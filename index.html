@@ -3,168 +3,1662 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>relvia.online</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<title>Relvia | The Next Generation of Entertainment</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
 <style>
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:'Inter',sans-serif;
 }
+
+html{
+scroll-behavior:smooth;
+}
+
 body{
 background:#050505;
-background-image:
-radial-gradient(circle at top,#1a1a1a 0%,#090909 45%,#030303 100%);
+color:white;
+overflow-x:hidden;
+}
+
+/* Background */
+
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at top,#b8860b25,transparent 55%),
+radial-gradient(circle at bottom,#d4af3720,transparent 60%);
+z-index:-2;
+}
+
+/* Moving Light */
+
+body::after{
+content:"";
+position:fixed;
+top:-40%;
+left:-20%;
+width:140%;
+height:180%;
+background:
+linear-gradient(120deg,
+transparent,
+rgba(212,175,55,.05),
+transparent);
+animation:moveLight 14s linear infinite;
+z-index:-1;
+}
+
+@keyframes moveLight{
+
+0%{
+transform:translateX(-30%);
+}
+
+100%{
+transform:translateX(30%);
+}
+
+}
+
+/* Navbar */
+
+nav{
+
+position:fixed;
+top:0;
+left:0;
+
+width:100%;
+
+padding:20px 60px;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:rgba(0,0,0,.45);
+
+backdrop-filter:blur(18px);
+
+border-bottom:1px solid rgba(212,175,55,.15);
+
+z-index:999;
+
+}
+
+.logo{
+
+font-size:30px;
+font-weight:900;
+letter-spacing:6px;
+color:#D4AF37;
+
+}
+
+nav ul{
+
+display:flex;
+gap:40px;
+list-style:none;
+
+}
+
+nav a{
+
+text-decoration:none;
+color:white;
+font-weight:500;
+transition:.35s;
+
+}
+
+nav a:hover{
+
+color:#D4AF37;
+
+}
+
+/* Hero */
+
+.hero{
+
 height:100vh;
+
 display:flex;
 justify-content:center;
 align-items:center;
-overflow:hidden;
-color:white;
-}
-.container{
-width:min(1400px,94%);
-height:92vh;
-background:rgba(255,255,255,.04);
-border:1px solid rgba(212,175,55,.22);
-border-radius:28px;
-backdrop-filter:blur(30px);
-padding:60px;
-box-shadow:
-0 0 60px rgba(212,175,55,.08);
-display:flex;
-flex-direction:column;
-animation:fade .8s ease;
-}
-@keyframes fade{
-from{
-opacity:0;
-transform:translateY(20px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-.logo{
 text-align:center;
-font-size:48px;
-font-weight:800;
+
+padding:0 25px;
+
+}
+
+.hero-content{
+
+max-width:900px;
+
+}
+
+.hero h1{
+
+font-size:85px;
+
+font-weight:900;
+
 letter-spacing:10px;
+
 color:#D4AF37;
+
+margin-bottom:20px;
+
 }
-.notice{
-text-align:center;
-margin-top:8px;
-font-size:13px;
-letter-spacing:4px;
-text-transform:uppercase;
-color:#8f8f8f;
+
+.hero h2{
+
+font-size:50px;
+
+margin-bottom:20px;
+
+font-weight:800;
+
 }
-.divider{
-width:180px;
-height:1px;
+
+.hero p{
+
+font-size:22px;
+
+line-height:1.7;
+
+opacity:.85;
+
+margin-bottom:45px;
+
+}
+
+/* Buttons */
+
+.buttons{
+
+display:flex;
+
+justify-content:center;
+
+gap:25px;
+
+flex-wrap:wrap;
+
+}
+
+.btn{
+
+padding:18px 38px;
+
+border-radius:50px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.4s;
+
+text-decoration:none;
+
+}
+
+.primary{
+
 background:#D4AF37;
-opacity:.5;
-margin:35px auto;
+
+color:black;
+
 }
-.notice-box{
-max-width:980px;
-margin:auto;
-text-align:center;
-line-height:2;
-font-size:18px;
-color:#d7d7d7;
+
+.primary:hover{
+
+transform:translateY(-5px);
+
+box-shadow:0 0 35px rgba(212,175,55,.35);
+
 }
-.notice-box strong{
-color:white;
-}
-.notice-box .gold{
+
+.secondary{
+
+border:2px solid #D4AF37;
+
 color:#D4AF37;
-font-weight:700;
+
 }
+
+.secondary:hover{
+
+background:#D4AF37;
+
+color:black;
+
+}
+
 </style>
+
 </head>
+
 <body>
-<div class="container">
+
+<nav>
+
 <div class="logo">
-relvia.online
+RELVIA
 </div>
-<div class="notice">
-OFFICIAL DOMAIN NOTICE
-</div>
-<div class="divider"></div>
-<div class="notice-box">
-The domain
-<strong class="gold">relvia.online</strong>
-has been officially
-<strong>purchased</strong>,
-<strong>acquired</strong>,
-and
-<strong>secured</strong>
-by
-<strong>StudentStreamHQ</strong>.
-<br><br>
-<strong>Founder & Owner</strong>
 
-<br><br>
+<ul>
 
-<strong class="gold">Deondre</strong> is the Founder & Owner of <strong>StudentStreamHQ</strong>, an independent technology company dedicated to building innovative brands, digital platforms, and multi-division creative ecosystems. Through StudentStreamHQ, Deondre leads the development of projects designed to shape the future of technology, media, entertainment, and creative innovation.
+<li><a href="#">Home</a></li>
 
-<br><br>
+<li><a href="#">Studios</a></li>
 
-For business inquiries, media requests, partnerships, or official correspondence with the Company Owner, please contact the
-<strong>StudentStreamHQ Management Offices.</strong>
-<br><br>
-Any unauthorized attempt to misuse, impersonate, compromise, interfere with, or gain unauthorized access to
-<strong class="gold">relvia.online</strong>,
-its services, or any StudentStreamHQ-owned brands or digital properties may result in immediate legal action through
-<strong>SS Law</strong>, the legal division representing StudentStreamHQ.
-</div>
-<div style="margin-top:auto;">
-<div class="divider"></div>
-<div style="text-align:center;">
-<h2 style="
-font-size:28px;
-font-weight:700;
-letter-spacing:2px;
-margin-bottom:15px;
-color:#D4AF37;
-">
-Official Digital Property
-</h2>
-<p style="
-font-size:16px;
-color:#cfcfcf;
-max-width:760px;
-margin:auto;
-line-height:1.8;
-">
-This website and domain are the exclusive digital property of
-<strong>StudentStreamHQ</strong>
-and serve as the official online home of the
-<strong>Relvia</strong>
-brand.
+<li><a href="#">Music</a></li>
+
+<li><a href="#">Live</a></li>
+
+<li><a href="#">Creators</a></li>
+
+</ul>
+
+</nav>
+
+<section class="hero">
+
+<div class="hero-content">
+
+<h1>RELVIA</h1>
+
+<h2>The Next Generation of Entertainment</h2>
+
+<p>
+
+Film. Television. Music. Live. Creators.<br>
+
+<strong>One ecosystem. Endless possibilities.</strong>
+
 </p>
-<p style="
-margin-top:35px;
-font-size:14px;
-color:#8d8d8d;
-letter-spacing:1px;
-">
-© 2026 StudentStreamHQ. All Rights Reserved.
-</p>
-<p style="
-margin-top:8px;
-font-size:13px;
-color:#6f6f6f;
-">
-Owned & Operated by StudentStreamHQ
-</p>
+
+<div class="buttons">
+
+<a class="btn primary">Explore Relvia</a>
+
+<a class="btn secondary">Discover More</a>
+
 </div>
+
 </div>
-</div>
+
+</section>
+
 </body>
 </html>
- student-stream/relvia.html at main · Prozy5/student-stream
+<section class="ecosystem">
+
+<div class="section-title">
+
+<h2>One Ecosystem.</h2>
+
+<p>
+Every story. Every creator. Every experience.
+Connected through Relvia Entertainment.
+</p>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="icon">🎥</div>
+
+<h3>Relvia Studios</h3>
+
+<p>
+Original films, television series, documentaries,
+and cinematic storytelling built for a global audience.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">📺</div>
+
+<h3>Relvia</h3>
+
+<p>
+The home of entertainment.
+Watch original productions, live events,
+music releases, and exclusive experiences.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">🎵</div>
+
+<h3>Relvia Music</h3>
+
+<p>
+Original soundtracks, performances,
+artists, and music experiences
+that move culture.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">💿</div>
+
+<h3>Relvia Records</h3>
+
+<p>
+Discover new artists, albums,
+and the next generation
+of independent music.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">🔴</div>
+
+<h3>Relvia Live</h3>
+
+<p>
+Premieres.
+Creator livestreams.
+Concerts.
+Behind-the-scenes.
+Live entertainment.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">👥</div>
+
+<h3>Relvia Creators</h3>
+
+<p>
+Follow creators.
+Chat with creators.
+See exclusive updates,
+community posts,
+and behind-the-scenes content.
+</p>
+
+</div>
+
+</div>
+
+</section>
+.ecosystem{
+
+padding:140px 8%;
+
+}
+
+.section-title{
+
+text-align:center;
+
+max-width:750px;
+
+margin:auto auto 80px;
+
+}
+
+.section-title h2{
+
+font-size:60px;
+
+color:#D4AF37;
+
+margin-bottom:20px;
+
+}
+
+.section-title p{
+
+font-size:20px;
+
+opacity:.75;
+
+line-height:1.7;
+
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+
+gap:35px;
+
+}
+
+.card{
+
+background:rgba(255,255,255,.03);
+
+border:1px solid rgba(212,175,55,.12);
+
+border-radius:28px;
+
+padding:40px;
+
+transition:.45s;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.card::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+
+left:-120%;
+
+width:120%;
+
+height:100%;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(212,175,55,.08),
+transparent
+);
+
+transition:.7s;
+
+}
+
+.card:hover::before{
+
+left:120%;
+
+}
+
+.card:hover{
+
+transform:translateY(-12px);
+
+border-color:#D4AF37;
+
+box-shadow:0 25px 60px rgba(212,175,55,.12);
+
+}
+
+.icon{
+
+font-size:42px;
+
+margin-bottom:25px;
+
+}
+
+.card h3{
+
+font-size:28px;
+
+margin-bottom:18px;
+
+color:#D4AF37;
+
+}
+
+.card p{
+
+line-height:1.8;
+
+opacity:.82;
+
+}
+<section class="experience">
+
+<div class="experience-header">
+
+<h2>Experience Relvia</h2>
+
+<p>
+Every experience begins with a story.
+Choose where your journey starts.
+</p>
+
+</div>
+
+<div class="experience-grid">
+
+<div class="experience-card film">
+
+<div class="overlay"></div>
+
+<div class="content">
+
+<span>CINEMATIC</span>
+
+<h3>Original Stories</h3>
+
+<p>
+Experience films and series created exclusively for Relvia.
+</p>
+
+<a href="#">Explore →</a>
+
+</div>
+
+</div>
+
+<div class="experience-card music">
+
+<div class="overlay"></div>
+
+<div class="content">
+
+<span>SOUND</span>
+
+<h3>Music & Records</h3>
+
+<p>
+Discover original music, artists, albums and soundtracks.
+</p>
+
+<a href="#">Listen →</a>
+
+</div>
+
+</div>
+
+<div class="experience-card live">
+
+<div class="overlay"></div>
+
+<div class="content">
+
+<span>LIVE</span>
+
+<h3>Live Experiences</h3>
+
+<p>
+Premieres.
+Livestreams.
+Concerts.
+Creator Events.
+</p>
+
+<a href="#">Watch Live →</a>
+
+</div>
+
+</div>
+
+<div class="experience-card creators">
+
+<div class="overlay"></div>
+
+<div class="content">
+
+<span>COMMUNITY</span>
+
+<h3>Creator Community</h3>
+
+<p>
+Follow creators.
+Interact.
+Discover exclusive content.
+</p>
+
+<a href="#">Join →</a>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+.ecosystem{
+
+padding:140px 8%;
+
+}
+
+.section-title{
+
+text-align:center;
+
+max-width:750px;
+
+margin:auto auto 80px;
+
+}
+
+.section-title h2{
+
+font-size:60px;
+
+color:#D4AF37;
+
+margin-bottom:20px;
+
+}
+
+.section-title p{
+
+font-size:20px;
+
+opacity:.75;
+
+line-height:1.7;
+
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+
+gap:35px;
+
+}
+
+.card{
+
+background:rgba(255,255,255,.03);
+
+border:1px solid rgba(212,175,55,.12);
+
+border-radius:28px;
+
+padding:40px;
+
+transition:.45s;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.card::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+
+left:-120%;
+
+width:120%;
+
+height:100%;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(212,175,55,.08),
+transparent
+);
+
+transition:.7s;
+
+}
+
+.card:hover::before{
+
+left:120%;
+
+}
+
+.card:hover{
+
+transform:translateY(-12px);
+
+border-color:#D4AF37;
+
+box-shadow:0 25px 60px rgba(212,175,55,.12);
+
+}
+
+.icon{
+
+font-size:42px;
+
+margin-bottom:25px;
+
+}
+
+.card h3{
+
+font-size:28px;
+
+margin-bottom:18px;
+
+color:#D4AF37;
+
+}
+
+.card p{
+
+line-height:1.8;
+
+opacity:.82;
+
+}
+<section class="experience">
+
+<div class="experience-header">
+
+<span>DISCOVER</span>
+
+<h2>Experience Relvia</h2>
+
+<p>
+
+Entertainment isn't one thing.
+
+It's every story...
+every performance...
+every creator...
+every moment.
+
+</p>
+
+</div>
+
+<div class="experience-grid">
+
+<div class="panel panel1">
+
+<div class="overlay">
+
+<h3>Original Stories</h3>
+
+<p>
+
+Films and television built for a new generation.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="panel panel2">
+
+<div class="overlay">
+
+<h3>Music & Records</h3>
+
+<p>
+
+Discover artists.
+Experience sound.
+Feel every note.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="panel panel3">
+
+<div class="overlay">
+
+<h3>Live Experiences</h3>
+
+<p>
+
+Premieres.
+
+Events.
+
+Livestreams.
+
+Creator broadcasts.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="panel panel4">
+
+<div class="overlay">
+
+<h3>Creator Community</h3>
+
+<p>
+
+Follow creators.
+
+Chat.
+
+Behind-the-scenes.
+
+Exclusive content.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+.experience{
+
+padding:160px 8%;
+
+}
+
+.experience-header{
+
+text-align:center;
+
+max-width:750px;
+
+margin:auto auto 80px;
+
+}
+
+.experience-header span{
+
+letter-spacing:8px;
+
+color:#D4AF37;
+
+font-size:13px;
+
+}
+
+.experience-header h2{
+
+font-size:65px;
+
+margin:25px 0;
+
+}
+
+.experience-header p{
+
+opacity:.75;
+
+line-height:1.8;
+
+font-size:20px;
+
+}
+
+.experience-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:30px;
+
+}
+
+.panel{
+
+height:420px;
+
+border-radius:30px;
+
+overflow:hidden;
+
+position:relative;
+
+cursor:pointer;
+
+transition:.6s;
+
+background-size:cover;
+
+background-position:center;
+
+}
+
+.panel:hover{
+
+transform:scale(1.03);
+
+}
+
+.panel::after{
+
+content:"";
+
+position:absolute;
+
+inset:0;
+
+background:
+
+linear-gradient(
+
+180deg,
+
+transparent,
+
+rgba(0,0,0,.85)
+
+);
+
+}
+
+.overlay{
+
+position:absolute;
+
+bottom:35px;
+
+left:35px;
+
+right:35px;
+
+z-index:2;
+
+}
+
+.overlay h3{
+
+font-size:38px;
+
+margin-bottom:15px;
+
+color:white;
+
+}
+
+.overlay p{
+
+line-height:1.7;
+
+opacity:.85;
+
+}
+
+.panel1{
+
+background:
+
+linear-gradient(
+
+135deg,
+
+#222,
+
+#000
+
+);
+
+}
+
+.panel2{
+
+background:
+
+linear-gradient(
+
+135deg,
+
+#2b1c00,
+
+#000
+
+);
+
+}
+
+.panel3{
+
+background:
+
+linear-gradient(
+
+135deg,
+
+#111,
+
+#000
+
+);
+
+}
+
+.panel4{
+
+background:
+
+linear-gradient(
+
+135deg,
+
+#3a2c08,
+
+#000
+
+);
+
+}
+
+@media(max-width:900px){
+
+.experience-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+<section class="creators">
+
+<div class="creators-header">
+
+<span>COMMUNITY</span>
+
+<h2>Meet The Creators</h2>
+
+<p>
+
+Follow the filmmakers, musicians, storytellers and visionaries
+bringing Relvia to life.
+
+</p>
+
+</div>
+
+<div class="creator-feed">
+
+<div class="creator-card">
+
+<div class="creator-top">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>@RelviaStudios</h3>
+
+<span>Official Studio</span>
+
+</div>
+
+</div>
+
+<p>
+
+🎬 Production has officially begun.
+
+A new era of storytelling starts here.
+
+</p>
+
+<div class="creator-footer">
+
+❤️ 18.4K
+
+💬 2.1K
+
+👥 Follow
+
+</div>
+
+</div>
+
+<div class="creator-card">
+
+<div class="creator-top">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>@RelviaMusic</h3>
+
+<span>Music Division</span>
+
+</div>
+
+</div>
+
+<p>
+
+🎵 Original soundtracks.
+
+Albums.
+
+Live Sessions.
+
+Coming Soon.
+
+</p>
+
+<div class="creator-footer">
+
+❤️ 9.8K
+
+💬 864
+
+👥 Follow
+
+</div>
+
+</div>
+
+<div class="creator-card">
+
+<div class="creator-top">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>@RelviaLive</h3>
+
+<span>Live Events</span>
+
+</div>
+
+</div>
+
+<p>
+
+🔴 Stay tuned for premieres,
+
+creator livestreams,
+
+and exclusive events.
+
+</p>
+
+<div class="creator-footer">
+
+❤️ 6.7K
+
+💬 502
+
+👥 Follow
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+.creators{
+
+padding:160px 8%;
+
+}
+
+.creators-header{
+
+text-align:center;
+
+max-width:700px;
+
+margin:auto auto 70px;
+
+}
+
+.creators-header span{
+
+color:#D4AF37;
+
+letter-spacing:6px;
+
+font-size:13px;
+
+}
+
+.creators-header h2{
+
+font-size:60px;
+
+margin:20px 0;
+
+}
+
+.creators-header p{
+
+font-size:20px;
+
+opacity:.75;
+
+line-height:1.8;
+
+}
+
+.creator-feed{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+
+gap:35px;
+
+}
+
+.creator-card{
+
+background:#111;
+
+border:1px solid rgba(212,175,55,.15);
+
+border-radius:28px;
+
+padding:35px;
+
+transition:.4s;
+
+}
+
+.creator-card:hover{
+
+transform:translateY(-8px);
+
+border-color:#D4AF37;
+
+box-shadow:0 20px 60px rgba(212,175,55,.15);
+
+}
+
+.creator-top{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+margin-bottom:25px;
+
+}
+
+.avatar{
+
+width:60px;
+
+height:60px;
+
+border-radius:50%;
+
+background:linear-gradient(135deg,#D4AF37,#7a5d08);
+
+}
+
+.creator-top h3{
+
+font-size:22px;
+
+}
+
+.creator-top span{
+
+opacity:.6;
+
+font-size:14px;
+
+}
+
+.creator-card p{
+
+line-height:1.8;
+
+margin-bottom:30px;
+
+opacity:.85;
+
+}
+
+.creator-footer{
+
+display:flex;
+
+justify-content:space-between;
+
+color:#D4AF37;
+
+font-weight:600;
+
+}
+<section class="future">
+
+<div class="future-bg"></div>
+
+<div class="future-content">
+
+<h2>
+
+The Future Isn't Coming.
+
+<span>It's Being Created.</span>
+
+</h2>
+
+<p>
+
+Relvia Entertainment is building the next generation of storytelling,
+bringing together film, television, music, live experiences,
+and creators into one connected universe.
+
+</p>
+
+<div class="future-buttons">
+
+<a href="#" class="future-btn gold">
+Explore Relvia
+</a>
+
+<a href="#" class="future-btn outline">
+Join The Community
+</a>
+
+</div>
+
+</div>
+
+</section>
+.future{
+
+position:relative;
+
+padding:180px 8%;
+
+text-align:center;
+
+overflow:hidden;
+
+}
+
+.future-bg{
+
+position:absolute;
+
+inset:0;
+
+background:
+
+radial-gradient(circle,#D4AF3720 0%,transparent 70%);
+
+animation:glow 10s ease-in-out infinite;
+
+z-index:0;
+
+}
+
+@keyframes glow{
+
+0%{
+transform:scale(1);
+opacity:.3;
+}
+
+50%{
+transform:scale(1.2);
+opacity:.6;
+}
+
+100%{
+transform:scale(1);
+opacity:.3;
+}
+
+}
+
+.future-content{
+
+position:relative;
+
+z-index:2;
+
+max-width:900px;
+
+margin:auto;
+
+}
+
+.future h2{
+
+font-size:72px;
+
+font-weight:900;
+
+line-height:1.1;
+
+margin-bottom:30px;
+
+}
+
+.future h2 span{
+
+color:#D4AF37;
+
+display:block;
+
+margin-top:10px;
+
+}
+
+.future p{
+
+font-size:22px;
+
+line-height:1.9;
+
+opacity:.82;
+
+margin-bottom:50px;
+
+}
+
+.future-buttons{
+
+display:flex;
+
+justify-content:center;
+
+gap:25px;
+
+flex-wrap:wrap;
+
+}
+
+.future-btn{
+
+padding:18px 40px;
+
+border-radius:50px;
+
+font-weight:700;
+
+text-decoration:none;
+
+transition:.35s;
+
+}
+
+.future-btn.gold{
+
+background:#D4AF37;
+
+color:#000;
+
+}
+
+.future-btn.gold:hover{
+
+transform:translateY(-5px);
+
+box-shadow:0 0 35px rgba(212,175,55,.4);
+
+}
+
+.future-btn.outline{
+
+border:2px solid #D4AF37;
+
+color:#D4AF37;
+
+}
+
+.future-btn.outline:hover{
+
+background:#D4AF37;
+
+color:#000;
+
+}
+<footer>
+
+<div class="footer-logo">
+
+RELVIA
+
+</div>
+
+<p class="footer-tag">
+
+The Next Generation of Entertainment
+
+</p>
+
+<div class="footer-links">
+
+<a href="#">About</a>
+
+<a href="#">Studios</a>
+
+<a href="#">Music</a>
+
+<a href="#">Records</a>
+
+<a href="#">Live</a>
+
+<a href="#">Creators</a>
+
+<a href="#">Support</a>
+
+<a href="#">Privacy</a>
+
+</div>
+
+<p class="copyright">
+
+© 2026 Relvia Entertainment.
+
+A StudentStreamHQ Company.
+
+</p>
+
+</footer>
+footer{
+
+padding:80px 8%;
+
+border-top:1px solid rgba(212,175,55,.15);
+
+text-align:center;
+
+background:#040404;
+
+}
+
+.footer-logo{
+
+font-size:46px;
+
+font-weight:900;
+
+letter-spacing:10px;
+
+color:#D4AF37;
+
+margin-bottom:15px;
+
+}
+
+.footer-tag{
+
+opacity:.7;
+
+margin-bottom:40px;
+
+font-size:18px;
+
+}
+
+.footer-links{
+
+display:flex;
+
+justify-content:center;
+
+gap:30px;
+
+flex-wrap:wrap;
+
+margin-bottom:40px;
+
+}
+
+.footer-links a{
+
+text-decoration:none;
+
+color:white;
+
+transition:.3s;
+
+}
+
+.footer-links a:hover{
+
+color:#D4AF37;
+
+}
+
+.copyright{
+
+opacity:.5;
+
+font-size:14px;
+
+}
