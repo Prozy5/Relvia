@@ -1,0 +1,207 @@
+Skip to content
+Prozy5
+student-stream
+Repository navigation
+Code
+Issues
+Pull requests
+8
+ (8)
+Agents
+Discussions
+Actions
+Projects
+Wiki
+Security and quality
+2
+ (2)
+Insights
+Settings
+student-stream
+/relvia.html
+Go to file
+t
+T
+Prozy5
+Prozy5
+Update relvia.html
+a215cbe
+ · 
+2 weeks ago
+student-stream
+/relvia.html
+
+Code
+
+Blame
+169 lines (165 loc) · 3.55 KB
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>relvia.online</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+body{
+background:#050505;
+background-image:
+radial-gradient(circle at top,#1a1a1a 0%,#090909 45%,#030303 100%);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+color:white;
+}
+.container{
+width:min(1400px,94%);
+height:92vh;
+background:rgba(255,255,255,.04);
+border:1px solid rgba(212,175,55,.22);
+border-radius:28px;
+backdrop-filter:blur(30px);
+padding:60px;
+box-shadow:
+0 0 60px rgba(212,175,55,.08);
+display:flex;
+flex-direction:column;
+animation:fade .8s ease;
+}
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+.logo{
+text-align:center;
+font-size:48px;
+font-weight:800;
+letter-spacing:10px;
+color:#D4AF37;
+}
+.notice{
+text-align:center;
+margin-top:8px;
+font-size:13px;
+letter-spacing:4px;
+text-transform:uppercase;
+color:#8f8f8f;
+}
+.divider{
+width:180px;
+height:1px;
+background:#D4AF37;
+opacity:.5;
+margin:35px auto;
+}
+.notice-box{
+max-width:980px;
+margin:auto;
+text-align:center;
+line-height:2;
+font-size:18px;
+color:#d7d7d7;
+}
+.notice-box strong{
+color:white;
+}
+.notice-box .gold{
+color:#D4AF37;
+font-weight:700;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="logo">
+relvia.online
+</div>
+<div class="notice">
+OFFICIAL DOMAIN NOTICE
+</div>
+<div class="divider"></div>
+<div class="notice-box">
+The domain
+<strong class="gold">relvia.online</strong>
+has been officially
+<strong>purchased</strong>,
+<strong>acquired</strong>,
+and
+<strong>secured</strong>
+by
+<strong>StudentStreamHQ</strong>.
+<br><br>
+<strong>Founder & Owner</strong>
+
+<br><br>
+
+<strong class="gold">Deondre</strong> is the Founder & Owner of <strong>StudentStreamHQ</strong>, an independent technology company dedicated to building innovative brands, digital platforms, and multi-division creative ecosystems. Through StudentStreamHQ, Deondre leads the development of projects designed to shape the future of technology, media, entertainment, and creative innovation.
+
+<br><br>
+
+For business inquiries, media requests, partnerships, or official correspondence with the Company Owner, please contact the
+<strong>StudentStreamHQ Management Offices.</strong>
+<br><br>
+Any unauthorized attempt to misuse, impersonate, compromise, interfere with, or gain unauthorized access to
+<strong class="gold">relvia.online</strong>,
+its services, or any StudentStreamHQ-owned brands or digital properties may result in immediate legal action through
+<strong>SS Law</strong>, the legal division representing StudentStreamHQ.
+</div>
+<div style="margin-top:auto;">
+<div class="divider"></div>
+<div style="text-align:center;">
+<h2 style="
+font-size:28px;
+font-weight:700;
+letter-spacing:2px;
+margin-bottom:15px;
+color:#D4AF37;
+">
+Official Digital Property
+</h2>
+<p style="
+font-size:16px;
+color:#cfcfcf;
+max-width:760px;
+margin:auto;
+line-height:1.8;
+">
+This website and domain are the exclusive digital property of
+<strong>StudentStreamHQ</strong>
+and serve as the official online home of the
+<strong>Relvia</strong>
+brand.
+</p>
+<p style="
+margin-top:35px;
+font-size:14px;
+color:#8d8d8d;
+letter-spacing:1px;
+">
+© 2026 StudentStreamHQ. All Rights Reserved.
+</p>
+<p style="
+margin-top:8px;
+font-size:13px;
+color:#6f6f6f;
+">
+Owned & Operated by StudentStreamHQ
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>
+ student-stream/relvia.html at main · Prozy5/student-stream
