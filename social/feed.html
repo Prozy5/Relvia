@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Relvia Social</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+font-family:"Inter",sans-serif;
+
+}
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+body{
+
+background:#050505;
+
+color:white;
+
+overflow-x:hidden;
+
+}
+
+/* ===========================
+NAVBAR
+=========================== */
+
+nav{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+right:0;
+
+height:78px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 60px;
+
+background:rgba(5,5,5,.82);
+
+backdrop-filter:blur(25px);
+
+border-bottom:1px solid rgba(212,175,55,.10);
+
+z-index:1000;
+
+}
+
+.logo{
+
+font-size:28px;
+
+font-weight:800;
+
+letter-spacing:2px;
+
+color:#D4AF37;
+
+}
+
+.logo span{
+
+color:white;
+
+}
+
+.right-nav{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+}
+
+.search{
+
+width:260px;
+
+padding:12px 18px;
+
+background:#111;
+
+border:none;
+
+border-radius:40px;
+
+outline:none;
+
+color:white;
+
+}
+
+.icon{
+
+width:42px;
+
+height:42px;
+
+background:#111;
+
+border-radius:50%;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.icon:hover{
+
+background:#D4AF37;
+
+color:black;
+
+}
+
+.profile{
+
+width:45px;
+
+height:45px;
+
+border-radius:50%;
+
+background:#D4AF37;
+
+cursor:pointer;
+
+}
+
+/* ===========================
+HERO
+=========================== */
+
+.hero{
+
+padding-top:140px;
+
+padding-left:70px;
+
+padding-right:70px;
+
+padding-bottom:70px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+gap:70px;
+
+}
+
+.left{
+
+max-width:650px;
+
+}
+
+.left small{
+
+color:#D4AF37;
+
+letter-spacing:5px;
+
+text-transform:uppercase;
+
+font-weight:600;
+
+}
+
+.left h1{
+
+font-size:76px;
+
+line-height:88px;
+
+margin-top:25px;
+
+font-weight:800;
+
+}
+
+.left h1 span{
+
+color:#D4AF37;
+
+}
+
+.left p{
+
+margin-top:28px;
+
+font-size:20px;
+
+line-height:35px;
+
+opacity:.72;
+
+}
+
+.buttons{
+
+display:flex;
+
+gap:20px;
+
+margin-top:40px;
+
+}
+
+.primary{
+
+padding:17px 38px;
+
+background:#D4AF37;
+
+border-radius:50px;
+
+color:black;
+
+font-weight:700;
+
+text-decoration:none;
+
+}
+
+.secondary{
+
+padding:17px 38px;
+
+border-radius:50px;
+
+border:1px solid rgba(255,255,255,.15);
+
+color:white;
+
+text-decoration:none;
+
+}
+
+/* PHONE */
+
+.phone{
+
+width:360px;
+
+height:720px;
+
+background:#111;
+
+border-radius:42px;
+
+overflow:hidden;
+
+border:1px solid rgba(255,255,255,.06);
+
+box-shadow:
+
+0 40px 90px rgba(0,0,0,.8),
+
+0 0 70px rgba(212,175,55,.08);
+
+}
+
+.phone-header{
+
+height:70px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-weight:700;
+
+color:#D4AF37;
+
+border-bottom:1px solid rgba(255,255,255,.05);
+
+}
+
+.story-row{
+
+display:flex;
+
+gap:14px;
+
+padding:18px;
+
+overflow:auto;
+
+}
+
+.story{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+min-width:70px;
+
+}
+
+.story-circle{
+
+width:62px;
+
+height:62px;
+
+border-radius:50%;
+
+background:linear-gradient(135deg,#D4AF37,#8b6b1a);
+
+}
+
+.story span{
+
+margin-top:8px;
+
+font-size:12px;
+
+}
+
+.mock-post{
+
+margin:18px;
+
+background:#181818;
+
+padding:18px;
+
+border-radius:22px;
+
+}
+
+.user{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.avatar{
+
+width:48px;
+
+height:48px;
+
+border-radius:50%;
+
+background:#D4AF37;
+
+}
+
+.post-image{
+
+height:200px;
+
+background:#242424;
+
+border-radius:18px;
+
+margin-top:18px;
+
+}
+
+.actions{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-top:18px;
+
+font-size:14px;
+
+opacity:.8;
+
+}
+
+/* MAIN */
+
+.main{
+
+padding:60px 70px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav>
+
+<div class="logo">
+
+RELVIA <span>SOCIAL</span>
+
+</div>
+
+<div class="right-nav">
+
+<input
+class="search"
+placeholder="Search Relvia">
+
+<div class="icon">💬</div>
+
+<div class="icon">🔔</div>
+
+<div class="profile"></div>
+
+</div>
+
+</nav>
+
+<section class="hero">
+
+<div class="left">
+
+<small>THE NEXT GENERATION OF SOCIAL</small>
+
+<h1>
+
+Where
+
+<span>Entertainment</span>
+
+Comes Alive.
+
+</h1>
+
+<p>
+
+Every Relvia account automatically includes
+Relvia Social.
+
+Connect with creators.
+
+Join Spaces.
+
+Share projects.
+
+Go Live.
+
+Experience entertainment together.
+
+</p>
+
+<div class="buttons">
+
+<a href="#" class="primary">
+
+Join Relvia
+
+</a>
+
+<a href="#" class="secondary">
+
+Explore
+
+</a>
+
+</div>
+
+</div>
+
+<div class="phone">
+
+<div class="phone-header">
+
+Relvia Social
+
+</div>
+
+<div class="story-row">
+
+<div class="story">
+
+<div class="story-circle"></div>
+
+<span>You</span>
+
+</div>
+
+<div class="story">
+
+<div class="story-circle"></div>
+
+<span>Studios</span>
+
+</div>
+
+<div class="story">
+
+<div class="story-circle"></div>
+
+<span>Music</span>
+
+</div>
+
+<div class="story">
+
+<div class="story-circle"></div>
+
+<span>Live</span>
+
+</div>
+
+</div>
+
+<div class="mock-post">
+
+<div class="user">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>Relvia Studios ✓</h3>
+
+<p>@relviastudios</p>
+
+</div>
+
+</div>
+
+<div class="post-image"></div>
+
+<div class="actions">
+
+<span>❤️ 12.4K</span>
+
+<span>💬 832</span>
+
+<span>↗ Share</span>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="main">
+<!-- ===========================
+STORIES
+=========================== -->
+
+<div class="stories">
+
+<div class="story-card">
+<div class="story-ring own">+</div>
+<p>Your Story</p>
+</div>
+
+<div class="story-card">
+<div class="story-ring"></div>
+<p>Relvia</p>
+</div>
+
+<div class="story-card">
+<div class="story-ring"></div>
+<p>Studios</p>
+</div>
+
+<div class="story-card">
+<div class="story-ring"></div>
+<p>Music</p>
+</div>
+
+<div class="story-card">
+<div class="story-ring"></div>
+<p>Live</p>
+</div>
+
+<div class="story-card">
+<div class="story-ring"></div>
+<p>Creators</p>
+</div>
+
+</div>
+
+<div class="layout">
+
+<!-- LEFT SIDE -->
+
+<div class="feed">
+
+<!-- CREATE POST -->
+
+<div class="create-post">
+
+<div class="create-top">
+
+<div class="avatar"></div>
+
+<input
+placeholder="What's happening?"
+>
+
+</div>
+
+<div class="create-actions">
+
+<button>📷 Photo</button>
+
+<button>🎥 Video</button>
+
+<button>📊 Poll</button>
+
+<button>🎵 Music</button>
+
+<button class="gold">
+
+Post
+
+</button>
+
+</div>
+
+</div>
+
+<!-- POST -->
+
+<div class="feed-post">
+
+<div class="feed-header">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>Relvia Studios ✓</h3>
+
+<p>@relviastudios • 2m</p>
+
+</div>
+
+</div>
+
+<p class="caption">
+
+Production Day 14.
+
+Behind the scenes from our newest original.
+
+</p>
+
+<div class="feed-image"></div>
+
+<div class="feed-actions">
+
+<span>❤️ 12.4K</span>
+
+<span>💬 823</span>
+
+<span>🔁 3.1K</span>
+
+<span>↗ Share</span>
+
+</div>
+
+</div>
+
+<div class="feed-post">
+
+<div class="feed-header">
+
+<div class="avatar"></div>
+
+<div>
+
+<h3>Relvia Music ✓</h3>
+
+<p>@relviamusic</p>
+
+</div>
+
+</div>
+
+<p class="caption">
+
+New single coming this Friday.
+
+Stay tuned.
+
+</p>
+
+<div class="feed-image"></div>
+
+<div class="feed-actions">
+
+<span>❤️ 6.1K</span>
+
+<span>💬 491</span>
+
+<span>🔁 209</span>
+
+<span>↗ Share</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div class="widget">
+
+<h2>🔥 Trending</h2>
+
+<p>#Relvia</p>
+
+<p>#RelviaStudios</p>
+
+<p>#RelviaMusic</p>
+
+<p>#CreatorPlus</p>
+
+<p>#BehindTheScenes</p>
+
+</div>
+
+<div class="widget">
+
+<h2>Suggested</h2>
+
+<p>Relvia Studios</p>
+
+<p>Relvia Live</p>
+
+<p>Relvia Music</p>
+
+<p>Relvia Records</p>
+
+</div>
+
+</div>
+
+</div>
+
+<style>
+
+.layout{
+
+display:grid;
+
+grid-template-columns:2fr 360px;
+
+gap:35px;
+
+}
+
+.stories{
+
+display:flex;
+
+gap:20px;
+
+overflow:auto;
+
+margin-bottom:35px;
+
+}
+
+.story-card{
+
+text-align:center;
+
+min-width:75px;
+
+}
+
+.story-ring{
+
+width:70px;
+
+height:70px;
+
+border-radius:50%;
+
+background:linear-gradient(135deg,#D4AF37,#8b6919);
+
+}
+
+.own{
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:34px;
+
+font-weight:700;
+
+}
+
+.story-card p{
+
+margin-top:8px;
+
+font-size:13px;
+
+}
+
+.create-post{
+
+background:#111;
+
+padding:22px;
+
+border-radius:24px;
+
+margin-bottom:35px;
+
+}
+
+.create-top{
+
+display:flex;
+
+gap:15px;
+
+align-items:center;
+
+}
+
+.create-top input{
+
+flex:1;
+
+padding:16px;
+
+border:none;
+
+background:#1d1d1d;
+
+color:white;
+
+border-radius:14px;
+
+outline:none;
+
+}
+
+.create-actions{
+
+display:flex;
+
+gap:12px;
+
+margin-top:18px;
+
+flex-wrap:wrap;
+
+}
+
+.create-actions button{
+
+padding:10px 16px;
+
+background:#1b1b1b;
+
+border:none;
+
+border-radius:12px;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+.gold{
+
+background:#D4AF37 !important;
+
+color:black !important;
+
+font-weight:700;
+
+}
+
+.feed-post{
+
+background:#111;
+
+padding:22px;
+
+border-radius:24px;
+
+margin-bottom:30px;
+
+}
+
+.feed-header{
+
+display:flex;
+
+gap:15px;
+
+align-items:center;
+
+}
+
+.caption{
+
+margin:18px 0;
+
+opacity:.82;
+
+line-height:30px;
+
+}
+
+.feed-image{
+
+height:340px;
+
+background:#222;
+
+border-radius:20px;
+
+}
+
+.feed-actions{
+
+display:flex;
+
+justify-content:space-around;
+
+margin-top:20px;
+
+}
+
+.widget{
+
+background:#111;
+
+padding:22px;
+
+border-radius:24px;
+
+margin-bottom:25px;
+
+}
+
+.widget h2{
+
+color:#D4AF37;
+
+margin-bottom:18px;
+
+}
+
+.widget p{
+
+margin:12px 0;
+
+opacity:.75;
+
+cursor:pointer;
+
+}
+
+</style>
+<!-- FLOATING CREATE BUTTON -->
+
+<div class="floating-button">
+
++
+
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+
+<footer class="bottom-nav">
+
+<div class="bottom-item active">
+
+🏠
+
+<span>Home</span>
+
+</div>
+
+<div class="bottom-item">
+
+🔍
+
+<span>Explore</span>
+
+</div>
+
+<div class="bottom-item">
+
+➕
+
+<span>Create</span>
+
+</div>
+
+<div class="bottom-item">
+
+🪐
+
+<span>Spaces</span>
+
+</div>
+
+<div class="bottom-item">
+
+💬
+
+<span>Messages</span>
+
+</div>
+
+<div class="bottom-item">
+
+👤
+
+<span>Profile</span>
+
+</div>
+
+</footer>
+
+<style>
+
+/* ===========================
+FLOATING BUTTON
+=========================== */
+
+.floating-button{
+
+position:fixed;
+
+right:35px;
+
+bottom:100px;
+
+width:72px;
+
+height:72px;
+
+border-radius:50%;
+
+background:#D4AF37;
+
+color:black;
+
+font-size:42px;
+
+font-weight:700;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+cursor:pointer;
+
+box-shadow:0 20px 45px rgba(212,175,55,.35);
+
+transition:.35s;
+
+z-index:999;
+
+}
+
+.floating-button:hover{
+
+transform:translateY(-6px) scale(1.05);
+
+}
+
+/* ===========================
+BOTTOM NAVIGATION
+=========================== */
+
+.bottom-nav{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+right:0;
+
+height:80px;
+
+background:rgba(10,10,10,.94);
+
+backdrop-filter:blur(30px);
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid rgba(255,255,255,.06);
+
+z-index:999;
+
+}
+
+.bottom-item{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+gap:6px;
+
+font-size:24px;
+
+opacity:.65;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.bottom-item span{
+
+font-size:12px;
+
+}
+
+.bottom-item:hover{
+
+opacity:1;
+
+color:#D4AF37;
+
+}
+
+.active{
+
+opacity:1;
+
+color:#D4AF37;
+
+}
+
+/* ===========================
+HOVER EFFECTS
+=========================== */
+
+.feed-post{
+
+transition:.35s;
+
+cursor:pointer;
+
+}
+
+.feed-post:hover{
+
+transform:translateY(-8px);
+
+box-shadow:0 20px 55px rgba(212,175,55,.12);
+
+}
+
+.feed-image{
+
+transition:.35s;
+
+}
+
+.feed-post:hover .feed-image{
+
+transform:scale(.99);
+
+}
+
+.widget{
+
+transition:.35s;
+
+}
+
+.widget:hover{
+
+border:1px solid rgba(212,175,55,.25);
+
+}
+
+.story-card{
+
+transition:.3s;
+
+cursor:pointer;
+
+}
+
+.story-card:hover{
+
+transform:translateY(-5px);
+
+}
+
+.create-actions button{
+
+transition:.3s;
+
+}
+
+.create-actions button:hover{
+
+background:#D4AF37;
+
+color:black;
+
+}
+
+.icon{
+
+transition:.3s;
+
+}
+
+.profile{
+
+transition:.3s;
+
+}
+
+.profile:hover{
+
+transform:scale(1.08);
+
+}
+
+.search{
+
+transition:.3s;
+
+}
+
+.search:focus{
+
+border:1px solid rgba(212,175,55,.35);
+
+}
+
+/* ===========================
+SCROLLBAR
+=========================== */
+
+::-webkit-scrollbar{
+
+width:8px;
+
+height:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:#D4AF37;
+
+border-radius:20px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#111;
+
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:1200px){
+
+.layout{
+
+grid-template-columns:1fr;
+
+}
+
+.sidebar{
+
+display:none;
+
+}
+
+}
+
+@media(max-width:900px){
+
+.hero{
+
+flex-direction:column;
+
+padding:120px 25px 40px;
+
+text-align:center;
+
+}
+
+.hero h1{
+
+font-size:48px;
+
+line-height:58px;
+
+}
+
+.phone{
+
+width:100%;
+
+max-width:360px;
+
+}
+
+.search{
+
+display:none;
+
+}
+
+nav{
+
+padding:0 20px;
+
+}
+
+.main{
+
+padding:35px 20px 120px;
+
+}
+
+.bottom-nav{
+
+height:74px;
+
+}
+
+.floating-button{
+
+right:20px;
+
+bottom:90px;
+
+}
+
+}
+
+</style>
+
+<script>
+
+const floatingButton=document.querySelector(".floating-button");
+
+floatingButton.addEventListener("click",()=>{
+
+alert("Create Post (Coming Soon)");
+
+});
+
+document.querySelectorAll(".feed-post").forEach(post=>{
+
+post.addEventListener("click",()=>{
+
+console.log("Opening Post");
+
+});
+
+});
+
+document.querySelectorAll(".story-card").forEach(story=>{
+
+story.addEventListener("click",()=>{
+
+console.log("Opening Story");
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>
