@@ -11,7 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -19,18 +21,28 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Inter',sans-serif;
+font-family:"Inter",sans-serif;
 }
 
 :root{
 
 --bg:#050505;
 --surface:#101010;
---surface2:#171717;
+--surface2:#181818;
+--border:#232323;
+
 --gold:#D4AF37;
+
 --text:#ffffff;
---muted:#9c9c9c;
---border:rgba(255,255,255,.08);
+--muted:#8a8a8a;
+
+--radius:24px;
+
+}
+
+html{
+
+scroll-behavior:smooth;
 
 }
 
@@ -44,7 +56,58 @@ overflow-x:hidden;
 
 }
 
-/* NAVBAR */
+body::-webkit-scrollbar{
+
+width:8px;
+
+}
+
+body::-webkit-scrollbar-thumb{
+
+background:var(--gold);
+
+border-radius:100px;
+
+}
+
+a{
+
+text-decoration:none;
+
+color:inherit;
+
+}
+
+button{
+
+font:inherit;
+
+cursor:pointer;
+
+}
+
+img{
+
+display:block;
+
+max-width:100%;
+
+}
+
+input,
+textarea{
+
+font:inherit;
+
+outline:none;
+
+}
+
+
+
+/* ==========================================
+NAVBAR
+========================================== */
 
 nav{
 
@@ -54,79 +117,83 @@ top:0;
 left:0;
 right:0;
 
-height:78px;
+height:74px;
 
 display:flex;
 
-justify-content:space-between;
-
 align-items:center;
+
+justify-content:space-between;
 
 padding:0 30px;
 
-background:rgba(5,5,5,.9);
+background:rgba(5,5,5,.90);
 
-backdrop-filter:blur(18px);
+backdrop-filter:blur(20px);
 
 border-bottom:1px solid var(--border);
 
-z-index:999;
+z-index:9999;
 
 }
 
 .logo{
 
-font-size:28px;
+font-size:24px;
 
-font-weight:900;
+font-weight:800;
 
-letter-spacing:1px;
-
-color:var(--gold);
+letter-spacing:2px;
 
 }
 
 .logo span{
 
-color:white;
-
-}
-
-.nav-right{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
+color:var(--gold);
 
 }
 
 .search{
 
-width:300px;
+width:420px;
 
-padding:12px 18px;
+height:46px;
 
 border:none;
 
-outline:none;
+border-radius:999px;
 
-background:#151515;
+padding:0 18px;
+
+background:#191919;
 
 color:white;
 
-border-radius:50px;
+transition:.25s;
 
 }
 
-.icon{
+.search:focus{
 
-width:42px;
+background:#202020;
 
-height:42px;
+}
 
-background:#151515;
+.right-nav{
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
+}
+
+.icon-btn{
+
+width:44px;
+
+height:44px;
 
 display:flex;
 
@@ -136,13 +203,13 @@ align-items:center;
 
 border-radius:50%;
 
-cursor:pointer;
+background:#171717;
 
 transition:.25s;
 
 }
 
-.icon:hover{
+.icon-btn:hover{
 
 background:var(--gold);
 
@@ -150,103 +217,197 @@ color:black;
 
 }
 
-.profile{
+.profile-avatar{
 
-background:var(--gold);
+width:44px;
+
+height:44px;
+
+border-radius:50%;
+
+overflow:hidden;
+
+background:#252525;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-weight:700;
 
 }
 
-/* STORIES */
 
-.stories{
 
-margin-top:78px;
+/* ==========================================
+LAYOUT
+========================================== */
+
+.app{
+
+max-width:1700px;
+
+margin:auto;
+
+padding-top:95px;
+
+padding-left:28px;
+
+padding-right:28px;
+
+display:grid;
+
+grid-template-columns:
+
+280px
+1fr
+340px;
+
+gap:26px;
+
+}
+
+.left-sidebar{
+
+position:sticky;
+
+top:94px;
+
+height:calc(100vh - 110px);
+
+}
+
+.feed{
+
+width:100%;
+
+}
+
+.right-sidebar{
+
+position:sticky;
+
+top:94px;
+
+height:calc(100vh - 110px);
+
+}
+
+
+
+/* ==========================================
+CARDS
+========================================== */
+
+.card{
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:var(--radius);
+
+padding:22px;
+
+margin-bottom:22px;
+
+}
+
+
+
+/* ==========================================
+STORIES
+========================================== */
+
+.story-row{
 
 display:flex;
 
 gap:18px;
 
-padding:20px 30px;
-
 overflow-x:auto;
 
-border-bottom:1px solid var(--border);
+padding-bottom:6px;
+
+}
+
+.story-row::-webkit-scrollbar{
+
+display:none;
 
 }
 
 .story{
 
-text-align:center;
-
 min-width:74px;
 
-cursor:pointer;
+text-align:center;
 
 }
 
-.story-circle{
+.story-ring{
 
-width:68px;
+width:70px;
 
-height:68px;
-
-border-radius:50%;
-
-border:2px solid var(--gold);
-
-background:#202020;
+height:70px;
 
 margin:auto;
 
+border-radius:50%;
+
+padding:2px;
+
+background:linear-gradient(
+
+135deg,
+
+var(--gold),
+
+#8d6b16
+
+);
+
 }
 
-.story p{
+.story-inner{
 
-margin-top:8px;
+width:100%;
+
+height:100%;
+
+border-radius:50%;
+
+background:#222;
+
+}
+
+.story-name{
 
 font-size:12px;
 
-}
+margin-top:8px;
 
-/* MAIN */
-
-.wrapper{
-
-display:grid;
-
-grid-template-columns:2fr 360px;
-
-gap:30px;
-
-padding:30px;
+color:var(--muted);
 
 }
 
-/* CREATE POST */
 
-.create-post{
 
-background:var(--surface);
+/* ==========================================
+CREATE POST
+========================================== */
 
-border-radius:22px;
-
-padding:22px;
-
-border:1px solid var(--border);
-
-}
-
-.create-top{
+.create{
 
 display:flex;
 
-gap:15px;
-
-align-items:flex-start;
+gap:16px;
 
 }
 
-.avatar{
+.create-avatar{
 
 width:52px;
 
@@ -254,37 +415,43 @@ height:52px;
 
 border-radius:50%;
 
-background:#2b2b2b;
+background:#252525;
+
+flex-shrink:0;
 
 }
 
-#createText{
+.create-main{
 
 flex:1;
+
+}
+
+#createPostInput{
+
+width:100%;
 
 height:90px;
 
 resize:none;
 
-background:var(--surface2);
-
 border:none;
 
-outline:none;
-
-padding:16px;
-
-border-radius:16px;
+background:transparent;
 
 color:white;
 
-font-size:15px;
+font-size:17px;
 
 }
 
-.create-bottom{
+#createPostInput::placeholder{
 
-margin-top:18px;
+color:var(--muted);
+
+}
+
+.create-footer{
 
 display:flex;
 
@@ -292,39 +459,41 @@ justify-content:space-between;
 
 align-items:center;
 
+margin-top:18px;
+
 }
 
-.actions{
+.create-tools{
 
 display:flex;
 
 gap:10px;
 
-}
-
-.action{
-
-padding:10px 16px;
-
-background:#191919;
-
-border-radius:12px;
-
-cursor:pointer;
-
-transition:.2s;
+flex-wrap:wrap;
 
 }
 
-.action:hover{
+.tool{
 
-background:#252525;
+padding:10px 14px;
+
+border-radius:14px;
+
+background:var(--surface2);
+
+transition:.25s;
 
 }
 
-#publishPost{
+.tool:hover{
 
-padding:12px 30px;
+background:#242424;
+
+}
+
+.publish{
+
+padding:12px 24px;
 
 border:none;
 
@@ -334,105 +503,356 @@ color:black;
 
 font-weight:700;
 
-border-radius:50px;
-
-cursor:pointer;
+border-radius:16px;
 
 }
 
-/* FEED */
+/* ==========================================
+POSTS
+========================================== */
 
-.feed{
+.post{
 
-margin-top:25px;
+overflow:hidden;
+
+transition:.25s;
+
+}
+
+.post:hover{
+
+transform:translateY(-2px);
+
+}
+
+.post-header{
 
 display:flex;
 
-flex-direction:column;
+align-items:center;
 
-gap:22px;
-
-}
-
-#feed{
-
-display:flex;
-
-flex-direction:column;
-
-gap:22px;
-
-}
-
-/* SIDEBAR */
-
-.sidebar{
-
-display:flex;
-
-flex-direction:column;
-
-gap:20px;
-
-}
-
-.card{
-
-background:var(--surface);
-
-border-radius:22px;
-
-padding:22px;
-
-border:1px solid var(--border);
-
-}
-
-.card h2{
-
-font-size:20px;
+justify-content:space-between;
 
 margin-bottom:18px;
 
-color:var(--gold);
+}
+
+.post-user{
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
 
 }
 
-/* SCROLLBAR */
+.post-avatar{
 
-::-webkit-scrollbar{
+width:52px;
 
-width:7px;
+height:52px;
 
-height:7px;
+border-radius:50%;
+
+overflow:hidden;
+
+background:#252525;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-weight:700;
 
 }
 
-::-webkit-scrollbar-thumb{
+.post-info h3{
+
+font-size:16px;
+
+font-weight:700;
+
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+}
+
+.verified{
+
+display:inline-flex;
+
+align-items:center;
+
+justify-content:center;
+
+padding:4px 8px;
+
+border-radius:999px;
 
 background:var(--gold);
 
-border-radius:30px;
+color:black;
+
+font-size:11px;
+
+font-weight:700;
 
 }
 
-::-webkit-scrollbar-track{
+.post-info p{
 
-background:#111;
+margin-top:4px;
+
+font-size:13px;
+
+color:var(--muted);
 
 }
 
-/* MOBILE */
+.more{
 
-@media(max-width:1050px){
+width:40px;
 
-.wrapper{
+height:40px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+border-radius:50%;
+
+background:var(--surface2);
+
+transition:.25s;
+
+}
+
+.more:hover{
+
+background:#262626;
+
+}
+
+.post-text{
+
+font-size:16px;
+
+line-height:30px;
+
+margin-bottom:18px;
+
+white-space:pre-wrap;
+
+word-break:break-word;
+
+}
+
+.post-media{
+
+border-radius:22px;
+
+overflow:hidden;
+
+background:#181818;
+
+}
+
+.post-media img{
+
+width:100%;
+
+display:block;
+
+}
+
+.post-media video{
+
+width:100%;
+
+display:block;
+
+}
+
+.post-actions{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-top:18px;
+
+padding-top:18px;
+
+border-top:1px solid var(--border);
+
+}
+
+.action-group{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+}
+
+.action{
+
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+padding:10px 14px;
+
+border-radius:14px;
+
+background:transparent;
+
+transition:.25s;
+
+cursor:pointer;
+
+user-select:none;
+
+}
+
+.action:hover{
+
+background:var(--surface2);
+
+}
+
+.action span{
+
+font-size:14px;
+
+color:var(--muted);
+
+}
+
+
+
+/* ==========================================
+SIDEBAR
+========================================== */
+
+.section-title{
+
+font-size:18px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+}
+
+.trend{
+
+padding:14px 0;
+
+border-bottom:1px solid var(--border);
+
+}
+
+.trend:last-child{
+
+border-bottom:none;
+
+}
+
+.trend h4{
+
+font-size:15px;
+
+font-weight:600;
+
+}
+
+.trend p{
+
+margin-top:6px;
+
+font-size:13px;
+
+color:var(--muted);
+
+}
+
+.suggest{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:14px 0;
+
+border-bottom:1px solid var(--border);
+
+}
+
+.suggest:last-child{
+
+border-bottom:none;
+
+}
+
+.suggest-user{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+}
+
+.follow-btn{
+
+padding:10px 18px;
+
+border:none;
+
+border-radius:14px;
+
+background:var(--gold);
+
+color:black;
+
+font-weight:700;
+
+}
+
+
+
+/* ==========================================
+RESPONSIVE
+========================================== */
+
+@media(max-width:1350px){
+
+.app{
 
 grid-template-columns:1fr;
 
 }
 
-.sidebar{
+.left-sidebar,
+.right-sidebar{
 
 display:none;
 
@@ -440,7 +860,13 @@ display:none;
 
 }
 
-@media(max-width:760px){
+@media(max-width:850px){
+
+nav{
+
+padding:0 16px;
+
+}
 
 .search{
 
@@ -448,23 +874,51 @@ display:none;
 
 }
 
-.wrapper{
+.app{
 
-padding:20px;
+padding-left:14px;
+
+padding-right:14px;
+
+padding-top:88px;
 
 }
 
-nav{
+.card{
 
-padding:0 18px;
+padding:18px;
+
+border-radius:20px;
+
+}
+
+.post-actions{
+
+flex-wrap:wrap;
+
+gap:10px;
+
+}
+
+.create-footer{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:16px;
+
+}
+
+.publish{
+
+width:100%;
 
 }
 
 }
 
 </style>
-
-</head>
 
 <body>
 
@@ -476,66 +930,117 @@ RELVIA <span>SOCIAL</span>
 
 </div>
 
-<div class="nav-right">
-
 <input
-id="searchBar"
 class="search"
-placeholder="Search">
+placeholder="Search Relvia">
 
-<div class="icon">💬</div>
+<div class="right-nav">
 
-<div class="icon">🔔</div>
+<div class="icon-btn"
+id="messagesButton">
 
-<div class="icon profile"></div>
+Messages
+
+</div>
+
+<div class="icon-btn"
+id="notificationsButton">
+
+Alerts
+
+</div>
+
+<div
+class="profile-avatar"
+id="profileAvatar">
+
+</div>
 
 </div>
 
 </nav>
 
-<div
-class="stories"
-id="stories">
+<div class="app">
 
-<!-- Stories loaded from Supabase -->
+<div class="left-sidebar">
+
+<div class="card">
+
+<h3 class="section-title">
+
+Navigation
+
+</h3>
+
+</div>
 
 </div>
 
-<div class="wrapper">
+<div class="feed">
 
-<div>
-
-<div class="create-post">
-
-<div class="create-top">
+<div class="card">
 
 <div
-class="avatar"
-id="profileAvatar">
+class="story-row"
+id="storiesContainer">
 
 </div>
+
+</div>
+
+<div class="card">
+
+<div class="create">
+
+<div
+class="create-avatar"
+id="createAvatar">
+
+</div>
+
+<div class="create-main">
 
 <textarea
-id="createText"
-placeholder="What's happening?"></textarea>
+
+id="createPostInput"
+
+placeholder="Share something with Relvia...">
+
+</textarea>
+
+<div class="create-footer">
+
+<div class="create-tools">
+
+<div class="tool">
+
+Photo
 
 </div>
 
-<div class="create-bottom">
+<div class="tool">
 
-<div class="actions">
-
-<div class="action">📷</div>
-
-<div class="action">🎥</div>
-
-<div class="action">🎵</div>
-
-<div class="action">📊</div>
+Video
 
 </div>
 
-<button id="publishPost">
+<div class="tool">
+
+Poll
+
+</div>
+
+<div class="tool">
+
+Event
+
+</div>
+
+</div>
+
+<button
+class="publish"
+id="publishPost">
 
 Post
 
@@ -545,334 +1050,93 @@ Post
 
 </div>
 
-<div class="feed">
+</div>
 
-<div id="feed">
+</div>
 
-<!-- Posts loaded from Supabase -->
+<div id="feedContainer">
+<!-- POSTS LOAD HERE -->
+
+</div>
+
+</div>
+
+<!-- RIGHT SIDEBAR -->
+
+<div class="right-sidebar">
+
+<div class="sidebar-card">
+
+<h3 class="sidebar-title">
+
+Trending
+
+</h3>
+
+<div id="trendingContainer"></div>
+
+</div>
+
+<div class="sidebar-card">
+
+<h3 class="sidebar-title">
+
+Suggested Creators
+
+</h3>
+
+<div id="suggestedContainer"></div>
 
 </div>
 
 </div>
 
 </div>
-
-<div class="sidebar">
-
-<div class="card">
-
-<h2>Trending</h2>
-
-<div id="trending"></div>
-
-</div>
-
-<div class="card">
-
-<h2>Suggested</h2>
-
-<div id="suggestedUsers"></div>
-
-</div>
-
-<div class="card">
-
-<h2>Spaces</h2>
-
-<div id="spaces"></div>
-
-</div>
-
-</div>
-
-</div>
-<!-- ===========================
-FLOATING CREATE BUTTON
-=========================== -->
-
-<div class="fab" id="fab">
-+
-</div>
-
-<!-- ===========================
-NOTIFICATION PANEL
-=========================== -->
-
-<div class="notification-panel" id="notificationPanel">
-
-<h2>Notifications</h2>
-
-<div id="notifications">
-
-<!-- Loaded From Supabase -->
-
-</div>
-
-</div>
-
-<!-- ===========================
-BOTTOM NAVIGATION
-=========================== -->
-
-<footer class="bottom-nav">
-
-<div class="nav-button active" id="homeBtn">
-🏠
-<span>Home</span>
-</div>
-
-<div class="nav-button" id="exploreBtn">
-🔍
-<span>Explore</span>
-</div>
-
-<div class="nav-button" id="createBtn">
-➕
-<span>Create</span>
-</div>
-
-<div class="nav-button" id="spacesBtn">
-🪐
-<span>Spaces</span>
-</div>
-
-<div class="nav-button" id="messagesBtn">
-💬
-<span>Messages</span>
-</div>
-
-<div class="nav-button" id="profileBtn">
-👤
-<span>Profile</span>
-</div>
-
-</footer>
-
-<style>
-
-/* FAB */
-
-.fab{
-
-position:fixed;
-
-right:35px;
-
-bottom:95px;
-
-width:68px;
-
-height:68px;
-
-border-radius:50%;
-
-background:var(--gold);
-
-color:black;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-font-size:38px;
-
-font-weight:800;
-
-cursor:pointer;
-
-box-shadow:0 18px 40px rgba(212,175,55,.35);
-
-transition:.3s;
-
-z-index:998;
-
-}
-
-.fab:hover{
-
-transform:translateY(-6px);
-
-}
-
-/* NOTIFICATION PANEL */
-
-.notification-panel{
-
-position:fixed;
-
-top:90px;
-
-right:25px;
-
-width:340px;
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:22px;
-
-padding:22px;
-
-display:none;
-
-z-index:999;
-
-}
-
-.notification-panel h2{
-
-color:var(--gold);
-
-margin-bottom:18px;
-
-}
-
-/* BOTTOM NAV */
-
-.bottom-nav{
-
-position:fixed;
-
-bottom:0;
-
-left:0;
-
-right:0;
-
-height:78px;
-
-background:#0c0c0c;
-
-border-top:1px solid var(--border);
-
-display:flex;
-
-justify-content:space-around;
-
-align-items:center;
-
-z-index:997;
-
-backdrop-filter:blur(18px);
-
-}
-
-.nav-button{
-
-display:flex;
-
-flex-direction:column;
-
-align-items:center;
-
-gap:4px;
-
-font-size:22px;
-
-cursor:pointer;
-
-color:#9d9d9d;
-
-transition:.25s;
-
-}
-
-.nav-button span{
-
-font-size:11px;
-
-}
-
-.nav-button:hover{
-
-color:var(--gold);
-
-}
-
-.nav-button.active{
-
-color:var(--gold);
-
-}
-
-</style>
 
 <script>
 
-/*
-===============================
-RELVIA SOCIAL
-===============================
-Everything below is Supabase-ready.
-Nothing is hardcoded.
-*/
+const SUPABASE_URL="YOUR_SUPABASE_URL";
 
-const feed=document.getElementById("feed");
+const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
 
-const stories=document.getElementById("stories");
+const supabaseClient=supabase.createClient(
 
-const trending=document.getElementById("trending");
+SUPABASE_URL,
 
-const suggestedUsers=document.getElementById("suggestedUsers");
+SUPABASE_ANON_KEY
 
-const spaces=document.getElementById("spaces");
+);
 
-const notifications=document.getElementById("notifications");
+let currentUser=null;
 
-/* -------------------------------- */
-
-async function loadFeed(){
-
-feed.innerHTML="";
-
-}
-
-/* -------------------------------- */
-
-async function loadStories(){
-
-stories.innerHTML="";
-
-}
-
-/* -------------------------------- */
-
-async function loadTrending(){
-
-trending.innerHTML="";
-
-}
-
-/* -------------------------------- */
-
-async function loadSuggested(){
-
-suggestedUsers.innerHTML="";
-
-}
-
-/* -------------------------------- */
-
-async function loadSpaces(){
-
-spaces.innerHTML="";
-
-}
-
-/* -------------------------------- */
-
-async function loadNotifications(){
-
-notifications.innerHTML="";
-
-}
-
-/* -------------------------------- */
+let profile=null;
+// ==========================================
+// AUTH
+// ==========================================
 
 async function initialize(){
+
+const {data,error}=await supabaseClient.auth.getUser();
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+if(!data.user){
+
+window.location.href="login.html";
+
+return;
+
+}
+
+currentUser=data.user;
+
+await loadProfile();
 
 await loadStories();
 
@@ -882,54 +1146,708 @@ await loadTrending();
 
 await loadSuggested();
 
-await loadSpaces();
-
-await loadNotifications();
+listenForRealtime();
 
 }
 
+
+
+// ==========================================
+// PROFILE
+// ==========================================
+
+async function loadProfile(){
+
+const {data,error}=await supabaseClient
+
+.from("profiles")
+
+.select("*")
+
+.eq("id",currentUser.id)
+
+.single();
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+profile=data;
+
+const avatar=document.getElementById("profileAvatar");
+
+const createAvatar=document.getElementById("createAvatar");
+
+const avatarHTML=data.avatar_url
+
+? `<img src="${data.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
+
+: `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;">${(data.display_name||"R").charAt(0)}</div>`;
+
+avatar.innerHTML=avatarHTML;
+
+createAvatar.innerHTML=avatarHTML;
+
+}
+
+
+
+// ==========================================
+// STORIES
+// ==========================================
+
+async function loadStories(){
+
+const {data,error}=await supabaseClient
+
+.from("profiles")
+
+.select("*")
+
+.order("follower_count",{ascending:false})
+
+.limit(15);
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+const container=document.getElementById("storiesContainer");
+
+container.innerHTML="";
+
+data.forEach(user=>{
+
+container.innerHTML+=`
+
+<div class="story">
+
+<div class="story-ring">
+
+<div class="story-inner">
+
+${user.avatar_url?
+
+`<img src="${user.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+
+:""}
+
+</div>
+
+</div>
+
+<div class="story-name">
+
+${user.display_name}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+// ==========================================
+// FEED
+// ==========================================
+
+async function loadFeed(){
+
+const {data,error}=await supabaseClient
+
+.from("social_feed")
+
+.select("*")
+
+.order("created_at",{ascending:false});
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+const container=document.getElementById("feedContainer");
+
+container.innerHTML="";
+
+for(const post of data){
+
+container.innerHTML+=`
+
+<div class="post">
+
+<div class="post-header">
+
+<div class="post-user">
+
+<div class="post-avatar">
+
+${post.avatar_url?
+
+`<img src="${post.avatar_url}">`
+
+:""}
+
+</div>
+
+<div class="post-info">
+
+<h3>
+
+${post.display_name}
+
+${post.verified?
+
+`<span class="verified">Verified</span>`
+
+:""}
+
+</h3>
+
+<p>
+
+@${post.username}
+
+</p>
+
+</div>
+
+</div>
+
+<div class="more-btn">
+
+•••
+
+</div>
+
+</div>
+
+<div class="post-caption">
+
+${post.caption||""}
+
+</div>
+
+<div
+
+class="post-media"
+
+id="media-${post.id}">
+
+</div>
+
+<div class="post-footer">
+
+<div class="action-bar">
+
+<div
+
+class="action"
+
+onclick="toggleLike('${post.id}')">
+
+Like
+
+<span class="action-count">
+
+${post.likes_count}
+
+</span>
+
+</div>
+
+<div class="action">
+
+Comment
+
+<span class="action-count">
+
+${post.comments_count}
+
+</span>
+
+</div>
+
+<div class="action">
+
+Repost
+
+<span class="action-count">
+
+${post.reposts_count}
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+await loadMedia(post.id);
+
+}
+
+}
+// ==========================================
+// LOAD MEDIA
+// ==========================================
+
+async function loadMedia(postId){
+
+const {data,error}=await supabaseClient
+
+.from("social_post_media")
+
+.select("*")
+
+.eq("post_id",postId)
+
+.order("position");
+
+if(error)return;
+
+const container=document.getElementById(`media-${postId}`);
+
+if(!container)return;
+
+if(data.length===0){
+
+container.style.display="none";
+
+return;
+
+}
+
+container.innerHTML="";
+
+data.forEach(media=>{
+
+const url=supabaseClient.storage
+
+.from("post-media")
+
+.getPublicUrl(media.storage_path)
+
+.data.publicUrl;
+
+if(media.media_type==="image"){
+
+container.innerHTML+=`
+
+<img src="${url}" loading="lazy">
+
+`;
+
+}
+
+if(media.media_type==="video"){
+
+container.innerHTML+=`
+
+<video
+
+controls
+
+playsinline
+
+preload="metadata">
+
+<source src="${url}">
+
+</video>
+
+`;
+
+}
+
+});
+
+}
+
+
+
+// ==========================================
+// LIKE
+// ==========================================
+
+async function toggleLike(postId){
+
+const {data:user}=await supabaseClient.auth.getUser();
+
+const userId=user.user.id;
+
+const {data:existing}=await supabaseClient
+
+.from("post_likes")
+
+.select("id")
+
+.eq("post_id",postId)
+
+.eq("user_id",userId)
+
+.maybeSingle();
+
+if(existing){
+
+await supabaseClient
+
+.from("post_likes")
+
+.delete()
+
+.eq("id",existing.id);
+
+}else{
+
+await supabaseClient
+
+.from("post_likes")
+
+.insert({
+
+post_id:postId,
+
+user_id:userId
+
+});
+
+}
+
+await loadFeed();
+
+}
+
+
+
+// ==========================================
+// PUBLISH POST
+// ==========================================
+
+document
+
+.getElementById("publishPost")
+
+.addEventListener(
+
+"click",
+
+publishPost
+
+);
+
+async function publishPost(){
+
+const caption=document
+
+.getElementById("createPostInput")
+
+.value
+
+.trim();
+
+if(caption==="")return;
+
+const {error}=await supabaseClient
+
+.from("social_posts")
+
+.insert({
+
+user_id:currentUser.id,
+
+caption:caption
+
+});
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+document
+
+.getElementById("createPostInput")
+
+.value="";
+
+await loadFeed();
+
+}
+
+
+
+// ==========================================
+// TRENDING
+// ==========================================
+
+async function loadTrending(){
+
+const {data}=await supabaseClient
+
+.from("social_feed")
+
+.select("caption")
+
+.limit(8);
+
+const container=document
+
+.getElementById("trendingContainer");
+
+container.innerHTML="";
+
+data.forEach(post=>{
+
+container.innerHTML+=`
+
+<div class="trending-item">
+
+<h4>
+
+${(post.caption||"")
+
+.substring(0,45)}
+
+</h4>
+
+<p>
+
+Trending on Relvia
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+// ==========================================
+// SUGGESTED CREATORS
+// ==========================================
+
+async function loadSuggested(){
+
+const {data,error}=await supabaseClient
+
+.from("profiles")
+
+.select("*")
+
+.neq("id",currentUser.id)
+
+.order("follower_count",{ascending:false})
+
+.limit(5);
+
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+
+const container=document.getElementById("suggestedContainer");
+
+container.innerHTML="";
+
+
+data.forEach(user=>{
+
+
+container.innerHTML+=`
+
+<div class="suggest">
+
+<div class="suggest-user">
+
+
+<div class="post-avatar">
+
+${user.avatar_url
+
+?
+
+`<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
+
+:
+
+user.display_name.charAt(0)
+
+}
+
+</div>
+
+
+<div>
+
+<h4>
+
+${user.display_name}
+
+</h4>
+
+
+<p style="color:#8a8a8a;font-size:13px">
+
+@${user.username}
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+<button class="follow-btn">
+
+Follow
+
+</button>
+
+
+</div>
+
+`;
+
+
+});
+
+
+}
+
+
+
+
+// ==========================================
+// REALTIME UPDATES
+// ==========================================
+
+function listenForRealtime(){
+
+
+supabaseClient
+
+.channel("social-feed")
+
+.on(
+
+"postgres_changes",
+
+{
+
+event:"*",
+
+schema:"public",
+
+table:"social_posts"
+
+},
+
+(payload)=>{
+
+
+console.log("Feed Updated",payload);
+
+
+loadFeed();
+
+
+}
+
+)
+
+
+.subscribe();
+
+
+}
+
+
+
+// ==========================================
+// SEARCH
+// ==========================================
+
+document
+
+.querySelector(".search")
+
+.addEventListener(
+
+"input",
+
+async(e)=>{
+
+
+const value=e.target.value.trim();
+
+
+if(value.length < 2)return;
+
+
+
+const {data,error}=await supabaseClient
+
+.from("profiles")
+
+.select("*")
+
+.ilike(
+
+"display_name",
+
+`%${value}%`
+
+)
+
+.limit(5);
+
+
+
+console.log(data);
+
+
+}
+
+);
+
+
+
+
+// ==========================================
+// START APP
+// ==========================================
+
 initialize();
-
-/* Notification Drawer */
-
-document.querySelectorAll(".icon")[1]
-
-.addEventListener("click",()=>{
-
-const panel=document.getElementById("notificationPanel");
-
-panel.style.display=
-
-panel.style.display==="block"
-
-? "none"
-
-: "block";
-
-});
-
-/* Create Button */
-
-document.getElementById("publishPost")
-
-.addEventListener("click",()=>{
-
-console.log("Publish Post");
-
-});
-
-/* Floating Button */
-
-document.getElementById("fab")
-
-.onclick=()=>{
-
-document.getElementById("createText").focus();
-
-};
-
-</script>
-
-</body>
-
-</html>
