@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -22,13 +24,13 @@ font-family:'Inter',sans-serif;
 
 :root{
 
+--bg:#050505;
+--surface:#101010;
+--surface2:#171717;
 --gold:#D4AF37;
---bg:#060606;
---card:#111111;
---card2:#191919;
---border:rgba(255,255,255,.08);
 --text:#ffffff;
---muted:#9a9a9a;
+--muted:#9c9c9c;
+--border:rgba(255,255,255,.08);
 
 }
 
@@ -49,12 +51,10 @@ nav{
 position:fixed;
 
 top:0;
-
 left:0;
-
 right:0;
 
-height:82px;
+height:78px;
 
 display:flex;
 
@@ -62,11 +62,11 @@ justify-content:space-between;
 
 align-items:center;
 
-padding:0 70px;
+padding:0 30px;
 
-background:rgba(6,6,6,.85);
+background:rgba(5,5,5,.9);
 
-backdrop-filter:blur(20px);
+backdrop-filter:blur(18px);
 
 border-bottom:1px solid var(--border);
 
@@ -76,11 +76,11 @@ z-index:999;
 
 .logo{
 
-font-size:30px;
+font-size:28px;
 
 font-weight:900;
 
-letter-spacing:2px;
+letter-spacing:1px;
 
 color:var(--gold);
 
@@ -92,51 +92,41 @@ color:white;
 
 }
 
-.right{
+.nav-right{
 
 display:flex;
 
 align-items:center;
 
-gap:18px;
+gap:15px;
 
 }
 
 .search{
 
-width:280px;
+width:300px;
 
-padding:13px 18px;
+padding:12px 18px;
 
-background:#121212;
-
-border:1px solid transparent;
-
-border-radius:40px;
-
-color:white;
+border:none;
 
 outline:none;
 
-transition:.3s;
-
-}
-
-.search:focus{
-
-border-color:var(--gold);
-
-}
-
-.circle{
-
-width:45px;
-
-height:45px;
-
 background:#151515;
 
-border-radius:50%;
+color:white;
+
+border-radius:50px;
+
+}
+
+.icon{
+
+width:42px;
+
+height:42px;
+
+background:#151515;
 
 display:flex;
 
@@ -144,13 +134,15 @@ justify-content:center;
 
 align-items:center;
 
+border-radius:50%;
+
 cursor:pointer;
 
-transition:.3s;
+transition:.25s;
 
 }
 
-.circle:hover{
+.icon:hover{
 
 background:var(--gold);
 
@@ -164,207 +156,45 @@ background:var(--gold);
 
 }
 
-/* HERO */
+/* STORIES */
 
-.hero{
+.stories{
 
-padding:150px 70px 80px;
-
-display:grid;
-
-grid-template-columns:1.2fr .8fr;
-
-gap:80px;
-
-align-items:center;
-
-}
-
-.hero small{
-
-color:var(--gold);
-
-letter-spacing:4px;
-
-font-weight:700;
-
-text-transform:uppercase;
-
-}
-
-.hero h1{
-
-font-size:74px;
-
-line-height:84px;
-
-margin-top:18px;
-
-font-weight:900;
-
-}
-
-.hero h1 span{
-
-color:var(--gold);
-
-}
-
-.hero p{
-
-margin-top:28px;
-
-font-size:20px;
-
-line-height:36px;
-
-color:var(--muted);
-
-max-width:620px;
-
-}
-
-.buttons{
+margin-top:78px;
 
 display:flex;
 
 gap:18px;
 
-margin-top:40px;
-
-}
-
-.btn{
-
-padding:16px 34px;
-
-border-radius:50px;
-
-text-decoration:none;
-
-font-weight:700;
-
-transition:.3s;
-
-}
-
-.primary{
-
-background:var(--gold);
-
-color:black;
-
-}
-
-.secondary{
-
-border:1px solid var(--border);
-
-color:white;
-
-}
-
-.btn:hover{
-
-transform:translateY(-3px);
-
-}
-
-/* FEATURE CARD */
-
-.feature{
-
-background:linear-gradient(135deg,#171717,#0f0f0f);
-
-border:1px solid var(--border);
-
-border-radius:30px;
-
-overflow:hidden;
-
-box-shadow:0 25px 80px rgba(0,0,0,.45);
-
-}
-
-.feature-image{
-
-height:250px;
-
-background:linear-gradient(135deg,#2c2c2c,#0f0f0f);
-
-}
-
-.feature-content{
-
-padding:30px;
-
-}
-
-.feature-content h2{
-
-font-size:28px;
-
-margin-bottom:10px;
-
-}
-
-.feature-content p{
-
-color:var(--muted);
-
-line-height:30px;
-
-}
-
-/* STORIES */
-
-.section{
-
-padding:0 70px;
-
-}
-
-.section-title{
-
-font-size:26px;
-
-font-weight:800;
-
-margin-bottom:25px;
-
-}
-
-.stories{
-
-display:flex;
-
-gap:22px;
+padding:20px 30px;
 
 overflow-x:auto;
 
-padding-bottom:10px;
+border-bottom:1px solid var(--border);
 
 }
 
 .story{
 
-min-width:90px;
-
 text-align:center;
+
+min-width:74px;
 
 cursor:pointer;
 
 }
 
-.story-ring{
+.story-circle{
 
-width:74px;
+width:68px;
 
-height:74px;
+height:68px;
 
 border-radius:50%;
 
-background:linear-gradient(135deg,var(--gold),#9c791d);
+border:2px solid var(--gold);
+
+background:#202020;
 
 margin:auto;
 
@@ -372,9 +202,263 @@ margin:auto;
 
 .story p{
 
-margin-top:10px;
+margin-top:8px;
 
-font-size:13px;
+font-size:12px;
+
+}
+
+/* MAIN */
+
+.wrapper{
+
+display:grid;
+
+grid-template-columns:2fr 360px;
+
+gap:30px;
+
+padding:30px;
+
+}
+
+/* CREATE POST */
+
+.create-post{
+
+background:var(--surface);
+
+border-radius:22px;
+
+padding:22px;
+
+border:1px solid var(--border);
+
+}
+
+.create-top{
+
+display:flex;
+
+gap:15px;
+
+align-items:flex-start;
+
+}
+
+.avatar{
+
+width:52px;
+
+height:52px;
+
+border-radius:50%;
+
+background:#2b2b2b;
+
+}
+
+#createText{
+
+flex:1;
+
+height:90px;
+
+resize:none;
+
+background:var(--surface2);
+
+border:none;
+
+outline:none;
+
+padding:16px;
+
+border-radius:16px;
+
+color:white;
+
+font-size:15px;
+
+}
+
+.create-bottom{
+
+margin-top:18px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+.actions{
+
+display:flex;
+
+gap:10px;
+
+}
+
+.action{
+
+padding:10px 16px;
+
+background:#191919;
+
+border-radius:12px;
+
+cursor:pointer;
+
+transition:.2s;
+
+}
+
+.action:hover{
+
+background:#252525;
+
+}
+
+#publishPost{
+
+padding:12px 30px;
+
+border:none;
+
+background:var(--gold);
+
+color:black;
+
+font-weight:700;
+
+border-radius:50px;
+
+cursor:pointer;
+
+}
+
+/* FEED */
+
+.feed{
+
+margin-top:25px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:22px;
+
+}
+
+#feed{
+
+display:flex;
+
+flex-direction:column;
+
+gap:22px;
+
+}
+
+/* SIDEBAR */
+
+.sidebar{
+
+display:flex;
+
+flex-direction:column;
+
+gap:20px;
+
+}
+
+.card{
+
+background:var(--surface);
+
+border-radius:22px;
+
+padding:22px;
+
+border:1px solid var(--border);
+
+}
+
+.card h2{
+
+font-size:20px;
+
+margin-bottom:18px;
+
+color:var(--gold);
+
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar{
+
+width:7px;
+
+height:7px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:var(--gold);
+
+border-radius:30px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#111;
+
+}
+
+/* MOBILE */
+
+@media(max-width:1050px){
+
+.wrapper{
+
+grid-template-columns:1fr;
+
+}
+
+.sidebar{
+
+display:none;
+
+}
+
+}
+
+@media(max-width:760px){
+
+.search{
+
+display:none;
+
+}
+
+.wrapper{
+
+padding:20px;
+
+}
+
+nav{
+
+padding:0 18px;
+
+}
 
 }
 
@@ -392,157 +476,66 @@ RELVIA <span>SOCIAL</span>
 
 </div>
 
-<div class="right">
+<div class="nav-right">
 
-<input class="search" placeholder="Search Relvia">
+<input
+id="searchBar"
+class="search"
+placeholder="Search">
 
-<div class="circle">💬</div>
+<div class="icon">💬</div>
 
-<div class="circle">🔔</div>
+<div class="icon">🔔</div>
 
-<div class="circle profile"></div>
+<div class="icon profile"></div>
 
 </div>
 
 </nav>
 
-<section class="hero">
+<div
+class="stories"
+id="stories">
+
+<!-- Stories loaded from Supabase -->
+
+</div>
+
+<div class="wrapper">
 
 <div>
 
-<small>WELCOME TO RELVIA</small>
+<div class="create-post">
 
-<h1>
+<div class="create-top">
 
-Entertainment
-
-<span>Starts Here.</span>
-
-</h1>
-
-<p>
-
-Relvia Social is where creators, studios, artists, podcasts,
-and audiences come together. Discover originals, connect
-with talent, share moments, and experience entertainment
-in one premium ecosystem.
-
-</p>
-
-<div class="buttons">
-
-<a href="#" class="btn primary">
-
-Get Started
-
-</a>
-
-<a href="#" class="btn secondary">
-
-Explore
-
-</a>
+<div
+class="avatar"
+id="profileAvatar">
 
 </div>
 
-</div>
-
-<div class="feature">
-
-<div class="feature-image"></div>
-
-<div class="feature-content">
-
-<h2>Featured Premiere</h2>
-
-<p>
-
-Watch exclusive trailers, behind-the-scenes content,
-creator updates, and new releases directly from
-Relvia Studios.
-
-</p>
+<textarea
+id="createText"
+placeholder="What's happening?"></textarea>
 
 </div>
 
-</div>
+<div class="create-bottom">
 
-</section>
+<div class="actions">
 
-<section class="section">
+<div class="action">📷</div>
 
-<h2 class="section-title">
+<div class="action">🎥</div>
 
-Stories
+<div class="action">🎵</div>
 
-</h2>
-
-<div class="stories">
-
-<div class="story">
-<div class="story-ring"></div>
-<p>You</p>
-</div>
-
-<div class="story">
-<div class="story-ring"></div>
-<p>Studios</p>
-</div>
-
-<div class="story">
-<div class="story-ring"></div>
-<p>Music</p>
-</div>
-
-<div class="story">
-<div class="story-ring"></div>
-<p>Creators</p>
-</div>
-
-<div class="story">
-<div class="story-ring"></div>
-<p>Podcasts</p>
-</div>
+<div class="action">📊</div>
 
 </div>
 
-</section>
-
-<!-- CONTINUES... -->
-<!-- ===========================
-MAIN LAYOUT
-=========================== -->
-
-<section class="section main-layout">
-
-<div class="feed-column">
-
-<!-- CREATE POST -->
-
-<div class="create-card">
-
-<div class="create-header">
-
-<div class="avatar"></div>
-
-<input
-type="text"
-placeholder="What's happening on Relvia?"
->
-
-</div>
-
-<div class="create-toolbar">
-
-<button>📷 Photo</button>
-
-<button>🎥 Video</button>
-
-<button>🎵 Music</button>
-
-<button>📊 Poll</button>
-
-<button class="post-btn">
+<button id="publishPost">
 
 Post
 
@@ -552,89 +545,11 @@ Post
 
 </div>
 
-<!-- POST 1 -->
+<div class="feed">
 
-<div class="post">
+<div id="feed">
 
-<div class="post-top">
-
-<div class="avatar gold"></div>
-
-<div>
-
-<h3>Relvia Studios ✓</h3>
-
-<span>@relviastudios • 12m</span>
-
-</div>
-
-</div>
-
-<p class="post-text">
-
-Production Day 14 🎬
-
-Behind the scenes from our newest Relvia Original.
-
-</p>
-
-<div class="media"></div>
-
-<div class="post-actions">
-
-<div>❤️ 12.4K</div>
-
-<div>💬 842</div>
-
-<div>🔁 1.3K</div>
-
-<div>🔖 Save</div>
-
-<div>↗ Share</div>
-
-</div>
-
-</div>
-
-<!-- POST 2 -->
-
-<div class="post">
-
-<div class="post-top">
-
-<div class="avatar blue"></div>
-
-<div>
-
-<h3>Relvia Music ✓</h3>
-
-<span>@relviamusic • 42m</span>
-
-</div>
-
-</div>
-
-<p class="post-text">
-
-Our newest single drops Friday.
-
-Who's excited? 🎵
-
-</p>
-
-<div class="media short"></div>
-
-<div class="post-actions">
-
-<div>❤️ 6.2K</div>
-
-<div>💬 391</div>
-
-<div>🔁 822</div>
-
-<div>🔖 Save</div>
-
-<div>↗ Share</div>
+<!-- Posts loaded from Supabase -->
 
 </div>
 
@@ -642,393 +557,57 @@ Who's excited? 🎵
 
 </div>
 
-<!-- SIDEBAR -->
-
-<aside class="sidebar">
+<div class="sidebar">
 
 <div class="card">
 
-<h3>🔥 Trending</h3>
+<h2>Trending</h2>
 
-<ul>
-
-<li>#RelviaOriginals</li>
-
-<li>#RelviaMusic</li>
-
-<li>#CreatorPlus</li>
-
-<li>#BehindTheScenes</li>
-
-<li>#PodcastDrop</li>
-
-</ul>
+<div id="trending"></div>
 
 </div>
 
 <div class="card">
 
-<h3>Suggested</h3>
+<h2>Suggested</h2>
 
-<div class="person">
-
-<div class="mini-avatar"></div>
-
-<div>
-
-<strong>Relvia Podcasts</strong>
-
-<p>Official</p>
+<div id="suggestedUsers"></div>
 
 </div>
 
-</div>
+<div class="card">
 
-<div class="person">
+<h2>Spaces</h2>
 
-<div class="mini-avatar"></div>
-
-<div>
-
-<strong>Relvia Creators</strong>
-
-<p>Official</p>
-
-</div>
-
-</div>
-
-<div class="person">
-
-<div class="mini-avatar"></div>
-
-<div>
-
-<strong>Relvia Live</strong>
-
-<p>Official</p>
+<div id="spaces"></div>
 
 </div>
 
 </div>
 
 </div>
-
-</aside>
-
-</section>
-
-<style>
-
-/* ===========================
-MAIN
-=========================== */
-
-.main-layout{
-
-display:grid;
-
-grid-template-columns:2fr 370px;
-
-gap:35px;
-
-margin-top:50px;
-
-padding-bottom:120px;
-
-}
-
-.feed-column{
-
-display:flex;
-
-flex-direction:column;
-
-gap:28px;
-
-}
-
-/* CREATE */
-
-.create-card{
-
-background:#111;
-
-border:1px solid rgba(255,255,255,.06);
-
-border-radius:24px;
-
-padding:22px;
-
-}
-
-.create-header{
-
-display:flex;
-
-gap:15px;
-
-align-items:center;
-
-}
-
-.create-header input{
-
-flex:1;
-
-background:#181818;
-
-border:none;
-
-outline:none;
-
-padding:15px;
-
-border-radius:16px;
-
-color:white;
-
-}
-
-.create-toolbar{
-
-display:flex;
-
-justify-content:space-between;
-
-margin-top:20px;
-
-flex-wrap:wrap;
-
-gap:10px;
-
-}
-
-.create-toolbar button{
-
-padding:12px 18px;
-
-background:#191919;
-
-border:none;
-
-border-radius:14px;
-
-color:white;
-
-cursor:pointer;
-
-transition:.3s;
-
-}
-
-.create-toolbar button:hover{
-
-background:#252525;
-
-}
-
-.post-btn{
-
-background:#D4AF37 !important;
-
-color:black !important;
-
-font-weight:700;
-
-}
-
-/* POSTS */
-
-.post{
-
-background:#111;
-
-border-radius:26px;
-
-padding:22px;
-
-border:1px solid rgba(255,255,255,.06);
-
-transition:.3s;
-
-}
-
-.post:hover{
-
-transform:translateY(-5px);
-
-}
-
-.post-top{
-
-display:flex;
-
-gap:15px;
-
-align-items:center;
-
-margin-bottom:18px;
-
-}
-
-.avatar{
-
-width:52px;
-
-height:52px;
-
-border-radius:50%;
-
-background:#444;
-
-}
-
-.gold{
-
-background:#D4AF37;
-
-}
-
-.blue{
-
-background:#4a7bff;
-
-}
-
-.post-top span{
-
-color:#8d8d8d;
-
-font-size:13px;
-
-}
-
-.post-text{
-
-line-height:30px;
-
-color:#d6d6d6;
-
-margin-bottom:20px;
-
-}
-
-.media{
-
-height:340px;
-
-background:#202020;
-
-border-radius:20px;
-
-}
-
-.media.short{
-
-height:260px;
-
-}
-
-.post-actions{
-
-display:flex;
-
-justify-content:space-between;
-
-margin-top:18px;
-
-color:#9f9f9f;
-
-font-size:14px;
-
-}
-
-/* SIDEBAR */
-
-.sidebar{
-
-display:flex;
-
-flex-direction:column;
-
-gap:25px;
-
-}
-
-.card{
-
-background:#111;
-
-border-radius:24px;
-
-padding:24px;
-
-border:1px solid rgba(255,255,255,.06);
-
-}
-
-.card h3{
-
-margin-bottom:18px;
-
-color:#D4AF37;
-
-}
-
-.card ul{
-
-list-style:none;
-
-display:flex;
-
-flex-direction:column;
-
-gap:14px;
-
-color:#cfcfcf;
-
-}
-
-.person{
-
-display:flex;
-
-gap:15px;
-
-margin-bottom:18px;
-
-align-items:center;
-
-}
-
-.mini-avatar{
-
-width:46px;
-
-height:46px;
-
-border-radius:50%;
-
-background:#D4AF37;
-
-}
-
-.person p{
-
-font-size:13px;
-
-color:#8d8d8d;
-
-}
-
-</style>
 <!-- ===========================
-FLOATING ACTION BUTTON
+FLOATING CREATE BUTTON
 =========================== -->
 
-<div class="fab" title="Create">
+<div class="fab" id="fab">
 +
+</div>
+
+<!-- ===========================
+NOTIFICATION PANEL
+=========================== -->
+
+<div class="notification-panel" id="notificationPanel">
+
+<h2>Notifications</h2>
+
+<div id="notifications">
+
+<!-- Loaded From Supabase -->
+
+</div>
+
 </div>
 
 <!-- ===========================
@@ -1037,63 +616,41 @@ BOTTOM NAVIGATION
 
 <footer class="bottom-nav">
 
-<div class="nav-item active">
+<div class="nav-button active" id="homeBtn">
 🏠
 <span>Home</span>
 </div>
 
-<div class="nav-item">
+<div class="nav-button" id="exploreBtn">
 🔍
 <span>Explore</span>
 </div>
 
-<div class="nav-item">
-🎬
-<span>Studios</span>
-</div>
-
-<div class="nav-item">
+<div class="nav-button" id="createBtn">
 ➕
 <span>Create</span>
 </div>
 
-<div class="nav-item">
+<div class="nav-button" id="spacesBtn">
+🪐
+<span>Spaces</span>
+</div>
+
+<div class="nav-button" id="messagesBtn">
 💬
 <span>Messages</span>
 </div>
 
-<div class="nav-item">
+<div class="nav-button" id="profileBtn">
 👤
 <span>Profile</span>
 </div>
 
 </footer>
 
-<!-- ===========================
-NOTIFICATIONS DRAWER
-=========================== -->
-
-<div class="notifications">
-
-<h3>Notifications</h3>
-
-<div class="notice">
-❤️ Relvia Studios liked your post.
-</div>
-
-<div class="notice">
-🎵 New music released by Relvia Music.
-</div>
-
-<div class="notice">
-🎬 Premiere begins in 2 hours.
-</div>
-
-</div>
-
 <style>
 
-/* FLOATING BUTTON */
+/* FAB */
 
 .fab{
 
@@ -1101,17 +658,17 @@ position:fixed;
 
 right:35px;
 
-bottom:105px;
+bottom:95px;
 
-width:70px;
+width:68px;
 
-height:70px;
-
-background:#D4AF37;
-
-color:black;
+height:68px;
 
 border-radius:50%;
+
+background:var(--gold);
+
+color:black;
 
 display:flex;
 
@@ -1119,23 +676,57 @@ justify-content:center;
 
 align-items:center;
 
-font-size:40px;
+font-size:38px;
 
-font-weight:700;
+font-weight:800;
 
 cursor:pointer;
 
-box-shadow:0 20px 45px rgba(212,175,55,.35);
+box-shadow:0 18px 40px rgba(212,175,55,.35);
 
 transition:.3s;
 
-z-index:999;
+z-index:998;
 
 }
 
 .fab:hover{
 
-transform:translateY(-6px) scale(1.05);
+transform:translateY(-6px);
+
+}
+
+/* NOTIFICATION PANEL */
+
+.notification-panel{
+
+position:fixed;
+
+top:90px;
+
+right:25px;
+
+width:340px;
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:22px;
+
+padding:22px;
+
+display:none;
+
+z-index:999;
+
+}
+
+.notification-panel h2{
+
+color:var(--gold);
+
+margin-bottom:18px;
 
 }
 
@@ -1151,13 +742,11 @@ left:0;
 
 right:0;
 
-height:82px;
+height:78px;
 
-background:rgba(10,10,10,.94);
+background:#0c0c0c;
 
-backdrop-filter:blur(20px);
-
-border-top:1px solid rgba(255,255,255,.08);
+border-top:1px solid var(--border);
 
 display:flex;
 
@@ -1165,11 +754,13 @@ justify-content:space-around;
 
 align-items:center;
 
-z-index:998;
+z-index:997;
+
+backdrop-filter:blur(18px);
 
 }
 
-.nav-item{
+.nav-button{
 
 display:flex;
 
@@ -1177,197 +768,33 @@ flex-direction:column;
 
 align-items:center;
 
-gap:5px;
+gap:4px;
 
 font-size:22px;
 
 cursor:pointer;
 
-opacity:.6;
-
-transition:.3s;
-
-}
-
-.nav-item span{
-
-font-size:12px;
-
-}
-
-.nav-item:hover{
-
-opacity:1;
-
-color:#D4AF37;
-
-}
-
-.active{
-
-opacity:1;
-
-color:#D4AF37;
-
-}
-
-/* NOTIFICATION DRAWER */
-
-.notifications{
-
-position:fixed;
-
-top:90px;
-
-right:30px;
-
-width:320px;
-
-background:#111;
-
-border-radius:22px;
-
-padding:22px;
-
-border:1px solid rgba(255,255,255,.08);
-
-display:none;
-
-z-index:999;
-
-}
-
-.notifications h3{
-
-margin-bottom:18px;
-
-color:#D4AF37;
-
-}
-
-.notice{
-
-padding:14px;
-
-background:#181818;
-
-border-radius:14px;
-
-margin-bottom:12px;
-
-font-size:14px;
-
-line-height:24px;
-
-}
-
-/* HOVERS */
-
-.post-actions div{
-
-cursor:pointer;
+color:#9d9d9d;
 
 transition:.25s;
 
 }
 
-.post-actions div:hover{
+.nav-button span{
 
-color:#D4AF37;
-
-}
-
-.story:hover{
-
-transform:translateY(-4px);
-
-transition:.3s;
+font-size:11px;
 
 }
 
-.card{
+.nav-button:hover{
 
-transition:.35s;
-
-}
-
-.card:hover{
-
-transform:translateY(-4px);
-
-border-color:rgba(212,175,55,.3);
+color:var(--gold);
 
 }
 
-/* RESPONSIVE */
+.nav-button.active{
 
-@media(max-width:1100px){
-
-.main-layout{
-
-grid-template-columns:1fr;
-
-}
-
-.sidebar{
-
-display:none;
-
-}
-
-}
-
-@media(max-width:850px){
-
-.hero{
-
-grid-template-columns:1fr;
-
-padding:120px 25px 50px;
-
-text-align:center;
-
-}
-
-.hero h1{
-
-font-size:52px;
-
-line-height:60px;
-
-}
-
-nav{
-
-padding:0 20px;
-
-}
-
-.search{
-
-display:none;
-
-}
-
-.section{
-
-padding:0 20px;
-
-}
-
-.bottom-nav{
-
-height:75px;
-
-}
-
-.fab{
-
-right:20px;
-
-bottom:92px;
-
-}
+color:var(--gold);
 
 }
 
@@ -1375,42 +802,131 @@ bottom:92px;
 
 <script>
 
-/* Floating Button */
+/*
+===============================
+RELVIA SOCIAL
+===============================
+Everything below is Supabase-ready.
+Nothing is hardcoded.
+*/
 
-document.querySelector(".fab").onclick=()=>{
+const feed=document.getElementById("feed");
 
-alert("Create Post (Coming Soon)");
+const stories=document.getElementById("stories");
+
+const trending=document.getElementById("trending");
+
+const suggestedUsers=document.getElementById("suggestedUsers");
+
+const spaces=document.getElementById("spaces");
+
+const notifications=document.getElementById("notifications");
+
+/* -------------------------------- */
+
+async function loadFeed(){
+
+feed.innerHTML="";
 
 }
 
-/* Notification Toggle */
+/* -------------------------------- */
 
-const bell=document.querySelectorAll(".circle")[1];
+async function loadStories(){
 
-const drawer=document.querySelector(".notifications");
+stories.innerHTML="";
 
-bell.onclick=()=>{
+}
 
-drawer.style.display=
-drawer.style.display==="block"
+/* -------------------------------- */
+
+async function loadTrending(){
+
+trending.innerHTML="";
+
+}
+
+/* -------------------------------- */
+
+async function loadSuggested(){
+
+suggestedUsers.innerHTML="";
+
+}
+
+/* -------------------------------- */
+
+async function loadSpaces(){
+
+spaces.innerHTML="";
+
+}
+
+/* -------------------------------- */
+
+async function loadNotifications(){
+
+notifications.innerHTML="";
+
+}
+
+/* -------------------------------- */
+
+async function initialize(){
+
+await loadStories();
+
+await loadFeed();
+
+await loadTrending();
+
+await loadSuggested();
+
+await loadSpaces();
+
+await loadNotifications();
+
+}
+
+initialize();
+
+/* Notification Drawer */
+
+document.querySelectorAll(".icon")[1]
+
+.addEventListener("click",()=>{
+
+const panel=document.getElementById("notificationPanel");
+
+panel.style.display=
+
+panel.style.display==="block"
+
 ? "none"
+
 : "block";
 
-}
+});
 
-/* Like Animation */
+/* Create Button */
 
-document.querySelectorAll(".post-actions div:first-child")
+document.getElementById("publishPost")
 
-.forEach(btn=>{
+.addEventListener("click",()=>{
 
-btn.onclick=()=>{
-
-btn.innerHTML="💛 Liked";
-
-}
+console.log("Publish Post");
 
 });
+
+/* Floating Button */
+
+document.getElementById("fab")
+
+.onclick=()=>{
+
+document.getElementById("createText").focus();
+
+};
 
 </script>
 
