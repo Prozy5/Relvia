@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Relvia Creator Plus</title>
+<title>Relvia Creator+</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,312 +17,374 @@
 
 <style>
 
-/*==================================================
-RELVIA CREATOR PLUS
-PART 1
-BASE SYSTEM
-==================================================*/
-
 *{
-
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:"Inter",sans-serif;
-
 }
 
 :root{
-
---background:#050505;
-
---surface:#0f0f0f;
-
---surface-light:#181818;
-
---surface-hover:#212121;
-
---border:#262626;
-
+--bg:#050505;
+--surface:#101010;
+--surface-light:#171717;
+--border:#252525;
 --gold:#d4af37;
-
---gold-light:#f4d97a;
-
---gold-dark:#98741b;
-
+--gold-light:#f5dc79;
 --text:#ffffff;
-
 --muted:#9d9d9d;
-
---success:#2ecc71;
-
---danger:#ff5a5a;
-
---radius:24px;
-
---shadow:0 25px 60px rgba(0,0,0,.45);
-
+--radius:26px;
 }
 
 html{
-
 scroll-behavior:smooth;
-
 }
 
 body{
-
-background:var(--background);
-
-color:var(--text);
-
+background:var(--bg);
+color:white;
 overflow-x:hidden;
-
 }
 
-body::-webkit-scrollbar{
+/* ==============================
+NAVIGATION
+============================== */
 
-width:8px;
-
-}
-
-body::-webkit-scrollbar-thumb{
-
-background:var(--gold);
-
-border-radius:100px;
-
-}
-
-a{
-
-text-decoration:none;
-
-color:inherit;
-
-}
-
-button{
-
-font:inherit;
-
-cursor:pointer;
-
-border:none;
-
-}
-
-input{
-
-font:inherit;
-
-outline:none;
-
-}
-
-img{
-
-display:block;
-
-max-width:100%;
-
-}
-
-/*==================================================
-TOP NAVIGATION
-==================================================*/
-
-.topbar{
-
+nav{
 position:fixed;
-
 top:0;
 left:0;
 right:0;
-
-height:78px;
-
+height:82px;
 display:flex;
-
-align-items:center;
-
 justify-content:space-between;
-
-padding:0 32px;
-
+align-items:center;
+padding:0 50px;
 background:rgba(5,5,5,.88);
-
-backdrop-filter:blur(18px);
-
+backdrop-filter:blur(20px);
 border-bottom:1px solid var(--border);
-
-z-index:9999;
-
+z-index:99999;
 }
 
-.brand{
-
-font-size:26px;
-
+.logo{
+font-size:32px;
 font-weight:900;
-
 letter-spacing:3px;
-
 }
 
-.brand span{
-
+.logo span{
 color:var(--gold);
-
 }
 
-.nav-right{
-
+.nav-links{
 display:flex;
-
 align-items:center;
-
-gap:14px;
-
+gap:18px;
 }
 
-.nav-btn{
+.nav-links a{
+text-decoration:none;
+color:white;
+padding:13px 22px;
+border-radius:999px;
+transition:.3s;
+font-weight:600;
+}
 
-width:46px;
-
-height:46px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-border-radius:50%;
-
+.nav-links a:hover{
 background:var(--surface-light);
-
-border:1px solid var(--border);
-
-transition:.25s;
-
 }
 
-.nav-btn:hover{
-
-background:var(--gold);
-
-color:black;
-
+.join-nav{
+background:linear-gradient(
+135deg,
+var(--gold),
+var(--gold-light)
+);
+color:black !important;
+font-weight:800;
 }
 
-.profile-avatar{
-
-width:46px;
-
-height:46px;
-
-border-radius:50%;
-
-overflow:hidden;
-
-background:#252525;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-weight:700;
-
-}
-
-/*==================================================
-MAIN LAYOUT
-==================================================*/
-
-.page{
-
-max-width:1450px;
-
-margin:auto;
-
-padding:120px 30px 50px;
-
-}
+/* ==============================
+HERO
+============================== */
 
 .hero{
+position:relative;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:140px 40px 90px;
+overflow:hidden;
+}
 
+.hero::before{
+content:"";
+position:absolute;
+width:850px;
+height:850px;
+background:radial-gradient(
+circle,
+rgba(212,175,55,.28),
+transparent 70%
+);
+filter:blur(80px);
+animation:glow 8s infinite alternate;
+}
+
+@keyframes glow{
+from{
+transform:scale(.9);
+}
+to{
+transform:scale(1.15);
+}
+}
+
+.hero-content{
+position:relative;
+z-index:10;
+max-width:760px;
 text-align:center;
+}
 
-margin-bottom:50px;
-
+.hero-badge{
+display:inline-flex;
+align-items:center;
+gap:10px;
+padding:10px 22px;
+background:#121212;
+border:1px solid var(--border);
+border-radius:999px;
+margin-bottom:28px;
+font-size:14px;
+color:var(--gold);
+font-weight:700;
 }
 
 .hero h1{
-
-font-size:62px;
-
+font-size:72px;
 font-weight:900;
-
-letter-spacing:2px;
-
-margin-bottom:18px;
-
+line-height:1.05;
+margin-bottom:24px;
 }
 
 .hero h1 span{
-
 color:var(--gold);
-
 }
 
 .hero p{
-
-max-width:760px;
-
-margin:auto;
-
-font-size:18px;
-
-line-height:1.8;
-
+font-size:20px;
+line-height:1.9;
 color:var(--muted);
+margin:auto;
+max-width:680px;
+margin-bottom:40px;
+}
+
+.hero-buttons{
+display:flex;
+justify-content:center;
+gap:18px;
+flex-wrap:wrap;
+}
+
+.primary-button{
+background:linear-gradient(
+135deg,
+var(--gold),
+var(--gold-light)
+);
+color:black;
+padding:18px 40px;
+border:none;
+border-radius:18px;
+font-size:18px;
+font-weight:800;
+cursor:pointer;
+transition:.3s;
+}
+
+.primary-button:hover{
+transform:translateY(-4px);
+box-shadow:0 18px 45px rgba(212,175,55,.35);
+}
+
+.secondary-button{
+background:transparent;
+border:1px solid var(--border);
+color:white;
+padding:18px 34px;
+border-radius:18px;
+font-size:18px;
+cursor:pointer;
+transition:.3s;
+}
+
+.secondary-button:hover{
+border-color:var(--gold);
+color:var(--gold);
+}
+
+/* ==============================
+RESPONSIVE
+============================== */
+
+@media(max-width:900px){
+
+nav{
+padding:0 18px;
+}
+
+.nav-links{
+display:none;
+}
+
+.hero h1{
+font-size:52px;
+}
+
+.hero p{
+font-size:17px;
+}
+
+.hero-buttons{
+flex-direction:column;
+}
+
+.primary-button,
+.secondary-button{
+width:100%;
+}
 
 }
 
-/*==================================================
-END PART 1
-==================================================*/
-
 </style>
-/*==================================================
-PREMIUM MEMBERSHIP CARD
-PART 2
-==================================================*/
+
+</head>
+
+<body>
+
+<nav>
+
+<div class="logo">
+
+RELVIA <span>CREATOR+</span>
+
+</div>
+
+<div class="nav-links">
+
+<a href="/social/feed.html">Feed</a>
+
+<a href="#features">Features</a>
+
+<a href="#pricing">Pricing</a>
+
+<a href="#faq">FAQ</a>
+
+<a href="#join" class="join-nav">
+
+Join Creator+
+
+</a>
+
+</div>
+
+</nav>
+
+<section class="hero">
+
+<div class="hero-content">
+
+<div class="hero-badge">
+
+RELVIA SOCIAL PREMIUM MEMBERSHIP
+
+</div>
+
+<h1>
+
+Build Your Audience.<br>
+
+<span>Earn More.</span>
+
+</h1>
+
+<p>
+
+Creator+ gives you everything you need to grow on Relvia Social.
+Unlock livestreaming, monetization, verification eligibility,
+professional analytics, exclusive creator tools, and priority
+support—all with one premium membership.
+
+</p>
+
+<div class="hero-buttons">
+
+<button class="primary-button" id="joinButton">
+
+Join Creator+
+
+</button>
+
+<button class="secondary-button">
+
+See Everything Included
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+<style>
+
+/*==========================================================
+MEMBERSHIP + CHECKOUT
+==========================================================*/
+
+.membership-section{
+
+padding:40px 7% 100px;
+
+}
+
+.membership-grid{
+
+display:grid;
+
+grid-template-columns:1fr 430px;
+
+gap:35px;
+
+align-items:start;
+
+}
 
 .membership-card{
+
+background:linear-gradient(
+
+180deg,
+
+#121212,
+
+#0b0b0b
+
+);
+
+border:1px solid #282828;
+
+border-radius:28px;
+
+padding:40px;
 
 position:relative;
 
 overflow:hidden;
-
-background:linear-gradient(
-145deg,
-#111111,
-#0a0a0a
-);
-
-border:1px solid rgba(212,175,55,.35);
-
-border-radius:32px;
-
-padding:50px;
-
-box-shadow:var(--shadow);
-
-margin-bottom:35px;
 
 }
 
@@ -333,252 +395,1295 @@ content:"";
 position:absolute;
 
 top:-180px;
+
 right:-180px;
 
-width:420px;
-height:420px;
+width:380px;
+
+height:380px;
 
 border-radius:50%;
 
-background:radial-gradient(
-circle,
-rgba(212,175,55,.18),
-transparent 70%
-);
+background:rgba(212,175,55,.12);
 
-pointer-events:none;
+filter:blur(60px);
 
 }
 
-.membership-card::after{
-
-content:"";
-
-position:absolute;
-
-bottom:-200px;
-left:-200px;
-
-width:420px;
-height:420px;
-
-border-radius:50%;
-
-background:radial-gradient(
-circle,
-rgba(212,175,55,.08),
-transparent 70%
-);
-
-pointer-events:none;
-
-}
-
-.plan-label{
+.plan-tag{
 
 display:inline-flex;
 
-align-items:center;
-
-gap:8px;
-
-padding:8px 18px;
+padding:10px 18px;
 
 border-radius:999px;
 
 background:rgba(212,175,55,.12);
 
-border:1px solid rgba(212,175,55,.25);
-
-color:var(--gold-light);
+color:var(--gold);
 
 font-size:13px;
 
 font-weight:700;
 
-letter-spacing:1px;
-
-text-transform:uppercase;
-
-margin-bottom:24px;
+margin-bottom:25px;
 
 }
 
-.plan-title{
+.membership-card h2{
 
-font-size:54px;
+font-size:48px;
 
-font-weight:900;
-
-margin-bottom:12px;
-
-}
-
-.plan-title span{
-
-color:var(--gold);
-
-}
-
-.plan-description{
-
-max-width:640px;
-
-font-size:18px;
-
-line-height:1.8;
-
-color:var(--muted);
-
-margin-bottom:35px;
-
-}
-
-.pricing{
-
-display:flex;
-
-align-items:flex-end;
-
-gap:14px;
-
-margin-bottom:30px;
+margin-bottom:8px;
 
 }
 
 .price{
 
-font-size:70px;
+display:flex;
+
+align-items:flex-end;
+
+gap:12px;
+
+margin-bottom:25px;
+
+}
+
+.price h1{
+
+font-size:78px;
 
 font-weight:900;
-
-line-height:1;
 
 color:var(--gold);
 
 }
 
-.price small{
+.price span{
 
-font-size:28px;
-
-vertical-align:top;
-
-}
-
-.billing{
-
-font-size:18px;
+font-size:20px;
 
 color:var(--muted);
 
-padding-bottom:10px;
+margin-bottom:14px;
 
 }
 
-.upgrade-actions{
+.plan-description{
 
-display:flex;
-
-align-items:center;
-
-gap:18px;
-
-flex-wrap:wrap;
-
-margin-top:10px;
-
-}
-
-.upgrade-button{
-
-background:linear-gradient(
-135deg,
-var(--gold),
-var(--gold-light)
-);
-
-color:#000;
-
-padding:16px 36px;
-
-border-radius:18px;
+color:var(--muted);
 
 font-size:17px;
 
-font-weight:800;
+line-height:1.8;
 
-transition:.3s;
-
-}
-
-.upgrade-button:hover{
-
-transform:translateY(-3px);
-
-box-shadow:0 18px 40px rgba(212,175,55,.28);
+margin-bottom:35px;
 
 }
 
-.secondary-button{
+.features-list{
 
-background:transparent;
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:16px;
+
+}
+
+.feature{
+
+padding:18px;
+
+background:#171717;
 
 border:1px solid var(--border);
 
-color:white;
-
-padding:16px 28px;
-
 border-radius:18px;
+
+font-size:15px;
 
 transition:.25s;
 
 }
 
-.secondary-button:hover{
+.feature:hover{
 
 border-color:var(--gold);
 
-color:var(--gold);
+transform:translateY(-3px);
 
 }
 
-.membership-note{
+.checkout-card{
 
-margin-top:28px;
+background:#101010;
 
-font-size:14px;
+border:1px solid var(--border);
+
+border-radius:28px;
+
+padding:32px;
+
+position:sticky;
+
+top:105px;
+
+}
+
+.checkout-card h2{
+
+font-size:28px;
+
+margin-bottom:8px;
+
+}
+
+.checkout-card p{
 
 color:var(--muted);
 
-line-height:1.7;
+margin-bottom:28px;
 
 }
-/*==================================================
-FEATURE GRID
-PART 3
-==================================================*/
+
+.checkout-card label{
+
+display:block;
+
+margin-bottom:8px;
+
+font-size:14px;
+
+font-weight:600;
+
+}
+
+.checkout-card input{
+
+width:100%;
+
+height:54px;
+
+background:#171717;
+
+border:1px solid var(--border);
+
+border-radius:14px;
+
+padding:0 16px;
+
+color:white;
+
+margin-bottom:18px;
+
+}
+
+.checkout-row{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:14px;
+
+}
+
+.order-summary{
+
+margin-top:20px;
+
+padding-top:20px;
+
+border-top:1px solid var(--border);
+
+}
+
+.summary-item{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-bottom:14px;
+
+color:#d6d6d6;
+
+}
+
+.summary-total{
+
+display:flex;
+
+justify-content:space-between;
+
+font-size:19px;
+
+font-weight:800;
+
+margin-top:20px;
+
+padding-top:20px;
+
+border-top:1px solid var(--border);
+
+}
+
+.checkout-button{
+
+width:100%;
+
+height:58px;
+
+margin-top:28px;
+
+border-radius:18px;
+
+background:linear-gradient(
+
+135deg,
+
+var(--gold),
+
+var(--gold-light)
+
+);
+
+font-size:17px;
+
+font-weight:800;
+
+color:black;
+
+transition:.3s;
+
+}
+
+.checkout-button:hover{
+
+transform:translateY(-4px);
+
+box-shadow:0 18px 45px rgba(212,175,55,.35);
+
+}
+
+.secure{
+
+text-align:center;
+
+margin-top:18px;
+
+font-size:13px;
+
+color:var(--muted);
+
+}
+
+@media(max-width:1100px){
+
+.membership-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.checkout-card{
+
+position:relative;
+
+top:0;
+
+}
+
+.features-list{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+<section
+class="membership-section"
+id="pricing">
+
+<div class="membership-grid">
+
+<div class="membership-card">
+
+<div class="plan-tag">
+
+CREATOR+ MEMBERSHIP
+
+</div>
+
+<h2>
+
+Creator+
+
+</h2>
+
+<div class="price">
+
+<h1>
+
+$9.99
+
+</h1>
+
+<span>
+
+/ month</span>
+
+</div>
+
+<p class="plan-description">
+
+Everything you need to build your audience, earn money,
+grow your community, and unlock professional creator tools.
+
+</p>
+
+<div class="features-list">
+
+<div class="feature">
+
+Verification Eligibility
+
+</div>
+
+<div class="feature">
+
+Unlimited Livestreaming
+
+</div>
+
+<div class="feature">
+
+Creator Monetization
+
+</div>
+
+<div class="feature">
+
+Advanced Analytics
+
+</div>
+
+<div class="feature">
+
+Broadcast Channels
+
+</div>
+
+<div class="feature">
+
+Priority Support
+
+</div>
+
+<div class="feature">
+
+Creator Dashboard
+
+</div>
+
+<div class="feature">
+
+Early Access Features
+
+</div>
+
+</div>
+
+</div>
+
+<div class="checkout-card">
+
+<h2>
+
+Secure Checkout
+
+</h2>
+
+<p>
+
+Powered by Stripe.
+
+</p>
+
+<label>
+
+Email
+
+</label>
+
+<input
+type="email"
+placeholder="you@example.com"
+disabled>
+
+<label>
+
+Payment Method
+
+</label>
+
+<input
+type="text"
+placeholder="Visa •••• •••• •••• 4242"
+disabled>
+
+<div class="checkout-row">
+
+<div>
+
+<label>
+
+Expires
+
+</label>
+
+<input
+type="text"
+placeholder="MM / YY"
+disabled>
+
+</div>
+
+<div>
+
+<label>
+
+CVV
+
+</label>
+
+<input
+type="text"
+placeholder="123"
+disabled>
+
+</div>
+
+</div>
+
+<div class="order-summary">
+
+<div class="summary-item">
+
+<span>
+
+Creator+
+
+</span>
+
+<strong>
+
+$9.99
+
+</strong>
+
+</div>
+
+<div class="summary-item">
+
+<span>
+
+Tax
+
+</span>
+
+<strong>
+
+$0.00
+
+</strong>
+
+</div>
+
+<div class="summary-total">
+
+<span>
+
+Total Today
+
+</span>
+
+<strong>
+
+$9.99
+
+</strong>
+
+</div>
+
+</div>
+
+<button
+
+class="checkout-button"
+
+id="stripeCheckout">
+
+Continue to Stripe
+
+</button>
+
+<div class="secure">
+
+Payments are encrypted and securely processed through Stripe.
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<style>
+
+/*==========================================================
+PREMIUM FEATURES
+==========================================================*/
 
 .features-section{
 
-margin-top:45px;
+padding:110px 7%;
+
+}
+
+.section-heading{
+
+text-align:center;
+
+max-width:800px;
+
+margin:auto;
+
+margin-bottom:70px;
+
+}
+
+.section-heading h2{
+
+font-size:56px;
+
+font-weight:900;
+
+margin-bottom:20px;
+
+}
+
+.section-heading p{
+
+font-size:18px;
+
+line-height:1.9;
+
+color:var(--muted);
+
+}
+
+.features-grid{
 
 display:grid;
 
 grid-template-columns:repeat(3,1fr);
 
-gap:24px;
+gap:28px;
+
+margin-bottom:90px;
 
 }
 
 .feature-card{
 
+background:linear-gradient(
+
+180deg,
+
+#111,
+
+#0a0a0a
+
+);
+
+border:1px solid var(--border);
+
+border-radius:28px;
+
+padding:35px;
+
+transition:.35s;
+
 position:relative;
 
 overflow:hidden;
 
-background:var(--surface);
+}
+
+.feature-card::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+
+left:0;
+
+right:0;
+
+height:3px;
+
+background:linear-gradient(
+
+90deg,
+
+var(--gold),
+
+transparent
+
+);
+
+opacity:0;
+
+transition:.35s;
+
+}
+
+.feature-card:hover{
+
+transform:translateY(-8px);
+
+border-color:var(--gold);
+
+}
+
+.feature-card:hover::before{
+
+opacity:1;
+
+}
+
+.feature-icon{
+
+width:70px;
+
+height:70px;
+
+border-radius:20px;
+
+background:rgba(212,175,55,.12);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:28px;
+
+color:var(--gold);
+
+margin-bottom:28px;
+
+}
+
+.feature-card h3{
+
+font-size:26px;
+
+margin-bottom:18px;
+
+}
+
+.feature-card p{
+
+font-size:16px;
+
+line-height:1.8;
+
+color:var(--muted);
+
+}
+
+/*==========================================================
+DASHBOARD PREVIEW
+==========================================================*/
+
+.dashboard-showcase{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:50px;
+
+align-items:center;
+
+}
+
+.dashboard-text h2{
+
+font-size:52px;
+
+margin-bottom:20px;
+
+}
+
+.dashboard-text p{
+
+color:var(--muted);
+
+font-size:18px;
+
+line-height:1.9;
+
+margin-bottom:35px;
+
+}
+
+.dashboard-window{
+
+background:#101010;
+
+border:1px solid var(--border);
+
+border-radius:28px;
+
+overflow:hidden;
+
+box-shadow:0 30px 80px rgba(0,0,0,.45);
+
+}
+
+.window-header{
+
+height:60px;
+
+background:#161616;
+
+display:flex;
+
+align-items:center;
+
+padding:0 22px;
+
+gap:10px;
+
+border-bottom:1px solid var(--border);
+
+}
+
+.window-dot{
+
+width:12px;
+
+height:12px;
+
+border-radius:50%;
+
+background:var(--gold);
+
+}
+
+.dashboard-body{
+
+padding:30px;
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:20px;
+
+}
+
+.dashboard-box{
+
+background:#181818;
+
+border-radius:18px;
+
+padding:25px;
+
+border:1px solid var(--border);
+
+}
+
+.dashboard-box span{
+
+display:block;
+
+font-size:14px;
+
+color:var(--muted);
+
+margin-bottom:10px;
+
+}
+
+.dashboard-box h1{
+
+font-size:34px;
+
+}
+
+@media(max-width:1100px){
+
+.features-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.dashboard-showcase{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+<section
+class="features-section"
+id="features">
+
+<div class="section-heading">
+
+<h2>
+
+Everything Included With Creator+
+
+</h2>
+
+<p>
+
+Creator+ gives you professional tools to grow your audience,
+build your brand, and unlock premium experiences across
+Relvia Social.
+
+</p>
+
+</div>
+
+<div class="features-grid">
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+✓
+
+</div>
+
+<h3>
+
+Verification
+
+</h3>
+
+<p>
+
+Become eligible to apply for the official Relvia Verified badge.
+
+</p>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+▶
+
+</div>
+
+<h3>
+
+Livestreaming
+
+</h3>
+
+<p>
+
+Go live in high quality and connect with your audience in real time.
+
+</p>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+$
+
+</div>
+
+<h3>
+
+Monetization
+
+</h3>
+
+<p>
+
+Unlock subscriptions, future payouts, and creator earnings.
+
+</p>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+↗
+
+</div>
+
+<h3>
+
+Analytics
+
+</h3>
+
+<p>
+
+Track views, followers, engagement, audience retention,
+and account growth.
+
+</p>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+★
+
+</div>
+
+<h3>
+
+Priority Support
+
+</h3>
+
+<p>
+
+Receive faster support from the Relvia Creator Team.
+
+</p>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-icon">
+
+∞
+
+</div>
+
+<h3>
+
+Future Features
+
+</h3>
+
+<p>
+
+Every new Creator+ feature is automatically included with
+your membership.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="dashboard-showcase">
+
+<div class="dashboard-text">
+
+<h2>
+
+One Dashboard.
+
+Every Creator Tool.
+
+</h2>
+
+<p>
+
+Manage livestreams, analytics, subscriptions,
+broadcast channels, verification,
+earnings, and creator insights from one place.
+
+</p>
+
+<button
+
+class="primary-button"
+
+id="dashboardUpgrade">
+
+Unlock Creator+
+
+</button>
+
+</div>
+
+<div class="dashboard-window">
+
+<div class="window-header">
+
+<div class="window-dot"></div>
+
+<div class="window-dot"></div>
+
+<div class="window-dot"></div>
+
+</div>
+
+<div class="dashboard-body">
+
+<div class="dashboard-box">
+
+<span>
+
+Followers
+
+</span>
+
+<h1>
+
+18.4K
+
+</h1>
+
+</div>
+
+<div class="dashboard-box">
+
+<span>
+
+Views
+
+</span>
+
+<h1>
+
+2.8M
+
+</h1>
+
+</div>
+
+<div class="dashboard-box">
+
+<span>
+
+Engagement
+
+</span>
+
+<h1>
+
+96%
+
+</h1>
+
+</div>
+
+<div class="dashboard-box">
+
+<span>
+
+Revenue
+
+</span>
+
+<h1>
+
+$4,280
+
+</h1>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<style>
+
+/*==========================================================
+CREATOR PORTAL PREVIEW
+==========================================================*/
+
+.portal-section{
+
+padding:120px 7%;
+
+}
+
+.portal-layout{
+
+display:grid;
+
+grid-template-columns:380px 1fr;
+
+gap:35px;
+
+align-items:start;
+
+}
+
+.portal-sidebar{
+
+background:linear-gradient(
+
+180deg,
+
+#121212,
+
+#0b0b0b
+
+);
+
+border:1px solid var(--border);
+
+border-radius:28px;
+
+padding:32px;
+
+position:sticky;
+
+top:105px;
+
+}
+
+.portal-avatar{
+
+width:90px;
+
+height:90px;
+
+border-radius:50%;
+
+background:#1d1d1d;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:34px;
+
+font-weight:800;
+
+margin-bottom:20px;
+
+}
+
+.portal-sidebar h2{
+
+font-size:28px;
+
+margin-bottom:6px;
+
+}
+
+.portal-sidebar p{
+
+color:var(--muted);
+
+margin-bottom:28px;
+
+}
+
+.portal-status{
+
+padding:16px;
+
+border-radius:18px;
+
+background:rgba(212,175,55,.12);
+
+border:1px solid rgba(212,175,55,.25);
+
+margin-bottom:28px;
+
+}
+
+.portal-status h4{
+
+color:var(--gold);
+
+margin-bottom:8px;
+
+}
+
+.portal-menu{
+
+display:flex;
+
+flex-direction:column;
+
+gap:12px;
+
+}
+
+.portal-item{
+
+padding:16px 18px;
+
+border-radius:16px;
+
+background:#171717;
+
+border:1px solid var(--border);
+
+transition:.25s;
+
+}
+
+.portal-item:hover{
+
+border-color:var(--gold);
+
+transform:translateX(6px);
+
+}
+
+.portal-main{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:24px;
+
+}
+
+.portal-card{
+
+background:#111;
 
 border:1px solid var(--border);
 
@@ -590,86 +1695,23 @@ transition:.3s;
 
 }
 
-.feature-card::before{
+.portal-card:hover{
 
-content:"";
+transform:translateY(-6px);
 
-position:absolute;
-
-top:0;
-left:0;
-
-width:100%;
-
-height:4px;
-
-background:linear-gradient(
-90deg,
-var(--gold),
-var(--gold-light)
-);
-
-transform:scaleX(0);
-
-transform-origin:left;
-
-transition:.35s;
+border-color:var(--gold);
 
 }
 
-.feature-card:hover{
+.portal-card h3{
 
-transform:translateY(-8px);
+font-size:24px;
 
-border-color:rgba(212,175,55,.4);
-
-box-shadow:0 20px 45px rgba(0,0,0,.35);
+margin-bottom:18px;
 
 }
 
-.feature-card:hover::before{
-
-transform:scaleX(1);
-
-}
-
-.feature-icon{
-
-width:62px;
-
-height:62px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-border-radius:18px;
-
-background:rgba(212,175,55,.12);
-
-border:1px solid rgba(212,175,55,.25);
-
-font-size:28px;
-
-margin-bottom:22px;
-
-}
-
-.feature-title{
-
-font-size:23px;
-
-font-weight:800;
-
-margin-bottom:12px;
-
-}
-
-.feature-description{
-
-font-size:15px;
+.portal-card p{
 
 line-height:1.8;
 
@@ -679,47 +1721,15 @@ margin-bottom:22px;
 
 }
 
-.feature-list{
+.portal-badge{
 
-display:flex;
+display:inline-block;
 
-flex-direction:column;
+padding:8px 16px;
 
-gap:12px;
-
-}
-
-.feature-item{
-
-display:flex;
-
-align-items:center;
-
-gap:12px;
-
-font-size:14px;
-
-color:#d8d8d8;
-
-}
-
-.feature-check{
-
-width:24px;
-
-height:24px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-border-radius:50%;
+border-radius:999px;
 
 background:rgba(212,175,55,.12);
-
-border:1px solid rgba(212,175,55,.35);
 
 color:var(--gold);
 
@@ -729,1213 +1739,1298 @@ font-weight:700;
 
 }
 
-@media(max-width:1200px){
-
-.features-section{
-
-grid-template-columns:repeat(2,1fr);
-
-}
-
-}
-
-@media(max-width:780px){
-
-.features-section{
-
-grid-template-columns:1fr;
-
-}
-
-.feature-card{
-
-padding:24px;
-
-}
-
-}
-/*==================================================
-PLAN COMPARISON
-PART 4
-==================================================*/
-
-.comparison-section{
-
-margin-top:55px;
-
-}
-
-.section-heading{
-
-font-size:34px;
-
-font-weight:800;
-
-margin-bottom:12px;
-
-}
-
-.section-subtitle{
-
-color:var(--muted);
-
-font-size:16px;
-
-line-height:1.8;
-
-margin-bottom:28px;
-
-}
-
-.comparison-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-overflow:hidden;
-
-border-radius:24px;
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-}
-
-.comparison-table thead{
-
-background:linear-gradient(
-135deg,
-rgba(212,175,55,.18),
-rgba(212,175,55,.08)
-);
-
-}
-
-.comparison-table th{
-
-padding:24px;
-
-text-align:left;
-
-font-size:17px;
-
-font-weight:700;
-
-}
-
-.comparison-table th:last-child{
-
-color:var(--gold);
-
-}
-
-.comparison-table td{
-
-padding:22px 24px;
-
-border-top:1px solid var(--border);
-
-font-size:15px;
-
-}
-
-.comparison-table tr{
-
-transition:.25s;
-
-}
-
-.comparison-table tbody tr:hover{
-
-background:rgba(255,255,255,.02);
-
-}
-
-.plan-free{
-
-color:#b0b0b0;
-
-font-weight:600;
-
-}
-
-.plan-plus{
-
-color:var(--gold);
-
-font-weight:700;
-
-}
-
-.table-check{
-
-display:inline-flex;
-
-align-items:center;
-
-justify-content:center;
-
-width:28px;
-
-height:28px;
-
-border-radius:50%;
-
-background:rgba(212,175,55,.15);
-
-color:var(--gold);
-
-font-weight:800;
-
-}
-
-.table-x{
-
-display:inline-flex;
-
-align-items:center;
-
-justify-content:center;
-
-width:28px;
-
-height:28px;
-
-border-radius:50%;
-
-background:#202020;
-
-color:#777;
-
-font-weight:800;
-
-}
-
-
-
-/*==================================================
-FAQ
-==================================================*/
-
-.faq-section{
-
-margin-top:60px;
-
-}
-
-.faq-grid{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:22px;
+.portal-button{
 
 margin-top:24px;
 
-}
+width:100%;
 
-.faq-card{
+height:54px;
 
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:22px;
-
-padding:26px;
-
-transition:.25s;
-
-}
-
-.faq-card:hover{
-
-border-color:rgba(212,175,55,.4);
-
-transform:translateY(-4px);
-
-}
-
-.faq-question{
-
-font-size:18px;
-
-font-weight:700;
-
-margin-bottom:14px;
-
-}
-
-.faq-answer{
-
-font-size:15px;
-
-line-height:1.8;
-
-color:var(--muted);
-
-}
-
-
-
-/*==================================================
-BOTTOM CTA
-==================================================*/
-
-.bottom-cta{
-
-margin-top:60px;
-
-padding:50px;
-
-border-radius:30px;
+border-radius:16px;
 
 background:linear-gradient(
+
 135deg,
-rgba(212,175,55,.14),
-rgba(255,255,255,.02)
-);
 
-border:1px solid rgba(212,175,55,.25);
-
-text-align:center;
-
-}
-
-.bottom-cta h2{
-
-font-size:42px;
-
-font-weight:900;
-
-margin-bottom:16px;
-
-}
-
-.bottom-cta p{
-
-max-width:700px;
-
-margin:auto;
-
-font-size:17px;
-
-line-height:1.8;
-
-color:var(--muted);
-
-margin-bottom:30px;
-
-}
-
-.bottom-upgrade{
-
-background:linear-gradient(
-135deg,
 var(--gold),
+
 var(--gold-light)
+
 );
 
-color:#000;
-
-padding:18px 42px;
-
-border-radius:18px;
-
-font-size:17px;
+font-size:16px;
 
 font-weight:800;
+
+color:black;
 
 transition:.3s;
 
 }
 
-.bottom-upgrade:hover{
+.portal-button:hover{
 
 transform:translateY(-3px);
 
-box-shadow:0 18px 40px rgba(212,175,55,.3);
-
 }
 
+@media(max-width:1100px){
 
-
-/*==================================================
-RESPONSIVE
-==================================================*/
-
-@media(max-width:900px){
-
-.faq-grid{
+.portal-layout{
 
 grid-template-columns:1fr;
 
 }
 
-.comparison-table{
+.portal-sidebar{
 
-display:block;
+position:relative;
 
-overflow-x:auto;
-
-white-space:nowrap;
+top:0;
 
 }
 
-.bottom-cta{
+.portal-main{
 
-padding:35px 25px;
-
-}
-
-.bottom-cta h2{
-
-font-size:32px;
+grid-template-columns:1fr;
 
 }
 
 }
-</head>
 
-<body>
+</style>
 
-<nav class="topbar">
+<section class="portal-section">
 
-    <div class="brand">
+<div class="section-heading">
 
-        RELVIA <span>CREATOR+</span>
+<h2>
 
-    </div>
+Preview Your Creator+ Workspace
 
-    <div class="nav-right">
+</h2>
 
-        <button class="nav-btn">
+<p>
 
-            Home
+Everything you unlock with Creator+ lives inside one professional dashboard.
 
-        </button>
-
-        <button class="nav-btn">
-
-            Feed
-
-        </button>
-
-        <button class="nav-btn">
-
-            Profile
-
-        </button>
-
-        <div
-        class="profile-avatar"
-        id="profileAvatar">
-
-        </div>
-
-    </div>
-
-</nav>
-
-<div class="page">
-
-    <section class="hero">
-
-        <h1>
-
-            Unlock <span>Creator Plus</span>
-
-        </h1>
-
-        <p>
-
-            Creator Plus gives you access to professional creator tools,
-            verification eligibility, livestreaming, advanced analytics,
-            monetization features, and everything you need to grow your
-            audience on Relvia Social.
-
-        </p>
-
-    </section>
-
-    <section class="membership-card">
-
-        <div class="plan-label">
-
-            RELVIA PREMIUM MEMBERSHIP
-
-        </div>
-
-        <h2 class="plan-title">
-
-            Creator <span>Plus</span>
-
-        </h2>
-
-        <p class="plan-description">
-
-            Take your content to the next level with exclusive creator
-            features designed for entertainers, filmmakers, musicians,
-            studios, influencers, businesses, and digital creators.
-
-        </p>
-
-        <div class="pricing">
-
-            <div class="price">
-
-                <small>$</small>9.99
-
-            </div>
-
-            <div class="billing">
-
-                per month
-
-            </div>
-
-        </div>
-
-        <div class="upgrade-actions">
-
-            <button
-            class="upgrade-button"
-            id="upgradeButton">
-
-                Upgrade Now
-
-            </button>
-
-            <button class="secondary-button">
-
-                Learn More
-
-            </button>
-
-        </div>
-
-        <p class="membership-note">
-
-            Cancel anytime. Your Creator Plus benefits remain active until
-            the end of your current billing period.
-
-        </p>
-
-    </section>
-        <section class="features-section">
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                ✓
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Verified Badge
-
-            </h3>
-
-            <p class="feature-description">
-
-                Apply for verification to build trust with your audience and
-                stand out across Relvia Social.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Gold Verified Badge
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Identity Verification
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Higher Search Visibility
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                LIVE
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Go Live
-
-            </h3>
-
-            <p class="feature-description">
-
-                Stream live to your followers with professional livestream
-                tools and audience engagement features.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Unlimited Livestreams
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Guest Invitations
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Replay Downloads
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                📈
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Creator Analytics
-
-            </h3>
-
-            <p class="feature-description">
-
-                Understand how your content performs with detailed insights
-                and audience analytics.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Audience Growth
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Reach Statistics
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Engagement Reports
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                $
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Monetization
-
-            </h3>
-
-            <p class="feature-description">
-
-                Earn revenue through subscriptions, exclusive content, and
-                future creator monetization tools.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Creator Subscriptions
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Tips & Donations
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Revenue Dashboard
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                ★
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Premium Features
-
-            </h3>
-
-            <p class="feature-description">
-
-                Unlock additional creator tools designed to help you grow
-                faster on the Relvia platform.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Broadcast Channels
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Early Access Features
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Priority Recommendations
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
-
-                +
-
-            </div>
-
-            <h3 class="feature-title">
-
-                Priority Support
-
-            </h3>
-
-            <p class="feature-description">
-
-                Receive faster support and priority assistance whenever you
-                need help managing your creator account.
-
-            </p>
-
-            <div class="feature-list">
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Faster Responses
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Creator Assistance
-
-                </div>
-
-                <div class="feature-item">
-
-                    <div class="feature-check">✓</div>
-
-                    Beta Access
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-        <section class="comparison-section">
-
-        <h2 class="section-heading">
-
-            Compare Plans
-
-        </h2>
-
-        <p class="section-subtitle">
-
-            Creator Plus unlocks powerful tools that help you build your
-            audience, monetize your content, and grow your presence on
-            Relvia Social.
-
-        </p>
-
-        <table class="comparison-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>Feature</th>
-
-                    <th>Free</th>
-
-                    <th>Creator Plus</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                <tr>
-
-                    <td>Verified Badge Eligibility</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Go Live</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Advanced Analytics</td>
-
-                    <td>Basic</td>
-
-                    <td class="plan-plus">Advanced</td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Video Upload Quality</td>
-
-                    <td>1080p</td>
-
-                    <td class="plan-plus">4K Ultra HD</td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Maximum Video Length</td>
-
-                    <td>10 Minutes</td>
-
-                    <td class="plan-plus">Unlimited</td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Broadcast Channels</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Subscriber Content</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Creator Monetization</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Priority Support</td>
-
-                    <td>Standard</td>
-
-                    <td class="plan-plus">Priority</td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Early Access Features</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Exclusive Profile Themes</td>
-
-                    <td><span class="table-x">—</span></td>
-
-                    <td><span class="table-check">✓</span></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Creator Dashboard</td>
-
-                    <td>Basic</td>
-
-                    <td class="plan-plus">Professional</td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </section>
-        <section class="faq-section">
-
-        <h2 class="section-heading">
-
-            Frequently Asked Questions
-
-        </h2>
-
-        <p class="section-subtitle">
-
-            Everything you need to know about Creator Plus.
-
-        </p>
-
-        <div class="faq-grid">
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    What is Creator Plus?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    Creator Plus is Relvia Social's premium membership for creators. It unlocks professional tools including livestreaming, verification eligibility, advanced analytics, monetization features, and exclusive creator benefits.
-
-                </p>
-
-            </div>
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    Does Creator Plus automatically verify my account?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    No. Creator Plus gives you the ability to apply for verification. Your account must still meet Relvia's verification requirements before a badge is approved.
-
-                </p>
-
-            </div>
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    Can I cancel anytime?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    Yes. You can cancel your membership at any time. Your Creator Plus benefits remain active until the end of your current billing period.
-
-                </p>
-
-            </div>
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    When do I receive my Creator Plus features?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    Your features are unlocked immediately after your subscription is successfully activated.
-
-                </p>
-
-            </div>
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    Can businesses and studios join?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    Yes. Creator Plus is available for creators, entertainers, filmmakers, musicians, influencers, businesses, studios, nonprofits, and organizations.
-
-                </p>
-
-            </div>
-
-            <div class="faq-card">
-
-                <h3 class="faq-question">
-
-                    Will more features be added?
-
-                </h3>
-
-                <p class="faq-answer">
-
-                    Yes. Creator Plus members will receive new tools, creator features, and early access to future Relvia Social updates.
-
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <section class="bottom-cta">
-
-        <h2>
-
-            Build Your Future on Relvia
-
-        </h2>
-
-        <p>
-
-            Join thousands of creators building communities, sharing their work,
-            growing their audience, and unlocking professional creator tools with
-            Creator Plus.
-
-        </p>
-
-        <button
-        class="bottom-upgrade"
-        id="bottomUpgradeButton">
-
-            Upgrade to Creator Plus
-
-        </button>
-
-    </section>
+</p>
 
 </div>
-<script>
 
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+<div class="portal-layout">
 
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
+<div class="portal-sidebar">
+
+<div class="portal-avatar">
+
+R
+
+</div>
+
+<h2>
+
+Creator+
+
+</h2>
+
+<p>
+
+Premium Membership Active
+
+</p>
+
+<div class="portal-status">
+
+<h4>
+
+Membership Status
+
+</h4>
+
+<span>
+
+Active until August 7, 2026
+
+</span>
+
+</div>
+
+<div class="portal-menu">
+
+<div class="portal-item">
+
+Creator Dashboard
+
+</div>
+
+<div class="portal-item">
+
+Verification
+
+</div>
+
+<div class="portal-item">
+
+Livestreams
+
+</div>
+
+<div class="portal-item">
+
+Broadcast Channels
+
+</div>
+
+<div class="portal-item">
+
+Analytics
+
+</div>
+
+<div class="portal-item">
+
+Billing
+
+</div>
+
+</div>
+
+</div>
+
+<div class="portal-main">
+
+<div class="portal-card">
+
+<span class="portal-badge">
+
+VERIFICATION
+
+</span>
+
+<h3>
+
+Apply For Verification
+
+</h3>
+
+<p>
+
+Creator+ members can submit an application for the official Relvia Verified badge after meeting platform requirements.
+
+</p>
+
+<button class="portal-button">
+
+Apply
+
+</button>
+
+</div>
+
+<div class="portal-card">
+
+<span class="portal-badge">
+
+LIVE
+
+</span>
+
+<h3>
+
+Go Live
+
+</h3>
+
+<p>
+
+Broadcast to your followers in HD with professional livestream controls and moderation tools.
+
+</p>
+
+<button class="portal-button">
+
+Start Livestream
+
+</button>
+
+</div>
+
+<div class="portal-card">
+
+<span class="portal-badge">
+
+ANALYTICS
+
+</span>
+
+<h3>
+
+Professional Analytics
+
+</h3>
+
+<p>
+
+Track impressions, watch time, engagement, followers, and audience growth from one dashboard.
+
+</p>
+
+<button class="portal-button">
+
+View Analytics
+
+</button>
+
+</div>
+
+<div class="portal-card">
+
+<span class="portal-badge">
+
+CHANNELS
+
+</span>
+
+<h3>
+
+Broadcast Channels
+
+</h3>
+
+<p>
+
+Send announcements directly to your followers without creating a normal feed post.
+
+</p>
+
+<button class="portal-button">
+
+Open Channels
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<style>
+
+/*==========================================================
+MEMBERSHIP PLANS
+==========================================================*/
+
+.plans-section{
+
+padding:120px 7%;
+
+}
+
+.plans-grid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:32px;
+
+margin-top:60px;
+
+}
+
+.plan-card{
+
+position:relative;
+
+background:linear-gradient(180deg,#111,#090909);
+
+border:1px solid var(--border);
+
+border-radius:30px;
+
+padding:40px;
+
+transition:.35s;
+
+overflow:hidden;
+
+}
+
+.plan-card::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+
+left:0;
+
+right:0;
+
+height:4px;
+
+background:linear-gradient(90deg,var(--gold),transparent);
+
+opacity:0;
+
+transition:.35s;
+
+}
+
+.plan-card:hover{
+
+transform:translateY(-10px);
+
+border-color:var(--gold);
+
+}
+
+.plan-card:hover::before{
+
+opacity:1;
+
+}
+
+.plan-card.featured{
+
+border:2px solid var(--gold);
+
+transform:scale(1.03);
+
+box-shadow:0 25px 70px rgba(212,175,55,.18);
+
+}
+
+.plan-card.featured:hover{
+
+transform:scale(1.03) translateY(-10px);
+
+}
+
+.plan-badge{
+
+display:inline-block;
+
+padding:8px 18px;
+
+border-radius:999px;
+
+background:rgba(212,175,55,.12);
+
+color:var(--gold);
+
+font-size:13px;
+
+font-weight:700;
+
+margin-bottom:22px;
+
+}
+
+.plan-name{
+
+font-size:34px;
+
+font-weight:800;
+
+margin-bottom:8px;
+
+}
+
+.plan-price{
+
+display:flex;
+
+align-items:flex-end;
+
+gap:10px;
+
+margin-bottom:25px;
+
+}
+
+.plan-price h1{
+
+font-size:64px;
+
+font-weight:900;
+
+color:var(--gold);
+
+}
+
+.plan-price span{
+
+margin-bottom:10px;
+
+color:var(--muted);
+
+}
+
+.plan-list{
+
+display:flex;
+
+flex-direction:column;
+
+gap:14px;
+
+margin:30px 0;
+
+}
+
+.plan-feature{
+
+padding:14px 0;
+
+border-bottom:1px solid var(--border);
+
+color:#d5d5d5;
+
+}
+
+.plan-button{
+
+width:100%;
+
+height:56px;
+
+border-radius:16px;
+
+background:linear-gradient(135deg,var(--gold),var(--gold-light));
+
+font-size:17px;
+
+font-weight:800;
+
+color:#000;
+
+transition:.3s;
+
+}
+
+.plan-button:hover{
+
+transform:translateY(-3px);
+
+}
+
+.secondary{
+
+background:#181818;
+
+color:#fff;
+
+border:1px solid var(--border);
+
+}
+
+.save{
+
+margin-top:18px;
+
+text-align:center;
+
+color:var(--gold);
+
+font-size:14px;
+
+font-weight:700;
+
+}
+
+@media(max-width:1100px){
+
+.plans-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.plan-card.featured{
+
+transform:none;
+
+}
+
+.plan-card.featured:hover{
+
+transform:translateY(-10px);
+
+}
+
+}
+
+</style>
+
+<section class="plans-section">
+
+<div class="section-heading">
+
+<h2>
+
+Choose Your Membership
+
+</h2>
+
+<p>
+
+Whether you're just getting started or building the next big brand,
+there's a plan designed for you.
+
+</p>
+
+</div>
+
+<div class="plans-grid">
+
+<div class="plan-card">
+
+<div class="plan-badge">
+
+FREE
+
+</div>
+
+<div class="plan-name">
+
+Relvia Social
+
+</div>
+
+<div class="plan-price">
+
+<h1>$0</h1>
+
+<span>Forever</span>
+
+</div>
+
+<div class="plan-list">
+
+<div class="plan-feature">Post photos and videos</div>
+
+<div class="plan-feature">Follow creators</div>
+
+<div class="plan-feature">Like and comment</div>
+
+<div class="plan-feature">Basic messaging</div>
+
+<div class="plan-feature">Standard profile</div>
+
+</div>
+
+<button class="plan-button secondary">
+
+Current Plan
+
+</button>
+
+</div>
+
+<div class="plan-card featured">
+
+<div class="plan-badge">
+
+MOST POPULAR
+
+</div>
+
+<div class="plan-name">
+
+Creator+
+
+</div>
+
+<div class="plan-price">
+
+<h1>$9.99</h1>
+
+<span>/ month</span>
+
+</div>
+
+<div class="plan-list">
+
+<div class="plan-feature">Everything in Free</div>
+
+<div class="plan-feature">Verification Eligibility</div>
+
+<div class="plan-feature">Unlimited Livestreaming</div>
+
+<div class="plan-feature">Broadcast Channels</div>
+
+<div class="plan-feature">Advanced Analytics</div>
+
+<div class="plan-feature">Priority Support</div>
+
+<div class="plan-feature">Creator Monetization</div>
+
+<div class="plan-feature">Early Access Features</div>
+
+</div>
+
+<button
+
+class="plan-button"
+
+id="monthlyCheckout">
+
+Upgrade Now
+
+</button>
+
+</div>
+
+<div class="plan-card">
+
+<div class="plan-badge">
+
+BEST VALUE
+
+</div>
+
+<div class="plan-name">
+
+Creator+ Annual
+
+</div>
+
+<div class="plan-price">
+
+<h1>$99</h1>
+
+<span>/ year</span>
+
+</div>
+
+<div class="plan-list">
+
+<div class="plan-feature">Everything in Creator+</div>
+
+<div class="plan-feature">Save 17%</div>
+
+<div class="plan-feature">Exclusive Annual Badge</div>
+
+<div class="plan-feature">Priority Feature Access</div>
+
+<div class="plan-feature">Future Premium Features Included</div>
+
+</div>
+
+<button
+
+class="plan-button"
+
+id="annualCheckout">
+
+Choose Annual
+
+</button>
+
+<div class="save">
+
+Save nearly two months every year.
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<style>
+
+/*==========================================================
+FAQ
+==========================================================*/
+
+.faq-section{
+
+padding:120px 7%;
+
+}
+
+.faq{
+
+max-width:950px;
+
+margin:70px auto 0;
+
+display:flex;
+
+flex-direction:column;
+
+gap:20px;
+
+}
+
+.faq-item{
+
+background:#101010;
+
+border:1px solid var(--border);
+
+border-radius:22px;
+
+overflow:hidden;
+
+transition:.3s;
+
+}
+
+.faq-item.active{
+
+border-color:var(--gold);
+
+}
+
+.faq-question{
+
+width:100%;
+
+background:none;
+
+border:none;
+
+padding:26px 30px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+font-size:19px;
+
+font-weight:700;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+.faq-question span{
+
+font-size:28px;
+
+color:var(--gold);
+
+transition:.3s;
+
+}
+
+.faq-answer{
+
+max-height:0;
+
+overflow:hidden;
+
+transition:max-height .35s ease;
+
+}
+
+.faq-answer p{
+
+padding:0 30px 28px;
+
+color:var(--muted);
+
+line-height:1.8;
+
+}
+
+/*==========================================================
+FINAL CTA
+==========================================================*/
+
+.final-cta{
+
+padding:80px 7%;
+
+}
+
+.cta-card{
+
+background:linear-gradient(
+
+135deg,
+
+rgba(212,175,55,.14),
+
+#111
+
 );
 
-let currentUser = null;
-let profile = null;
+border:1px solid rgba(212,175,55,.25);
 
-async function initialize(){
+border-radius:32px;
 
-    const { data } = await supabaseClient.auth.getUser();
+padding:70px;
 
-    if(!data.user){
-
-        window.location.href="/login.html";
-        return;
-
-    }
-
-    currentUser = data.user;
-
-    await loadProfile();
+text-align:center;
 
 }
 
-async function loadProfile(){
+.cta-card h2{
 
-    const { data, error } = await supabaseClient
+font-size:56px;
 
-        .from("profiles")
-
-        .select("*")
-
-        .eq("id", currentUser.id)
-
-        .single();
-
-    if(error){
-
-        console.error(error);
-        return;
-
-    }
-
-    profile = data;
-
-    const avatar = document.getElementById("profileAvatar");
-
-    if(avatar){
-
-        if(profile.avatar_url){
-
-            avatar.innerHTML = `
-                <img
-                src="${profile.avatar_url}"
-                style="
-                width:100%;
-                height:100%;
-                object-fit:cover;
-                ">
-            `;
-
-        }else{
-
-            avatar.innerHTML = profile.display_name
-                ? profile.display_name.charAt(0).toUpperCase()
-                : "R";
-
-        }
-
-    }
+margin-bottom:20px;
 
 }
 
-document
+.cta-card p{
 
-.getElementById("upgradeButton")
+max-width:760px;
 
-.addEventListener("click",()=>{
+margin:auto;
 
-    window.location.href="/social/checkout.html";
+font-size:19px;
+
+line-height:1.9;
+
+color:var(--muted);
+
+margin-bottom:35px;
+
+}
+
+.big-button{
+
+padding:20px 60px;
+
+border-radius:18px;
+
+background:linear-gradient(
+
+135deg,
+
+var(--gold),
+
+var(--gold-light)
+
+);
+
+font-size:20px;
+
+font-weight:800;
+
+color:black;
+
+transition:.3s;
+
+}
+
+.big-button:hover{
+
+transform:translateY(-4px);
+
+box-shadow:0 25px 60px rgba(212,175,55,.35);
+
+}
+
+.small-note{
+
+margin-top:22px;
+
+color:var(--muted);
+
+}
+
+/*==========================================================
+FOOTER
+==========================================================*/
+
+footer{
+
+padding:60px 7%;
+
+border-top:1px solid var(--border);
+
+margin-top:100px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+flex-wrap:wrap;
+
+gap:25px;
+
+}
+
+.footer-logo{
+
+font-size:30px;
+
+font-weight:900;
+
+}
+
+.footer-logo span{
+
+color:var(--gold);
+
+}
+
+.footer-links{
+
+display:flex;
+
+gap:30px;
+
+flex-wrap:wrap;
+
+}
+
+.footer-links a{
+
+color:var(--muted);
+
+transition:.25s;
+
+}
+
+.footer-links a:hover{
+
+color:var(--gold);
+
+}
+
+.copyright{
+
+color:var(--muted);
+
+font-size:14px;
+
+}
+
+</style>
+
+<section
+class="faq-section"
+id="faq">
+
+<div class="section-heading">
+
+<h2>
+
+Frequently Asked Questions
+
+</h2>
+
+<p>
+
+Questions creators ask before joining Creator+.
+
+</p>
+
+</div>
+
+<div class="faq">
+
+<div class="faq-item">
+
+<button class="faq-question">
+
+What is Creator+?
+
+<span>+</span>
+
+</button>
+
+<div class="faq-answer">
+
+<p>
+
+Creator+ is Relvia Social's premium membership that unlocks livestreaming,
+verification eligibility, monetization, analytics, creator tools,
+and future premium features.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="faq-item">
+
+<button class="faq-question">
+
+Can I cancel anytime?
+
+<span>+</span>
+
+</button>
+
+<div class="faq-answer">
+
+<p>
+
+Yes. Cancel whenever you want. Your membership stays active until
+the end of your billing cycle.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="faq-item">
+
+<button class="faq-question">
+
+How do I become verified?
+
+<span>+</span>
+
+</button>
+
+<div class="faq-answer">
+
+<p>
+
+Creator+ makes you eligible to apply. Approval still depends on
+Relvia's verification requirements.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="faq-item">
+
+<button class="faq-question">
+
+When do my features unlock?
+
+<span>+</span>
+
+</button>
+
+<div class="faq-answer">
+
+<p>
+
+Immediately after Stripe confirms your payment.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section
+class="final-cta"
+id="join">
+
+<div class="cta-card">
+
+<h2>
+
+Start Creating Without Limits
+
+</h2>
+
+<p>
+
+Join Creator+ today and unlock the complete professional toolkit
+for creators, filmmakers, entertainers, musicians, organizations,
+businesses, and influencers.
+
+</p>
+
+<button
+
+class="big-button"
+
+id="joinNow">
+
+Become a Creator+
+
+</button>
+
+<div class="small-note">
+
+$9.99/month • Cancel Anytime • Secure Payments by Stripe
+
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+<div>
+
+<div class="footer-logo">
+
+RELVIA <span>CREATOR+</span>
+
+</div>
+
+<div class="copyright">
+
+© 2026 Relvia. All Rights Reserved.
+
+</div>
+
+</div>
+
+<div class="footer-links">
+
+<a href="/social/feed.html">
+
+Relvia Social
+
+</a>
+
+<a href="#pricing">
+
+Pricing
+
+</a>
+
+<a href="#faq">
+
+FAQ
+
+</a>
+
+<a href="/privacy">
+
+Privacy
+
+</a>
+
+<a href="/terms">
+
+Terms
+
+</a>
+
+</div>
+
+</footer>
+
+<script>
+
+/*=========================================
+FAQ
+=========================================*/
+
+document.querySelectorAll(".faq-question").forEach(button=>{
+
+button.onclick=()=>{
+
+const item=button.parentElement;
+
+const answer=item.querySelector(".faq-answer");
+
+const icon=button.querySelector("span");
+
+if(item.classList.contains("active")){
+
+item.classList.remove("active");
+
+answer.style.maxHeight=null;
+
+icon.innerHTML="+";
+
+}else{
+
+document.querySelectorAll(".faq-item").forEach(i=>{
+
+i.classList.remove("active");
+
+i.querySelector(".faq-answer").style.maxHeight=null;
+
+i.querySelector("span").innerHTML="+";
 
 });
 
-document
+item.classList.add("active");
 
-.getElementById("bottomUpgradeButton")
+answer.style.maxHeight=answer.scrollHeight+"px";
 
-.addEventListener("click",()=>{
+icon.innerHTML="−";
 
-    window.location.href="/social/checkout.html";
+}
+
+}
+
+/*=========================================
+STRIPE PLACEHOLDER
+=========================================*/
+
+const STRIPE_MONTHLY_LINK="https://buy.stripe.com/YOUR_MONTHLY_LINK";
+
+const STRIPE_ANNUAL_LINK="https://buy.stripe.com/YOUR_ANNUAL_LINK";
+
+document.querySelectorAll(
+
+"#joinButton,#joinNow,#stripeCheckout,#monthlyCheckout,#dashboardUpgrade"
+
+).forEach(button=>{
+
+if(button){
+
+button.onclick=()=>{
+
+window.location.href=STRIPE_MONTHLY_LINK;
+
+};
+
+}
 
 });
 
-initialize();
+const annual=document.getElementById("annualCheckout");
+
+if(annual){
+
+annual.onclick=()=>{
+
+window.location.href=STRIPE_ANNUAL_LINK;
+
+};
+
+}
+
+/*=========================================
+SUPABASE PLACEHOLDER
+=========================================*/
+
+const SUPABASE_URL="YOUR_SUPABASE_URL";
+
+const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
+
+/* Uncomment after setup
+
+const supabase=supabase.createClient(
+
+SUPABASE_URL,
+
+SUPABASE_ANON_KEY
+
+);
+
+*/
 
 </script>
 
