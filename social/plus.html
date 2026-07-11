@@ -1,270 +1,575 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1.0">
 
 <title>Relvia Creator+</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Inter",sans-serif;
-}
+/*==================================================
+RELVIA CREATOR+
+PART 1A
+==================================================*/
 
-:root{
---bg:#050505;
---surface:#101010;
---surface-light:#171717;
---border:#252525;
---gold:#d4af37;
---gold-light:#f5dc79;
---text:#ffffff;
---muted:#9d9d9d;
---radius:26px;
+*{
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
 }
 
 html{
+
 scroll-behavior:smooth;
+
 }
 
 body{
-background:var(--bg);
-color:white;
+
+background:#050505;
+
+color:#ffffff;
+
+font-family:
+
+Arial,
+
+Helvetica,
+
+sans-serif;
+
 overflow-x:hidden;
+
 }
 
-/* ==============================
+/*==================================================
+ROOT COLORS
+==================================================*/
+
+:root{
+
+--background:#050505;
+
+--surface:#101010;
+
+--surface-two:#171717;
+
+--surface-three:#1f1f1f;
+
+--border:#2d2d2d;
+
+--gold:#D4AF37;
+
+--gold-light:#F5D36B;
+
+--text:#ffffff;
+
+--muted:#9c9c9c;
+
+--radius:24px;
+
+--transition:.35s;
+
+}
+
+/*==================================================
+GLOBAL
+==================================================*/
+
+section{
+
+padding:110px 7%;
+
+position:relative;
+
+}
+
+button{
+
+border:none;
+
+cursor:pointer;
+
+transition:var(--transition);
+
+}
+
+a{
+
+text-decoration:none;
+
+color:inherit;
+
+}
+
+img{
+
+display:block;
+
+max-width:100%;
+
+}
+
+/*==================================================
+BACKGROUND
+==================================================*/
+
+.background{
+
+position:fixed;
+
+inset:0;
+
+overflow:hidden;
+
+z-index:-1;
+
+background:
+
+radial-gradient(circle at top,#242424 0%,#050505 55%);
+
+}
+
+.blur-one{
+
+position:absolute;
+
+width:700px;
+
+height:700px;
+
+border-radius:50%;
+
+background:
+
+rgba(212,175,55,.08);
+
+filter:blur(100px);
+
+top:-250px;
+
+left:-120px;
+
+animation:
+
+floatOne 14s ease-in-out infinite;
+
+}
+
+.blur-two{
+
+position:absolute;
+
+width:550px;
+
+height:550px;
+
+border-radius:50%;
+
+background:
+
+rgba(212,175,55,.06);
+
+right:-180px;
+
+bottom:-150px;
+
+filter:blur(90px);
+
+animation:
+
+floatTwo 18s ease-in-out infinite;
+
+}
+
+@keyframes floatOne{
+
+0%{
+
+transform:
+
+translateY(0px)
+
+translateX(0px);
+
+}
+
+50%{
+
+transform:
+
+translateY(80px)
+
+translateX(40px);
+
+}
+
+100%{
+
+transform:
+
+translateY(0px)
+
+translateX(0px);
+
+}
+
+}
+
+@keyframes floatTwo{
+
+0%{
+
+transform:
+
+translateY(0px)
+
+translateX(0px);
+
+}
+
+50%{
+
+transform:
+
+translateY(-70px)
+
+translateX(-40px);
+
+}
+
+100%{
+
+transform:
+
+translateY(0px)
+
+translateX(0px);
+
+}
+
+}
+
+/*==================================================
 NAVIGATION
-============================== */
+==================================================*/
 
 nav{
+
 position:fixed;
+
 top:0;
+
 left:0;
+
 right:0;
+
 height:82px;
+
 display:flex;
-justify-content:space-between;
+
 align-items:center;
-padding:0 50px;
-background:rgba(5,5,5,.88);
-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--border);
-z-index:99999;
+
+justify-content:space-between;
+
+padding:0 60px;
+
+background:
+
+rgba(5,5,5,.82);
+
+backdrop-filter:
+
+blur(18px);
+
+border-bottom:
+
+1px solid var(--border);
+
+z-index:9999;
+
 }
 
 .logo{
-font-size:32px;
-font-weight:900;
-letter-spacing:3px;
+
+font-size:28px;
+
+font-weight:800;
+
+letter-spacing:2px;
+
 }
 
 .logo span{
+
 color:var(--gold);
+
 }
 
-.nav-links{
+.navigation{
+
 display:flex;
+
 align-items:center;
-gap:18px;
+
+gap:14px;
+
 }
 
-.nav-links a{
-text-decoration:none;
-color:white;
-padding:13px 22px;
-border-radius:999px;
-transition:.3s;
-font-weight:600;
+.navigation a{
+
+padding:12px 18px;
+
+border-radius:14px;
+
+font-size:15px;
+
+transition:var(--transition);
+
 }
 
-.nav-links a:hover{
-background:var(--surface-light);
+.navigation a:hover{
+
+background:
+
+var(--surface-two);
+
 }
 
-.join-nav{
-background:linear-gradient(
+.join-button{
+
+background:
+
+linear-gradient(
+
 135deg,
+
 var(--gold),
+
 var(--gold-light)
+
 );
-color:black !important;
-font-weight:800;
+
+color:#000;
+
+font-weight:700;
+
+padding:13px 22px;
+
+border-radius:14px;
+
 }
 
-/* ==============================
+/*==================================================
 HERO
-============================== */
+==================================================*/
 
 .hero{
-position:relative;
+
 min-height:100vh;
-display:flex;
+
+display:grid;
+
+grid-template-columns:
+
+1.1fr
+
+.9fr;
+
 align-items:center;
-justify-content:center;
-padding:140px 40px 90px;
-overflow:hidden;
+
+gap:70px;
+
+padding-top:120px;
+
 }
 
-.hero::before{
-content:"";
-position:absolute;
-width:850px;
-height:850px;
-background:radial-gradient(
-circle,
-rgba(212,175,55,.28),
-transparent 70%
-);
-filter:blur(80px);
-animation:glow 8s infinite alternate;
-}
+.hero-left{
 
-@keyframes glow{
-from{
-transform:scale(.9);
-}
-to{
-transform:scale(1.15);
-}
-}
-
-.hero-content{
 position:relative;
-z-index:10;
-max-width:760px;
-text-align:center;
+
+z-index:2;
+
 }
 
-.hero-badge{
+.hero-label{
+
 display:inline-flex;
-align-items:center;
-gap:10px;
-padding:10px 22px;
-background:#121212;
-border:1px solid var(--border);
+
+padding:10px 18px;
+
 border-radius:999px;
-margin-bottom:28px;
-font-size:14px;
+
+background:
+
+rgba(212,175,55,.12);
+
+border:
+
+1px solid
+
+rgba(212,175,55,.2);
+
 color:var(--gold);
+
+font-size:13px;
+
 font-weight:700;
+
+margin-bottom:26px;
+
 }
 
 .hero h1{
-font-size:72px;
-font-weight:900;
+
+font-size:74px;
+
 line-height:1.05;
+
+font-weight:800;
+
 margin-bottom:24px;
+
+max-width:760px;
+
 }
 
 .hero h1 span{
+
 color:var(--gold);
+
 }
 
 .hero p{
+
 font-size:20px;
-line-height:1.9;
+
+line-height:1.8;
+
 color:var(--muted);
-margin:auto;
+
 max-width:680px;
+
 margin-bottom:40px;
+
 }
 
 .hero-buttons{
+
 display:flex;
-justify-content:center;
+
 gap:18px;
+
 flex-wrap:wrap;
+
 }
 
 .primary-button{
-background:linear-gradient(
-135deg,
-var(--gold),
-var(--gold-light)
-);
-color:black;
-padding:18px 40px;
-border:none;
+
+height:58px;
+
+padding:0 34px;
+
 border-radius:18px;
-font-size:18px;
-font-weight:800;
-cursor:pointer;
-transition:.3s;
+
+background:
+
+linear-gradient(
+
+135deg,
+
+var(--gold),
+
+var(--gold-light)
+
+);
+
+font-size:16px;
+
+font-weight:700;
+
+color:#000;
+
 }
 
 .primary-button:hover{
-transform:translateY(-4px);
-box-shadow:0 18px 45px rgba(212,175,55,.35);
+
+transform:
+
+translateY(-4px);
+
+box-shadow:
+
+0 20px 45px
+
+rgba(212,175,55,.25);
+
 }
 
 .secondary-button{
-background:transparent;
-border:1px solid var(--border);
-color:white;
-padding:18px 34px;
+
+height:58px;
+
+padding:0 34px;
+
+background:
+
+transparent;
+
+border:
+
+1px solid
+
+var(--border);
+
 border-radius:18px;
-font-size:18px;
-cursor:pointer;
-transition:.3s;
+
+color:#fff;
+
 }
 
 .secondary-button:hover{
-border-color:var(--gold);
-color:var(--gold);
-}
 
-/* ==============================
-RESPONSIVE
-============================== */
+border-color:
 
-@media(max-width:900px){
+var(--gold);
 
-nav{
-padding:0 18px;
-}
+color:
 
-.nav-links{
-display:none;
-}
-
-.hero h1{
-font-size:52px;
-}
-
-.hero p{
-font-size:17px;
-}
-
-.hero-buttons{
-flex-direction:column;
-}
-
-.primary-button,
-.secondary-button{
-width:100%;
-}
+var(--gold);
 
 }
+
+/*==================================================
+PART 1A ENDS HERE
+==================================================*/
 
 </style>
 
 </head>
 
 <body>
+
+<div class="background">
+
+<div class="blur-one"></div>
+
+<div class="blur-two"></div>
+
+</div>
 
 <nav>
 
@@ -274,19 +579,33 @@ RELVIA <span>CREATOR+</span>
 
 </div>
 
-<div class="nav-links">
+<div class="navigation">
 
-<a href="/social/feed.html">Feed</a>
+<a href="#features">
 
-<a href="#features">Features</a>
+Features
 
-<a href="#pricing">Pricing</a>
+</a>
 
-<a href="#faq">FAQ</a>
+<a href="#pricing">
 
-<a href="#join" class="join-nav">
+Pricing
 
-Join Creator+
+</a>
+
+<a href="#faq">
+
+FAQ
+
+</a>
+
+<a
+
+href="#checkout"
+
+class="join-button">
+
+Become a Member
 
 </a>
 
@@ -296,34 +615,33 @@ Join Creator+
 
 <section class="hero">
 
-<div class="hero-content">
+<div class="hero-left">
 
-<div class="hero-badge">
+<div class="hero-label">
 
-RELVIA SOCIAL PREMIUM MEMBERSHIP
+PREMIUM MEMBERSHIP
 
 </div>
 
 <h1>
 
-Build Your Audience.<br>
+Create Without
 
-<span>Earn More.</span>
+<span>Limits.</span>
 
 </h1>
 
 <p>
 
-Creator+ gives you everything you need to grow on Relvia Social.
-Unlock livestreaming, monetization, verification eligibility,
-professional analytics, exclusive creator tools, and priority
-support—all with one premium membership.
+Unlock advanced creator tools, verification eligibility,
+livestreaming, monetization, analytics, exclusive features,
+and everything you need to grow on Relvia Social.
 
 </p>
 
 <div class="hero-buttons">
 
-<button class="primary-button" id="joinButton">
+<button class="primary-button">
 
 Join Creator+
 
@@ -331,110 +649,197 @@ Join Creator+
 
 <button class="secondary-button">
 
-See Everything Included
+Learn More
 
 </button>
 
 </div>
 
 </div>
+<div class="hero-right">
+
+    <div class="creator-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h2>Creator+</h2>
+
+                <p>Premium Membership</p>
+
+            </div>
+
+            <div class="status-badge">
+
+                Active
+
+            </div>
+
+        </div>
+
+        <div class="price">
+
+            <h1>$9.99</h1>
+
+            <span>/month</span>
+
+        </div>
+
+        <div class="feature-list">
+
+            <div class="feature-row">
+
+                <span>Verification</span>
+
+                <strong>Eligible</strong>
+
+            </div>
+
+            <div class="feature-row">
+
+                <span>Livestreaming</span>
+
+                <strong>Unlimited</strong>
+
+            </div>
+
+            <div class="feature-row">
+
+                <span>Analytics</span>
+
+                <strong>Advanced</strong>
+
+            </div>
+
+            <div class="feature-row">
+
+                <span>Broadcast Channels</span>
+
+                <strong>Included</strong>
+
+            </div>
+
+            <div class="feature-row">
+
+                <span>Creator Support</span>
+
+                <strong>Priority</strong>
+
+            </div>
+
+        </div>
+
+        <div class="secure-box">
+
+            <h4>Secure Checkout</h4>
+
+            <p>
+
+                Payments are encrypted using industry-standard SSL encryption and securely processed through Stripe. Relvia never stores your complete card information.
+
+            </p>
+
+            <div class="trust-grid">
+
+                <div>256-bit SSL</div>
+
+                <div>PCI DSS</div>
+
+                <div>Stripe</div>
+
+                <div>Fraud Protection</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 </section>
-<style>
+.hero-right{
 
-/*==========================================================
-MEMBERSHIP + CHECKOUT
-==========================================================*/
+display:flex;
 
-.membership-section{
+justify-content:center;
 
-padding:40px 7% 100px;
+align-items:center;
 
 }
 
-.membership-grid{
+.creator-card{
 
-display:grid;
+width:430px;
 
-grid-template-columns:1fr 430px;
+background:#111111;
 
-gap:35px;
-
-align-items:start;
-
-}
-
-.membership-card{
-
-background:linear-gradient(
-
-180deg,
-
-#121212,
-
-#0b0b0b
-
-);
-
-border:1px solid #282828;
+border:1px solid #2a2a2a;
 
 border-radius:28px;
 
-padding:40px;
+padding:32px;
 
 position:relative;
 
-overflow:hidden;
+transition:.35s;
+
+box-shadow:0 30px 70px rgba(0,0,0,.45);
 
 }
 
-.membership-card::before{
+.creator-card:hover{
 
-content:"";
+transform:translateY(-8px);
 
-position:absolute;
+border-color:#D4AF37;
 
-top:-180px;
-
-right:-180px;
-
-width:380px;
-
-height:380px;
-
-border-radius:50%;
-
-background:rgba(212,175,55,.12);
-
-filter:blur(60px);
+box-shadow:0 35px 90px rgba(212,175,55,.18);
 
 }
 
-.plan-tag{
+.card-header{
 
-display:inline-flex;
+display:flex;
 
-padding:10px 18px;
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:28px;
+
+}
+
+.card-header h2{
+
+font-size:30px;
+
+margin-bottom:4px;
+
+}
+
+.card-header p{
+
+font-size:14px;
+
+color:#9c9c9c;
+
+}
+
+.status-badge{
+
+padding:8px 16px;
 
 border-radius:999px;
 
 background:rgba(212,175,55,.12);
 
-color:var(--gold);
+color:#D4AF37;
 
 font-size:13px;
 
-font-weight:700;
-
-margin-bottom:25px;
-
-}
-
-.membership-card h2{
-
-font-size:48px;
-
-margin-bottom:8px;
+font-weight:bold;
 
 }
 
@@ -444,585 +849,222 @@ display:flex;
 
 align-items:flex-end;
 
-gap:12px;
+gap:10px;
 
-margin-bottom:25px;
+margin-bottom:30px;
 
 }
 
 .price h1{
 
-font-size:78px;
+font-size:56px;
 
-font-weight:900;
-
-color:var(--gold);
+color:#D4AF37;
 
 }
 
 .price span{
 
-font-size:20px;
+margin-bottom:10px;
 
-color:var(--muted);
-
-margin-bottom:14px;
+color:#999;
 
 }
 
-.plan-description{
-
-color:var(--muted);
-
-font-size:17px;
-
-line-height:1.8;
-
-margin-bottom:35px;
-
-}
-
-.features-list{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:16px;
-
-}
-
-.feature{
-
-padding:18px;
-
-background:#171717;
-
-border:1px solid var(--border);
-
-border-radius:18px;
-
-font-size:15px;
-
-transition:.25s;
-
-}
-
-.feature:hover{
-
-border-color:var(--gold);
-
-transform:translateY(-3px);
-
-}
-
-.checkout-card{
-
-background:#101010;
-
-border:1px solid var(--border);
-
-border-radius:28px;
-
-padding:32px;
-
-position:sticky;
-
-top:105px;
-
-}
-
-.checkout-card h2{
-
-font-size:28px;
-
-margin-bottom:8px;
-
-}
-
-.checkout-card p{
-
-color:var(--muted);
+.feature-list{
 
 margin-bottom:28px;
 
 }
 
-.checkout-card label{
+.feature-row{
 
-display:block;
+display:flex;
 
-margin-bottom:8px;
+justify-content:space-between;
 
-font-size:14px;
+padding:16px 0;
 
-font-weight:600;
+border-bottom:1px solid rgba(255,255,255,.06);
 
 }
 
-.checkout-card input{
+.feature-row span{
 
-width:100%;
+color:#9c9c9c;
 
-height:54px;
+}
+
+.secure-box{
 
 background:#171717;
 
-border:1px solid var(--border);
+border:1px solid rgba(212,175,55,.15);
 
-border-radius:14px;
+border-radius:18px;
 
-padding:0 16px;
+padding:20px;
 
-color:white;
+}
+
+.secure-box h4{
+
+margin-bottom:12px;
+
+color:#D4AF37;
+
+}
+
+.secure-box p{
+
+font-size:14px;
+
+line-height:1.7;
+
+color:#9c9c9c;
 
 margin-bottom:18px;
 
 }
 
-.checkout-row{
+.trust-grid{
 
 display:grid;
 
-grid-template-columns:1fr 1fr;
+grid-template-columns:repeat(2,1fr);
 
-gap:14px;
-
-}
-
-.order-summary{
-
-margin-top:20px;
-
-padding-top:20px;
-
-border-top:1px solid var(--border);
+gap:10px;
 
 }
 
-.summary-item{
+.trust-grid div{
 
-display:flex;
+background:#202020;
 
-justify-content:space-between;
+padding:12px;
 
-margin-bottom:14px;
-
-color:#d6d6d6;
-
-}
-
-.summary-total{
-
-display:flex;
-
-justify-content:space-between;
-
-font-size:19px;
-
-font-weight:800;
-
-margin-top:20px;
-
-padding-top:20px;
-
-border-top:1px solid var(--border);
-
-}
-
-.checkout-button{
-
-width:100%;
-
-height:58px;
-
-margin-top:28px;
-
-border-radius:18px;
-
-background:linear-gradient(
-
-135deg,
-
-var(--gold),
-
-var(--gold-light)
-
-);
-
-font-size:17px;
-
-font-weight:800;
-
-color:black;
-
-transition:.3s;
-
-}
-
-.checkout-button:hover{
-
-transform:translateY(-4px);
-
-box-shadow:0 18px 45px rgba(212,175,55,.35);
-
-}
-
-.secure{
+border-radius:12px;
 
 text-align:center;
-
-margin-top:18px;
 
 font-size:13px;
 
-color:var(--muted);
+border:1px solid #2a2a2a;
+
+color:#ffffff;
 
 }
 
-@media(max-width:1100px){
+@media(max-width:1000px){
 
-.membership-grid{
+.hero{
 
 grid-template-columns:1fr;
-
-}
-
-.checkout-card{
-
-position:relative;
-
-top:0;
-
-}
-
-.features-list{
-
-grid-template-columns:1fr;
-
-}
-
-}
-
-</style>
-
-<section
-class="membership-section"
-id="pricing">
-
-<div class="membership-grid">
-
-<div class="membership-card">
-
-<div class="plan-tag">
-
-CREATOR+ MEMBERSHIP
-
-</div>
-
-<h2>
-
-Creator+
-
-</h2>
-
-<div class="price">
-
-<h1>
-
-$9.99
-
-</h1>
-
-<span>
-
-/ month</span>
-
-</div>
-
-<p class="plan-description">
-
-Everything you need to build your audience, earn money,
-grow your community, and unlock professional creator tools.
-
-</p>
-
-<div class="features-list">
-
-<div class="feature">
-
-Verification Eligibility
-
-</div>
-
-<div class="feature">
-
-Unlimited Livestreaming
-
-</div>
-
-<div class="feature">
-
-Creator Monetization
-
-</div>
-
-<div class="feature">
-
-Advanced Analytics
-
-</div>
-
-<div class="feature">
-
-Broadcast Channels
-
-</div>
-
-<div class="feature">
-
-Priority Support
-
-</div>
-
-<div class="feature">
-
-Creator Dashboard
-
-</div>
-
-<div class="feature">
-
-Early Access Features
-
-</div>
-
-</div>
-
-</div>
-
-<div class="checkout-card">
-
-<h2>
-
-Secure Checkout
-
-</h2>
-
-<p>
-
-Powered by Stripe.
-
-</p>
-
-<label>
-
-Email
-
-</label>
-
-<input
-type="email"
-placeholder="you@example.com"
-disabled>
-
-<label>
-
-Payment Method
-
-</label>
-
-<input
-type="text"
-placeholder="Visa •••• •••• •••• 4242"
-disabled>
-
-<div class="checkout-row">
-
-<div>
-
-<label>
-
-Expires
-
-</label>
-
-<input
-type="text"
-placeholder="MM / YY"
-disabled>
-
-</div>
-
-<div>
-
-<label>
-
-CVV
-
-</label>
-
-<input
-type="text"
-placeholder="123"
-disabled>
-
-</div>
-
-</div>
-
-<div class="order-summary">
-
-<div class="summary-item">
-
-<span>
-
-Creator+
-
-</span>
-
-<strong>
-
-$9.99
-
-</strong>
-
-</div>
-
-<div class="summary-item">
-
-<span>
-
-Tax
-
-</span>
-
-<strong>
-
-$0.00
-
-</strong>
-
-</div>
-
-<div class="summary-total">
-
-<span>
-
-Total Today
-
-</span>
-
-<strong>
-
-$9.99
-
-</strong>
-
-</div>
-
-</div>
-
-<button
-
-class="checkout-button"
-
-id="stripeCheckout">
-
-Continue to Stripe
-
-</button>
-
-<div class="secure">
-
-Payments are encrypted and securely processed through Stripe.
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-<style>
-
-/*==========================================================
-PREMIUM FEATURES
-==========================================================*/
-
-.features-section{
-
-padding:110px 7%;
-
-}
-
-.section-heading{
 
 text-align:center;
 
-max-width:800px;
+}
 
-margin:auto;
+.hero-left{
 
-margin-bottom:70px;
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
 
 }
 
-.section-heading h2{
+.creator-card{
 
-font-size:56px;
+width:100%;
 
-font-weight:900;
+max-width:460px;
+
+margin-top:40px;
+
+}
+
+}
+<!-- ==========================================
+FEATURES
+========================================== -->
+
+<style>
+
+.features{
+
+padding:120px 7%;
+
+}
+
+.features-header{
+
+text-align:center;
+
+max-width:760px;
+
+margin:0 auto 70px;
+
+}
+
+.features-header h2{
+
+font-size:54px;
 
 margin-bottom:20px;
 
 }
 
-.section-heading p{
+.features-header p{
 
 font-size:18px;
 
-line-height:1.9;
+color:#9c9c9c;
 
-color:var(--muted);
+line-height:1.8;
 
 }
 
-.features-grid{
+.feature-grid{
 
 display:grid;
 
-grid-template-columns:repeat(3,1fr);
+grid-template-columns:repeat(2,1fr);
 
-gap:28px;
-
-margin-bottom:90px;
+gap:30px;
 
 }
 
 .feature-card{
 
-background:linear-gradient(
+position:relative;
 
-180deg,
+background:#111;
 
-#111,
-
-#0a0a0a
-
-);
-
-border:1px solid var(--border);
+border:1px solid #2a2a2a;
 
 border-radius:28px;
 
 padding:35px;
 
+overflow:hidden;
+
 transition:.35s;
 
-position:relative;
+cursor:pointer;
 
-overflow:hidden;
+min-height:320px;
+
+}
+
+.feature-card:hover{
+
+transform:translateY(-8px);
+
+border-color:#D4AF37;
+
+box-shadow:0 25px 60px rgba(212,175,55,.12);
 
 }
 
@@ -1032,696 +1074,31 @@ content:"";
 
 position:absolute;
 
-top:0;
+width:250px;
 
-left:0;
+height:250px;
 
-right:0;
+background:rgba(212,175,55,.08);
 
-height:3px;
+border-radius:50%;
 
-background:linear-gradient(
+top:-120px;
 
-90deg,
+right:-120px;
 
-var(--gold),
-
-transparent
-
-);
-
-opacity:0;
+filter:blur(40px);
 
 transition:.35s;
 
 }
 
-.feature-card:hover{
-
-transform:translateY(-8px);
-
-border-color:var(--gold);
-
-}
-
 .feature-card:hover::before{
 
-opacity:1;
+transform:scale(1.4);
 
 }
 
-.feature-icon{
-
-width:70px;
-
-height:70px;
-
-border-radius:20px;
-
-background:rgba(212,175,55,.12);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:28px;
-
-color:var(--gold);
-
-margin-bottom:28px;
-
-}
-
-.feature-card h3{
-
-font-size:26px;
-
-margin-bottom:18px;
-
-}
-
-.feature-card p{
-
-font-size:16px;
-
-line-height:1.8;
-
-color:var(--muted);
-
-}
-
-/*==========================================================
-DASHBOARD PREVIEW
-==========================================================*/
-
-.dashboard-showcase{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:50px;
-
-align-items:center;
-
-}
-
-.dashboard-text h2{
-
-font-size:52px;
-
-margin-bottom:20px;
-
-}
-
-.dashboard-text p{
-
-color:var(--muted);
-
-font-size:18px;
-
-line-height:1.9;
-
-margin-bottom:35px;
-
-}
-
-.dashboard-window{
-
-background:#101010;
-
-border:1px solid var(--border);
-
-border-radius:28px;
-
-overflow:hidden;
-
-box-shadow:0 30px 80px rgba(0,0,0,.45);
-
-}
-
-.window-header{
-
-height:60px;
-
-background:#161616;
-
-display:flex;
-
-align-items:center;
-
-padding:0 22px;
-
-gap:10px;
-
-border-bottom:1px solid var(--border);
-
-}
-
-.window-dot{
-
-width:12px;
-
-height:12px;
-
-border-radius:50%;
-
-background:var(--gold);
-
-}
-
-.dashboard-body{
-
-padding:30px;
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:20px;
-
-}
-
-.dashboard-box{
-
-background:#181818;
-
-border-radius:18px;
-
-padding:25px;
-
-border:1px solid var(--border);
-
-}
-
-.dashboard-box span{
-
-display:block;
-
-font-size:14px;
-
-color:var(--muted);
-
-margin-bottom:10px;
-
-}
-
-.dashboard-box h1{
-
-font-size:34px;
-
-}
-
-@media(max-width:1100px){
-
-.features-grid{
-
-grid-template-columns:1fr;
-
-}
-
-.dashboard-showcase{
-
-grid-template-columns:1fr;
-
-}
-
-}
-
-</style>
-
-<section
-class="features-section"
-id="features">
-
-<div class="section-heading">
-
-<h2>
-
-Everything Included With Creator+
-
-</h2>
-
-<p>
-
-Creator+ gives you professional tools to grow your audience,
-build your brand, and unlock premium experiences across
-Relvia Social.
-
-</p>
-
-</div>
-
-<div class="features-grid">
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-✓
-
-</div>
-
-<h3>
-
-Verification
-
-</h3>
-
-<p>
-
-Become eligible to apply for the official Relvia Verified badge.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-▶
-
-</div>
-
-<h3>
-
-Livestreaming
-
-</h3>
-
-<p>
-
-Go live in high quality and connect with your audience in real time.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-$
-
-</div>
-
-<h3>
-
-Monetization
-
-</h3>
-
-<p>
-
-Unlock subscriptions, future payouts, and creator earnings.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-↗
-
-</div>
-
-<h3>
-
-Analytics
-
-</h3>
-
-<p>
-
-Track views, followers, engagement, audience retention,
-and account growth.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-★
-
-</div>
-
-<h3>
-
-Priority Support
-
-</h3>
-
-<p>
-
-Receive faster support from the Relvia Creator Team.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<div class="feature-icon">
-
-∞
-
-</div>
-
-<h3>
-
-Future Features
-
-</h3>
-
-<p>
-
-Every new Creator+ feature is automatically included with
-your membership.
-
-</p>
-
-</div>
-
-</div>
-
-<div class="dashboard-showcase">
-
-<div class="dashboard-text">
-
-<h2>
-
-One Dashboard.
-
-Every Creator Tool.
-
-</h2>
-
-<p>
-
-Manage livestreams, analytics, subscriptions,
-broadcast channels, verification,
-earnings, and creator insights from one place.
-
-</p>
-
-<button
-
-class="primary-button"
-
-id="dashboardUpgrade">
-
-Unlock Creator+
-
-</button>
-
-</div>
-
-<div class="dashboard-window">
-
-<div class="window-header">
-
-<div class="window-dot"></div>
-
-<div class="window-dot"></div>
-
-<div class="window-dot"></div>
-
-</div>
-
-<div class="dashboard-body">
-
-<div class="dashboard-box">
-
-<span>
-
-Followers
-
-</span>
-
-<h1>
-
-18.4K
-
-</h1>
-
-</div>
-
-<div class="dashboard-box">
-
-<span>
-
-Views
-
-</span>
-
-<h1>
-
-2.8M
-
-</h1>
-
-</div>
-
-<div class="dashboard-box">
-
-<span>
-
-Engagement
-
-</span>
-
-<h1>
-
-96%
-
-</h1>
-
-</div>
-
-<div class="dashboard-box">
-
-<span>
-
-Revenue
-
-</span>
-
-<h1>
-
-$4,280
-
-</h1>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-<style>
-
-/*==========================================================
-CREATOR PORTAL PREVIEW
-==========================================================*/
-
-.portal-section{
-
-padding:120px 7%;
-
-}
-
-.portal-layout{
-
-display:grid;
-
-grid-template-columns:380px 1fr;
-
-gap:35px;
-
-align-items:start;
-
-}
-
-.portal-sidebar{
-
-background:linear-gradient(
-
-180deg,
-
-#121212,
-
-#0b0b0b
-
-);
-
-border:1px solid var(--border);
-
-border-radius:28px;
-
-padding:32px;
-
-position:sticky;
-
-top:105px;
-
-}
-
-.portal-avatar{
-
-width:90px;
-
-height:90px;
-
-border-radius:50%;
-
-background:#1d1d1d;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:34px;
-
-font-weight:800;
-
-margin-bottom:20px;
-
-}
-
-.portal-sidebar h2{
-
-font-size:28px;
-
-margin-bottom:6px;
-
-}
-
-.portal-sidebar p{
-
-color:var(--muted);
-
-margin-bottom:28px;
-
-}
-
-.portal-status{
-
-padding:16px;
-
-border-radius:18px;
-
-background:rgba(212,175,55,.12);
-
-border:1px solid rgba(212,175,55,.25);
-
-margin-bottom:28px;
-
-}
-
-.portal-status h4{
-
-color:var(--gold);
-
-margin-bottom:8px;
-
-}
-
-.portal-menu{
-
-display:flex;
-
-flex-direction:column;
-
-gap:12px;
-
-}
-
-.portal-item{
-
-padding:16px 18px;
-
-border-radius:16px;
-
-background:#171717;
-
-border:1px solid var(--border);
-
-transition:.25s;
-
-}
-
-.portal-item:hover{
-
-border-color:var(--gold);
-
-transform:translateX(6px);
-
-}
-
-.portal-main{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:24px;
-
-}
-
-.portal-card{
-
-background:#111;
-
-border:1px solid var(--border);
-
-border-radius:24px;
-
-padding:28px;
-
-transition:.3s;
-
-}
-
-.portal-card:hover{
-
-transform:translateY(-6px);
-
-border-color:var(--gold);
-
-}
-
-.portal-card h3{
-
-font-size:24px;
-
-margin-bottom:18px;
-
-}
-
-.portal-card p{
-
-line-height:1.8;
-
-color:var(--muted);
-
-margin-bottom:22px;
-
-}
-
-.portal-badge{
+.feature-tag{
 
 display:inline-block;
 
@@ -1731,69 +1108,95 @@ border-radius:999px;
 
 background:rgba(212,175,55,.12);
 
-color:var(--gold);
+color:#D4AF37;
 
 font-size:13px;
 
-font-weight:700;
+font-weight:bold;
+
+margin-bottom:25px;
 
 }
 
-.portal-button{
+.feature-card h3{
 
-margin-top:24px;
+font-size:34px;
 
-width:100%;
-
-height:54px;
-
-border-radius:16px;
-
-background:linear-gradient(
-
-135deg,
-
-var(--gold),
-
-var(--gold-light)
-
-);
-
-font-size:16px;
-
-font-weight:800;
-
-color:black;
-
-transition:.3s;
+margin-bottom:18px;
 
 }
 
-.portal-button:hover{
+.feature-card p{
 
-transform:translateY(-3px);
+color:#9c9c9c;
+
+line-height:1.8;
+
+margin-bottom:30px;
 
 }
 
-@media(max-width:1100px){
+.preview-box{
 
-.portal-layout{
+background:#181818;
+
+border-radius:18px;
+
+padding:22px;
+
+border:1px solid #2a2a2a;
+
+transition:.35s;
+
+}
+
+.preview-box:hover{
+
+border-color:#D4AF37;
+
+}
+
+.preview-title{
+
+font-size:15px;
+
+color:#9c9c9c;
+
+margin-bottom:14px;
+
+}
+
+.preview-number{
+
+font-size:42px;
+
+font-weight:bold;
+
+color:#D4AF37;
+
+}
+
+.preview-small{
+
+margin-top:12px;
+
+font-size:14px;
+
+color:#9c9c9c;
+
+}
+
+@media(max-width:1000px){
+
+.feature-grid{
 
 grid-template-columns:1fr;
 
 }
 
-.portal-sidebar{
+.features-header h2{
 
-position:relative;
-
-top:0;
-
-}
-
-.portal-main{
-
-grid-template-columns:1fr;
+font-size:40px;
 
 }
 
@@ -1801,141 +1204,80 @@ grid-template-columns:1fr;
 
 </style>
 
-<section class="portal-section">
+<section class="features">
 
-<div class="section-heading">
+<div class="features-header">
 
 <h2>
 
-Preview Your Creator+ Workspace
+Everything You Need To Grow
 
 </h2>
 
 <p>
 
-Everything you unlock with Creator+ lives inside one professional dashboard.
+Creator+ unlocks powerful tools designed for creators,
+filmmakers, entertainers, businesses, and organizations
+building their community on Relvia Social.
 
 </p>
 
 </div>
 
-<div class="portal-layout">
+<div class="feature-grid">
 
-<div class="portal-sidebar">
+<div class="feature-card">
 
-<div class="portal-avatar">
-
-R
-
-</div>
-
-<h2>
-
-Creator+
-
-</h2>
-
-<p>
-
-Premium Membership Active
-
-</p>
-
-<div class="portal-status">
-
-<h4>
-
-Membership Status
-
-</h4>
-
-<span>
-
-Active until August 7, 2026
-
-</span>
-
-</div>
-
-<div class="portal-menu">
-
-<div class="portal-item">
-
-Creator Dashboard
-
-</div>
-
-<div class="portal-item">
-
-Verification
-
-</div>
-
-<div class="portal-item">
-
-Livestreams
-
-</div>
-
-<div class="portal-item">
-
-Broadcast Channels
-
-</div>
-
-<div class="portal-item">
-
-Analytics
-
-</div>
-
-<div class="portal-item">
-
-Billing
-
-</div>
-
-</div>
-
-</div>
-
-<div class="portal-main">
-
-<div class="portal-card">
-
-<span class="portal-badge">
+<div class="feature-tag">
 
 VERIFICATION
 
-</span>
+</div>
 
 <h3>
 
-Apply For Verification
+Build Trust
 
 </h3>
 
 <p>
 
-Creator+ members can submit an application for the official Relvia Verified badge after meeting platform requirements.
+Become eligible to apply for Relvia Verification and
+stand out across the platform with a trusted identity.
 
 </p>
 
-<button class="portal-button">
+<div class="preview-box">
 
-Apply
+<div class="preview-title">
 
-</button>
+Verification Status
 
 </div>
 
-<div class="portal-card">
+<div class="preview-number">
 
-<span class="portal-badge">
+Eligible
 
-LIVE
+</div>
 
-</span>
+<div class="preview-small">
+
+Requirements Met
+
+</div>
+
+</div>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-tag">
+
+LIVESTREAMING
+
+</div>
 
 <h3>
 
@@ -1945,71 +1287,121 @@ Go Live
 
 <p>
 
-Broadcast to your followers in HD with professional livestream controls and moderation tools.
+Broadcast to your followers with high-quality streaming,
+live chat moderation, and creator controls.
 
 </p>
 
-<button class="portal-button">
+<div class="preview-box">
 
-Start Livestream
+<div class="preview-title">
 
-</button>
+Livestream Access
 
 </div>
 
-<div class="portal-card">
+<div class="preview-number">
 
-<span class="portal-badge">
+Unlimited
+
+</div>
+
+<div class="preview-small">
+
+HD Streaming Enabled
+
+</div>
+
+</div>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-tag">
 
 ANALYTICS
 
-</span>
+</div>
 
 <h3>
 
-Professional Analytics
+Know Your Audience
 
 </h3>
 
 <p>
 
-Track impressions, watch time, engagement, followers, and audience growth from one dashboard.
+Track views, engagement, audience growth, retention,
+watch time, and performance with advanced analytics.
 
 </p>
 
-<button class="portal-button">
+<div class="preview-box">
 
-View Analytics
+<div class="preview-title">
 
-</button>
+Monthly Reach
 
 </div>
 
-<div class="portal-card">
+<div class="preview-number">
 
-<span class="portal-badge">
+2.8M
 
-CHANNELS
+</div>
 
-</span>
+<div class="preview-small">
+
+Sample Dashboard
+
+</div>
+
+</div>
+
+</div>
+
+<div class="feature-card">
+
+<div class="feature-tag">
+
+MONETIZATION
+
+</div>
 
 <h3>
 
-Broadcast Channels
+Earn More
 
 </h3>
 
 <p>
 
-Send announcements directly to your followers without creating a normal feed post.
+Unlock future creator payouts, subscriptions,
+tips, premium content, and additional revenue
+opportunities.
 
 </p>
 
-<button class="portal-button">
+<div class="preview-box">
 
-Open Channels
+<div class="preview-title">
 
-</button>
+Estimated Revenue
+
+</div>
+
+<div class="preview-number">
+
+$4,280
+
+</div>
+
+<div class="preview-small">
+
+Illustration Only
+
+</div>
 
 </div>
 
@@ -2018,249 +1410,373 @@ Open Channels
 </div>
 
 </section>
+<!-- ==========================================
+CREATOR DASHBOARD PREVIEW
+========================================== -->
+
 <style>
 
-/*==========================================================
-MEMBERSHIP PLANS
-==========================================================*/
-
-.plans-section{
+.dashboard{
 
 padding:120px 7%;
 
 }
 
-.plans-grid{
+.dashboard-header{
 
-display:grid;
+text-align:center;
 
-grid-template-columns:repeat(3,1fr);
+max-width:760px;
 
-gap:32px;
-
-margin-top:60px;
+margin:0 auto 70px;
 
 }
 
-.plan-card{
+.dashboard-header h2{
 
-position:relative;
+font-size:54px;
 
-background:linear-gradient(180deg,#111,#090909);
+margin-bottom:20px;
 
-border:1px solid var(--border);
+}
+
+.dashboard-header p{
+
+font-size:18px;
+
+color:#9c9c9c;
+
+line-height:1.8;
+
+}
+
+.dashboard-window{
+
+background:#101010;
+
+border:1px solid #2a2a2a;
 
 border-radius:30px;
 
-padding:40px;
-
-transition:.35s;
-
 overflow:hidden;
 
-}
-
-.plan-card::before{
-
-content:"";
-
-position:absolute;
-
-top:0;
-
-left:0;
-
-right:0;
-
-height:4px;
-
-background:linear-gradient(90deg,var(--gold),transparent);
-
-opacity:0;
-
-transition:.35s;
+box-shadow:0 40px 90px rgba(0,0,0,.45);
 
 }
 
-.plan-card:hover{
+.window-top{
 
-transform:translateY(-10px);
+height:65px;
 
-border-color:var(--gold);
+display:flex;
 
-}
+align-items:center;
 
-.plan-card:hover::before{
+justify-content:space-between;
 
-opacity:1;
+padding:0 28px;
 
-}
+background:#171717;
 
-.plan-card.featured{
-
-border:2px solid var(--gold);
-
-transform:scale(1.03);
-
-box-shadow:0 25px 70px rgba(212,175,55,.18);
+border-bottom:1px solid #2a2a2a;
 
 }
 
-.plan-card.featured:hover{
+.window-title{
 
-transform:scale(1.03) translateY(-10px);
+font-size:18px;
+
+font-weight:bold;
 
 }
 
-.plan-badge{
+.window-status{
 
-display:inline-block;
-
-padding:8px 18px;
+padding:8px 16px;
 
 border-radius:999px;
 
 background:rgba(212,175,55,.12);
 
-color:var(--gold);
+color:#D4AF37;
 
 font-size:13px;
 
-font-weight:700;
-
-margin-bottom:22px;
+font-weight:bold;
 
 }
 
-.plan-name{
+.dashboard-layout{
 
-font-size:34px;
+display:grid;
 
-font-weight:800;
+grid-template-columns:260px 1fr;
 
-margin-bottom:8px;
-
-}
-
-.plan-price{
-
-display:flex;
-
-align-items:flex-end;
-
-gap:10px;
-
-margin-bottom:25px;
+min-height:700px;
 
 }
 
-.plan-price h1{
+.sidebar{
 
-font-size:64px;
+background:#0d0d0d;
 
-font-weight:900;
+border-right:1px solid #2a2a2a;
 
-color:var(--gold);
-
-}
-
-.plan-price span{
-
-margin-bottom:10px;
-
-color:var(--muted);
+padding:30px;
 
 }
 
-.plan-list{
+.sidebar-item{
 
-display:flex;
+padding:16px 18px;
 
-flex-direction:column;
-
-gap:14px;
-
-margin:30px 0;
-
-}
-
-.plan-feature{
-
-padding:14px 0;
-
-border-bottom:1px solid var(--border);
-
-color:#d5d5d5;
-
-}
-
-.plan-button{
-
-width:100%;
-
-height:56px;
+margin-bottom:12px;
 
 border-radius:16px;
 
-background:linear-gradient(135deg,var(--gold),var(--gold-light));
-
-font-size:17px;
-
-font-weight:800;
-
-color:#000;
-
 transition:.3s;
 
-}
-
-.plan-button:hover{
-
-transform:translateY(-3px);
+cursor:pointer;
 
 }
 
-.secondary{
+.sidebar-item:hover{
+
+background:#1a1a1a;
+
+border-left:4px solid #D4AF37;
+
+padding-left:14px;
+
+}
+
+.sidebar-item.active{
 
 background:#181818;
 
-color:#fff;
+border-left:4px solid #D4AF37;
 
-border:1px solid var(--border);
-
-}
-
-.save{
-
-margin-top:18px;
-
-text-align:center;
-
-color:var(--gold);
-
-font-size:14px;
-
-font-weight:700;
+padding-left:14px;
 
 }
 
-@media(max-width:1100px){
+.dashboard-content{
 
-.plans-grid{
+padding:35px;
+
+}
+
+.stats-grid{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+gap:20px;
+
+margin-bottom:35px;
+
+}
+
+.stat-card{
+
+background:#181818;
+
+border:1px solid #2a2a2a;
+
+border-radius:20px;
+
+padding:25px;
+
+transition:.35s;
+
+cursor:pointer;
+
+}
+
+.stat-card:hover{
+
+transform:translateY(-6px);
+
+border-color:#D4AF37;
+
+}
+
+.stat-card small{
+
+display:block;
+
+color:#999;
+
+margin-bottom:12px;
+
+}
+
+.stat-card h2{
+
+font-size:34px;
+
+color:#D4AF37;
+
+}
+
+.large-card{
+
+background:#181818;
+
+border:1px solid #2a2a2a;
+
+border-radius:24px;
+
+padding:30px;
+
+margin-bottom:24px;
+
+transition:.35s;
+
+}
+
+.large-card:hover{
+
+border-color:#D4AF37;
+
+}
+
+.large-card h3{
+
+font-size:28px;
+
+margin-bottom:16px;
+
+}
+
+.large-card p{
+
+color:#9c9c9c;
+
+line-height:1.8;
+
+margin-bottom:20px;
+
+}
+
+.progress{
+
+height:14px;
+
+background:#0f0f0f;
+
+border-radius:999px;
+
+overflow:hidden;
+
+}
+
+.progress div{
+
+width:82%;
+
+height:100%;
+
+background:linear-gradient(90deg,#D4AF37,#F5D36B);
+
+}
+
+.quick-grid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:20px;
+
+margin-top:24px;
+
+}
+
+.quick-card{
+
+background:#181818;
+
+border:1px solid #2a2a2a;
+
+border-radius:20px;
+
+padding:24px;
+
+transition:.35s;
+
+cursor:pointer;
+
+}
+
+.quick-card:hover{
+
+transform:translateY(-5px);
+
+border-color:#D4AF37;
+
+}
+
+.quick-card h4{
+
+margin-bottom:12px;
+
+font-size:20px;
+
+}
+
+.quick-card p{
+
+color:#9c9c9c;
+
+line-height:1.7;
+
+font-size:15px;
+
+}
+
+@media(max-width:1200px){
+
+.dashboard-layout{
 
 grid-template-columns:1fr;
 
 }
 
-.plan-card.featured{
+.sidebar{
 
-transform:none;
+border-right:none;
+
+border-bottom:1px solid #2a2a2a;
 
 }
 
-.plan-card.featured:hover{
+.stats-grid{
 
-transform:translateY(-10px);
+grid-template-columns:repeat(2,1fr);
+
+}
+
+.quick-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+@media(max-width:700px){
+
+.stats-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.dashboard-header h2{
+
+font-size:40px;
 
 }
 
@@ -2268,174 +1784,209 @@ transform:translateY(-10px);
 
 </style>
 
-<section class="plans-section">
+<section class="dashboard">
 
-<div class="section-heading">
+<div class="dashboard-header">
 
 <h2>
 
-Choose Your Membership
+Your Creator+ Dashboard
 
 </h2>
 
 <p>
 
-Whether you're just getting started or building the next big brand,
-there's a plan designed for you.
+Manage your membership, livestreams, verification, analytics,
+broadcast channels, and creator tools from one place.
 
 </p>
 
 </div>
 
-<div class="plans-grid">
+<div class="dashboard-window">
 
-<div class="plan-card">
+<div class="window-top">
 
-<div class="plan-badge">
+<div class="window-title">
 
-FREE
-
-</div>
-
-<div class="plan-name">
-
-Relvia Social
+Creator+ Dashboard Preview
 
 </div>
 
-<div class="plan-price">
+<div class="window-status">
 
-<h1>$0</h1>
-
-<span>Forever</span>
+Membership Active
 
 </div>
 
-<div class="plan-list">
+</div>
 
-<div class="plan-feature">Post photos and videos</div>
+<div class="dashboard-layout">
 
-<div class="plan-feature">Follow creators</div>
+<div class="sidebar">
 
-<div class="plan-feature">Like and comment</div>
+<div class="sidebar-item active">
 
-<div class="plan-feature">Basic messaging</div>
-
-<div class="plan-feature">Standard profile</div>
+Dashboard
 
 </div>
 
-<button class="plan-button secondary">
+<div class="sidebar-item">
 
-Current Plan
-
-</button>
+Verification
 
 </div>
 
-<div class="plan-card featured">
+<div class="sidebar-item">
 
-<div class="plan-badge">
-
-MOST POPULAR
+Livestream
 
 </div>
 
-<div class="plan-name">
+<div class="sidebar-item">
 
-Creator+
-
-</div>
-
-<div class="plan-price">
-
-<h1>$9.99</h1>
-
-<span>/ month</span>
+Analytics
 
 </div>
 
-<div class="plan-list">
+<div class="sidebar-item">
 
-<div class="plan-feature">Everything in Free</div>
-
-<div class="plan-feature">Verification Eligibility</div>
-
-<div class="plan-feature">Unlimited Livestreaming</div>
-
-<div class="plan-feature">Broadcast Channels</div>
-
-<div class="plan-feature">Advanced Analytics</div>
-
-<div class="plan-feature">Priority Support</div>
-
-<div class="plan-feature">Creator Monetization</div>
-
-<div class="plan-feature">Early Access Features</div>
+Broadcast Channels
 
 </div>
 
-<button
+<div class="sidebar-item">
 
-class="plan-button"
-
-id="monthlyCheckout">
-
-Upgrade Now
-
-</button>
+Monetization
 
 </div>
 
-<div class="plan-card">
+<div class="sidebar-item">
 
-<div class="plan-badge">
-
-BEST VALUE
+Billing
 
 </div>
 
-<div class="plan-name">
+<div class="sidebar-item">
 
-Creator+ Annual
-
-</div>
-
-<div class="plan-price">
-
-<h1>$99</h1>
-
-<span>/ year</span>
+Settings
 
 </div>
 
-<div class="plan-list">
+</div>
 
-<div class="plan-feature">Everything in Creator+</div>
+<div class="dashboard-content">
 
-<div class="plan-feature">Save 17%</div>
+<div class="stats-grid">
 
-<div class="plan-feature">Exclusive Annual Badge</div>
+<div class="stat-card">
 
-<div class="plan-feature">Priority Feature Access</div>
+<small>Followers</small>
 
-<div class="plan-feature">Future Premium Features Included</div>
+<h2>18.4K</h2>
 
 </div>
 
-<button
+<div class="stat-card">
 
-class="plan-button"
+<small>Total Views</small>
 
-id="annualCheckout">
+<h2>2.8M</h2>
 
-Choose Annual
+</div>
 
-</button>
+<div class="stat-card">
 
-<div class="save">
+<small>Engagement</small>
 
-Save nearly two months every year.
+<h2>96%</h2>
+
+</div>
+
+<div class="stat-card">
+
+<small>Revenue</small>
+
+<h2>$4,280</h2>
+
+</div>
+
+</div>
+
+<div class="large-card">
+
+<h3>
+
+Verification Progress
+
+</h3>
+
+<p>
+
+Your account meets most of the requirements for Relvia Verification.
+Continue growing your audience and maintaining an active presence to improve eligibility.
+
+</p>
+
+<div class="progress">
+
+<div></div>
+
+</div>
+
+</div>
+
+<div class="quick-grid">
+
+<div class="quick-card">
+
+<h4>
+
+Start a Livestream
+
+</h4>
+
+<p>
+
+Broadcast live to your audience with Creator+ streaming tools.
+
+</p>
+
+</div>
+
+<div class="quick-card">
+
+<h4>
+
+Creator Analytics
+
+</h4>
+
+<p>
+
+Track your audience, engagement, reach, and content performance.
+
+</p>
+
+</div>
+
+<div class="quick-card">
+
+<h4>
+
+Broadcast Channel
+
+</h4>
+
+<p>
+
+Send updates directly to your followers and subscribers.
+
+</p>
+
+</div>
+
+</div>
 
 </div>
 
@@ -2444,39 +1995,1618 @@ Save nearly two months every year.
 </div>
 
 </section>
+<!-- ==========================================
+CHECKOUT
+========================================== -->
+
 <style>
 
-/*==========================================================
-FAQ
-==========================================================*/
-
-.faq-section{
+.checkout{
 
 padding:120px 7%;
 
 }
 
-.faq{
+.checkout-header{
 
-max-width:950px;
+text-align:center;
 
-margin:70px auto 0;
+max-width:760px;
+
+margin:0 auto 70px;
+
+}
+
+.checkout-header h2{
+
+font-size:54px;
+
+margin-bottom:18px;
+
+}
+
+.checkout-header p{
+
+font-size:18px;
+
+line-height:1.8;
+
+color:#9c9c9c;
+
+}
+
+.checkout-layout{
+
+display:grid;
+
+grid-template-columns:1.2fr .8fr;
+
+gap:35px;
+
+align-items:start;
+
+}
+
+.checkout-panel{
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:28px;
+
+padding:35px;
+
+}
+
+.checkout-panel h3{
+
+font-size:30px;
+
+margin-bottom:30px;
+
+}
+
+.billing-toggle{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+background:#181818;
+
+padding:8px;
+
+border-radius:18px;
+
+margin-bottom:35px;
+
+}
+
+.billing-option{
+
+height:56px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+border-radius:14px;
+
+cursor:pointer;
+
+transition:.3s;
+
+font-weight:bold;
+
+}
+
+.billing-option.active{
+
+background:linear-gradient(135deg,#D4AF37,#F5D36B);
+
+color:#000;
+
+}
+
+.field{
+
+margin-bottom:24px;
+
+}
+
+.field label{
+
+display:block;
+
+margin-bottom:10px;
+
+font-size:14px;
+
+color:#bdbdbd;
+
+}
+
+.field input,
+
+.field select{
+
+width:100%;
+
+height:56px;
+
+background:#181818;
+
+border:1px solid #2a2a2a;
+
+border-radius:16px;
+
+padding:0 18px;
+
+color:white;
+
+font-size:15px;
+
+outline:none;
+
+transition:.3s;
+
+}
+
+.field input:focus,
+
+.field select:focus{
+
+border-color:#D4AF37;
+
+}
+
+.summary{
+
+background:#181818;
+
+border-radius:22px;
+
+padding:28px;
+
+margin-top:10px;
+
+}
+
+.summary-row{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-bottom:18px;
+
+color:#bdbdbd;
+
+}
+
+.summary-total{
+
+display:flex;
+
+justify-content:space-between;
+
+padding-top:20px;
+
+border-top:1px solid #2a2a2a;
+
+font-size:24px;
+
+font-weight:bold;
+
+}
+
+.checkout-button{
+
+margin-top:30px;
+
+width:100%;
+
+height:60px;
+
+border:none;
+
+border-radius:18px;
+
+background:linear-gradient(135deg,#D4AF37,#F5D36B);
+
+font-size:17px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.checkout-button:hover{
+
+transform:translateY(-4px);
+
+box-shadow:0 25px 60px rgba(212,175,55,.25);
+
+}
+
+.security{
+
+margin-top:28px;
+
+padding:24px;
+
+background:#181818;
+
+border-radius:20px;
+
+border:1px solid rgba(212,175,55,.18);
+
+}
+
+.security h4{
+
+color:#D4AF37;
+
+margin-bottom:14px;
+
+}
+
+.security p{
+
+line-height:1.8;
+
+color:#9c9c9c;
+
+margin-bottom:18px;
+
+}
+
+.security-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:14px;
+
+}
+
+.security-item{
+
+padding:16px;
+
+background:#101010;
+
+border:1px solid #2a2a2a;
+
+border-radius:14px;
+
+text-align:center;
+
+font-size:14px;
+
+}
+
+.cards{
+
+display:flex;
+
+gap:12px;
+
+flex-wrap:wrap;
+
+margin-top:20px;
+
+}
+
+.card{
+
+padding:12px 18px;
+
+border-radius:14px;
+
+background:#101010;
+
+border:1px solid #2a2a2a;
+
+font-size:14px;
+
+}
+
+.notice{
+
+margin-top:20px;
+
+font-size:14px;
+
+line-height:1.7;
+
+color:#8f8f8f;
+
+}
+
+@media(max-width:1000px){
+
+.checkout-layout{
+
+grid-template-columns:1fr;
+
+}
+
+.security-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+<section class="checkout" id="checkout">
+
+<div class="checkout-header">
+
+<h2>
+
+Complete Your Membership
+
+</h2>
+
+<p>
+
+Your Creator+ membership unlocks premium creator tools immediately after your payment is securely processed.
+
+</p>
+
+</div>
+
+<div class="checkout-layout">
+
+<div class="checkout-panel">
+
+<h3>
+
+Billing Information
+
+</h3>
+
+<div class="billing-toggle">
+
+<div class="billing-option active" id="monthlyPlan">
+
+Monthly
+
+</div>
+
+<div class="billing-option" id="annualPlan">
+
+Annual
+
+</div>
+
+</div>
+
+<div class="field">
+
+<label>Email Address</label>
+
+<input
+type="email"
+placeholder="you@example.com">
+
+</div>
+
+<div class="field">
+
+<label>Country / Region</label>
+
+<select>
+
+<option>United States</option>
+
+<option>Canada</option>
+
+<option>United Kingdom</option>
+
+<option>Australia</option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>Promo Code</label>
+
+<input
+type="text"
+placeholder="Optional">
+
+</div>
+
+<button
+class="checkout-button"
+id="stripeCheckout">
+
+Continue to Secure Checkout
+
+</button>
+
+<div class="notice">
+
+By continuing, you agree to Relvia's Terms of Service and authorize recurring billing until your membership is cancelled.
+
+</div>
+
+</div>
+
+<div class="checkout-panel">
+
+<h3>
+
+Order Summary
+
+</h3>
+
+<div class="summary">
+
+<div class="summary-row">
+
+<span>Creator+ Membership</span>
+
+<strong id="planPrice">$9.99</strong>
+
+</div>
+
+<div class="summary-row">
+
+<span>Billing</span>
+
+<strong id="planType">Monthly</strong>
+
+</div>
+
+<div class="summary-row">
+
+<span>Taxes</span>
+
+<strong>Calculated at Checkout</strong>
+
+</div>
+
+<div class="summary-total">
+
+<span>Total Today</span>
+
+<span id="totalPrice">$9.99</span>
+
+</div>
+
+</div>
+
+<div class="security">
+
+<h4>
+
+Secure Payments
+
+</h4>
+
+<p>
+
+All payments are encrypted using industry-standard TLS and SSL encryption. Relvia never stores your full credit or debit card number. Transactions are securely processed through Stripe, a PCI DSS compliant payment provider trusted by millions of businesses worldwide.
+
+</p>
+
+<div class="security-grid">
+
+<div class="security-item">
+
+256-bit SSL Encryption
+
+</div>
+
+<div class="security-item">
+
+PCI DSS Compliant
+
+</div>
+
+<div class="security-item">
+
+Fraud Protection
+
+</div>
+
+<div class="security-item">
+
+Stripe Secure Checkout
+
+</div>
+
+</div>
+
+<div class="cards">
+
+<div class="card">Visa</div>
+
+<div class="card">Mastercard</div>
+
+<div class="card">American Express</div>
+
+<div class="card">Discover</div>
+
+<div class="card">Apple Pay</div>
+
+<div class="card">Google Pay</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<script>
+
+const monthly=document.getElementById("monthlyPlan");
+
+const annual=document.getElementById("annualPlan");
+
+const price=document.getElementById("planPrice");
+
+const total=document.getElementById("totalPrice");
+
+const type=document.getElementById("planType");
+
+monthly.onclick=()=>{
+
+monthly.classList.add("active");
+
+annual.classList.remove("active");
+
+price.innerHTML="$9.99";
+
+total.innerHTML="$9.99";
+
+type.innerHTML="Monthly";
+
+};
+
+annual.onclick=()=>{
+
+annual.classList.add("active");
+
+monthly.classList.remove("active");
+
+price.innerHTML="$99.00";
+
+total.innerHTML="$99.00";
+
+type.innerHTML="Annual";
+
+};
+
+document.getElementById("stripeCheckout").onclick=()=>{
+
+window.location.href="YOUR_STRIPE_PAYMENT_LINK";
+
+};
+
+</script>
+<!-- ==========================================
+WHY CREATOR+
+========================================== -->
+
+<style>
+
+.why-plus{
+
+padding:120px 7%;
+
+}
+
+.why-header{
+
+max-width:850px;
+
+margin:0 auto 70px;
+
+text-align:center;
+
+}
+
+.why-header h2{
+
+font-size:54px;
+
+margin-bottom:20px;
+
+}
+
+.why-header p{
+
+font-size:18px;
+
+line-height:1.8;
+
+color:#9c9c9c;
+
+}
+
+.timeline{
+
+position:relative;
 
 display:flex;
 
 flex-direction:column;
 
-gap:20px;
+gap:30px;
+
+max-width:1200px;
+
+margin:auto;
+
+}
+
+.timeline::before{
+
+content:"";
+
+position:absolute;
+
+left:50%;
+
+top:0;
+
+bottom:0;
+
+width:2px;
+
+background:#2a2a2a;
+
+transform:translateX(-50%);
+
+}
+
+.timeline-card{
+
+display:grid;
+
+grid-template-columns:1fr 120px 1fr;
+
+align-items:center;
+
+gap:30px;
+
+}
+
+.timeline-content{
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:26px;
+
+padding:35px;
+
+transition:.35s;
+
+cursor:pointer;
+
+}
+
+.timeline-content:hover{
+
+border-color:#D4AF37;
+
+transform:translateY(-6px);
+
+box-shadow:0 25px 60px rgba(212,175,55,.12);
+
+}
+
+.timeline-content h3{
+
+font-size:30px;
+
+margin-bottom:18px;
+
+}
+
+.timeline-content p{
+
+color:#9c9c9c;
+
+line-height:1.9;
+
+}
+
+.timeline-dot{
+
+width:80px;
+
+height:80px;
+
+border-radius:50%;
+
+background:#181818;
+
+border:2px solid #D4AF37;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:22px;
+
+font-weight:bold;
+
+margin:auto;
+
+}
+
+.timeline-content ul{
+
+margin-top:25px;
+
+padding-left:20px;
+
+}
+
+.timeline-content li{
+
+margin-bottom:14px;
+
+color:#cfcfcf;
+
+}
+
+.highlight{
+
+color:#D4AF37;
+
+font-weight:bold;
+
+}
+
+@media(max-width:1000px){
+
+.timeline::before{
+
+display:none;
+
+}
+
+.timeline-card{
+
+grid-template-columns:1fr;
+
+}
+
+.timeline-dot{
+
+margin-bottom:25px;
+
+}
+
+}
+
+</style>
+
+<section class="why-plus">
+
+<div class="why-header">
+
+<h2>
+
+Why Upgrade To Creator+?
+
+</h2>
+
+<p>
+
+Creator+ is designed for creators who want more than just a profile.
+Unlock professional tools that help you grow your audience, build your brand,
+and prepare for future monetization opportunities.
+
+</p>
+
+</div>
+
+<div class="timeline">
+
+<div class="timeline-card">
+
+<div class="timeline-content">
+
+<h3>
+
+Build Your Presence
+
+</h3>
+
+<p>
+
+Create content, grow your followers, livestream, and establish your identity
+within the Relvia community.
+
+</p>
+
+<ul>
+
+<li>Professional creator profile</li>
+
+<li>Unlimited livestreams</li>
+
+<li>Broadcast channels</li>
+
+<li>Priority creator support</li>
+
+</ul>
+
+</div>
+
+<div class="timeline-dot">
+
+01
+
+</div>
+
+<div></div>
+
+</div>
+
+<div class="timeline-card">
+
+<div></div>
+
+<div class="timeline-dot">
+
+02
+
+</div>
+
+<div class="timeline-content">
+
+<h3>
+
+Grow Your Audience
+
+</h3>
+
+<p>
+
+Use advanced analytics to understand what performs best and make smarter
+content decisions every day.
+
+</p>
+
+<ul>
+
+<li>Audience insights</li>
+
+<li>Reach analytics</li>
+
+<li>Engagement reports</li>
+
+<li>Performance tracking</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="timeline-card">
+
+<div class="timeline-content">
+
+<h3>
+
+Unlock Future Opportunities
+
+</h3>
+
+<p>
+
+As Relvia expands, Creator+ members will receive access to new creator
+features, premium tools, and monetization opportunities before everyone else.
+
+</p>
+
+<ul>
+
+<li>Creator payouts</li>
+
+<li>Premium subscriptions</li>
+
+<li>Brand partnerships</li>
+
+<li>Early feature access</li>
+
+</ul>
+
+</div>
+
+<div class="timeline-dot">
+
+03
+
+</div>
+
+<div></div>
+
+</div>
+
+</div>
+
+</section>
+<!-- ==========================================
+CREATOR+ COMPARISON
+========================================== -->
+
+<style>
+
+.comparison{
+
+padding:120px 7%;
+
+}
+
+.comparison-header{
+
+max-width:850px;
+
+margin:0 auto 70px;
+
+text-align:center;
+
+}
+
+.comparison-header h2{
+
+font-size:54px;
+
+margin-bottom:20px;
+
+}
+
+.comparison-header p{
+
+font-size:18px;
+
+line-height:1.8;
+
+color:#9c9c9c;
+
+}
+
+.compare-table{
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:28px;
+
+overflow:hidden;
+
+}
+
+.compare-row{
+
+display:grid;
+
+grid-template-columns:2fr 1fr 1fr;
+
+}
+
+.compare-row:nth-child(even){
+
+background:#161616;
+
+}
+
+.compare-row div{
+
+padding:24px;
+
+border-right:1px solid #2a2a2a;
+
+display:flex;
+
+align-items:center;
+
+}
+
+.compare-row div:last-child{
+
+border-right:none;
+
+}
+
+.compare-head{
+
+background:#1a1a1a;
+
+font-weight:bold;
+
+font-size:18px;
+
+}
+
+.plan-title{
+
+justify-content:center;
+
+font-size:22px;
+
+font-weight:bold;
+
+}
+
+.plan-title.creator{
+
+color:#D4AF37;
+
+}
+
+.check{
+
+justify-content:center;
+
+font-size:18px;
+
+font-weight:bold;
+
+}
+
+.not{
+
+justify-content:center;
+
+opacity:.35;
+
+}
+
+.upgrade-banner{
+
+margin-top:70px;
+
+background:linear-gradient(135deg,#111,#191919);
+
+border:1px solid rgba(212,175,55,.25);
+
+border-radius:30px;
+
+padding:50px;
+
+display:grid;
+
+grid-template-columns:1fr auto;
+
+gap:40px;
+
+align-items:center;
+
+}
+
+.upgrade-banner h3{
+
+font-size:42px;
+
+margin-bottom:15px;
+
+}
+
+.upgrade-banner p{
+
+color:#9c9c9c;
+
+font-size:18px;
+
+line-height:1.8;
+
+max-width:650px;
+
+}
+
+.upgrade-banner button{
+
+height:60px;
+
+padding:0 38px;
+
+background:linear-gradient(135deg,#D4AF37,#F5D36B);
+
+border:none;
+
+border-radius:18px;
+
+font-size:17px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.upgrade-banner button:hover{
+
+transform:translateY(-4px);
+
+box-shadow:0 25px 60px rgba(212,175,55,.25);
+
+}
+
+@media(max-width:900px){
+
+.compare-row{
+
+grid-template-columns:1.5fr 1fr 1fr;
+
+font-size:14px;
+
+}
+
+.compare-row div{
+
+padding:18px;
+
+}
+
+.upgrade-banner{
+
+grid-template-columns:1fr;
+
+text-align:center;
+
+}
+
+.upgrade-banner p{
+
+margin:auto;
+
+}
+
+}
+
+</style>
+
+<section class="comparison">
+
+<div class="comparison-header">
+
+<h2>
+
+Compare Memberships
+
+</h2>
+
+<p>
+
+See everything included with Creator+ compared to the free Relvia Social experience.
+
+</p>
+
+</div>
+
+<div class="compare-table">
+
+<div class="compare-row compare-head">
+
+<div>Feature</div>
+
+<div class="plan-title">
+
+Free
+
+</div>
+
+<div class="plan-title creator">
+
+Creator+
+
+</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Post Photos & Videos</div>
+
+<div class="check">Included</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Messaging</div>
+
+<div class="check">Included</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Verification Eligibility</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Unlimited Livestreaming</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Advanced Analytics</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Broadcast Channels</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Priority Creator Support</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Future Creator Features</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+<div class="compare-row">
+
+<div>Monetization Access</div>
+
+<div class="not">—</div>
+
+<div class="check">Included</div>
+
+</div>
+
+</div>
+
+<div class="upgrade-banner">
+
+<div>
+
+<h3>
+
+Ready To Unlock Creator+?
+
+</h3>
+
+<p>
+
+Join thousands of creators building the future of entertainment on Relvia. Upgrade today to access premium creator tools, advanced insights, livestreaming, and exclusive features as they're released.
+
+</p>
+
+</div>
+
+<button id="upgradeNow">
+
+Become a Member
+
+</button>
+
+</div>
+
+</section>
+
+<script>
+
+document.getElementById("upgradeNow").onclick=function(){
+
+document.getElementById("checkout").scrollIntoView({
+
+behavior:"smooth"
+
+});
+
+};
+
+</script>
+<!-- ==========================================
+CREATOR TESTIMONIALS
+========================================== -->
+
+<style>
+
+.testimonials{
+
+padding:120px 7%;
+
+}
+
+.testimonials-header{
+
+text-align:center;
+
+max-width:760px;
+
+margin:0 auto 70px;
+
+}
+
+.testimonials-header h2{
+
+font-size:54px;
+
+margin-bottom:18px;
+
+}
+
+.testimonials-header p{
+
+font-size:18px;
+
+line-height:1.8;
+
+color:#9c9c9c;
+
+}
+
+.testimonial-slider{
+
+display:flex;
+
+gap:30px;
+
+overflow-x:auto;
+
+scroll-snap-type:x mandatory;
+
+padding-bottom:12px;
+
+}
+
+.testimonial-slider::-webkit-scrollbar{
+
+height:8px;
+
+}
+
+.testimonial-slider::-webkit-scrollbar-thumb{
+
+background:#2d2d2d;
+
+border-radius:999px;
+
+}
+
+.testimonial{
+
+min-width:380px;
+
+scroll-snap-align:start;
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:24px;
+
+padding:30px;
+
+transition:.35s;
+
+}
+
+.testimonial:hover{
+
+transform:translateY(-6px);
+
+border-color:#D4AF37;
+
+}
+
+.testimonial h3{
+
+margin-bottom:6px;
+
+}
+
+.testimonial small{
+
+display:block;
+
+margin-bottom:18px;
+
+color:#D4AF37;
+
+}
+
+.testimonial p{
+
+line-height:1.8;
+
+color:#bdbdbd;
+
+}
+
+</style>
+
+<section class="testimonials">
+
+<div class="testimonials-header">
+
+<h2>
+
+Creators Using Creator+
+
+</h2>
+
+<p>
+
+Creator+ helps creators build communities, livestream, and prepare for future monetization across Relvia.
+
+</p>
+
+</div>
+
+<div class="testimonial-slider">
+
+<div class="testimonial">
+
+<h3>Jordan W.</h3>
+
+<small>Filmmaker</small>
+
+<p>
+
+Creator+ gives me everything I need in one place. The analytics and livestream tools make managing my audience much easier.
+
+</p>
+
+</div>
+
+<div class="testimonial">
+
+<h3>Avery M.</h3>
+
+<small>Musician</small>
+
+<p>
+
+Broadcast Channels have become my favorite way to keep fans updated without creating multiple posts every day.
+
+</p>
+
+</div>
+
+<div class="testimonial">
+
+<h3>Taylor R.</h3>
+
+<small>Content Creator</small>
+
+<p>
+
+The dashboard is clean, fast, and easy to use. Having analytics, livestreams, and membership tools together saves me time.
+
+</p>
+
+</div>
+
+</div>
+
+</section>
+<!-- ==========================================
+FREQUENTLY ASKED QUESTIONS
+========================================== -->
+
+<style>
+
+.faq{
+
+padding:120px 7%;
+
+}
+
+.faq-header{
+
+text-align:center;
+
+max-width:760px;
+
+margin:0 auto 70px;
+
+}
+
+.faq-header h2{
+
+font-size:54px;
+
+margin-bottom:20px;
+
+}
+
+.faq-header p{
+
+font-size:18px;
+
+color:#9c9c9c;
+
+line-height:1.8;
+
+}
+
+.faq-container{
+
+max-width:950px;
+
+margin:auto;
+
+display:flex;
+
+flex-direction:column;
+
+gap:18px;
 
 }
 
 .faq-item{
 
-background:#101010;
+background:#111;
 
-border:1px solid var(--border);
+border:1px solid #2a2a2a;
 
-border-radius:22px;
+border-radius:20px;
 
 overflow:hidden;
 
@@ -2486,7 +3616,7 @@ transition:.3s;
 
 .faq-item.active{
 
-border-color:var(--gold);
+border-color:#D4AF37;
 
 }
 
@@ -2506,21 +3636,21 @@ justify-content:space-between;
 
 align-items:center;
 
-font-size:19px;
-
-font-weight:700;
-
 color:white;
+
+font-size:18px;
+
+font-weight:bold;
 
 cursor:pointer;
 
 }
 
-.faq-question span{
+.faq-icon{
 
-font-size:28px;
+font-size:26px;
 
-color:var(--gold);
+color:#D4AF37;
 
 transition:.3s;
 
@@ -2538,37 +3668,37 @@ transition:max-height .35s ease;
 
 .faq-answer p{
 
-padding:0 30px 28px;
+padding:0 30px 30px;
 
-color:var(--muted);
+line-height:1.9;
 
-line-height:1.8;
+color:#9c9c9c;
 
 }
 
-/*==========================================================
+/*==========================================
 FINAL CTA
-==========================================================*/
+==========================================*/
 
 .final-cta{
 
-padding:80px 7%;
+padding:120px 7%;
 
 }
 
-.cta-card{
+.cta-box{
 
 background:linear-gradient(
 
 135deg,
 
-rgba(212,175,55,.14),
+#101010,
 
-#111
+#181818
 
 );
 
-border:1px solid rgba(212,175,55,.25);
+border:1px solid rgba(212,175,55,.20);
 
 border-radius:32px;
 
@@ -2578,33 +3708,37 @@ text-align:center;
 
 }
 
-.cta-card h2{
+.cta-box h2{
 
-font-size:56px;
+font-size:60px;
 
 margin-bottom:20px;
 
 }
 
-.cta-card p{
+.cta-box p{
 
 max-width:760px;
 
 margin:auto;
 
-font-size:19px;
+font-size:18px;
 
 line-height:1.9;
 
-color:var(--muted);
+color:#9c9c9c;
 
-margin-bottom:35px;
+margin-bottom:40px;
 
 }
 
-.big-button{
+.cta-button{
 
-padding:20px 60px;
+height:64px;
+
+padding:0 45px;
+
+border:none;
 
 border-radius:18px;
 
@@ -2612,49 +3746,39 @@ background:linear-gradient(
 
 135deg,
 
-var(--gold),
+#D4AF37,
 
-var(--gold-light)
+#F5D36B
 
 );
 
-font-size:20px;
+font-size:18px;
 
-font-weight:800;
+font-weight:bold;
 
-color:black;
+cursor:pointer;
 
 transition:.3s;
 
 }
 
-.big-button:hover{
+.cta-button:hover{
 
 transform:translateY(-4px);
 
-box-shadow:0 25px 60px rgba(212,175,55,.35);
+box-shadow:0 30px 70px rgba(212,175,55,.25);
 
 }
 
-.small-note{
-
-margin-top:22px;
-
-color:var(--muted);
-
-}
-
-/*==========================================================
+/*==========================================
 FOOTER
-==========================================================*/
+==========================================*/
 
 footer{
 
-padding:60px 7%;
+padding:70px 7%;
 
-border-top:1px solid var(--border);
-
-margin-top:100px;
+border-top:1px solid #2a2a2a;
 
 display:flex;
 
@@ -2664,21 +3788,21 @@ align-items:center;
 
 flex-wrap:wrap;
 
-gap:25px;
+gap:30px;
 
 }
 
 .footer-logo{
 
-font-size:30px;
+font-size:28px;
 
-font-weight:900;
+font-weight:bold;
 
 }
 
 .footer-logo span{
 
-color:var(--gold);
+color:#D4AF37;
 
 }
 
@@ -2694,33 +3818,57 @@ flex-wrap:wrap;
 
 .footer-links a{
 
-color:var(--muted);
+color:#9c9c9c;
 
-transition:.25s;
+transition:.3s;
 
 }
 
 .footer-links a:hover{
 
-color:var(--gold);
+color:#D4AF37;
 
 }
 
-.copyright{
+.footer-copy{
 
-color:var(--muted);
+margin-top:18px;
+
+color:#777;
 
 font-size:14px;
 
 }
 
+@media(max-width:900px){
+
+.cta-box{
+
+padding:45px 30px;
+
+}
+
+.cta-box h2{
+
+font-size:42px;
+
+}
+
+footer{
+
+flex-direction:column;
+
+text-align:center;
+
+}
+
+}
+
 </style>
 
-<section
-class="faq-section"
-id="faq">
+<section class="faq" id="faq">
 
-<div class="section-heading">
+<div class="faq-header">
 
 <h2>
 
@@ -2730,13 +3878,13 @@ Frequently Asked Questions
 
 <p>
 
-Questions creators ask before joining Creator+.
+Everything you should know before joining Creator+.
 
 </p>
 
 </div>
 
-<div class="faq">
+<div class="faq-container">
 
 <div class="faq-item">
 
@@ -2744,7 +3892,7 @@ Questions creators ask before joining Creator+.
 
 What is Creator+?
 
-<span>+</span>
+<span class="faq-icon">+</span>
 
 </button>
 
@@ -2752,9 +3900,7 @@ What is Creator+?
 
 <p>
 
-Creator+ is Relvia Social's premium membership that unlocks livestreaming,
-verification eligibility, monetization, analytics, creator tools,
-and future premium features.
+Creator+ is Relvia Social's premium membership that unlocks advanced creator tools including livestreaming, verification eligibility, analytics, broadcast channels, priority support, and access to future premium features.
 
 </p>
 
@@ -2766,9 +3912,9 @@ and future premium features.
 
 <button class="faq-question">
 
-Can I cancel anytime?
+Can I cancel my membership?
 
-<span>+</span>
+<span class="faq-icon">+</span>
 
 </button>
 
@@ -2776,8 +3922,7 @@ Can I cancel anytime?
 
 <p>
 
-Yes. Cancel whenever you want. Your membership stays active until
-the end of your billing cycle.
+Yes. You can cancel your Creator+ membership at any time from your Billing settings. Your membership remains active until the end of your billing period.
 
 </p>
 
@@ -2789,9 +3934,9 @@ the end of your billing cycle.
 
 <button class="faq-question">
 
-How do I become verified?
+Does Relvia store my payment information?
 
-<span>+</span>
+<span class="faq-icon">+</span>
 
 </button>
 
@@ -2799,8 +3944,7 @@ How do I become verified?
 
 <p>
 
-Creator+ makes you eligible to apply. Approval still depends on
-Relvia's verification requirements.
+No. Relvia does not store your complete credit or debit card information. Payments are securely processed through Stripe using industry-standard encryption and PCI DSS compliant payment systems.
 
 </p>
 
@@ -2812,9 +3956,9 @@ Relvia's verification requirements.
 
 <button class="faq-question">
 
-When do my features unlock?
+When will Creator+ features become available?
 
-<span>+</span>
+<span class="faq-icon">+</span>
 
 </button>
 
@@ -2822,7 +3966,7 @@ When do my features unlock?
 
 <p>
 
-Immediately after Stripe confirms your payment.
+Your Creator+ benefits become available immediately after Stripe confirms your payment.
 
 </p>
 
@@ -2834,41 +3978,31 @@ Immediately after Stripe confirms your payment.
 
 </section>
 
-<section
-class="final-cta"
-id="join">
+<section class="final-cta">
 
-<div class="cta-card">
+<div class="cta-box">
 
 <h2>
 
-Start Creating Without Limits
+Create Without Limits.
 
 </h2>
 
 <p>
 
-Join Creator+ today and unlock the complete professional toolkit
-for creators, filmmakers, entertainers, musicians, organizations,
-businesses, and influencers.
+Join Creator+ today and unlock professional tools built for creators, filmmakers, entertainers, musicians, organizations, and businesses across Relvia Social.
 
 </p>
 
 <button
 
-class="big-button"
+class="cta-button"
 
-id="joinNow">
+onclick="document.getElementById('checkout').scrollIntoView({behavior:'smooth'})">
 
 Become a Creator+
 
 </button>
-
-<div class="small-note">
-
-$9.99/month • Cancel Anytime • Secure Payments by Stripe
-
-</div>
 
 </div>
 
@@ -2884,9 +4018,9 @@ RELVIA <span>CREATOR+</span>
 
 </div>
 
-<div class="copyright">
+<div class="footer-copy">
 
-© 2026 Relvia. All Rights Reserved.
+© 2026 Relvia. All rights reserved.
 
 </div>
 
@@ -2897,6 +4031,12 @@ RELVIA <span>CREATOR+</span>
 <a href="/social/feed.html">
 
 Relvia Social
+
+</a>
+
+<a href="#features">
+
+Features
 
 </a>
 
@@ -2930,19 +4070,19 @@ Terms
 
 <script>
 
-/*=========================================
-FAQ
-=========================================*/
+/*==========================================
+FAQ ACCORDION
+==========================================*/
 
 document.querySelectorAll(".faq-question").forEach(button=>{
 
-button.onclick=()=>{
+button.onclick=function(){
 
-const item=button.parentElement;
+const item=this.parentElement;
 
 const answer=item.querySelector(".faq-answer");
 
-const icon=button.querySelector("span");
+const icon=item.querySelector(".faq-icon");
 
 if(item.classList.contains("active")){
 
@@ -2954,13 +4094,13 @@ icon.innerHTML="+";
 
 }else{
 
-document.querySelectorAll(".faq-item").forEach(i=>{
+document.querySelectorAll(".faq-item").forEach(f=>{
 
-i.classList.remove("active");
+f.classList.remove("active");
 
-i.querySelector(".faq-answer").style.maxHeight=null;
+f.querySelector(".faq-answer").style.maxHeight=null;
 
-i.querySelector("span").innerHTML="+";
+f.querySelector(".faq-icon").innerHTML="+";
 
 });
 
@@ -2972,65 +4112,9 @@ icon.innerHTML="−";
 
 }
 
-}
-
-/*=========================================
-STRIPE PLACEHOLDER
-=========================================*/
-
-const STRIPE_MONTHLY_LINK="https://buy.stripe.com/YOUR_MONTHLY_LINK";
-
-const STRIPE_ANNUAL_LINK="https://buy.stripe.com/YOUR_ANNUAL_LINK";
-
-document.querySelectorAll(
-
-"#joinButton,#joinNow,#stripeCheckout,#monthlyCheckout,#dashboardUpgrade"
-
-).forEach(button=>{
-
-if(button){
-
-button.onclick=()=>{
-
-window.location.href=STRIPE_MONTHLY_LINK;
-
 };
-
-}
 
 });
-
-const annual=document.getElementById("annualCheckout");
-
-if(annual){
-
-annual.onclick=()=>{
-
-window.location.href=STRIPE_ANNUAL_LINK;
-
-};
-
-}
-
-/*=========================================
-SUPABASE PLACEHOLDER
-=========================================*/
-
-const SUPABASE_URL="YOUR_SUPABASE_URL";
-
-const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
-
-/* Uncomment after setup
-
-const supabase=supabase.createClient(
-
-SUPABASE_URL,
-
-SUPABASE_ANON_KEY
-
-);
-
-*/
 
 </script>
 
