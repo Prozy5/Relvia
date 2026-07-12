@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relvia Owner Panel</title>
+
+    <link rel="stylesheet" href="owner.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+<div class="owner-app">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <h2>Relvia</h2>
+            <span>OWNER PANEL</span>
+
+        </div>
+
+        <nav>
+
+            <button class="nav-item active">Dashboard</button>
+
+            <button class="nav-item">Analytics</button>
+
+            <button class="nav-item">Users</button>
+
+            <button class="nav-item">Moderation</button>
+
+            <button class="nav-item">Security & Finance</button>
+
+            <button class="nav-item">Creator+</button>
+
+            <button class="nav-item">Announcements</button>
+
+            <button class="nav-item">Feature Flags</button>
+
+            <button class="nav-item">Services</button>
+
+            <button class="nav-item">System Health</button>
+
+            <button class="nav-item">Developer</button>
+
+            <button class="nav-item">Emergency Center</button>
+
+            <button class="nav-item">Logs</button>
+
+            <button class="nav-item">Platform Settings</button>
+
+        </nav>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main-content">
+
+        <!-- Topbar -->
+
+        <header class="topbar">
+
+            <div class="search">
+
+                <input
+                    id="globalSearch"
+                    placeholder="Search users, reports, settings..."
+                >
+
+            </div>
+
+            <div class="top-actions">
+
+                <button id="notifications">
+
+                    🔔
+
+                </button>
+
+                <button id="ownerProfile">
+
+                    Owner
+
+                </button>
+
+            </div>
+
+        </header>
+
+        <!-- Greeting -->
+
+        <section class="welcome-card glass">
+
+            <h1 id="greeting">
+
+                Good Evening
+
+            </h1>
+
+            <h2 id="ownerName">
+
+                Welcome back.
+
+            </h2>
+
+            <p>
+
+                Everything will automatically sync with Supabase.
+
+            </p>
+
+        </section>
+
+        <!-- Dashboard Cards -->
+
+        <section class="dashboard-grid">
+
+            <div class="card glass" id="platformHealth">
+
+                <h3>Platform Health</h3>
+
+                <div class="empty">
+
+                    Waiting for Supabase...
+
+                </div>
+
+            </div>
+
+            <div class="card glass" id="usersCard">
+
+                <h3>Total Users</h3>
+
+                <div class="empty">
+
+                    Waiting for Supabase...
+
+                </div>
+
+            </div>
+
+            <div class="card glass" id="creatorPlusCard">
+
+                <h3>Creator+</h3>
+
+                <div class="empty">
+
+                    Waiting for Supabase...
+
+                </div>
+
+            </div>
+
+            <div class="card glass" id="reportsCard">
+
+                <h3>Open Reports</h3>
+
+                <div class="empty">
+
+                    Waiting for Supabase...
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Quick Actions -->
+
+        <section class="glass quick-actions">
+
+            <h2>
+
+                Quick Actions
+
+            </h2>
+
+            <div class="actions">
+
+                <button id="announcementBtn">
+
+                    Site Announcement
+
+                </button>
+
+                <button id="maintenanceBtn">
+
+                    Maintenance Mode
+
+                </button>
+
+                <button id="featureBtn">
+
+                    Feature Flags
+
+                </button>
+
+                <button id="usersBtn">
+
+                    User Lookup
+
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- Bottom -->
+
+        <section class="bottom-grid">
+
+            <div class="glass activity">
+
+                <h2>
+
+                    Recent Activity
+
+                </h2>
+
+                <div id="activityFeed">
+
+                    Waiting for activity...
+
+                </div>
+
+            </div>
+
+            <div class="glass alerts">
+
+                <h2>
+
+                    Security Alerts
+
+                </h2>
+
+                <div id="securityAlerts">
+
+                    No alerts.
+
+                </div>
+
+            </div>
+
+            <div class="glass announcements">
+
+                <h2>
+
+                    Announcements
+
+                </h2>
+
+                <div id="announcementFeed">
+
+                    No announcements.
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="owner.js"></script>
+
+<script>
+lucide.createIcons();
+</script>
+
+</body>
+</html>
+/* ==========================================
+   RELVIA OWNER PANEL
+   owner.css
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Inter",sans-serif;
+}
+
+body{
+
+    background:#0b1220;
+    color:#fff;
+    overflow:hidden;
+
+}
+
+.owner-app{
+
+    display:grid;
+
+    grid-template-columns:280px 1fr;
+
+    width:100vw;
+
+    height:100vh;
+
+}
+
+/* ===========================
+SIDEBAR
+=========================== */
+
+.sidebar{
+
+    background:#111827;
+
+    border-right:1px solid rgba(255,255,255,.08);
+
+    padding:30px 20px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:30px;
+
+}
+
+.logo h2{
+
+    font-size:28px;
+
+    font-weight:800;
+
+    background:linear-gradient(90deg,#3b82f6,#22c55e);
+
+    -webkit-background-clip:text;
+
+    -webkit-text-fill-color:transparent;
+
+}
+
+.logo span{
+
+    color:#8fa3bf;
+
+    font-size:12px;
+
+    letter-spacing:2px;
+
+}
+
+nav{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+.nav-item{
+
+    border:none;
+
+    background:none;
+
+    color:#c7d2fe;
+
+    padding:14px;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    text-align:left;
+
+    font-size:15px;
+
+}
+
+.nav-item:hover{
+
+    background:rgba(59,130,246,.15);
+
+    color:white;
+
+}
+
+.nav-item.active{
+
+    background:linear-gradient(90deg,#2563eb,#16a34a);
+
+    color:white;
+
+}
+
+/* ===========================
+MAIN
+=========================== */
+
+.main-content{
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:auto;
+
+    padding:30px;
+
+    gap:25px;
+
+}
+
+/* ===========================
+TOPBAR
+=========================== */
+
+.topbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.search input{
+
+    width:420px;
+
+    padding:14px 18px;
+
+    border-radius:14px;
+
+    border:none;
+
+    outline:none;
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+.top-actions{
+
+    display:flex;
+
+    gap:15px;
+
+}
+
+.top-actions button{
+
+    border:none;
+
+    cursor:pointer;
+
+    background:#1e293b;
+
+    color:white;
+
+    padding:12px 18px;
+
+    border-radius:12px;
+
+}
+
+/* ===========================
+GLASS
+=========================== */
+
+.glass{
+
+    background:rgba(255,255,255,.05);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    padding:25px;
+
+}
+
+/* ===========================
+WELCOME
+=========================== */
+
+.welcome-card h1{
+
+    font-size:34px;
+
+    font-weight:800;
+
+}
+
+.welcome-card h2{
+
+    margin-top:10px;
+
+    color:#60a5fa;
+
+}
+
+.welcome-card p{
+
+    margin-top:15px;
+
+    color:#9ca3af;
+
+}
+
+/* ===========================
+CARDS
+=========================== */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+
+    gap:20px;
+
+}
+
+.card{
+
+    min-height:170px;
+
+}
+
+.card h3{
+
+    margin-bottom:20px;
+
+}
+
+.empty{
+
+    color:#94a3b8;
+
+}
+
+/* ===========================
+QUICK ACTIONS
+=========================== */
+
+.actions{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+.actions button{
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:14px;
+
+    padding:14px 24px;
+
+    background:linear-gradient(90deg,#2563eb,#22c55e);
+
+    color:white;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.actions button:hover{
+
+    transform:translateY(-3px);
+
+}
+
+/* ===========================
+BOTTOM GRID
+=========================== */
+
+.bottom-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:20px;
+
+}
+
+.activity,
+.alerts,
+.announcements{
+
+    min-height:320px;
+
+}
+
+/* ===========================
+SCROLLBAR
+=========================== */
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#2563eb;
+
+    border-radius:10px;
+
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:1200px){
+
+.owner-app{
+
+grid-template-columns:90px 1fr;
+
+}
+
+.logo span{
+
+display:none;
+
+}
+
+.nav-item{
+
+font-size:13px;
+
+padding:12px;
+
+}
+
+.search input{
+
+width:250px;
+
+}
+
+.bottom-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.owner-app{
+
+grid-template-columns:1fr;
+
+}
+
+.sidebar{
+
+display:none;
+
+}
+
+.search input{
+
+width:100%;
+
+}
+
+.topbar{
+
+flex-direction:column;
+
+gap:20px;
+
+align-items:stretch;
+
+}
+
+.dashboard-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="owner.js"></script>
+/* ==========================================
+   RELVIA OWNER PANEL
+   owner.js
+========================================== */
+
+// ================================
+// Supabase
+// ================================
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+// ================================
+// Elements
+// ================================
+
+const greetingElement = document.getElementById("greeting");
+const ownerName = document.getElementById("ownerName");
+
+const usersCard = document.querySelector("#usersCard .empty");
+const creatorCard = document.querySelector("#creatorPlusCard .empty");
+const reportsCard = document.querySelector("#reportsCard .empty");
+const platformCard = document.querySelector("#platformHealth .empty");
+
+const activityFeed = document.getElementById("activityFeed");
+const announcementFeed = document.getElementById("announcementFeed");
+const securityAlerts = document.getElementById("securityAlerts");
+
+// ================================
+// Greeting
+// ================================
+
+function updateGreeting(){
+
+    const hour = new Date().getHours();
+
+    if(hour < 12){
+
+        greetingElement.textContent = "Good Morning";
+
+    }else if(hour < 18){
+
+        greetingElement.textContent = "Good Afternoon";
+
+    }else{
+
+        greetingElement.textContent = "Good Evening";
+
+    }
+
+}
+
+// ================================
+// Owner Check
+// ================================
+
+async function authenticateOwner(){
+
+    const { data:{ user } } = await supabase.auth.getUser();
+
+    if(!user){
+
+        window.location.href="/login";
+
+        return;
+
+    }
+
+    const { data:role } = await supabase
+
+        .from("user_roles")
+
+        .select("role")
+
+        .eq("user_id",user.id);
+
+    const isOwner = role?.some(r=>r.role==="owner");
+
+    if(!isOwner){
+
+        window.location.href="/403";
+
+        return;
+
+    }
+
+    const { data:profile } = await supabase
+
+        .from("profiles")
+
+        .select("username")
+
+        .eq("id",user.id)
+
+        .single();
+
+    ownerName.textContent =
+        `Welcome back, ${profile?.username ?? "Owner"}`;
+
+}
+
+// ================================
+// Dashboard
+// ================================
+
+async function loadDashboard(){
+
+    // Total Users
+
+    const { count:users } = await supabase
+
+        .from("profiles")
+
+        .select("*",{count:"exact",head:true});
+
+    usersCard.textContent = users ?? "No data";
+
+    // Creator+
+
+    const { count:creator } = await supabase
+
+        .from("user_account_flags")
+
+        .select("*",{count:"exact",head:true})
+
+        .eq("creator_plus",true);
+
+    creatorCard.textContent = creator ?? "No data";
+
+    // Reports
+
+    const { count:reports } = await supabase
+
+        .from("reports")
+
+        .select("*",{count:"exact",head:true});
+
+    reportsCard.textContent = reports ?? "No data";
+
+    // Platform
+
+    platformCard.textContent = "Operational";
+
+}
+
+// ================================
+// Activity
+// ================================
+
+async function loadActivity(){
+
+    const { data } = await supabase
+
+        .from("system_logs")
+
+        .select("*")
+
+        .order("created_at",{ascending:false})
+
+        .limit(10);
+
+    activityFeed.innerHTML="";
+
+    if(!data || data.length===0){
+
+        activityFeed.innerHTML="No activity.";
+
+        return;
+
+    }
+
+    data.forEach(log=>{
+
+        activityFeed.innerHTML+=`
+
+        <div class="activity-item">
+
+            <strong>${log.action}</strong>
+
+            <br>
+
+            <small>${new Date(log.created_at)
+                .toLocaleString()}</small>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+// ================================
+// Announcements
+// ================================
+
+async function loadAnnouncements(){
+
+    const { data } = await supabase
+
+        .from("announcements")
+
+        .select("*")
+
+        .order("created_at",{ascending:false})
+
+        .limit(5);
+
+    announcementFeed.innerHTML="";
+
+    if(!data || data.length===0){
+
+        announcementFeed.innerHTML="No announcements.";
+
+        return;
+
+    }
+
+    data.forEach(item=>{
+
+        announcementFeed.innerHTML+=`
+
+        <div class="announcement">
+
+            <strong>${item.title}</strong>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+// ================================
+// Security Alerts
+// ================================
+
+async function loadAlerts(){
+
+    securityAlerts.innerHTML="No active alerts.";
+
+}
+
+// ================================
+// Realtime
+// ================================
+
+supabase
+
+.channel("owner-dashboard")
+
+.on(
+
+"postgres_changes",
+
+{
+
+event:"*",
+
+schema:"public"
+
+},
+
+()=>{
+
+loadDashboard();
+
+loadActivity();
+
+loadAnnouncements();
+
+})
+
+.subscribe();
+
+// ================================
+// Quick Actions
+// ================================
+
+document.getElementById("announcementBtn")
+.onclick=()=>{
+
+window.location.href="/owner?tab=announcements";
+
+};
+
+document.getElementById("maintenanceBtn")
+.onclick=()=>{
+
+window.location.href="/owner?tab=services";
+
+};
+
+document.getElementById("featureBtn")
+.onclick=()=>{
+
+window.location.href="/owner?tab=features";
+
+};
+
+document.getElementById("usersBtn")
+.onclick=()=>{
+
+window.location.href="/owner?tab=users";
+
+};
+
+// ================================
+// Initialize
+// ================================
+
+async function initialize(){
+
+    updateGreeting();
+
+    await authenticateOwner();
+
+    await loadDashboard();
+
+    await loadActivity();
+
+    await loadAnnouncements();
+
+    await loadAlerts();
+
+}
+
+initialize();
