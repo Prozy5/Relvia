@@ -1,694 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relvia Owner Panel</title>
 
-    <link rel="stylesheet" href="owner.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<body>
+<title>Relvia • Owner Panel</title>
 
-<div class="owner-app">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <!-- Sidebar -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <aside class="sidebar">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-        <div class="logo">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-            <h2>Relvia</h2>
-            <span>OWNER PANEL</span>
-
-        </div>
-
-        <nav>
-
-            <button class="nav-item active">Dashboard</button>
-
-            <button class="nav-item">Analytics</button>
-
-            <button class="nav-item">Users</button>
-
-            <button class="nav-item">Moderation</button>
-
-            <button class="nav-item">Security & Finance</button>
-
-            <button class="nav-item">Creator+</button>
-
-            <button class="nav-item">Announcements</button>
-
-            <button class="nav-item">Feature Flags</button>
-
-            <button class="nav-item">Services</button>
-
-            <button class="nav-item">System Health</button>
-
-            <button class="nav-item">Developer</button>
-
-            <button class="nav-item">Emergency Center</button>
-
-            <button class="nav-item">Logs</button>
-
-            <button class="nav-item">Platform Settings</button>
-
-        </nav>
-
-    </aside>
-
-    <!-- Main -->
-
-    <main class="main-content">
-
-        <!-- Topbar -->
-
-        <header class="topbar">
-
-            <div class="search">
-
-                <input
-                    id="globalSearch"
-                    placeholder="Search users, reports, settings..."
-                >
-
-            </div>
-
-            <div class="top-actions">
-
-                <button id="notifications">
-
-                    🔔
-
-                </button>
-
-                <button id="ownerProfile">
-
-                    Owner
-
-                </button>
-
-            </div>
-
-        </header>
-
-        <!-- Greeting -->
-
-        <section class="welcome-card glass">
-
-            <h1 id="greeting">
-
-                Good Evening
-
-            </h1>
-
-            <h2 id="ownerName">
-
-                Welcome back.
-
-            </h2>
-
-            <p>
-
-                Everything will automatically sync with Supabase.
-
-            </p>
-
-        </section>
-
-        <!-- Dashboard Cards -->
-
-        <section class="dashboard-grid">
-
-            <div class="card glass" id="platformHealth">
-
-                <h3>Platform Health</h3>
-
-                <div class="empty">
-
-                    Waiting for Supabase...
-
-                </div>
-
-            </div>
-
-            <div class="card glass" id="usersCard">
-
-                <h3>Total Users</h3>
-
-                <div class="empty">
-
-                    Waiting for Supabase...
-
-                </div>
-
-            </div>
-
-            <div class="card glass" id="creatorPlusCard">
-
-                <h3>Creator+</h3>
-
-                <div class="empty">
-
-                    Waiting for Supabase...
-
-                </div>
-
-            </div>
-
-            <div class="card glass" id="reportsCard">
-
-                <h3>Open Reports</h3>
-
-                <div class="empty">
-
-                    Waiting for Supabase...
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- Quick Actions -->
-
-        <section class="glass quick-actions">
-
-            <h2>
-
-                Quick Actions
-
-            </h2>
-
-            <div class="actions">
-
-                <button id="announcementBtn">
-
-                    Site Announcement
-
-                </button>
-
-                <button id="maintenanceBtn">
-
-                    Maintenance Mode
-
-                </button>
-
-                <button id="featureBtn">
-
-                    Feature Flags
-
-                </button>
-
-                <button id="usersBtn">
-
-                    User Lookup
-
-                </button>
-
-            </div>
-
-        </section>
-
-        <!-- Bottom -->
-
-        <section class="bottom-grid">
-
-            <div class="glass activity">
-
-                <h2>
-
-                    Recent Activity
-
-                </h2>
-
-                <div id="activityFeed">
-
-                    Waiting for activity...
-
-                </div>
-
-            </div>
-
-            <div class="glass alerts">
-
-                <h2>
-
-                    Security Alerts
-
-                </h2>
-
-                <div id="securityAlerts">
-
-                    No alerts.
-
-                </div>
-
-            </div>
-
-            <div class="glass announcements">
-
-                <h2>
-
-                    Announcements
-
-                </h2>
-
-                <div id="announcementFeed">
-
-                    No announcements.
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-</div>
-
-<script src="owner.js"></script>
-
-<script>
-lucide.createIcons();
-</script>
-
-</body>
-</html>
-/* ==========================================
-   RELVIA OWNER PANEL
-   owner.css
-========================================== */
+<style>
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:"Inter",sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Inter,sans-serif;
+}
+
+:root{
+
+--bg:#070f1b;
+--surface:#111c2c;
+--surface2:#182537;
+--border:rgba(255,255,255,.08);
+
+--blue:#3b82f6;
+--green:#22c55e;
+
+--white:#ffffff;
+--gray:#94a3b8;
+
+--radius:18px;
+
+}
+
+html,body{
+
+height:100%;
+
+background:var(--bg);
+
+color:white;
+
+overflow:hidden;
+
 }
 
 body{
 
-    background:#0b1220;
-    color:#fff;
-    overflow:hidden;
+display:flex;
 
 }
 
-.owner-app{
-
-    display:grid;
-
-    grid-template-columns:280px 1fr;
-
-    width:100vw;
-
-    height:100vh;
-
-}
-
-/* ===========================
-SIDEBAR
-=========================== */
+/* Sidebar */
 
 .sidebar{
 
-    background:#111827;
+width:280px;
 
-    border-right:1px solid rgba(255,255,255,.08);
+height:100vh;
 
-    padding:30px 20px;
+background:#0d1726;
 
-    display:flex;
+border-right:1px solid var(--border);
 
-    flex-direction:column;
+display:flex;
 
-    gap:30px;
+flex-direction:column;
 
 }
 
-.logo h2{
+.logo{
 
-    font-size:28px;
+padding:28px;
 
-    font-weight:800;
+border-bottom:1px solid var(--border);
 
-    background:linear-gradient(90deg,#3b82f6,#22c55e);
+}
 
-    -webkit-background-clip:text;
+.logo h1{
 
-    -webkit-text-fill-color:transparent;
+font-size:28px;
+
+background:linear-gradient(90deg,var(--blue),var(--green));
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
 
 }
 
 .logo span{
 
-    color:#8fa3bf;
+display:block;
 
-    font-size:12px;
+margin-top:4px;
 
-    letter-spacing:2px;
+font-size:12px;
 
-}
+color:var(--gray);
 
-nav{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
+letter-spacing:2px;
 
 }
 
-.nav-item{
+.nav{
 
-    border:none;
+padding:18px;
 
-    background:none;
+display:flex;
 
-    color:#c7d2fe;
+flex-direction:column;
 
-    padding:14px;
-
-    border-radius:14px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    text-align:left;
-
-    font-size:15px;
+gap:8px;
 
 }
 
-.nav-item:hover{
+.nav button{
 
-    background:rgba(59,130,246,.15);
+height:48px;
 
-    color:white;
+border:none;
 
-}
+background:none;
 
-.nav-item.active{
+color:white;
 
-    background:linear-gradient(90deg,#2563eb,#16a34a);
+border-radius:14px;
 
-    color:white;
+cursor:pointer;
 
-}
+text-align:left;
 
-/* ===========================
-MAIN
-=========================== */
+padding:0 18px;
 
-.main-content{
+font-size:15px;
 
-    display:flex;
-
-    flex-direction:column;
-
-    overflow:auto;
-
-    padding:30px;
-
-    gap:25px;
+transition:.25s;
 
 }
 
-/* ===========================
-TOPBAR
-=========================== */
+.nav button:hover{
+
+background:rgba(59,130,246,.15);
+
+}
+
+.nav button.active{
+
+background:linear-gradient(90deg,var(--blue),var(--green));
+
+}
+
+/* Main */
+
+.main{
+
+flex:1;
+
+display:flex;
+
+flex-direction:column;
+
+overflow:auto;
+
+}
+
+/* Top */
 
 .topbar{
 
-    display:flex;
+height:80px;
 
-    justify-content:space-between;
+display:flex;
 
-    align-items:center;
+align-items:center;
 
-}
+justify-content:space-between;
 
-.search input{
+padding:0 30px;
 
-    width:420px;
+border-bottom:1px solid var(--border);
 
-    padding:14px 18px;
-
-    border-radius:14px;
-
-    border:none;
-
-    outline:none;
-
-    background:#1e293b;
-
-    color:white;
+background:#0c1727;
 
 }
 
-.top-actions{
+.search{
 
-    display:flex;
+width:450px;
 
-    gap:15px;
+height:46px;
 
-}
+background:var(--surface);
 
-.top-actions button{
+border-radius:14px;
 
-    border:none;
+display:flex;
 
-    cursor:pointer;
+align-items:center;
 
-    background:#1e293b;
-
-    color:white;
-
-    padding:12px 18px;
-
-    border-radius:12px;
-
-}
-
-/* ===========================
-GLASS
-=========================== */
-
-.glass{
-
-    background:rgba(255,255,255,.05);
-
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:22px;
-
-    padding:25px;
-
-}
-
-/* ===========================
-WELCOME
-=========================== */
-
-.welcome-card h1{
-
-    font-size:34px;
-
-    font-weight:800;
-
-}
-
-.welcome-card h2{
-
-    margin-top:10px;
-
-    color:#60a5fa;
-
-}
-
-.welcome-card p{
-
-    margin-top:15px;
-
-    color:#9ca3af;
-
-}
-
-/* ===========================
-CARDS
-=========================== */
-
-.dashboard-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-
-    gap:20px;
-
-}
-
-.card{
-
-    min-height:170px;
-
-}
-
-.card h3{
-
-    margin-bottom:20px;
-
-}
-
-.empty{
-
-    color:#94a3b8;
-
-}
-
-/* ===========================
-QUICK ACTIONS
-=========================== */
-
-.actions{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:15px;
-
-    margin-top:20px;
-
-}
-
-.actions button{
-
-    border:none;
-
-    cursor:pointer;
-
-    border-radius:14px;
-
-    padding:14px 24px;
-
-    background:linear-gradient(90deg,#2563eb,#22c55e);
-
-    color:white;
-
-    font-weight:600;
-
-    transition:.25s;
-
-}
-
-.actions button:hover{
-
-    transform:translateY(-3px);
-
-}
-
-/* ===========================
-BOTTOM GRID
-=========================== */
-
-.bottom-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    gap:20px;
-
-}
-
-.activity,
-.alerts,
-.announcements{
-
-    min-height:320px;
-
-}
-
-/* ===========================
-SCROLLBAR
-=========================== */
-
-::-webkit-scrollbar{
-
-    width:8px;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-    background:#2563eb;
-
-    border-radius:10px;
-
-}
-
-/* ===========================
-RESPONSIVE
-=========================== */
-
-@media(max-width:1200px){
-
-.owner-app{
-
-grid-template-columns:90px 1fr;
-
-}
-
-.logo span{
-
-display:none;
-
-}
-
-.nav-item{
-
-font-size:13px;
-
-padding:12px;
-
-}
-
-.search input{
-
-width:250px;
-
-}
-
-.bottom-grid{
-
-grid-template-columns:1fr;
-
-}
-
-}
-
-@media(max-width:768px){
-
-.owner-app{
-
-grid-template-columns:1fr;
-
-}
-
-.sidebar{
-
-display:none;
+padding:0 18px;
 
 }
 
@@ -696,17 +217,736 @@ display:none;
 
 width:100%;
 
+background:none;
+
+border:none;
+
+outline:none;
+
+color:white;
+
+font-size:15px;
+
 }
 
-.topbar{
+.actions{
+
+display:flex;
+
+gap:14px;
+
+align-items:center;
+
+}
+
+.icon{
+
+width:42px;
+
+height:42px;
+
+border-radius:50%;
+
+background:var(--surface);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.icon:hover{
+
+background:var(--blue);
+
+}
+
+/* Dashboard */
+
+.content{
+
+padding:30px;
+
+display:flex;
 
 flex-direction:column;
 
-gap:20px;
-
-align-items:stretch;
+gap:25px;
 
 }
+
+.hero{
+
+padding:30px;
+
+border-radius:22px;
+
+background:linear-gradient(135deg,#15243b,#16334f,#173928);
+
+border:1px solid var(--border);
+
+}
+
+.hero h2{
+
+font-size:34px;
+
+font-weight:800;
+
+}
+
+.hero p{
+
+margin-top:8px;
+
+color:var(--gray);
+
+}
+
+.cards{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+gap:18px;
+
+}
+
+.card{
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:20px;
+
+padding:22px;
+
+min-height:170px;
+
+}
+
+.card h3{
+
+font-size:14px;
+
+color:var(--gray);
+
+margin-bottom:18px;
+
+}
+
+.card h1{
+
+font-size:36px;
+
+background:linear-gradient(90deg,var(--blue),var(--green));
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
+
+}
+
+.card p{
+
+margin-top:12px;
+
+color:var(--gray);
+
+font-size:13px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+
+<h1>Relvia</h1>
+
+<span>OWNER PANEL</span>
+
+</div>
+
+<div class="nav">
+
+<button class="active">Dashboard</button>
+
+<button>Analytics</button>
+
+<button>Users</button>
+
+<button>Moderation</button>
+
+<button>Security</button>
+
+<button>Finance</button>
+
+<button>Creator+</button>
+
+<button>Announcements</button>
+
+<button>Developer</button>
+
+<button>Emergency</button>
+
+<button>Platform</button>
+
+<button>Settings</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="topbar">
+
+<div class="search">
+
+<input
+id="search"
+placeholder="Search anything...">
+
+</div>
+
+<div class="actions">
+
+<div class="icon">🔔</div>
+
+<div class="icon">⚡</div>
+
+<div class="icon">👤</div>
+
+</div>
+
+</div>
+
+<div class="content">
+
+<div class="hero">
+
+<h2 id="greeting">
+
+Welcome Back
+
+</h2>
+
+<p id="subtitle">
+
+Connecting to Supabase...
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Platform Health</h3>
+
+<h1 id="platformHealth">--</h1>
+
+<p>Live platform status</p>
+
+</div>
+
+<div class="card">
+
+<h3>Total Users</h3>
+
+<h1 id="totalUsers">--</h1>
+
+<p>Registered accounts</p>
+
+</div>
+
+<div class="card">
+
+<h3>Creator+</h3>
+
+<h1 id="creatorPlus">--</h1>
+
+<p>Active members</p>
+
+</div>
+
+<div class="card">
+
+<h3>Open Reports</h3>
+
+<h1 id="reports">--</h1>
+
+<p>Waiting for moderation</p>
+
+</div>
+
+</div>
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>Recent Activity</h2>
+
+<button class="panel-btn" id="refreshActivity">
+
+Refresh
+
+</button>
+
+</div>
+
+<div class="activity-feed" id="activityFeed">
+
+<div class="activity-item">
+
+<div class="activity-dot"></div>
+
+<div>
+
+<h4>Waiting for Supabase...</h4>
+
+<p>System activity will appear here.</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>Announcements</h2>
+
+<button class="panel-btn">
+
+Create
+
+</button>
+
+</div>
+
+<div class="announcement-feed"
+
+id="announcementFeed">
+
+<div class="announcement-card">
+
+<h4>No Announcements</h4>
+
+<p>
+
+Site-wide announcements will appear here.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>Quick Actions</h2>
+
+</div>
+
+<div class="quick-actions">
+
+<button id="qaAnnouncement">
+
+📢
+
+<span>Announcement</span>
+
+</button>
+
+<button id="qaUsers">
+
+👥
+
+<span>Users</span>
+
+</button>
+
+<button id="qaReports">
+
+🛡️
+
+<span>Reports</span>
+
+</button>
+
+<button id="qaSecurity">
+
+🔒
+
+<span>Security</span>
+
+</button>
+
+<button id="qaFinance">
+
+💳
+
+<span>Finance</span>
+
+</button>
+
+<button id="qaSettings">
+
+⚙️
+
+<span>Settings</span>
+
+</button>
+
+<button id="qaEmergency">
+
+🚨
+
+<span>Emergency</span>
+
+</button>
+
+<button id="qaLogs">
+
+📄
+
+<span>Logs</span>
+
+</button>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>Platform Status</h2>
+
+</div>
+
+<div class="status-list">
+
+<div class="status-row">
+
+<span>Database</span>
+
+<strong id="dbStatus">
+
+Checking...
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Authentication</span>
+
+<strong id="authStatus">
+
+Checking...
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Realtime</span>
+
+<strong id="realtimeStatus">
+
+Checking...
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Storage</span>
+
+<strong id="storageStatus">
+
+Checking...
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>API</span>
+
+<strong id="apiStatus">
+
+Checking...
+
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<style>
+
+/* Dashboard */
+
+.dashboard-grid{
+
+display:grid;
+
+grid-template-columns:2fr 1fr;
+
+gap:18px;
+
+margin-top:20px;
+
+}
+
+.panel{
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:20px;
+
+padding:22px;
+
+}
+
+.panel-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:20px;
+
+}
+
+.panel-header h2{
+
+font-size:18px;
+
+}
+
+.panel-btn{
+
+background:var(--blue);
+
+color:white;
+
+border:none;
+
+padding:10px 18px;
+
+border-radius:12px;
+
+cursor:pointer;
+
+}
+
+.activity-feed{
+
+display:flex;
+
+flex-direction:column;
+
+gap:14px;
+
+}
+
+.activity-item{
+
+display:flex;
+
+gap:14px;
+
+padding:14px;
+
+background:var(--surface2);
+
+border-radius:14px;
+
+}
+
+.activity-dot{
+
+width:12px;
+
+height:12px;
+
+border-radius:50%;
+
+background:var(--green);
+
+margin-top:6px;
+
+}
+
+.activity-item h4{
+
+font-size:15px;
+
+}
+
+.activity-item p{
+
+margin-top:6px;
+
+font-size:13px;
+
+color:var(--gray);
+
+}
+
+.announcement-feed{
+
+display:flex;
+
+flex-direction:column;
+
+gap:14px;
+
+}
+
+.announcement-card{
+
+background:var(--surface2);
+
+padding:16px;
+
+border-radius:14px;
+
+}
+
+.quick-actions{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:14px;
+
+}
+
+.quick-actions button{
+
+height:95px;
+
+border:none;
+
+background:var(--surface2);
+
+color:white;
+
+border-radius:16px;
+
+cursor:pointer;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:28px;
+
+gap:8px;
+
+transition:.25s;
+
+}
+
+.quick-actions button:hover{
+
+background:var(--blue);
+
+transform:translateY(-4px);
+
+}
+
+.quick-actions span{
+
+font-size:13px;
+
+}
+
+.status-list{
+
+display:flex;
+
+flex-direction:column;
+
+gap:14px;
+
+}
+
+.status-row{
+
+display:flex;
+
+justify-content:space-between;
+
+padding:14px;
+
+background:var(--surface2);
+
+border-radius:14px;
+
+}
+
+.status-row strong{
+
+color:var(--green);
+
+}
+
+@media(max-width:1200px){
 
 .dashboard-grid{
 
@@ -714,265 +954,404 @@ grid-template-columns:1fr;
 
 }
 
+.cards{
+
+grid-template-columns:repeat(2,1fr);
+
 }
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="owner.js"></script>
-/* ==========================================
-   RELVIA OWNER PANEL
-   owner.js
-========================================== */
 
-// ================================
-// Supabase
-// ================================
+}
 
-const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+@media(max-width:700px){
 
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
+.cards{
+
+grid-template-columns:1fr;
+
+}
+
+.search{
+
+width:100%;
+
+}
+
+}
+
+</style>
+
+<script>
+
+const SUPABASE_URL="YOUR_SUPABASE_URL";
+
+const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
+
+const supabase=window.supabase.createClient(
+
+SUPABASE_URL,
+
+SUPABASE_ANON_KEY
+
 );
 
-// ================================
-// Elements
-// ================================
+function greeting(){
 
-const greetingElement = document.getElementById("greeting");
-const ownerName = document.getElementById("ownerName");
+const h=new Date().getHours();
 
-const usersCard = document.querySelector("#usersCard .empty");
-const creatorCard = document.querySelector("#creatorPlusCard .empty");
-const reportsCard = document.querySelector("#reportsCard .empty");
-const platformCard = document.querySelector("#platformHealth .empty");
+const g=document.getElementById("greeting");
 
-const activityFeed = document.getElementById("activityFeed");
-const announcementFeed = document.getElementById("announcementFeed");
-const securityAlerts = document.getElementById("securityAlerts");
+if(h<12){
 
-// ================================
-// Greeting
-// ================================
+g.textContent="Good Morning";
 
-function updateGreeting(){
+}else if(h<18){
 
-    const hour = new Date().getHours();
+g.textContent="Good Afternoon";
 
-    if(hour < 12){
+}else{
 
-        greetingElement.textContent = "Good Morning";
-
-    }else if(hour < 18){
-
-        greetingElement.textContent = "Good Afternoon";
-
-    }else{
-
-        greetingElement.textContent = "Good Evening";
-
-    }
+g.textContent="Good Evening";
 
 }
 
-// ================================
-// Owner Check
-// ================================
+}
 
-async function authenticateOwner(){
+greeting();
 
-    const { data:{ user } } = await supabase.auth.getUser();
+async function ownerLogin(){
 
-    if(!user){
+const{
 
-        window.location.href="/login";
+data:{user}
 
-        return;
+}=await supabase.auth.getUser();
 
-    }
+if(!user){
 
-    const { data:role } = await supabase
+location.href="/login";
 
-        .from("user_roles")
-
-        .select("role")
-
-        .eq("user_id",user.id);
-
-    const isOwner = role?.some(r=>r.role==="owner");
-
-    if(!isOwner){
-
-        window.location.href="/403";
-
-        return;
-
-    }
-
-    const { data:profile } = await supabase
-
-        .from("profiles")
-
-        .select("username")
-
-        .eq("id",user.id)
-
-        .single();
-
-    ownerName.textContent =
-        `Welcome back, ${profile?.username ?? "Owner"}`;
+return;
 
 }
 
-// ================================
-// Dashboard
-// ================================
+const{
 
+data:role
+
+}=await supabase
+
+.from("user_roles")
+
+.select("role")
+
+.eq("user_id",user.id);
+
+const owner=
+
+role?.some(
+
+r=>r.role==="owner"
+
+);
+
+if(!owner){
+
+location.href="/403";
+
+return;
+
+}
+
+document.getElementById("subtitle")
+
+.textContent=
+
+"Welcome back to the Relvia Owner Panel.";
+
+}
 async function loadDashboard(){
 
-    // Total Users
+/* ===========================
+TOTAL USERS
+=========================== */
 
-    const { count:users } = await supabase
+const{
 
-        .from("profiles")
+count:userCount,
 
-        .select("*",{count:"exact",head:true});
+error:userError
 
-    usersCard.textContent = users ?? "No data";
+}=await supabase
 
-    // Creator+
+.from("profiles")
 
-    const { count:creator } = await supabase
+.select("*",{
 
-        .from("user_account_flags")
+count:"exact",
 
-        .select("*",{count:"exact",head:true})
+head:true
 
-        .eq("creator_plus",true);
+});
 
-    creatorCard.textContent = creator ?? "No data";
+if(!userError){
 
-    // Reports
+document.getElementById("totalUsers").textContent=
 
-    const { count:reports } = await supabase
-
-        .from("reports")
-
-        .select("*",{count:"exact",head:true});
-
-    reportsCard.textContent = reports ?? "No data";
-
-    // Platform
-
-    platformCard.textContent = "Operational";
+userCount ?? "--";
 
 }
 
-// ================================
-// Activity
-// ================================
+/* ===========================
+CREATOR+
+=========================== */
 
-async function loadActivity(){
+const{
 
-    const { data } = await supabase
+count:creatorCount,
 
-        .from("system_logs")
+error:creatorError
 
-        .select("*")
+}=await supabase
 
-        .order("created_at",{ascending:false})
+.from("user_account_flags")
 
-        .limit(10);
+.select("*",{
 
-    activityFeed.innerHTML="";
+count:"exact",
 
-    if(!data || data.length===0){
+head:true
 
-        activityFeed.innerHTML="No activity.";
+})
 
-        return;
+.eq("creator_plus",true);
 
-    }
+if(!creatorError){
 
-    data.forEach(log=>{
+document.getElementById("creatorPlus").textContent=
 
-        activityFeed.innerHTML+=`
-
-        <div class="activity-item">
-
-            <strong>${log.action}</strong>
-
-            <br>
-
-            <small>${new Date(log.created_at)
-                .toLocaleString()}</small>
-
-        </div>
-
-        `;
-
-    });
+creatorCount ?? "--";
 
 }
 
-// ================================
-// Announcements
-// ================================
+/* ===========================
+REPORTS
+=========================== */
 
-async function loadAnnouncements(){
+let reportQuery=
 
-    const { data } = await supabase
+await supabase
 
-        .from("announcements")
+.from("reports")
 
-        .select("*")
+.select("*",{
 
-        .order("created_at",{ascending:false})
+count:"exact",
 
-        .limit(5);
+head:true
 
-    announcementFeed.innerHTML="";
+});
 
-    if(!data || data.length===0){
+if(reportQuery.error){
 
-        announcementFeed.innerHTML="No announcements.";
+reportQuery=
 
-        return;
+await supabase
 
-    }
+.schema("moderation")
 
-    data.forEach(item=>{
+.from("reports")
 
-        announcementFeed.innerHTML+=`
+.select("*",{
 
-        <div class="announcement">
+count:"exact",
 
-            <strong>${item.title}</strong>
+head:true
 
-        </div>
-
-        `;
-
-    });
+});
 
 }
 
-// ================================
-// Security Alerts
-// ================================
+document.getElementById("reports").textContent=
 
-async function loadAlerts(){
+reportQuery.count ?? "--";
 
-    securityAlerts.innerHTML="No active alerts.";
+/* ===========================
+SYSTEM LOGS
+=========================== */
+
+const{
+
+data:logs,
+
+error:logError
+
+}=await supabase
+
+.from("system_logs")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(15);
+
+if(!logError){
+
+const feed=
+
+document.getElementById("activityFeed");
+
+feed.innerHTML="";
+
+if(logs.length===0){
+
+feed.innerHTML=`
+
+<div class="activity-item">
+
+<div class="activity-dot"></div>
+
+<div>
+
+<h4>No Activity</h4>
+
+<p>Nothing to display.</p>
+
+</div>
+
+</div>
+
+`;
+
+}else{
+
+logs.forEach(log=>{
+
+feed.innerHTML+=`
+
+<div class="activity-item">
+
+<div class="activity-dot"></div>
+
+<div>
+
+<h4>${log.action}</h4>
+
+<p>
+
+${log.module ?? "System"}
+
+• ${new Date(log.created_at).toLocaleString()}
+
+</p>
+
+</div>
+
+</div>
+
+`;
+
+});
 
 }
 
-// ================================
-// Realtime
-// ================================
+}
+
+/* ===========================
+ANNOUNCEMENTS
+=========================== */
+
+const{
+
+data:announcements,
+
+error:announcementError
+
+}=await supabase
+
+.from("announcements")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(10);
+
+if(!announcementError){
+
+const list=
+
+document.getElementById("announcementFeed");
+
+list.innerHTML="";
+
+if(announcements.length===0){
+
+list.innerHTML=`
+
+<div class="announcement-card">
+
+<h4>No announcements</h4>
+
+<p>Create one from the Owner Panel.</p>
+
+</div>
+
+`;
+
+}else{
+
+announcements.forEach(item=>{
+
+list.innerHTML+=`
+
+<div class="announcement-card">
+
+<h4>${item.title}</h4>
+
+<p>${item.message ?? ""}</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+}
+
+/* ===========================
+PLATFORM STATUS
+=========================== */
+
+document.getElementById("dbStatus").textContent="Online";
+
+document.getElementById("authStatus").textContent="Authenticated";
+
+document.getElementById("realtimeStatus").textContent="Connected";
+
+document.getElementById("storageStatus").textContent="Available";
+
+document.getElementById("apiStatus").textContent="Operational";
+
+}
+
+/* ===========================
+REALTIME
+=========================== */
 
 supabase
 
-.channel("owner-dashboard")
+.channel("owner-panel")
 
 .on(
 
@@ -990,64 +1369,2718 @@ schema:"public"
 
 loadDashboard();
 
-loadActivity();
+}
 
-loadAnnouncements();
-
-})
+)
 
 .subscribe();
 
-// ================================
-// Quick Actions
-// ================================
+/* ===========================
+SEARCH
+=========================== */
 
-document.getElementById("announcementBtn")
-.onclick=()=>{
+document
 
-window.location.href="/owner?tab=announcements";
+.getElementById("search")
 
-};
+.addEventListener("keydown",async(e)=>{
 
-document.getElementById("maintenanceBtn")
-.onclick=()=>{
+if(e.key!=="Enter") return;
 
-window.location.href="/owner?tab=services";
+const value=e.target.value.trim();
 
-};
+if(!value.length) return;
 
-document.getElementById("featureBtn")
-.onclick=()=>{
+const{
 
-window.location.href="/owner?tab=features";
+data,
 
-};
+error
 
-document.getElementById("usersBtn")
-.onclick=()=>{
+}=await supabase
 
-window.location.href="/owner?tab=users";
+.from("profiles")
 
-};
+.select("*")
 
-// ================================
-// Initialize
-// ================================
+.or(`username.ilike.%${value}%,display_name.ilike.%${value}%`)
 
-async function initialize(){
+.limit(15);
 
-    updateGreeting();
+if(error){
 
-    await authenticateOwner();
+console.error(error);
 
-    await loadDashboard();
-
-    await loadActivity();
-
-    await loadAnnouncements();
-
-    await loadAlerts();
+return;
 
 }
 
-initialize();
+console.log("Search Results:",data);
+
+});
+
+/* ===========================
+QUICK ACTIONS
+=========================== */
+
+document.getElementById("qaAnnouncement").onclick=()=>{
+
+showToast("Opening Announcements...");
+
+};
+
+document.getElementById("qaUsers").onclick=()=>{
+
+showToast("Opening Users...");
+
+};
+
+document.getElementById("qaReports").onclick=()=>{
+
+showToast("Opening Moderation...");
+
+};
+
+document.getElementById("qaSecurity").onclick=()=>{
+
+showToast("Opening Security Center...");
+
+};
+
+document.getElementById("qaFinance").onclick=()=>{
+
+showToast("Opening Finance Center...");
+
+};
+
+document.getElementById("qaSettings").onclick=()=>{
+
+showToast("Opening Settings...");
+
+};
+
+document.getElementById("qaEmergency").onclick=()=>{
+
+showToast("Opening Emergency Center...");
+
+};
+
+document.getElementById("qaLogs").onclick=()=>{
+
+showToast("Opening Logs...");
+
+};
+
+/* ===========================
+TOAST
+=========================== */
+
+function showToast(message){
+
+let toast=document.getElementById("toast");
+
+if(!toast){
+
+toast=document.createElement("div");
+
+toast.id="toast";
+
+document.body.appendChild(toast);
+
+toast.style.position="fixed";
+
+toast.style.bottom="30px";
+
+toast.style.right="30px";
+
+toast.style.background="#2563eb";
+
+toast.style.color="white";
+
+toast.style.padding="14px 22px";
+
+toast.style.borderRadius="12px";
+
+toast.style.boxShadow="0 10px 30px rgba(0,0,0,.35)";
+
+toast.style.zIndex="99999";
+
+toast.style.transition=".25s";
+
+}
+
+toast.textContent=message;
+
+toast.style.opacity="1";
+
+setTimeout(()=>{
+
+toast.style.opacity="0";
+
+},2500);
+
+}
+
+/* ===========================
+INITIALIZE
+=========================== */
+
+(async()=>{
+
+await ownerLogin();
+
+await loadDashboard();
+
+})();
+/* ==========================================================
+   PART 5
+   OWNER PANEL SPA + USERS MODULE
+   Continue inside the SAME <script>
+========================================================== */
+
+const pages={
+
+dashboard:document.querySelector(".content")
+
+};
+
+const pageCache={};
+
+/* =====================================
+NAVIGATION
+===================================== */
+
+document
+
+.querySelectorAll(".nav button")
+
+.forEach(button=>{
+
+button.onclick=()=>{
+
+document
+
+.querySelectorAll(".nav button")
+
+.forEach(b=>b.classList.remove("active"));
+
+button.classList.add("active");
+
+const page=button.textContent
+
+.toLowerCase()
+
+.replace("+","")
+
+.replace(/\s+/g,"");
+
+openPage(page);
+
+};
+
+});
+
+/* =====================================
+PAGE ROUTER
+===================================== */
+
+async function openPage(page){
+
+if(page==="dashboard"){
+
+document.querySelector(".content").style.display="flex";
+
+return;
+
+}
+
+document.querySelector(".content").style.display="none";
+
+let container=document.getElementById("dynamicPage");
+
+if(!container){
+
+container=document.createElement("div");
+
+container.id="dynamicPage";
+
+container.className="content";
+
+document.querySelector(".main")
+
+.appendChild(container);
+
+}
+
+container.innerHTML="<h2>Loading...</h2>";
+
+switch(page){
+
+case"users":
+
+loadUsersPage(container);
+
+break;
+
+case"analytics":
+
+loadAnalyticsPage(container);
+
+break;
+
+case"moderation":
+
+loadModerationPage(container);
+
+break;
+
+case"security":
+
+loadSecurityPage(container);
+
+break;
+
+case"finance":
+
+loadFinancePage(container);
+
+break;
+
+case"creator":
+
+loadCreatorPage(container);
+
+break;
+
+case"announcements":
+
+loadAnnouncementsPage(container);
+
+break;
+
+case"developer":
+
+loadDeveloperPage(container);
+
+break;
+
+case"emergency":
+
+loadEmergencyPage(container);
+
+break;
+
+case"platform":
+
+loadPlatformPage(container);
+
+break;
+
+case"settings":
+
+loadSettingsPage(container);
+
+break;
+
+default:
+
+container.innerHTML=`
+
+<h1>
+
+Coming Soon
+
+</h1>
+
+`;
+
+}
+
+}
+
+/* =====================================
+USERS PAGE
+===================================== */
+
+async function loadUsersPage(container){
+
+container.innerHTML=`
+
+<div class="hero">
+
+<h2>
+
+User Management
+
+</h2>
+
+<p>
+
+Search, inspect and manage every account.
+
+</p>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Users
+
+</h2>
+
+<input
+
+id="userSearch"
+
+placeholder="Search users..."
+
+style="width:300px;height:42px;padding:0 15px;border:none;border-radius:12px;background:#182537;color:white;">
+
+</div>
+
+<table class="ownerTable"
+
+id="usersTable">
+
+<thead>
+
+<tr>
+
+<th>Username</th>
+
+<th>Display Name</th>
+
+<th>Role</th>
+
+<th>Status</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+const tbody=
+
+container.querySelector("tbody");
+
+const{
+
+data,
+
+error
+
+}=await supabase
+
+.from("profiles")
+
+.select("*")
+
+.limit(100);
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+tbody.innerHTML="";
+
+data.forEach(user=>{
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>
+
+${user.username ?? "-"}
+
+</td>
+
+<td>
+
+${user.display_name ?? "-"}
+
+</td>
+
+<td>
+
+Unknown
+
+</td>
+
+<td>
+
+Active
+
+</td>
+
+<td>
+
+<button
+
+class="viewUser"
+
+data-id="${user.id}">
+
+View
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+container
+
+.querySelectorAll(".viewUser")
+
+.forEach(btn=>{
+
+btn.onclick=()=>{
+
+openUser(
+
+btn.dataset.id
+
+);
+
+};
+
+});
+
+document
+
+.getElementById("userSearch")
+
+.oninput=e=>{
+
+const value=
+
+e.target.value
+
+.toLowerCase();
+
+tbody
+
+.querySelectorAll("tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(value)
+
+?
+
+""
+
+:
+
+"none";
+
+});
+
+};
+
+}
+
+/* =====================================
+USER PROFILE
+===================================== */
+
+async function openUser(id){
+
+const{
+
+data,
+
+error
+
+}=await supabase
+
+.from("profiles")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+if(error){
+
+console.error(error);
+
+return;
+
+}
+
+const modal=document.createElement("div");
+
+modal.className="ownerModal";
+
+modal.innerHTML=`
+
+<div class="ownerModalCard">
+
+<h2>
+
+${data.display_name ?? data.username}
+
+</h2>
+
+<p>
+
+Username:
+
+${data.username}
+
+</p>
+
+<p>
+
+Email visibility controlled by Auth
+
+</p>
+
+<br>
+
+<button id="closeUser">
+
+Close
+
+</button>
+
+</div>
+
+`;
+
+document.body.appendChild(modal);
+
+document
+
+.getElementById("closeUser")
+
+.onclick=()=>{
+
+modal.remove();
+
+};
+
+}
+/* ==========================================================
+   ANALYTICS PAGE
+========================================================== */
+
+async function loadAnalyticsPage(container){
+
+container.innerHTML=`
+
+<div class="hero">
+
+<h2>
+
+Platform Analytics
+
+</h2>
+
+<p>
+
+Live analytics across the entire Relvia platform.
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Total Users</h3>
+
+<h1 id="analyticsUsers">--</h1>
+
+<p>Registered Accounts</p>
+
+</div>
+
+<div class="card">
+
+<h3>Creator+</h3>
+
+<h1 id="analyticsCreator">--</h1>
+
+<p>Premium Members</p>
+
+</div>
+
+<div class="card">
+
+<h3>Reports</h3>
+
+<h1 id="analyticsReports">--</h1>
+
+<p>Open Moderation Reports</p>
+
+</div>
+
+<div class="card">
+
+<h3>Sessions</h3>
+
+<h1 id="analyticsSessions">--</h1>
+
+<p>Current Sessions</p>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Platform Overview
+
+</h2>
+
+</div>
+
+<canvas
+
+id="userChart"
+
+height="140">
+
+</canvas>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Statistics
+
+</h2>
+
+</div>
+
+<div class="status-list">
+
+<div class="status-row">
+
+<span>Profiles</span>
+
+<strong id="statsProfiles">
+
+--
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Creator+</span>
+
+<strong id="statsCreator">
+
+--
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Reports</span>
+
+<strong id="statsReports">
+
+--
+
+</strong>
+
+</div>
+
+<div class="status-row">
+
+<span>Sessions</span>
+
+<strong id="statsSessions">
+
+--
+
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+const users=await supabase
+
+.from("profiles")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("analyticsUsers").textContent=
+
+users.count ?? "--";
+
+document.getElementById("statsProfiles").textContent=
+
+users.count ?? "--";
+
+const creator=await supabase
+
+.from("user_account_flags")
+
+.select("*",{count:"exact",head:true})
+
+.eq("creator_plus",true);
+
+document.getElementById("analyticsCreator").textContent=
+
+creator.count ?? "--";
+
+document.getElementById("statsCreator").textContent=
+
+creator.count ?? "--";
+
+let reports=await supabase
+
+.from("reports")
+
+.select("*",{count:"exact",head:true});
+
+if(reports.error){
+
+reports=await supabase
+
+.schema("moderation")
+
+.from("reports")
+
+.select("*",{count:"exact",head:true});
+
+}
+
+document.getElementById("analyticsReports").textContent=
+
+reports.count ?? "--";
+
+document.getElementById("statsReports").textContent=
+
+reports.count ?? "--";
+
+const sessions=await supabase
+
+.from("owner_sessions")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("analyticsSessions").textContent=
+
+sessions.count ?? "--";
+
+document.getElementById("statsSessions").textContent=
+
+sessions.count ?? "--";
+
+drawChart(
+
+users.count ?? 0,
+
+creator.count ?? 0,
+
+reports.count ?? 0,
+
+sessions.count ?? 0
+
+);
+
+}
+
+/* ==========================================================
+   SIMPLE CANVAS CHART
+========================================================== */
+
+function drawChart(users,creator,reports,sessions){
+
+const canvas=
+
+document.getElementById("userChart");
+
+if(!canvas) return;
+
+const ctx=
+
+canvas.getContext("2d");
+
+ctx.clearRect(
+
+0,
+
+0,
+
+canvas.width,
+
+canvas.height
+
+);
+
+const values=[
+
+users,
+
+creator,
+
+reports,
+
+sessions
+
+];
+
+const labels=[
+
+"Users",
+
+"Creator+",
+
+"Reports",
+
+"Sessions"
+
+];
+
+const colors=[
+
+"#3b82f6",
+
+"#22c55e",
+
+"#f59e0b",
+
+"#8b5cf6"
+
+];
+
+const max=
+
+Math.max(...values,1);
+
+const width=70;
+
+values.forEach((value,index)=>{
+
+const height=
+
+(value/max)*180;
+
+const x=
+
+40+(index*110);
+
+const y=
+
+220-height;
+
+ctx.fillStyle=
+
+colors[index];
+
+ctx.fillRect(
+
+x,
+
+y,
+
+width,
+
+height
+
+);
+
+ctx.fillStyle="#ffffff";
+
+ctx.font="14px Inter";
+
+ctx.fillText(
+
+labels[index],
+
+x,
+
+245
+
+);
+
+ctx.fillText(
+
+value,
+
+x+20,
+
+y-10
+
+);
+
+});
+
+}
+
+/* ==========================================================
+   AUTO REFRESH ANALYTICS
+========================================================== */
+
+setInterval(()=>{
+
+const page=
+
+document
+
+.querySelector(".nav .active")
+
+.textContent
+
+.toLowerCase();
+
+if(page==="analytics"){
+
+loadAnalyticsPage(
+
+document.getElementById("dynamicPage")
+
+);
+
+}
+
+},30000)
+/* ==========================================================
+   MODERATION CENTER
+========================================================== */
+
+async function loadModerationPage(container){
+
+container.innerHTML=`
+
+<div class="hero">
+
+<h2>
+
+Moderation Center
+
+</h2>
+
+<p>
+
+Manage reports, warnings, suspensions and bans.
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Open Reports</h3>
+
+<h1 id="modReports">--</h1>
+
+<p>Awaiting Review</p>
+
+</div>
+
+<div class="card">
+
+<h3>Warnings</h3>
+
+<h1 id="modWarnings">--</h1>
+
+<p>Issued</p>
+
+</div>
+
+<div class="card">
+
+<h3>Suspensions</h3>
+
+<h1 id="modSuspensions">--</h1>
+
+<p>Active</p>
+
+</div>
+
+<div class="card">
+
+<h3>Bans</h3>
+
+<h1 id="modBans">--</h1>
+
+<p>Permanent</p>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Report Queue
+
+</h2>
+
+<input
+
+id="reportSearch"
+
+placeholder="Search reports..."
+
+style="width:260px;height:42px;border:none;background:#182537;color:white;padding:0 14px;border-radius:12px;">
+
+</div>
+
+<table class="ownerTable">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Reason</th>
+
+<th>Status</th>
+
+<th>Created</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody id="reportsTable">
+
+<tr>
+
+<td colspan="5">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Moderator Actions
+
+</h2>
+
+</div>
+
+<div class="quick-actions">
+
+<button id="warnUser">
+
+⚠️
+
+<span>Warn</span>
+
+</button>
+
+<button id="suspendUser">
+
+⏸️
+
+<span>Suspend</span>
+
+</button>
+
+<button id="banUser">
+
+🔨
+
+<span>Ban</span>
+
+</button>
+
+<button id="ipBan">
+
+🌐
+
+<span>IP Ban</span>
+
+</button>
+
+<button id="deleteAccount">
+
+🗑️
+
+<span>Delete</span>
+
+</button>
+
+<button id="clearReports">
+
+✅
+
+<span>Resolve</span>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+let reportResult=
+
+await supabase
+
+.from("reports")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(100);
+
+if(reportResult.error){
+
+reportResult=
+
+await supabase
+
+.schema("moderation")
+
+.from("reports")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(100);
+
+}
+
+const tbody=
+
+document.getElementById("reportsTable");
+
+tbody.innerHTML="";
+
+if(reportResult.data.length===0){
+
+tbody.innerHTML=`
+
+<tr>
+
+<td colspan="5">
+
+No reports found.
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+reportResult.data.forEach(report=>{
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>
+
+${report.id}
+
+</td>
+
+<td>
+
+${report.reason ?? "Unknown"}
+
+</td>
+
+<td>
+
+${report.status ?? "Pending"}
+
+</td>
+
+<td>
+
+${new Date(report.created_at).toLocaleDateString()}
+
+</td>
+
+<td>
+
+<button
+
+class="reviewReport"
+
+data-id="${report.id}">
+
+Review
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+document
+
+.querySelectorAll(".reviewReport")
+
+.forEach(button=>{
+
+button.onclick=()=>{
+
+reviewReport(
+
+button.dataset.id
+
+);
+
+};
+
+});
+
+document
+
+.getElementById("reportSearch")
+
+.oninput=e=>{
+
+const search=
+
+e.target.value
+
+.toLowerCase();
+
+tbody
+
+.querySelectorAll("tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(search)
+
+?
+
+""
+
+:
+
+"none";
+
+});
+
+};
+
+loadModerationStats();
+
+}
+
+/* ==========================================================
+   MODERATION STATS
+========================================================== */
+
+async function loadModerationStats(){
+
+let reports=
+
+await supabase
+
+.from("reports")
+
+.select("*",{
+
+count:"exact",
+
+head:true
+
+});
+
+if(reports.error){
+
+reports=
+
+await supabase
+
+.schema("moderation")
+
+.from("reports")
+
+.select("*",{
+
+count:"exact",
+
+head:true
+
+});
+
+}
+
+document.getElementById("modReports").textContent=
+
+reports.count ?? "--";
+
+const warnings=
+
+await supabase
+
+.from("user_warnings")
+
+.select("*",{
+
+count:"exact",
+
+head:true
+
+});
+
+document.getElementById("modWarnings").textContent=
+
+warnings.count ?? "--";
+
+const suspensions=
+
+await supabase
+
+.from("user_suspensions")
+
+.select("*",{
+
+count:"exact",
+
+head:true
+
+});
+
+document.getElementById("modSuspensions").textContent=
+
+suspensions.count ?? "--";
+
+const bans=
+
+await supabase
+
+.from("user_bans")
+
+.select("*",{
+
+count:"exact",
+
+head:true
+
+});
+
+document.getElementById("modBans").textContent=
+
+bans.count ?? "--";
+
+}
+
+/* ==========================================================
+   REVIEW REPORT
+========================================================== */
+
+async function reviewReport(id){
+
+let report=
+
+await supabase
+
+.from("reports")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+if(report.error){
+
+report=
+
+await supabase
+
+.schema("moderation")
+
+.from("reports")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+}
+
+const modal=document.createElement("div");
+
+modal.className="ownerModal";
+
+modal.innerHTML=`
+
+<div class="ownerModalCard"
+
+style="width:700px;">
+
+<h2>
+
+Report #${report.data.id}
+
+</h2>
+
+<br>
+
+<p>
+
+<strong>
+
+Reason:
+
+</strong>
+
+${report.data.reason ?? "-"}
+
+</p>
+
+<br>
+
+<p>
+
+<strong>
+
+Description:
+
+</strong>
+
+</p>
+
+<p>
+
+${report.data.description ?? "No description provided."}
+
+</p>
+
+<br>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+
+<button id="approveReport">
+
+Resolve
+
+</button>
+
+<button id="warnReportUser">
+
+Warn User
+
+</button>
+
+<button id="suspendReportUser">
+
+Suspend
+
+</button>
+
+<button id="banReportUser">
+
+Ban
+
+</button>
+
+<button id="closeReport">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+document.body.appendChild(modal);
+
+document.getElementById("closeReport").onclick=()=>{
+
+modal.remove();
+
+};
+
+document.getElementById("approveReport").onclick=()=>{
+
+showToast("Report marked as resolved.");
+
+modal.remove();
+
+};
+
+document.getElementById("warnReportUser").onclick=()=>{
+
+showToast("Warning workflow started.");
+
+};
+
+document.getElementById("suspendReportUser").onclick=()=>{
+
+showToast("Suspension workflow started.");
+
+};
+
+document.getElementById("banReportUser").onclick=()=>{
+
+showToast("Ban workflow started.");
+
+};
+
+}
+/* ==========================================================
+   SECURITY CENTER
+========================================================== */
+
+async function loadSecurityPage(container){
+
+container.innerHTML=`
+
+<div class="hero">
+
+<h2>
+
+Security Center
+
+</h2>
+
+<p>
+
+Monitor logins, sessions, IP addresses and security alerts.
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Active Sessions</h3>
+
+<h1 id="securitySessions">--</h1>
+
+<p>Current logged in users</p>
+
+</div>
+
+<div class="card">
+
+<h3>Failed Logins</h3>
+
+<h1 id="failedLogins">--</h1>
+
+<p>Last 24 hours</p>
+
+</div>
+
+<div class="card">
+
+<h3>Security Alerts</h3>
+
+<h1 id="securityAlerts">--</h1>
+
+<p>Needs attention</p>
+
+</div>
+
+<div class="card">
+
+<h3>Blocked IPs</h3>
+
+<h1 id="blockedIPs">--</h1>
+
+<p>Platform IP bans</p>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Recent Logins
+
+</h2>
+
+<input
+id="securitySearch"
+placeholder="Search user or IP..."
+style="width:260px;height:42px;border:none;background:#182537;color:white;padding:0 14px;border-radius:12px;">
+
+</div>
+
+<table class="ownerTable">
+
+<thead>
+
+<tr>
+
+<th>User</th>
+
+<th>IP Address</th>
+
+<th>Location</th>
+
+<th>Device</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody id="loginTable">
+
+<tr>
+
+<td colspan="5">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Emergency Controls
+
+</h2>
+
+</div>
+
+<div class="quick-actions">
+
+<button id="lockPlatform">
+
+🔒
+
+<span>Lock Platform</span>
+
+</button>
+
+<button id="maintenanceMode">
+
+🛠️
+
+<span>Maintenance</span>
+
+</button>
+
+<button id="disableSignup">
+
+🚫
+
+<span>Disable Signup</span>
+
+</button>
+
+<button id="clearSessions">
+
+👥
+
+<span>End Sessions</span>
+
+</button>
+
+<button id="securityAudit">
+
+🛡️
+
+<span>Run Audit</span>
+
+</button>
+
+<button id="viewAuditLog">
+
+📄
+
+<span>Audit Log</span>
+
+</button>
+
+<button id="manageIPs">
+
+🌐
+
+<span>Manage IPs</span>
+
+</button>
+
+<button id="panicButton">
+
+🚨
+
+<span>Panic Mode</span>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+await loadSecurityStats();
+
+await loadLoginHistory();
+
+wireSecurityButtons();
+
+}
+
+/* ==========================================================
+   SECURITY STATS
+========================================================== */
+
+async function loadSecurityStats(){
+
+const sessions=await supabase
+
+.from("owner_sessions")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("securitySessions").textContent=
+
+sessions.count ?? "--";
+
+const failed=await supabase
+
+.from("failed_logins")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("failedLogins").textContent=
+
+failed.count ?? "--";
+
+const alerts=await supabase
+
+.from("security_alerts")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("securityAlerts").textContent=
+
+alerts.count ?? "--";
+
+const bans=await supabase
+
+.from("ip_bans")
+
+.select("*",{count:"exact",head:true});
+
+document.getElementById("blockedIPs").textContent=
+
+bans.count ?? "--";
+
+}
+
+/* ==========================================================
+   LOGIN HISTORY
+========================================================== */
+
+async function loadLoginHistory(){
+
+const tbody=document.getElementById("loginTable");
+
+if(!tbody) return;
+
+tbody.innerHTML="";
+
+const {data,error}=await supabase
+
+.from("login_history")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(100);
+
+if(error){
+
+tbody.innerHTML=`
+
+<tr>
+
+<td colspan="5">
+
+Unable to load login history.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+}
+
+if(data.length===0){
+
+tbody.innerHTML=`
+
+<tr>
+
+<td colspan="5">
+
+No login history.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+}
+
+data.forEach(login=>{
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>
+
+${login.username ?? "-"}
+
+</td>
+
+<td>
+
+${login.ip_address ?? "-"}
+
+</td>
+
+<td>
+
+${login.location ?? "Unknown"}
+
+</td>
+
+<td>
+
+${login.device ?? "Unknown"}
+
+</td>
+
+<td>
+
+<button
+class="inspectLogin"
+data-id="${login.id}">
+
+Inspect
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document
+
+.querySelectorAll(".inspectLogin")
+
+.forEach(button=>{
+
+button.onclick=()=>{
+
+showToast(
+
+"Opening login session..."
+
+);
+
+};
+
+});
+
+document
+
+.getElementById("securitySearch")
+
+.oninput=e=>{
+
+const value=e.target.value.toLowerCase();
+
+tbody
+
+.querySelectorAll("tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(value)
+
+?
+
+""
+
+:
+
+"none";
+
+});
+
+};
+
+}
+
+/* ==========================================================
+   SECURITY BUTTONS
+========================================================== */
+
+function wireSecurityButtons(){
+
+document.getElementById("lockPlatform").onclick=()=>{
+
+showToast("Platform lock requested.");
+
+};
+
+document.getElementById("maintenanceMode").onclick=()=>{
+
+showToast("Maintenance mode.");
+
+};
+
+document.getElementById("disableSignup").onclick=()=>{
+
+showToast("Signup toggle opened.");
+
+};
+
+document.getElementById("clearSessions").onclick=()=>{
+
+showToast("Ending active sessions...");
+
+};
+
+document.getElementById("securityAudit").onclick=()=>{
+
+showToast("Running security audit...");
+
+};
+
+document.getElementById("viewAuditLog").onclick=()=>{
+
+showToast("Opening audit logs...");
+
+};
+
+document.getElementById("manageIPs").onclick=()=>{
+
+showToast("Opening IP Manager...");
+
+};
+
+document.getElementById("panicButton").onclick=()=>{
+
+const confirmed=confirm(
+
+"Enable PANIC MODE?\n\nThis should only be used during an emergency."
+
+);
+
+if(!confirmed) return;
+
+showToast("Emergency mode activated.");
+
+};
+
+}
+/* ==========================================================
+   FINANCE CENTER
+========================================================== */
+
+async function loadFinancePage(container){
+
+container.innerHTML=`
+
+<div class="hero">
+
+<h2>
+
+Finance Center
+
+</h2>
+
+<p>
+
+Monitor subscriptions, revenue, payouts and transactions.
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Total Revenue</h3>
+
+<h1 id="financeRevenue">$0</h1>
+
+<p>Lifetime Platform Revenue</p>
+
+</div>
+
+<div class="card">
+
+<h3>Creator+ Members</h3>
+
+<h1 id="financeCreatorPlus">--</h1>
+
+<p>Recurring Subscribers</p>
+
+</div>
+
+<div class="card">
+
+<h3>Pending Payouts</h3>
+
+<h1 id="pendingPayouts">$0</h1>
+
+<p>Awaiting Processing</p>
+
+</div>
+
+<div class="card">
+
+<h3>Refund Requests</h3>
+
+<h1 id="refundRequests">0</h1>
+
+<p>Open Refund Cases</p>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Recent Transactions
+
+</h2>
+
+<input
+
+id="transactionSearch"
+
+placeholder="Search transactions..."
+
+style="width:280px;height:42px;background:#182537;border:none;border-radius:12px;padding:0 15px;color:white;">
+
+</div>
+
+<table class="ownerTable">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>User</th>
+
+<th>Amount</th>
+
+<th>Status</th>
+
+<th>Date</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody id="transactionTable">
+
+<tr>
+
+<td colspan="6">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+
+<h2>
+
+Finance Actions
+
+</h2>
+
+</div>
+
+<div class="quick-actions">
+
+<button id="creatorPlans">
+
+💎
+
+<span>Creator+ Plans</span>
+
+</button>
+
+<button id="processRefund">
+
+💸
+
+<span>Refunds</span>
+
+</button>
+
+<button id="payoutCenter">
+
+🏦
+
+<span>Payouts</span>
+
+</button>
+
+<button id="billingLogs">
+
+🧾
+
+<span>Billing Logs</span>
+
+</button>
+
+<button id="taxCenter">
+
+📑
+
+<span>Tax Center</span>
+
+</button>
+
+<button id="paymentSettings">
+
+⚙️
+
+<span>Payments</span>
+
+</button>
+
+<button id="exportFinance">
+
+📤
+
+<span>Export</span>
+
+</button>
+
+<button id="revenueChart">
+
+📈
+
+<span>Revenue</span>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+await loadFinanceStats();
+
+await loadTransactions();
+
+wireFinanceButtons();
+
+}
+
+/* ==========================================================
+   FINANCE STATS
+========================================================== */
+
+async function loadFinanceStats(){
+
+const creator=await supabase
+
+.from("user_account_flags")
+
+.select("*",{count:"exact",head:true})
+
+.eq("creator_plus",true);
+
+document.getElementById("financeCreatorPlus").textContent=
+
+creator.count ?? "--";
+
+/*
+
+Replace these with your real finance tables later.
+
+*/
+
+document.getElementById("financeRevenue").textContent="$0.00";
+
+document.getElementById("pendingPayouts").textContent="$0.00";
+
+document.getElementById("refundRequests").textContent="0";
+
+}
+
+/* ==========================================================
+   TRANSACTIONS
+========================================================== */
+
+async function loadTransactions(){
+
+const tbody=
+
+document.getElementById("transactionTable");
+
+tbody.innerHTML="";
+
+const {data,error}=await supabase
+
+.from("transactions")
+
+.select("*")
+
+.order("created_at",{
+
+ascending:false
+
+})
+
+.limit(100);
+
+if(error){
+
+tbody.innerHTML=`
+
+<tr>
+
+<td colspan="6">
+
+No transaction table found.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+}
+
+if(data.length===0){
+
+tbody.innerHTML=`
+
+<tr>
+
+<td colspan="6">
+
+No transactions available.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+}
+
+data.forEach(transaction=>{
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>
+
+${transaction.id}
+
+</td>
+
+<td>
+
+${transaction.user_id}
+
+</td>
+
+<td>
+
+$${Number(transaction.amount).toFixed(2)}
+
+</td>
+
+<td>
+
+${transaction.status}
+
+</td>
+
+<td>
+
+${new Date(transaction.created_at).toLocaleDateString()}
+
+</td>
+
+<td>
+
+<button
+
+class="viewTransaction"
+
+data-id="${transaction.id}">
+
+View
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document
+
+.querySelectorAll(".viewTransaction")
+
+.forEach(button=>{
+
+button.onclick=()=>{
+
+openTransaction(
+
+button.dataset.id
+
+);
+
+};
+
+});
+
+document
+
+.getElementById("transactionSearch")
+
+.oninput=e=>{
+
+const search=e.target.value.toLowerCase();
+
+tbody
+
+.querySelectorAll("tr")
+
+.forEach(row=>{
+
+row.style.display=
+
+row.innerText
+
+.toLowerCase()
+
+.includes(search)
+
+?
+
+""
+
+:
+
+"none";
+
+});
+
+};
+
+}
+
+/* ==========================================================
+   TRANSACTION DETAILS
+========================================================== */
+
+async function openTransaction(id){
+
+const {data,error}=await supabase
+
+.from("transactions")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+if(error){
+
+showToast("Unable to load transaction.");
+
+return;
+
+}
+
+const modal=document.createElement("div");
+
+modal.className="ownerModal";
+
+modal.innerHTML=`
+
+<div class="ownerModalCard"
+
+style="width:650px;">
+
+<h2>
+
+Transaction
+
+</h2>
+
+<br>
+
+<p><strong>ID:</strong> ${data.id}</p>
+
+<p><strong>User:</strong> ${data.user_id}</p>
+
+<p><strong>Amount:</strong> $${Number(data.amount).toFixed(2)}</p>
+
+<p><strong>Status:</strong> ${data.status}</p>
+
+<p><strong>Date:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+
+<br>
+
+<button id="closeTransaction">
+
+Close
+
+</button>
+
+</div>
+
+`;
+
+document.body.appendChild(modal);
+
+document.getElementById("closeTransaction").onclick=()=>{
+
+modal.remove();
+
+};
+
+}
+
+/* ==========================================================
+   FINANCE BUTTONS
+========================================================== */
+
+function wireFinanceButtons(){
+
+document.getElementById("creatorPlans").onclick=()=>{
+
+showToast("Opening Creator+ plans...");
+
+};
+
+document.getElementById("processRefund").onclick=()=>{
+
+showToast("Opening refund center...");
+
+};
+
+document.getElementById("payoutCenter").onclick=()=>{
+
+showToast("Opening payout center...");
+
+};
+
+document.getElementById("billingLogs").onclick=()=>{
+
+showToast("Opening billing logs...");
+
+};
+
+document.getElementById("taxCenter").onclick=()=>{
+
+showToast("Opening tax center...");
+
+};
+
+document.getElementById("paymentSettings").onclick=()=>{
+
+showToast("Opening payment settings...");
+
+};
+
+document.getElementById("exportFinance").onclick=()=>{
+
+showToast("Preparing export...");
+
+};
+
+document.getElementById("revenueChart").onclick=()=>{
+
+showToast("Opening revenue analytics...");
+
+};
+
+}
