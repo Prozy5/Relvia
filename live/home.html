@@ -9,15 +9,374 @@
 
 <title>Relvia Live</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+:root{
+
+--bg:#0B1220;
+--surface:#111827;
+--surface2:#1A2335;
+
+--blue:#2563EB;
+--blue-hover:#1D4ED8;
+
+--purple:#7C3AED;
+
+--text:#FFFFFF;
+--muted:#94A3B8;
+
+--border:#1F2937;
+
+--success:#22C55E;
+--danger:#EF4444;
+
+}
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+}
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+body{
+
+background:var(--bg);
+
+color:var(--text);
+
+font-family:Arial,Helvetica,sans-serif;
+
+}
+
+a{
+
+text-decoration:none;
+
+color:inherit;
+
+}
+
+button{
+
+cursor:pointer;
+
+font-family:inherit;
+
+}
+
+header{
+
+position:sticky;
+
+top:0;
+
+height:72px;
+
+background:rgba(11,18,32,.96);
+
+backdrop-filter:blur(18px);
+
+border-bottom:1px solid var(--border);
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 35px;
+
+z-index:999;
+
+}
+
+.logo{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+font-size:28px;
+
+font-weight:700;
+
+}
+
+.logoMark{
+
+width:42px;
+
+height:42px;
+
+border-radius:12px;
+
+background:linear-gradient(135deg,var(--blue),var(--purple));
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:18px;
+
+font-weight:bold;
+
+}
+
+nav{
+
+display:flex;
+
+gap:28px;
+
+}
+
+nav a{
+
+font-size:15px;
+
+color:var(--muted);
+
+transition:.2s;
+
+}
+
+nav a:hover{
+
+color:white;
+
+}
+
+nav .active{
+
+color:white;
+
+}
+
+.headerRight{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.search{
+
+width:300px;
+
+height:42px;
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:12px;
+
+padding:0 15px;
+
+outline:none;
+
+color:white;
+
+}
+
+.profile{
+
+width:42px;
+
+height:42px;
+
+border-radius:50%;
+
+background:var(--surface2);
+
+border:1px solid var(--border);
+
+}
+
+.hero{
+
+padding:60px 40px;
+
+}
+
+.heroCard{
+
+background:linear-gradient(135deg,#111827,#18243A);
+
+border:1px solid var(--border);
+
+border-radius:28px;
+
+padding:60px;
+
+min-height:420px;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.liveBadge{
+
+display:inline-flex;
+
+align-items:center;
+
+gap:10px;
+
+background:rgba(239,68,68,.15);
+
+border:1px solid rgba(239,68,68,.35);
+
+color:#FFB4B4;
+
+padding:8px 18px;
+
+border-radius:999px;
+
+width:max-content;
+
+margin-bottom:24px;
+
+font-size:14px;
+
+font-weight:bold;
+
+}
+
+.liveDot{
+
+width:10px;
+
+height:10px;
+
+background:var(--danger);
+
+border-radius:50%;
+
+}
+
+.hero h1{
+
+font-size:58px;
+
+max-width:760px;
+
+line-height:1.05;
+
+margin-bottom:18px;
+
+}
+
+.hero p{
+
+max-width:700px;
+
+font-size:18px;
+
+line-height:1.8;
+
+color:var(--muted);
+
+margin-bottom:35px;
+
+}
+
+.heroButtons{
+
+display:flex;
+
+gap:15px;
+
+}
+
+.primary{
+
+height:52px;
+
+padding:0 28px;
+
+border:none;
+
+background:var(--blue);
+
+color:white;
+
+border-radius:14px;
+
+font-size:15px;
+
+}
+
+.primary:hover{
+
+background:var(--blue-hover);
+
+}
+
+.secondary{
+
+height:52px;
+
+padding:0 28px;
+
+border:1px solid var(--border);
+
+background:transparent;
+
+color:white;
+
+border-radius:14px;
+
+}
+
+.secondary:hover{
+
+background:var(--surface);
+
+}
+
+</style>
+
 </head>
 
 <body>
 
 <header>
 
-<div>
+<div class="logo">
 
-<h1>Relvia Live</h1>
+<div class="logoMark">
+
+R
+
+</div>
+
+Relvia Live
 
 </div>
 
@@ -25,199 +384,580 @@
 
 <a href="/">Home</a>
 
-<a href="/live">Live</a>
-
 <a href="/discover">Discover</a>
 
-<a href="/creator">Creator Hub</a>
+<a href="/live" class="active">Live</a>
 
-<a href="/profile">Profile</a>
+<a href="/videos">Videos</a>
+
+<a href="/communities">Communities</a>
+
+<a href="/studio">Creator Studio</a>
 
 </nav>
 
+<div class="headerRight">
+
+<input
+class="search"
+placeholder="Search creators, broadcasts, events...">
+
+<div class="profile"></div>
+
+</div>
+
 </header>
 
-<main>
+<section class="hero">
 
-<section>
+<div class="heroCard">
 
-<h2>Featured Broadcast</h2>
+<div class="liveBadge">
 
-<div>
+<div class="liveDot"></div>
 
-<img src="" alt="Featured Broadcast">
+LIVE ACROSS RELVIA
 
-<h3>Broadcast Title</h3>
+</div>
 
-<p>Creator Name</p>
+<h1>
 
-<p>Live Now</p>
+Where creators, communities, and live events come together.
+
+</h1>
+
+<p>
+
+Discover live entertainment, gaming, podcasts, music, sports, education, and community events happening across the Relvia ecosystem.
+
+</p>
+
+<div class="heroButtons">
+
+<button class="primary">
+
+Explore Live
+
+</button>
+
+<button class="secondary">
+
+Become a Creator
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+<section class="section">
+
+<div class="sectionHeader">
+
+<h2>
+
+Trending Live
+
+</h2>
+
+<a href="/live/discover">
+
+View All
+
+</a>
+
+</div>
+
+<div
+class="liveGrid"
+id="liveGrid">
 
 </div>
 
 </section>
 
-<section>
+<section class="section">
 
-<h2>Live Right Now</h2>
+<div class="sectionHeader">
 
-<div>
+<h2>
 
-<article>
+Browse Categories
 
-<img src="" alt="Live">
+</h2>
 
-<h3>Broadcast</h3>
+</div>
 
-<p>Creator</p>
+<div class="categoryGrid">
 
-<p>Watching</p>
+<button class="category">
 
-</article>
+Gaming
 
-<article>
+</button>
 
-<img src="" alt="Live">
+<button class="category">
 
-<h3>Broadcast</h3>
+Music
 
-<p>Creator</p>
+</button>
 
-<p>Watching</p>
+<button class="category">
 
-</article>
+Podcasts
 
-<article>
+</button>
 
-<img src="" alt="Live">
+<button class="category">
 
-<h3>Broadcast</h3>
+IRL
 
-<p>Creator</p>
+</button>
 
-<p>Watching</p>
+<button class="category">
 
-</article>
+Sports
 
-<article>
+</button>
 
-<img src="" alt="Live">
+<button class="category">
 
-<h3>Broadcast</h3>
+Technology
 
-<p>Creator</p>
+</button>
 
-<p>Watching</p>
+<button class="category">
 
-</article>
+Education
+
+</button>
+
+<button class="category">
+
+Events
+
+</button>
 
 </div>
 
 </section>
 
-<section>
+<style>
 
-<h2>Categories</h2>
+.section{
 
-<div>
+padding:0 40px 50px;
 
-<button>Gaming</button>
+}
 
-<button>Music</button>
+.sectionHeader{
 
-<button>IRL</button>
+display:flex;
 
-<button>Podcast</button>
+justify-content:space-between;
 
-<button>Sports</button>
+align-items:center;
 
-<button>Education</button>
+margin-bottom:25px;
 
-<button>Events</button>
+}
 
-<button>News</button>
+.sectionHeader h2{
+
+font-size:32px;
+
+}
+
+.sectionHeader a{
+
+color:var(--blue);
+
+font-size:15px;
+
+}
+
+.liveGrid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+
+gap:25px;
+
+}
+
+.liveCard{
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:20px;
+
+overflow:hidden;
+
+transition:.25s;
+
+cursor:pointer;
+
+}
+
+.liveCard:hover{
+
+transform:translateY(-5px);
+
+border-color:var(--blue);
+
+}
+
+.liveThumbnail{
+
+height:190px;
+
+background:linear-gradient(135deg,#16233a,#1b2944);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+position:relative;
+
+}
+
+.liveLabel{
+
+position:absolute;
+
+top:15px;
+
+left:15px;
+
+background:var(--danger);
+
+padding:6px 14px;
+
+border-radius:999px;
+
+font-size:12px;
+
+font-weight:bold;
+
+}
+
+.viewerCount{
+
+position:absolute;
+
+bottom:15px;
+
+right:15px;
+
+background:rgba(0,0,0,.5);
+
+padding:6px 12px;
+
+border-radius:999px;
+
+font-size:12px;
+
+}
+
+.liveInfo{
+
+padding:18px;
+
+}
+
+.liveInfo h3{
+
+margin-bottom:8px;
+
+font-size:20px;
+
+}
+
+.liveInfo p{
+
+color:var(--muted);
+
+font-size:14px;
+
+margin-bottom:6px;
+
+}
+
+.categoryGrid{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:15px;
+
+}
+
+.category{
+
+height:48px;
+
+padding:0 22px;
+
+background:var(--surface);
+
+border:1px solid var(--border);
+
+border-radius:999px;
+
+color:white;
+
+font-size:15px;
+
+}
+
+.category:hover{
+
+background:var(--blue);
+
+border-color:var(--blue);
+
+}
+
+</style>
+<script>
+
+const SUPABASE_URL="YOUR_SUPABASE_URL";
+
+const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
+
+const supabase=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+async function loadLiveSessions(){
+
+const{
+
+data,
+
+error
+
+}=await supabase
+
+.from("live_sessions")
+
+.select("*")
+
+.eq("status","live")
+
+.order("started_at",{ascending:false});
+
+const grid=document.getElementById("liveGrid");
+
+grid.innerHTML="";
+
+if(error){
+
+console.error(error);
+
+grid.innerHTML=`
+
+<div class="liveCard">
+
+<div class="liveThumbnail">
+
+Database Error
 
 </div>
 
-</section>
+<div class="liveInfo">
 
-<section>
+<h3>
 
-<h2>Trending Creators</h2>
+Unable to load broadcasts
 
-<div>
+</h3>
 
-<article>
+<p>
 
-<img src="" alt="Creator">
+Please try again later.
 
-<h3>Creator Name</h3>
-
-<p>Live</p>
-
-</article>
-
-<article>
-
-<img src="" alt="Creator">
-
-<h3>Creator Name</h3>
-
-<p>Live</p>
-
-</article>
-
-<article>
-
-<img src="" alt="Creator">
-
-<h3>Creator Name</h3>
-
-<p>Live</p>
-
-</article>
+</p>
 
 </div>
 
-</section>
+</div>
 
-<section>
+`;
 
-<h2>Upcoming Broadcasts</h2>
+return;
 
-<div>
+}
 
-<article>
+if(!data||data.length===0){
 
-<h3>Broadcast Title</h3>
+grid.innerHTML=`
 
-<p>Creator</p>
+<div class="liveCard">
 
-<p>Scheduled Time</p>
+<div class="liveThumbnail">
 
-</article>
-
-<article>
-
-<h3>Broadcast Title</h3>
-
-<p>Creator</p>
-
-<p>Scheduled Time</p>
-
-</article>
+No Live Shows
 
 </div>
 
-</section>
+<div class="liveInfo">
 
-</main>
+<h3>
 
-<footer>
+Nothing is live right now.
 
-<p>© Relvia Live</p>
+</h3>
 
-</footer>
+<p>
+
+Check back later to discover new broadcasts.
+
+</p>
+
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+data.forEach(stream=>{
+
+grid.innerHTML+=`
+
+<div
+class="liveCard"
+onclick="openBroadcast('${stream.id}')">
+
+<div class="liveThumbnail">
+
+<div class="liveLabel">
+
+LIVE
+
+</div>
+
+<div class="viewerCount">
+
+${stream.current_viewers||0} Watching
+
+</div>
+
+</div>
+
+<div class="liveInfo">
+
+<h3>
+
+${stream.title||"Untitled Broadcast"}
+
+</h3>
+
+<p>
+
+${stream.category||"General"}
+
+</p>
+
+<p>
+
+${stream.status}
+
+</p>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+function openBroadcast(id){
+
+window.location.href=
+
+"/live/watch.html?id="+id;
+
+}
+
+async function loadCategories(){
+
+const buttons=
+
+document.querySelectorAll(".category");
+
+buttons.forEach(button=>{
+
+button.onclick=()=>{
+
+window.location.href=
+
+"/live/discover.html?category="+
+
+encodeURIComponent(button.innerText);
+
+};
+
+});
+
+}
+
+async function initializeRelviaLive(){
+
+await loadLiveSessions();
+
+await loadCategories();
+
+}
+
+initializeRelviaLive();
+
+const liveChannel=
+
+supabase
+
+.channel("live-updates")
+
+.on(
+
+"postgres_changes",
+
+{
+
+event:"*",
+
+schema:"public",
+
+table:"live_sessions"
+
+},
+
+()=>{
+
+loadLiveSessions();
+
+}
+
+)
+
+.subscribe();
+
+</script>
 
 </body>
 
