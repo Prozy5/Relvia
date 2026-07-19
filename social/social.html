@@ -1,3215 +1,1222 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Relvia Social</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
-<style>
-
-
-/* ==========================================
-RELViA SOCIAL V2
-BASE SYSTEM
-========================================== */
-
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Inter",sans-serif;
-
-}
-
-
-:root{
-
---background:#050505;
-
---surface:#0d0d0d;
-
---surface-light:#151515;
-
---border:#242424;
-
---gold:#d4af37;
-
---gold-soft:#f0d77a;
-
---text:#ffffff;
-
---muted:#8c8c8c;
-
---radius:24px;
-
-}
-
-
-html{
-
-scroll-behavior:smooth;
-
-}
-
-
-body{
-
-background:var(--background);
-
-color:var(--text);
-
-overflow-x:hidden;
-
-}
-
-
-button,
-input,
-textarea{
-
-font-family:inherit;
-
-}
-
-
-button{
-
-cursor:pointer;
-
-}
-
-
-img{
-
-max-width:100%;
-
-display:block;
-
-}
-
-
-
-/* ==========================================
-NAVBAR
-========================================== */
-
-
-.topbar{
-
-
-position:fixed;
-
-top:0;
-
-left:0;
-
-right:0;
-
-height:78px;
-
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-
-padding:0 32px;
-
-
-background:rgba(5,5,5,.88);
-
-backdrop-filter:blur(18px);
-
-
-border-bottom:1px solid var(--border);
-
-
-z-index:999;
-
-
-}
-
-
-
-.brand{
-
-
-font-size:26px;
-
-font-weight:800;
-
-letter-spacing:3px;
-
-
-}
-
-
-.brand span{
-
-
-color:var(--gold);
-
-
-}
-
-
-
-.search-container{
-
-
-width:430px;
-
-
-}
-
-
-
-.search-container input{
-
-
-width:100%;
-
-
-height:46px;
-
-
-background:#171717;
-
-
-border:1px solid var(--border);
-
-
-border-radius:999px;
-
-
-padding:0 20px;
-
-
-color:white;
-
-
-font-size:15px;
-
-
-}
-
-
-
-.search-container input::placeholder{
-
-
-color:var(--muted);
-
-
-}
-
-
-
-
-.nav-actions{
-
-
-display:flex;
-
-align-items:center;
-
-gap:14px;
-
-
-}
-
-
-
-.nav-button{
-
-
-width:44px;
-
-height:44px;
-
-
-border-radius:50%;
-
-
-background:#171717;
-
-
-border:1px solid var(--border);
-
-
-color:white;
-
-
-transition:.25s;
-
-
-}
-
-
-.nav-button:hover{
-
-
-background:var(--gold);
-
-color:black;
-
-
-}
-
-
-
-.avatar{
-
-
-width:46px;
-
-height:46px;
-
-
-border-radius:50%;
-
-
-overflow:hidden;
-
-
-background:#222;
-
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-
-font-weight:700;
-
-
-}
-
-
-
-/* ==========================================
-MAIN APP STRUCTURE
-========================================== */
-
-
-.app-container{
-
-
-max-width:1700px;
-
-
-margin:auto;
-
-
-padding:105px 30px 40px;
-
-
-
-display:grid;
-
-
-
-grid-template-columns:
-
-
-270px
-
-
-minmax(500px,820px)
-
-
-340px;
-
-
-
-gap:26px;
-
-
-
-}
-
-
-
-.sidebar{
-
-
-position:sticky;
-
-
-top:100px;
-
-
-height:max-content;
-
-
-}
-
-
-
-.feed{
-
-
-width:100%;
-
-
-}
-
-
-
-
-.card{
-
-
-background:var(--surface);
-
-
-border:1px solid var(--border);
-
-
-border-radius:var(--radius);
-
-
-padding:22px;
-
-
-margin-bottom:22px;
-
-
-}
-
-
-
-
-/* ==========================================
-END PART 1A
-========================================== */
-
-
 <style>
 
 /* ==========================================
-RELViA SOCIAL V2
-BASE SYSTEM
-========================================== */
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Inter",sans-serif;
-}
-
+   RELVIA SOCIAL — DESIGN TOKENS
+   ========================================== */
 :root{
+  --background:#050505;
+  --surface:#0d0d0d;
+  --surface-light:#151515;
+  --glass:rgba(21,21,21,.6);
+  --border:#242424;
+  --border-soft:#1a1a1a;
 
---background:#050505;
---surface:#0d0d0d;
---surface-light:#151515;
---border:#242424;
+  --gold-start:#d9a94b;
+  --gold-end:#f0c465;
+  --gold:#d9a94b;
 
---gold:#d4af37;
---gold-soft:#f0d77a;
+  --text:#ffffff;
+  --muted:#8c8c8c;
+  --muted-soft:#5f5f5f;
+  --danger:#e0574f;
 
---text:#ffffff;
---muted:#8c8c8c;
+  --radius-lg:24px;
+  --radius-md:16px;
+  --radius-sm:10px;
 
---radius:24px;
-
+  --font-display:"Cormorant Garamond",serif;
+  --font-body:"Inter",sans-serif;
 }
 
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html{ scroll-behavior:smooth; }
+body{ background:var(--background); color:var(--text); overflow-x:hidden; }
+button, input, textarea{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+::selection{ background:var(--gold); color:#000; }
 
-html{
-scroll-behavior:smooth;
+.gold-text{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
 }
-
-
-body{
-
-background:var(--background);
-color:var(--text);
-overflow-x:hidden;
-
-}
-
 
 /* ==========================================
-NAVBAR
-========================================== */
-
-
+   TOPBAR
+   ========================================== */
 .topbar{
-
-position:fixed;
-
-top:0;
-left:0;
-right:0;
-
-height:78px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-padding:0 32px;
-
-background:rgba(5,5,5,.88);
-
-backdrop-filter:blur(18px);
-
-border-bottom:1px solid var(--border);
-
-z-index:999;
-
+  position:fixed; top:0; left:0; right:0; height:76px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px;
+  background:rgba(5,5,5,.82);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border-soft);
+  z-index:999;
 }
-
-
-/* ==========================================
-MAIN APP STRUCTURE
-========================================== */
-
-
-.app-container{
-
-max-width:1700px;
-
-margin:auto;
-
-padding:105px 30px 40px;
-
-display:grid;
-
-grid-template-columns:
-
-270px
-minmax(500px,820px)
-340px;
-
-gap:26px;
-
-}
-
-
-.sidebar{
-
-position:sticky;
-
-top:100px;
-
-height:max-content;
-
-}
-
-
-.feed{
-
-width:100%;
-
-}
-
-
-.card{
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:var(--radius);
-
-padding:22px;
-
-margin-bottom:22px;
-
-}
-/* ==========================================
-NAVBAR DETAILS
-========================================== */
-
 
 .brand{
-
-font-size:26px;
-
-font-weight:800;
-
-letter-spacing:3px;
-
+  font-family:var(--font-display);
+  font-size:26px; font-weight:700; letter-spacing:2px;
+  display:flex; align-items:center; gap:2px;
 }
+.brand span{ color:var(--gold); }
 
-
-.brand span{
-
-color:var(--gold);
-
-}
-
-
-.search-container{
-
-width:430px;
-
-}
-
-
+.search-container{ position:relative; width:420px; }
 .search-container input{
-
-width:100%;
-
-height:46px;
-
-background:#171717;
-
-border:1px solid var(--border);
-
-border-radius:999px;
-
-padding:0 20px;
-
-color:white;
-
-font-size:15px;
-
+  width:100%; height:44px;
+  background:var(--surface-light);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:0 44px 0 18px;
+  color:white; font-size:14px;
+  transition:border-color .2s;
 }
+.search-container input:focus{ outline:none; border-color:var(--gold); }
+.search-container input::placeholder{ color:var(--muted-soft); }
+.search-icon{ position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none; }
 
-
-.search-container input::placeholder{
-
-color:var(--muted);
-
+.search-results{
+  position:absolute; top:52px; left:0; right:0;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,.5);
+  display:none; max-height:360px; overflow-y:auto;
 }
-
-
-.nav-actions{
-
-display:flex;
-
-align-items:center;
-
-gap:14px;
-
+.search-results.open{ display:block; }
+.search-result-item{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; border-bottom:1px solid var(--border-soft);
+  transition:background .2s;
 }
+.search-result-item:last-child{ border-bottom:none; }
+.search-result-item:hover{ background:var(--surface-light); }
 
-
+.nav-actions{ display:flex; align-items:center; gap:12px; }
 .nav-button{
-
-width:44px;
-
-height:44px;
-
-border-radius:50%;
-
-background:#171717;
-
-border:1px solid var(--border);
-
-color:white;
-
-transition:.25s;
-
+  width:42px; height:42px; border-radius:50%;
+  background:var(--surface-light); border:1px solid var(--border);
+  color:white; display:flex; align-items:center; justify-content:center;
+  font-size:17px; transition:.2s;
 }
-
-
-.nav-button:hover{
-
-background:var(--gold);
-
-color:black;
-
-}
-
+.nav-button:hover{ background:var(--gold); color:#000; border-color:var(--gold); }
 
 .avatar{
-
-width:46px;
-
-height:46px;
-
-border-radius:50%;
-
-overflow:hidden;
-
-background:#222;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-weight:700;
-
+  width:44px; height:44px; border-radius:50%; overflow:hidden;
+  background:linear-gradient(135deg,#2a2a2a,#171717);
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:15px; cursor:pointer;
 }
 
+/* ==========================================
+   LAYOUT
+   ========================================== */
+.app-container{
+  max-width:1700px; margin:auto; padding:104px 30px 60px;
+  display:grid;
+  grid-template-columns:270px minmax(500px,820px) 340px;
+  gap:26px;
+  align-items:start;
+}
+.sidebar{ position:sticky; top:100px; }
+.feed{ width:100%; min-height:60vh; }
 
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  margin-bottom:22px;
+  backdrop-filter:blur(8px);
+}
 
-
+.view{ display:none; }
+.view.active{ display:block; }
 
 /* ==========================================
-LEFT NAVIGATION
-========================================== */
-
-
+   LEFT NAVIGATION
+   ========================================== */
 .navigation-card{
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:var(--radius);
-
-padding:18px;
-
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px;
 }
-
-
 .navigation-title{
-
-font-size:18px;
-
-font-weight:700;
-
-margin-bottom:18px;
-
+  font-family:var(--font-display);
+  font-size:19px; font-weight:600; margin:6px 6px 16px;
+  color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.5px; font-size:12px;
 }
-
-
-
 .navigation-item{
-
-height:48px;
-
-display:flex;
-
-align-items:center;
-
-gap:14px;
-
-padding:0 16px;
-
-border-radius:14px;
-
-color:#bdbdbd;
-
-transition:.25s;
-
-margin-bottom:6px;
-
+  height:48px; display:flex; align-items:center; gap:14px;
+  padding:0 16px; border-radius:14px; color:#bdbdbd;
+  transition:.2s; margin-bottom:4px; font-size:15px; font-weight:500;
 }
-
-
-.navigation-item:hover{
-
-background:var(--surface-light);
-
-color:white;
-
-}
-
-
+.navigation-item .nav-icon{ font-size:17px; width:20px; text-align:center; }
+.navigation-item:hover{ background:var(--surface-light); color:white; }
 .navigation-item.active{
-
-background:var(--gold);
-
-color:black;
-
-font-weight:700;
-
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-weight:700;
 }
-
-
-
-
 
 /* ==========================================
-STORIES
-========================================== */
-
-
-.stories-container{
-
-display:flex;
-
-gap:18px;
-
-overflow-x:auto;
-
-}
-
-
-.stories-container::-webkit-scrollbar{
-
-display:none;
-
-}
-
-
-
-.story{
-
-min-width:76px;
-
-text-align:center;
-
-}
-
-
-
+   STORIES
+   ========================================== */
+.stories-container{ display:flex; gap:18px; overflow-x:auto; padding-bottom:2px; }
+.stories-container::-webkit-scrollbar{ display:none; }
+.story{ min-width:74px; text-align:center; cursor:pointer; }
 .story-border{
-
-width:74px;
-
-height:74px;
-
-padding:2px;
-
-border-radius:50%;
-
-background:linear-gradient(
-
-135deg,
-
-var(--gold),
-
-var(--gold-soft)
-
-);
-
+  width:70px; height:70px; padding:2.5px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  transition:transform .2s;
 }
-
-
-
+.story:hover .story-border{ transform:scale(1.05); }
 .story-avatar{
-
-width:100%;
-
-height:100%;
-
-border-radius:50%;
-
-background:#222;
-
-overflow:hidden;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
+  width:100%; height:100%; border-radius:50%; background:#1a1a1a;
+  overflow:hidden; display:flex; align-items:center; justify-content:center;
+  font-weight:700; border:2px solid var(--background);
 }
+.story-name{ font-size:12px; color:var(--muted); margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:74px; }
 
-
-
-.story-name{
-
-font-size:12px;
-
-color:var(--muted);
-
-margin-top:8px;
-
-}
 /* ==========================================
-CREATE POST COMPOSER
-========================================== */
-
-
-.create-post{
-
-display:flex;
-
-gap:16px;
-
-}
-
-
-
-.create-content{
-
-flex:1;
-
-}
-
-
-
+   COMPOSER
+   ========================================== */
+.create-post{ display:flex; gap:16px; }
+.create-content{ flex:1; }
 .create-input{
-
-width:100%;
-
-height:100px;
-
-background:transparent;
-
-border:none;
-
-resize:none;
-
-color:white;
-
-font-size:17px;
-
-line-height:1.5;
-
+  width:100%; min-height:80px; background:transparent; border:none;
+  resize:none; color:white; font-size:16px; line-height:1.6;
 }
-
-
-
-.create-input::placeholder{
-
-color:var(--muted);
-
-}
-
-
-
-.create-actions{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-margin-top:18px;
-
-}
-
-
-
-.media-actions{
-
-display:flex;
-
-gap:10px;
-
-flex-wrap:wrap;
-
-}
-
-
-
+.create-input:focus{ outline:none; }
+.create-input::placeholder{ color:var(--muted-soft); }
+.create-actions{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:16px; border-top:1px solid var(--border-soft); }
+.media-actions{ display:flex; gap:8px; flex-wrap:wrap; }
 .media-button{
-
-background:var(--surface-light);
-
-border:1px solid var(--border);
-
-color:#ddd;
-
-padding:10px 16px;
-
-border-radius:14px;
-
-transition:.25s;
-
+  background:var(--surface-light); border:1px solid var(--border); color:#ccc;
+  padding:9px 15px; border-radius:12px; font-size:13px; transition:.2s;
 }
-
-
-
-.media-button:hover{
-
-border-color:var(--gold);
-
-color:white;
-
-}
-
-
-
+.media-button:hover{ border-color:var(--gold); color:var(--gold); }
 .publish-button{
-
-background:var(--gold);
-
-color:black;
-
-padding:12px 26px;
-
-border-radius:16px;
-
-font-weight:700;
-
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; padding:11px 26px; border-radius:14px; font-weight:700; font-size:14px;
+  transition:opacity .2s;
 }
-
-
-
-
-
+.publish-button:disabled{ opacity:.4; cursor:not-allowed; }
+.publish-button:not(:disabled):hover{ opacity:.88; }
 
 /* ==========================================
-POST CARDS
-========================================== */
-
-
-.post-card{
-
-transition:.25s;
-
-}
-
-
-
-.post-card:hover{
-
-transform:translateY(-3px);
-
-}
-
-
-
-.post-header{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-}
-
-
-
-.post-user{
-
-display:flex;
-
-align-items:center;
-
-gap:14px;
-
-}
-
-
-
+   POST CARDS
+   ========================================== */
+.post-card{ transition:.2s; }
+.post-header{ display:flex; align-items:center; justify-content:space-between; }
+.post-user{ display:flex; align-items:center; gap:13px; }
 .post-avatar{
-
-width:54px;
-
-height:54px;
-
-border-radius:50%;
-
-background:#222;
-
-overflow:hidden;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-weight:700;
-
+  width:50px; height:50px; border-radius:50%; background:#1a1a1a; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
 }
-
-
-
-.post-info{
-
-display:flex;
-
-flex-direction:column;
-
-}
-
-
-
-.post-name{
-
-font-size:16px;
-
-font-weight:700;
-
-}
-
-
-
-.post-meta{
-
-font-size:13px;
-
-color:var(--muted);
-
-margin-top:4px;
-
-}
-
-
-
+.post-info{ display:flex; flex-direction:column; }
+.post-name{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:7px; }
+.post-meta{ font-size:13px; color:var(--muted); margin-top:2px; }
 .verified-badge{
-
-background:var(--gold);
-
-color:black;
-
-font-size:11px;
-
-font-weight:700;
-
-padding:3px 8px;
-
-border-radius:999px;
-
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+  letter-spacing:.5px;
 }
-
-
-
 .post-menu{
-
-width:38px;
-
-height:38px;
-
-border-radius:50%;
-
-background:var(--surface-light);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
+  width:36px; height:36px; border-radius:50%; background:var(--surface-light);
+  display:flex; align-items:center; justify-content:center; color:var(--muted);
+  transition:.2s;
 }
-
-
-
-.post-text{
-
-margin-top:18px;
-
-font-size:16px;
-
-line-height:1.7;
-
-white-space:pre-wrap;
-
-}
-
-
-
-.post-media{
-
-margin-top:18px;
-
-border-radius:22px;
-
-overflow:hidden;
-
-background:#181818;
-
-}
-
-
-
-.post-media img,
-.post-media video{
-
-width:100%;
-
-display:block;
-
-}
-
-
-
-
-
-/* ==========================================
-POST ACTIONS
-========================================== */
-
+.post-menu:hover{ background:var(--border); color:white; }
+.post-text{ margin-top:16px; font-size:15.5px; line-height:1.65; white-space:pre-wrap; color:#e6e6e6; }
+.post-media{ margin-top:16px; border-radius:18px; overflow:hidden; background:#141414; }
+.post-media img, .post-media video{ width:100%; display:block; max-height:600px; object-fit:cover; }
 
 .post-actions{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-border-top:1px solid var(--border);
-
-margin-top:18px;
-
-padding-top:16px;
-
+  display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid var(--border-soft); margin-top:16px; padding-top:14px;
 }
-
-
-
-.action-group{
-
-display:flex;
-
-gap:10px;
-
-}
-
-
-
+.action-group{ display:flex; gap:6px; }
 .action-button{
-
-background:none;
-
-color:var(--muted);
-
-padding:8px 14px;
-
-border-radius:12px;
-
-transition:.25s;
-
+  background:none; color:var(--muted); padding:8px 13px; border-radius:12px;
+  transition:.2s; font-size:13.5px; display:flex; align-items:center; gap:6px;
 }
+.action-button:hover{ background:var(--surface-light); color:white; }
+.action-button.liked{ color:var(--gold); }
 
-
-
-.action-button:hover{
-
-background:var(--surface-light);
-
-color:white;
-
-}
 /* ==========================================
-RIGHT SIDEBAR
-========================================== */
-
-
+   RIGHT SIDEBAR
+   ========================================== */
 .sidebar-panel{
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:var(--radius);
-
-padding:22px;
-
-margin-bottom:22px;
-
+  background:var(--glass); border:1px solid var(--border); border-radius:var(--radius-lg);
+  padding:22px; margin-bottom:22px;
 }
+.sidebar-title{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:16px; }
+.trending-item{ padding:13px 0; border-bottom:1px solid var(--border-soft); cursor:pointer; }
+.trending-item:last-child{ border-bottom:none; }
+.trending-item h4{ font-size:14.5px; font-weight:600; }
+.trending-item p{ font-size:12.5px; color:var(--muted); margin-top:4px; }
 
-
-
-.sidebar-title{
-
-font-size:18px;
-
-font-weight:700;
-
-margin-bottom:18px;
-
-}
-
-
-
-.trending-item{
-
-padding:14px 0;
-
-border-bottom:1px solid var(--border);
-
-}
-
-
-
-.trending-item:last-child{
-
-border-bottom:none;
-
-}
-
-
-
-.trending-item h4{
-
-font-size:15px;
-
-font-weight:600;
-
-}
-
-
-
-.trending-item p{
-
-font-size:13px;
-
-color:var(--muted);
-
-margin-top:5px;
-
-}
-
-
-
-
-
-/* ==========================================
-SUGGESTED CREATORS
-========================================== */
-
-
-.creator-card{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-padding:14px 0;
-
-border-bottom:1px solid var(--border);
-
-}
-
-
-
-.creator-card:last-child{
-
-border-bottom:none;
-
-}
-
-
-
-.creator-info{
-
-display:flex;
-
-align-items:center;
-
-gap:12px;
-
-}
-
-
-
+.creator-card{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border-soft); }
+.creator-card:last-child{ border-bottom:none; }
+.creator-info{ display:flex; align-items:center; gap:11px; }
 .creator-avatar{
-
-width:44px;
-
-height:44px;
-
-border-radius:50%;
-
-background:#222;
-
-overflow:hidden;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-weight:700;
-
+  width:42px; height:42px; border-radius:50%; background:#1a1a1a; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
 }
-
-
-
-.creator-name{
-
-font-size:14px;
-
-font-weight:700;
-
-}
-
-
-
-.creator-handle{
-
-font-size:12px;
-
-color:var(--muted);
-
-margin-top:3px;
-
-}
-
-
-
+.creator-name{ font-size:13.5px; font-weight:700; }
+.creator-handle{ font-size:12px; color:var(--muted); margin-top:2px; }
 .follow-button{
-
-background:var(--gold);
-
-color:black;
-
-border:none;
-
-padding:9px 18px;
-
-border-radius:14px;
-
-font-weight:700;
-
+  background:var(--surface-light); border:1px solid var(--gold); color:var(--gold);
+  padding:8px 16px; border-radius:12px; font-weight:700; font-size:12.5px; transition:.2s;
 }
-
-
-
-
+.follow-button:hover{ background:var(--gold); color:#000; }
+.follow-button.following{ border-color:var(--border); color:var(--muted); }
 
 /* ==========================================
-EMPTY STATES
-========================================== */
+   EXPLORE VIEW
+   ========================================== */
+.explore-header{ margin-bottom:22px; }
+.explore-header h1{ font-family:var(--font-display); font-size:34px; font-weight:600; margin-bottom:6px; }
+.explore-header p{ color:var(--muted); font-size:14.5px; }
 
-
-.empty-state{
-
-padding:40px;
-
-text-align:center;
-
-color:var(--muted);
-
-font-size:15px;
-
+.chip-row{ display:flex; gap:10px; overflow-x:auto; margin-bottom:26px; padding-bottom:4px; }
+.chip-row::-webkit-scrollbar{ display:none; }
+.chip{
+  white-space:nowrap; background:var(--surface-light); border:1px solid var(--border);
+  padding:9px 18px; border-radius:999px; font-size:13.5px; color:#ddd; transition:.2s;
 }
+.chip:hover{ border-color:var(--gold); color:var(--gold); }
 
-
-
+.explore-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+  border-radius:var(--radius-lg); overflow:hidden;
+}
+.explore-tile{
+  position:relative; aspect-ratio:1/1; background:#141414; overflow:hidden; cursor:pointer;
+}
+.explore-tile img, .explore-tile video{ width:100%; height:100%; object-fit:cover; transition:transform .35s; }
+.explore-tile:hover img, .explore-tile:hover video{ transform:scale(1.06); }
+.explore-tile-overlay{
+  position:absolute; inset:0; background:rgba(0,0,0,.45); opacity:0;
+  display:flex; align-items:center; justify-content:center; gap:22px;
+  transition:opacity .2s; color:white; font-weight:700; font-size:14px;
+}
+.explore-tile:hover .explore-tile-overlay{ opacity:1; }
 
 /* ==========================================
-MOBILE RESPONSIVE
-========================================== */
+   PROFILE VIEW
+   ========================================== */
+.profile-banner{
+  height:190px; border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+  position:relative; overflow:hidden;
+  border:1px solid var(--border); border-bottom:none;
+}
+.profile-banner::after{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at 25% 30%, rgba(217,169,75,.18), transparent 60%);
+}
+.profile-header-card{ padding:0; margin-bottom:22px; overflow:hidden; }
+.profile-body{ padding:0 26px 26px; position:relative; }
+.profile-avatar-lg{
+  width:110px; height:110px; border-radius:50%; overflow:hidden;
+  border:4px solid var(--surface); background:#1a1a1a;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:34px;
+  margin-top:-55px; position:relative;
+}
+.profile-top-row{ display:flex; align-items:flex-end; justify-content:space-between; }
+.edit-profile-btn{
+  margin-top:16px; background:var(--surface-light); border:1px solid var(--border);
+  padding:10px 20px; border-radius:14px; font-weight:700; font-size:13.5px; transition:.2s;
+}
+.edit-profile-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.profile-name-row{ display:flex; align-items:center; gap:10px; margin-top:16px; }
+.profile-name-row h2{ font-family:var(--font-display); font-size:28px; font-weight:700; }
+.profile-handle{ color:var(--muted); font-size:14.5px; margin-top:2px; }
+.profile-bio{ margin-top:14px; font-size:14.5px; line-height:1.6; color:#dcdcdc; max-width:520px; }
+.profile-stats{ display:flex; gap:28px; margin-top:20px; }
+.profile-stat{ display:flex; flex-direction:column; }
+.profile-stat b{ font-size:18px; font-weight:800; }
+.profile-stat span{ font-size:12.5px; color:var(--muted); margin-top:2px; }
 
+.profile-tabs{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-top:24px; }
+.profile-tab{
+  padding:14px 20px; font-size:14px; font-weight:700; color:var(--muted);
+  border-bottom:2px solid transparent; transition:.2s;
+}
+.profile-tab.active{ color:var(--gold); border-bottom-color:var(--gold); }
+.profile-tab:hover{ color:white; }
 
+/* ==========================================
+   MODAL
+   ========================================== */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:2000;
+}
+.modal-backdrop.open{ display:flex; }
+.modal{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+  width:440px; max-width:90vw; padding:26px;
+}
+.modal h3{ font-family:var(--font-display); font-size:22px; margin-bottom:18px; }
+.modal-field{ margin-bottom:14px; }
+.modal-field label{ font-size:12.5px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.modal-field input, .modal-field textarea{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:11px 14px; color:white; font-size:14px;
+}
+.modal-field textarea{ resize:none; min-height:72px; }
+.modal-field input:focus, .modal-field textarea:focus{ outline:none; border-color:var(--gold); }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+.modal-cancel{ background:var(--surface-light); border:1px solid var(--border); padding:10px 20px; border-radius:12px; font-weight:600; font-size:13.5px; }
+.modal-save{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; padding:10px 22px; border-radius:12px; font-weight:700; font-size:13.5px; }
+
+/* ==========================================
+   EMPTY / LOADING STATES
+   ========================================== */
+.empty-state{ padding:50px 20px; text-align:center; color:var(--muted); }
+.empty-state .empty-icon{ font-size:32px; margin-bottom:12px; opacity:.6; }
+.empty-state h4{ color:#ddd; font-size:16px; margin-bottom:6px; }
+.empty-state p{ font-size:13.5px; }
+
+.skeleton{ background:linear-gradient(90deg,#141414 25%,#1c1c1c 37%,#141414 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite; border-radius:14px; }
+@keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+.skeleton-post{ height:150px; margin-bottom:22px; }
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface); border:1px solid var(--gold); color:white;
+  padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
 @media(max-width:1350px){
-
-
-.app-container{
-
-grid-template-columns:1fr;
-
+  .app-container{ grid-template-columns:1fr; }
+  .sidebar{ display:none; }
+  .search-container{ width:300px; }
 }
-
-
-.sidebar{
-
-display:none;
-
-}
-
-
-.search-container{
-
-width:300px;
-
-}
-
-
-}
-
-
-
 @media(max-width:850px){
-
-
-.topbar{
-
-padding:0 16px;
-
-}
-
-
-.brand{
-
-font-size:20px;
-
-}
-
-
-.search-container{
-
-display:none;
-
-}
-
-
-.app-container{
-
-padding:95px 14px 30px;
-
-}
-
-
-.card{
-
-padding:18px;
-
-border-radius:20px;
-
-}
-
-
-.create-actions{
-
-flex-direction:column;
-
-align-items:stretch;
-
-gap:16px;
-
-}
-
-
-.publish-button{
-
-width:100%;
-
-}
-
-
-.post-actions{
-
-flex-wrap:wrap;
-
-gap:10px;
-
-}
-
-
+  .topbar{ padding:0 16px; }
+  .brand{ font-size:20px; }
+  .search-container{ display:none; }
+  .app-container{ padding:92px 14px 40px; }
+  .card{ padding:16px; border-radius:20px; }
+  .create-actions{ flex-direction:column; align-items:stretch; gap:14px; }
+  .publish-button{ width:100%; }
+  .explore-grid{ grid-template-columns:repeat(2,1fr); }
 }
 </style>
-
 </head>
-
 <body>
 
-
-<!-- ==========================================
-TOP NAVBAR
-========================================== -->
-
-
 <header class="topbar">
+  <div class="brand">RELVIA <span>SOCIAL</span></div>
 
+  <div class="search-container">
+    <input type="text" placeholder="Search Relvia" id="searchInput" autocomplete="off">
+    <span class="search-icon">⌕</span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
 
-<div class="brand">
-
-RELVIA <span>SOCIAL</span>
-
-</div>
-
-
-
-<div class="search-container">
-
-<input
-
-type="text"
-
-placeholder="Search Relvia"
-
-id="searchInput"
-
-/>
-
-</div>
-
-
-
-<div class="nav-actions">
-
-
-<button class="nav-button" id="messagesButton">
-
-✉
-
-</button>
-
-
-<button class="nav-button" id="notificationsButton">
-
-🔔
-
-</button>
-
-
-
-<div class="avatar" id="profileAvatar">
-
-</div>
-
-
-</div>
-
-
+  <div class="nav-actions">
+    <button class="nav-button" id="messagesButton" title="Messages">✉</button>
+    <button class="nav-button" id="notificationsButton" title="Notifications">🔔</button>
+    <div class="avatar" id="profileAvatar" title="Your profile"></div>
+  </div>
 </header>
-
-
-
-
-
-<!-- ==========================================
-MAIN APP
-========================================== -->
-
 
 <main class="app-container">
 
-
-
-<!-- LEFT SIDEBAR -->
-
-
-<aside class="sidebar">
-
-
-<div class="navigation-card">
-
-
-<h3 class="navigation-title">
-
-Navigation
-
-</h3>
-
-
-
-<div class="navigation-item active">
-
-Home
-
-</div>
-
-
-
-<div class="navigation-item">
-
-Explore
-
-</div>
-
-
-
-<div class="navigation-item">
-
-Messages
-
-</div>
-
-
-
-<div class="navigation-item">
-
-Notifications
-
-</div>
-
-
-
-<div class="navigation-item">
-
-Profile
-
-</div>
-
-
-
-</div>
-
-
-</aside>
-
-
-
-
-
-<!-- CENTER FEED -->
-
-
-<section class="feed">
-
-
-
-<!-- STORIES -->
-
-
-<div class="card">
-
-
-<div
-
-class="stories-container"
-
-id="storiesContainer">
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- CREATE POST -->
-
-
-<div class="card">
-
-
-<div class="create-post">
-
-
-
-<div class="avatar" id="createAvatar">
-
-
-</div>
-
-
-
-<div class="create-content">
-
-
-
-<textarea
-
-class="create-input"
-
-id="createPostInput"
-
-placeholder="Share something with Relvia..."
-
-></textarea>
-
-
-
-
-
-<div class="create-actions">
-
-
-
-<div class="media-actions">
-
-
-<button class="media-button">
-
-Photo
-
-</button>
-
-
-<button class="media-button">
-
-Video
-
-</button>
-
-
-<button class="media-button">
-
-Poll
-
-</button>
-
-
-<button class="media-button">
-
-Event
-
-</button>
-
-
-
-</div>
-
-
-
-<button
-
-class="publish-button"
-
-id="publishPost">
-
-Post
-
-</button>
-
-
-
-</div>
-
-
-
-</div>
-
-
-</div>
-
-
-</div>
-<!-- ==========================================
-FEED POSTS CONTAINER
-========================================== -->
-
-
-<div
-
-id="feedContainer">
-
-
-<!-- POSTS WILL LOAD HERE -->
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-<!-- ==========================================
-RIGHT SIDEBAR
-========================================== -->
-
-
-<aside class="sidebar">
-
-
-
-<div class="sidebar-panel">
-
-
-
-<h3 class="sidebar-title">
-
-Trending
-
-</h3>
-
-
-
-<div
-
-id="trendingContainer">
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="sidebar-panel">
-
-
-
-<h3 class="sidebar-title">
-
-Suggested Creators
-
-</h3>
-
-
-
-<div
-
-id="suggestedContainer">
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</aside>
-
-
-
-
+  <!-- LEFT NAV -->
+  <aside class="sidebar">
+    <div class="navigation-card">
+      <div class="navigation-title">Menu</div>
+      <div class="navigation-item active" data-view="home"><span class="nav-icon">⌂</span>Home</div>
+      <div class="navigation-item" data-view="explore"><span class="nav-icon">◈</span>Explore</div>
+      <div class="navigation-item" data-view="messages"><span class="nav-icon">✉</span>Messages</div>
+      <div class="navigation-item" data-view="notifications"><span class="nav-icon">🔔</span>Notifications</div>
+      <div class="navigation-item" data-view="profile"><span class="nav-icon">◉</span>Profile</div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <section class="feed">
+
+    <!-- HOME VIEW -->
+    <div class="view active" id="view-home">
+      <div class="card">
+        <div class="stories-container" id="storiesContainer">
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="create-post">
+          <div class="avatar" id="createAvatar"></div>
+          <div class="create-content">
+            <textarea class="create-input" id="createPostInput" placeholder="Share something with Relvia..."></textarea>
+            <div class="create-actions">
+              <div class="media-actions">
+                <button class="media-button">📷 Photo</button>
+                <button class="media-button">🎬 Video</button>
+                <button class="media-button">📊 Poll</button>
+                <button class="media-button">📅 Event</button>
+              </div>
+              <button class="publish-button" id="publishPost" disabled>Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="feedContainer">
+        <div class="card skeleton skeleton-post"></div>
+        <div class="card skeleton skeleton-post"></div>
+      </div>
+    </div>
+
+    <!-- EXPLORE VIEW -->
+    <div class="view" id="view-explore">
+      <div class="explore-header">
+        <h1 class="gold-text">Explore</h1>
+        <p>Discover creators and posts across Relvia</p>
+      </div>
+      <div class="chip-row" id="exploreChips"></div>
+      <div class="explore-grid" id="exploreGrid">
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div class="view" id="view-profile">
+      <div class="card profile-header-card">
+        <div class="profile-banner"></div>
+        <div class="profile-body">
+          <div class="profile-top-row">
+            <div class="profile-avatar-lg" id="profileAvatarLg"></div>
+            <button class="edit-profile-btn" id="editProfileBtn">Edit profile</button>
+          </div>
+          <div class="profile-name-row">
+            <h2 id="profileDisplayName">—</h2>
+            <span id="profileVerifiedBadge"></span>
+          </div>
+          <div class="profile-handle" id="profileHandle">@—</div>
+          <p class="profile-bio" id="profileBio"></p>
+          <div class="profile-stats">
+            <div class="profile-stat"><b id="statPosts">0</b><span>Posts</span></div>
+            <div class="profile-stat"><b id="statFollowers">0</b><span>Followers</span></div>
+            <div class="profile-stat"><b id="statFollowing">0</b><span>Following</span></div>
+          </div>
+          <div class="profile-tabs">
+            <div class="profile-tab active" data-tab="posts">Posts</div>
+            <div class="profile-tab" data-tab="media">Media</div>
+          </div>
+        </div>
+      </div>
+      <div id="profilePostsContainer">
+        <div class="card skeleton skeleton-post"></div>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER VIEW (messages / notifications) -->
+    <div class="view" id="view-placeholder">
+      <div class="card">
+        <div class="empty-state">
+          <div class="empty-icon">✦</div>
+          <h4 id="placeholderTitle">Coming soon</h4>
+          <p id="placeholderText">This part of Relvia is still being built.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-panel">
+      <h3 class="sidebar-title">Trending</h3>
+      <div id="trendingContainer"></div>
+    </div>
+    <div class="sidebar-panel">
+      <h3 class="sidebar-title">Suggested Creators</h3>
+      <div id="suggestedContainer"></div>
+    </div>
+  </aside>
 
 </main>
 
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-backdrop" id="editProfileModal">
+  <div class="modal">
+    <h3>Edit profile</h3>
+    <div class="modal-field">
+      <label>Display name</label>
+      <input type="text" id="editDisplayName">
+    </div>
+    <div class="modal-field">
+      <label>Bio</label>
+      <textarea id="editBio" placeholder="Tell people about yourself..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Avatar URL</label>
+      <input type="text" id="editAvatarUrl" placeholder="https://...">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="editCancelBtn">Cancel</button>
+      <button class="modal-save" id="editSaveBtn">Save changes</button>
+    </div>
+  </div>
+</div>
 
-
-
-
-
-<!-- ==========================================
-SUPABASE + APP JAVASCRIPT
-========================================== -->
-
+<div class="toast" id="toast"></div>
 
 <script>
 
-
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
-
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 
-
-
-const supabaseClient = supabase.createClient(
-
-SUPABASE_URL,
-
-SUPABASE_ANON_KEY
-
-);
-
-
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
-
 let profile = null;
-
-
-
-
+let currentView = "home";
+let profileViewLoaded = false;
+let exploreViewLoaded = false;
 
 // ==========================================
-// INITIALIZE APP
+// UTIL
 // ==========================================
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
 
+function initials(name){
+  return (name || "R").charAt(0).toUpperCase();
+}
 
+function avatarInnerHTML(url, name){
+  return url
+    ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`
+    : initials(name);
+}
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
+
+// ==========================================
+// INITIALIZE
+// ==========================================
 async function initialize(){
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error) { console.error(error); return; }
+  if (!data.user) { window.location.href = "login.html"; return; }
 
+  currentUser = data.user;
 
+  await loadProfile();
+  await loadStories();
+  await loadFeed();
+  await loadTrending();
+  await loadSuggested();
 
-const {data,error} = await supabaseClient.auth.getUser();
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
+  setupNavigation();
+  setupComposer();
+  setupSearch();
+  setupProfileModal();
+  listenForRealtime();
 }
 
-
-
-if(!data.user){
-
-window.location.href="login.html";
-
-return;
-
-}
-
-
-
-currentUser = data.user;
-
-
-
-await loadProfile();
-
-await loadStories();
-
-await loadFeed();
-
-await loadTrending();
-
-await loadSuggested();
-
-
-
-listenForRealtime();
-
-
-
-}
 // ==========================================
-// LOAD PROFILE
+// PROFILE (self)
 // ==========================================
-
-
 async function loadProfile(){
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .single();
 
+  if (error) { console.error(error); return; }
 
-const {data,error} = await supabaseClient
+  profile = data;
 
-.from("profiles")
-
-.select("*")
-
-.eq("id",currentUser.id)
-
-.single();
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
+  document.getElementById("profileAvatar").innerHTML = avatarInnerHTML(profile.avatar_url, profile.display_name);
+  document.getElementById("createAvatar").innerHTML = avatarInnerHTML(profile.avatar_url, profile.display_name);
 }
 
-
-
-profile = data;
-
-
-
-const avatar = document.getElementById("profileAvatar");
-
-const createAvatar = document.getElementById("createAvatar");
-
-
-
-const avatarHTML = data.avatar_url
-
-?
-
-`
-
-<img
-
-src="${data.avatar_url}"
-
-style="width:100%;height:100%;object-fit:cover;"
-
->
-
-`
-
-:
-
-`
-
-${(data.display_name || "R").charAt(0)}
-
-`;
-
-
-
-avatar.innerHTML = avatarHTML;
-
-createAvatar.innerHTML = avatarHTML;
-
-
-
+function renderProfileHeader(){
+  document.getElementById("profileAvatarLg").innerHTML = avatarInnerHTML(profile.avatar_url, profile.display_name);
+  document.getElementById("profileDisplayName").textContent = profile.display_name || "Unnamed";
+  document.getElementById("profileHandle").textContent = `@${profile.username || "unknown"}`;
+  document.getElementById("profileBio").textContent = profile.bio || "No bio yet — tell people about yourself.";
+  document.getElementById("profileVerifiedBadge").innerHTML = profile.verified
+    ? `<span class="verified-badge">Verified</span>` : "";
+  document.getElementById("statFollowers").textContent = profile.follower_count ?? 0;
+  document.getElementById("statFollowing").textContent = profile.following_count ?? 0;
 }
 
+async function loadProfileView(){
+  renderProfileHeader();
 
+  const container = document.getElementById("profilePostsContainer");
+  container.innerHTML = `<div class="card skeleton skeleton-post"></div>`;
 
+  const { data, error } = await supabaseClient
+    .from("social_feed")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .order("created_at", { ascending:false });
 
+  if (error) { console.error(error); container.innerHTML = ""; return; }
+
+  document.getElementById("statPosts").textContent = data.length;
+
+  if (data.length === 0){
+    container.innerHTML = `
+      <div class="card">
+        <div class="empty-state">
+          <div class="empty-icon">✎</div>
+          <h4>No posts yet</h4>
+          <p>Share something on Home and it'll show up here.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = "";
+  for (const post of data){
+    container.innerHTML += renderPostCardHTML(post);
+    loadMedia(post.id, `media-${post.id}`);
+  }
+
+  profileViewLoaded = true;
+}
 
 // ==========================================
-// LOAD STORIES
+// EDIT PROFILE MODAL
 // ==========================================
+function setupProfileModal(){
+  const modal = document.getElementById("editProfileModal");
 
+  document.getElementById("editProfileBtn").addEventListener("click", () => {
+    document.getElementById("editDisplayName").value = profile.display_name || "";
+    document.getElementById("editBio").value = profile.bio || "";
+    document.getElementById("editAvatarUrl").value = profile.avatar_url || "";
+    modal.classList.add("open");
+  });
 
+  document.getElementById("editCancelBtn").addEventListener("click", () => modal.classList.remove("open"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+
+  document.getElementById("editSaveBtn").addEventListener("click", async () => {
+    const display_name = document.getElementById("editDisplayName").value.trim();
+    const bio = document.getElementById("editBio").value.trim();
+    const avatar_url = document.getElementById("editAvatarUrl").value.trim();
+
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update({ display_name, bio, avatar_url })
+      .eq("id", currentUser.id);
+
+    if (error){ console.error(error); showToast("Couldn't save changes"); return; }
+
+    modal.classList.remove("open");
+    showToast("Profile updated");
+    await loadProfile();
+    renderProfileHeader();
+  });
+}
+
+// ==========================================
+// NAVIGATION / VIEW SWITCHING
+// ==========================================
+function setupNavigation(){
+  document.querySelectorAll(".navigation-item").forEach(item => {
+    item.addEventListener("click", () => switchView(item.dataset.view, item));
+  });
+
+  document.getElementById("messagesButton").addEventListener("click", () => {
+    const navItem = document.querySelector('.navigation-item[data-view="messages"]');
+    switchView("messages", navItem);
+  });
+
+  document.getElementById("notificationsButton").addEventListener("click", () => {
+    const navItem = document.querySelector('.navigation-item[data-view="notifications"]');
+    switchView("notifications", navItem);
+  });
+
+  document.getElementById("profileAvatar").addEventListener("click", () => {
+    const navItem = document.querySelector('.navigation-item[data-view="profile"]');
+    switchView("profile", navItem);
+  });
+}
+
+async function switchView(view, navItem){
+  currentView = view;
+
+  document.querySelectorAll(".navigation-item").forEach(i => i.classList.remove("active"));
+  if (navItem) navItem.classList.add("active");
+
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+
+  if (view === "home"){
+    document.getElementById("view-home").classList.add("active");
+  } else if (view === "explore"){
+    document.getElementById("view-explore").classList.add("active");
+    if (!exploreViewLoaded) await loadExplore();
+  } else if (view === "profile"){
+    document.getElementById("view-profile").classList.add("active");
+    await loadProfileView();
+  } else {
+    document.getElementById("view-placeholder").classList.add("active");
+    document.getElementById("placeholderTitle").textContent =
+      view === "messages" ? "Messages coming soon" : "Notifications coming soon";
+    document.getElementById("placeholderText").textContent =
+      view === "messages"
+        ? "Direct messages between creators are on the way."
+        : "You'll see likes, comments, and follows here soon.";
+  }
+}
+
+// ==========================================
+// STORIES
+// ==========================================
 async function loadStories(){
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .order("follower_count", { ascending:false })
+    .limit(15);
 
+  if (error) { console.error(error); return; }
 
-const {data,error} = await supabaseClient
+  const container = document.getElementById("storiesContainer");
+  container.innerHTML = "";
 
-.from("profiles")
-
-.select("*")
-
-.order(
-
-"follower_count",
-
-{
-
-ascending:false
-
+  data.forEach(user => {
+    container.innerHTML += `
+      <div class="story">
+        <div class="story-border">
+          <div class="story-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div>
+        </div>
+        <div class="story-name">${escapeHtml(user.display_name)}</div>
+      </div>`;
+  });
 }
-
-)
-
-.limit(15);
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
-}
-
-
-
-const container = document.getElementById(
-
-"storiesContainer"
-
-);
-
-
-
-container.innerHTML = "";
-
-
-
-
-data.forEach(user => {
-
-
-
-container.innerHTML += `
-
-
-
-<div class="story">
-
-
-<div class="story-border">
-
-
-<div class="story-avatar">
-
-
-
-${
-
-user.avatar_url
-
-?
-
-`
-
-<img
-
-src="${user.avatar_url}"
-
-style="width:100%;height:100%;object-fit:cover;"
-
->
-
-`
-
-:
-
-`
-
-${user.display_name.charAt(0)}
-
-`
-
-}
-
-
-
-</div>
-
-
-</div>
-
-
-
-<div class="story-name">
-
-${user.display_name}
-
-</div>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
 
 // ==========================================
-// LOAD FEED
+// SHARED POST CARD RENDERER
 // ==========================================
+function renderPostCardHTML(post){
+  return `
+    <div class="card post-card">
+      <div class="post-header">
+        <div class="post-user">
+          <div class="post-avatar">${avatarInnerHTML(post.avatar_url, post.display_name)}</div>
+          <div class="post-info">
+            <div class="post-name">
+              ${escapeHtml(post.display_name)}
+              ${post.verified ? `<span class="verified-badge">Verified</span>` : ""}
+            </div>
+            <div class="post-meta">@${escapeHtml(post.username)} · ${timeAgo(post.created_at)}</div>
+          </div>
+        </div>
+        <div class="post-menu">•••</div>
+      </div>
 
+      <div class="post-text">${escapeHtml(post.caption || "")}</div>
+      <div class="post-media" id="media-${post.id}"></div>
 
+      <div class="post-actions">
+        <div class="action-group">
+          <button class="action-button" onclick="toggleLike('${post.id}')">♥ ${post.likes_count || 0}</button>
+          <button class="action-button">💬 ${post.comments_count || 0}</button>
+          <button class="action-button">⟲ ${post.reposts_count || 0}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function timeAgo(dateStr){
+  if (!dateStr) return "";
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
+// ==========================================
+// HOME FEED
+// ==========================================
 async function loadFeed(){
+  const { data, error } = await supabaseClient
+    .from("social_feed")
+    .select("*")
+    .order("created_at", { ascending:false });
 
+  if (error) { console.error(error); return; }
 
-const {data,error} = await supabaseClient
+  const container = document.getElementById("feedContainer");
 
-.from("social_feed")
+  if (data.length === 0){
+    container.innerHTML = `
+      <div class="card">
+        <div class="empty-state">
+          <div class="empty-icon">✦</div>
+          <h4>No posts yet</h4>
+          <p>Be the first to share something with Relvia.</p>
+        </div>
+      </div>`;
+    return;
+  }
 
-.select("*")
-
-.order(
-
-"created_at",
-
-{
-
-ascending:false
-
+  container.innerHTML = "";
+  for (const post of data){
+    container.innerHTML += renderPostCardHTML(post);
+    loadMedia(post.id, `media-${post.id}`);
+  }
 }
 
-);
+async function loadMedia(postId, targetElId){
+  const { data, error } = await supabaseClient
+    .from("social_post_media")
+    .select("*")
+    .eq("post_id", postId)
+    .order("position");
 
+  if (error) { console.error(error); return; }
 
+  const container = document.getElementById(targetElId);
+  if (!container) return;
 
-if(error){
+  if (!data || data.length === 0){ container.style.display = "none"; return; }
 
-console.error(error);
+  data.forEach(media => {
+    const { data: urlData } = supabaseClient.storage.from("post-media").getPublicUrl(media.storage_path);
+    const url = urlData.publicUrl;
 
-return;
-
+    if (media.media_type === "image"){
+      container.innerHTML += `<img src="${url}" loading="lazy">`;
+    } else if (media.media_type === "video"){
+      container.innerHTML += `<video controls playsinline preload="metadata"><source src="${url}"></video>`;
+    }
+  });
 }
-
-
-
-const container = document.getElementById(
-
-"feedContainer"
-
-);
-
-
-
-container.innerHTML = "";
-
-
-
-
-for(const post of data){
-
-
-
-container.innerHTML += `
-
-
-
-<div class="card post-card">
-
-
-
-<div class="post-header">
-
-
-
-<div class="post-user">
-
-
-
-<div class="post-avatar">
-
-
-
-${
-
-post.avatar_url
-
-?
-
-`
-
-<img
-
-src="${post.avatar_url}"
-
-style="width:100%;height:100%;object-fit:cover;"
-
->
-
-`
-
-:
-
-`
-
-${post.display_name.charAt(0)}
-
-`
-
-}
-
-
-
-</div>
-
-
-
-
-
-<div>
-
-
-
-<div class="post-name">
-
-
-${post.display_name}
-
-
-
-${
-
-post.verified
-
-?
-
-`
-
-<span class="verified-badge">
-
-Verified
-
-</span>
-
-`
-
-:
-
-""
-
-}
-
-
-
-</div>
-
-
-
-<div class="post-meta">
-
-@${post.username}
-
-</div>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<div class="post-menu">
-
-•••
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<div class="post-text">
-
-
-${post.caption || ""}
-
-
-
-</div>
-
-
-
-
-
-<div
-
-class="post-media"
-
-id="media-${post.id}">
-
-
-</div>
-
-
-
-
-
-
-<div class="post-actions">
-
-
-
-<button
-
-class="action-button"
-
-onclick="toggleLike('${post.id}')"
-
->
-
-
-Like ${post.likes_count || 0}
-
-
-</button>
-
-
-
-
-
-<button class="action-button">
-
-
-Comment ${post.comments_count || 0}
-
-
-</button>
-
-
-
-
-
-<button class="action-button">
-
-
-Repost ${post.reposts_count || 0}
-
-
-</button>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-await loadMedia(post.id);
-
-
-
-}
-
-
-
-}
-// ==========================================
-// LOAD POST MEDIA
-// ==========================================
-
-
-async function loadMedia(postId){
-
-
-const {data,error} = await supabaseClient
-
-.from("social_post_media")
-
-.select("*")
-
-.eq("post_id",postId)
-
-.order("position");
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
-}
-
-
-
-const container = document.getElementById(
-
-`media-${postId}`
-
-);
-
-
-
-if(!container)return;
-
-
-
-if(!data || data.length === 0){
-
-container.style.display = "none";
-
-return;
-
-}
-
-
-
-data.forEach(media => {
-
-
-
-const {data:urlData} = supabaseClient.storage
-
-.from("post-media")
-
-.getPublicUrl(
-
-media.storage_path
-
-);
-
-
-
-const url = urlData.publicUrl;
-
-
-
-
-
-if(media.media_type === "image"){
-
-
-
-container.innerHTML += `
-
-
-
-<img
-
-src="${url}"
-
-loading="lazy"
-
->
-
-
-
-`;
-
-
-
-}
-
-
-
-
-
-if(media.media_type === "video"){
-
-
-
-container.innerHTML += `
-
-
-
-<video
-
-controls
-
-playsinline
-
-preload="metadata"
-
->
-
-
-<source src="${url}">
-
-
-</video>
-
-
-
-`;
-
-
-
-}
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
 
 // ==========================================
-// LIKE SYSTEM
+// LIKES
 // ==========================================
-
-
 async function toggleLike(postId){
+  const userId = currentUser.id;
 
+  const { data: existing } = await supabaseClient
+    .from("post_likes")
+    .select("id")
+    .eq("post_id", postId)
+    .eq("user_id", userId)
+    .maybeSingle();
 
+  if (existing){
+    await supabaseClient.from("post_likes").delete().eq("id", existing.id);
+  } else {
+    await supabaseClient.from("post_likes").insert({ post_id: postId, user_id: userId });
+  }
 
-const {data:userData} = await supabaseClient.auth.getUser();
-
-
-
-const userId = userData.user.id;
-
-
-
-
-
-const {data:existing} = await supabaseClient
-
-.from("post_likes")
-
-.select("id")
-
-.eq("post_id",postId)
-
-.eq("user_id",userId)
-
-.maybeSingle();
-
-
-
-
-
-if(existing){
-
-
-
-await supabaseClient
-
-.from("post_likes")
-
-.delete()
-
-.eq(
-
-"id",
-
-existing.id
-
-);
-
-
-
+  if (currentView === "profile") await loadProfileView();
+  else await loadFeed();
 }
-
-else{
-
-
-
-await supabaseClient
-
-.from("post_likes")
-
-.insert({
-
-
-post_id:postId,
-
-
-user_id:userId
-
-
-
-});
-
-
-
-}
-
-
-
-await loadFeed();
-
-
-
-}
-
-
-
-
-
-
 
 // ==========================================
-// CREATE POST
+// COMPOSER
 // ==========================================
+function setupComposer(){
+  const input = document.getElementById("createPostInput");
+  const button = document.getElementById("publishPost");
 
+  input.addEventListener("input", () => {
+    button.disabled = input.value.trim().length === 0;
+  });
 
-document
-
-.getElementById("publishPost")
-
-.addEventListener(
-
-"click",
-
-publishPost
-
-);
-
-
-
-
-
+  button.addEventListener("click", publishPost);
+}
 
 async function publishPost(){
+  const input = document.getElementById("createPostInput");
+  const caption = input.value.trim();
+  if (!caption) return;
 
+  const { error } = await supabaseClient
+    .from("social_posts")
+    .insert({ user_id: currentUser.id, caption });
 
+  if (error) { console.error(error); showToast("Couldn't publish post"); return; }
 
-const input = document.getElementById(
-
-"createPostInput"
-
-);
-
-
-
-const caption = input.value.trim();
-
-
-
-
-
-if(!caption)return;
-
-
-
-
-
-const {error} = await supabaseClient
-
-.from("social_posts")
-
-.insert({
-
-
-user_id:currentUser.id,
-
-
-caption:caption
-
-
-
-});
-
-
-
-
-
-if(error){
-
-
-console.error(error);
-
-
-return;
-
-
+  input.value = "";
+  document.getElementById("publishPost").disabled = true;
+  showToast("Posted to Relvia");
+  await loadFeed();
 }
-
-
-
-
-
-input.value = "";
-
-
-
-await loadFeed();
-
-
-
-}
-
-
-
-
-
 
 // ==========================================
 // TRENDING
 // ==========================================
-
-
 async function loadTrending(){
+  const { data, error } = await supabaseClient
+    .from("social_feed")
+    .select("caption")
+    .limit(8);
 
+  if (error) return;
 
+  const container = document.getElementById("trendingContainer");
+  container.innerHTML = "";
 
-const {data,error} = await supabaseClient
+  if (data.length === 0){
+    container.innerHTML = `<div class="empty-state" style="padding:20px 0;"><p>Nothing trending yet.</p></div>`;
+    return;
+  }
 
-.from("social_feed")
-
-.select("caption")
-
-.limit(8);
-
-
-
-
-
-if(error)return;
-
-
-
-
-
-const container = document.getElementById(
-
-"trendingContainer"
-
-);
-
-
-
-container.innerHTML = "";
-
-
-
-
-
-data.forEach(post => {
-
-
-
-container.innerHTML += `
-
-
-
-<div class="trending-item">
-
-
-
-<h4>
-
-${
-
-(post.caption || "New Relvia post")
-
-.substring(0,45)
-
+  data.forEach(post => {
+    container.innerHTML += `
+      <div class="trending-item">
+        <h4>${escapeHtml((post.caption || "New Relvia post").substring(0,45))}</h4>
+        <p>Trending on Relvia</p>
+      </div>`;
+  });
 }
 
-
-
-</h4>
-
-
-
-<p>
-
-Trending on Relvia
-
-</p>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-}
 // ==========================================
 // SUGGESTED CREATORS
 // ==========================================
-
-
 async function loadSuggested(){
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .neq("id", currentUser.id)
+    .order("follower_count", { ascending:false })
+    .limit(5);
 
+  if (error) { console.error(error); return; }
 
+  const container = document.getElementById("suggestedContainer");
+  container.innerHTML = "";
 
-const {data,error} = await supabaseClient
-
-.from("profiles")
-
-.select("*")
-
-.neq(
-
-"id",
-
-currentUser.id
-
-)
-
-.order(
-
-"follower_count",
-
-{
-
-ascending:false
-
+  data.forEach(user => {
+    container.innerHTML += `
+      <div class="creator-card">
+        <div class="creator-info">
+          <div class="creator-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div>
+          <div>
+            <div class="creator-name">${escapeHtml(user.display_name)}</div>
+            <div class="creator-handle">@${escapeHtml(user.username)}</div>
+          </div>
+        </div>
+        <button class="follow-button">Follow</button>
+      </div>`;
+  });
 }
-
-)
-
-.limit(5);
-
-
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
-}
-
-
-
-
-
-const container = document.getElementById(
-
-"suggestedContainer"
-
-);
-
-
-
-container.innerHTML = "";
-
-
-
-
-
-data.forEach(user => {
-
-
-
-container.innerHTML += `
-
-
-
-<div class="creator-card">
-
-
-
-<div class="creator-info">
-
-
-
-<div class="creator-avatar">
-
-
-
-${
-
-user.avatar_url
-
-?
-
-`
-
-<img
-
-src="${user.avatar_url}"
-
-style="width:100%;height:100%;object-fit:cover;"
-
->
-
-`
-
-:
-
-user.display_name.charAt(0)
-
-}
-
-
-
-</div>
-
-
-
-
-
-<div>
-
-
-
-<div class="creator-name">
-
-${user.display_name}
-
-</div>
-
-
-
-<div class="creator-handle">
-
-@${user.username}
-
-</div>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<button class="follow-button">
-
-
-Follow
-
-
-</button>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
 
 // ==========================================
-// SEARCH USERS
+// EXPLORE
 // ==========================================
-
-
-document
-
-.getElementById("searchInput")
-
-.addEventListener(
-
-"input",
-
-async(event)=>{
-
-
-
-const value = event.target.value.trim();
-
-
-
-
-
-if(value.length < 2)return;
-
-
-
-
-
-const {data,error} = await supabaseClient
-
-.from("profiles")
-
-.select("*")
-
-.ilike(
-
-"display_name",
-
-`%${value}%`
-
-)
-
-.limit(8);
-
-
-
-
-
-if(error){
-
-console.error(error);
-
-return;
-
+async function loadExplore(){
+  await loadExploreChips();
+  await loadExploreGrid();
+  exploreViewLoaded = true;
 }
 
+async function loadExploreChips(){
+  const { data, error } = await supabaseClient
+    .from("social_feed")
+    .select("caption")
+    .limit(10);
 
+  const container = document.getElementById("exploreChips");
+  container.innerHTML = "";
 
+  if (error || !data || data.length === 0){
+    container.innerHTML = `<div class="chip">No trends yet</div>`;
+    return;
+  }
 
-
-console.log(
-
-"Search Results:",
-
-data
-
-);
-
-
-
+  data.slice(0,8).forEach(post => {
+    const label = (post.caption || "Relvia").split(" ").slice(0,3).join(" ");
+    container.innerHTML += `<div class="chip">${escapeHtml(label)}</div>`;
+  });
 }
 
-);
+async function loadExploreGrid(){
+  const grid = document.getElementById("exploreGrid");
 
+  const { data: posts, error } = await supabaseClient
+    .from("social_feed")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(30);
 
+  if (error) { console.error(error); grid.innerHTML = ""; return; }
 
+  if (!posts || posts.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">◈</div>
+        <h4>Nothing to explore yet</h4>
+        <p>Posts with photos or video will show up here.</p>
+      </div>`;
+    return;
+  }
 
+  const tiles = [];
 
+  for (const post of posts){
+    const { data: media } = await supabaseClient
+      .from("social_post_media")
+      .select("*")
+      .eq("post_id", post.id)
+      .order("position")
+      .limit(1);
 
+    if (media && media.length > 0){
+      const { data: urlData } = supabaseClient.storage.from("post-media").getPublicUrl(media[0].storage_path);
+      tiles.push({ post, mediaUrl: urlData.publicUrl, mediaType: media[0].media_type });
+    }
+  }
+
+  if (tiles.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">◈</div>
+        <h4>No visual posts yet</h4>
+        <p>Photo and video posts will appear here as creators share them.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = "";
+  tiles.forEach(({ post, mediaUrl, mediaType }) => {
+    grid.innerHTML += `
+      <div class="explore-tile">
+        ${mediaType === "video"
+          ? `<video src="${mediaUrl}" muted playsinline preload="metadata"></video>`
+          : `<img src="${mediaUrl}" loading="lazy">`}
+        <div class="explore-tile-overlay">
+          <span>♥ ${post.likes_count || 0}</span>
+          <span>💬 ${post.comments_count || 0}</span>
+        </div>
+      </div>`;
+  });
+}
 
 // ==========================================
-// REALTIME FEED
+// SEARCH
 // ==========================================
+function setupSearch(){
+  const input = document.getElementById("searchInput");
+  const results = document.getElementById("searchResults");
+  let debounceTimer;
 
+  input.addEventListener("input", (event) => {
+    clearTimeout(debounceTimer);
+    const value = event.target.value.trim();
 
+    if (value.length < 2){
+      results.classList.remove("open");
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .ilike("display_name", `%${value}%`)
+        .limit(6);
+
+      if (error) { console.error(error); return; }
+
+      if (!data || data.length === 0){
+        results.innerHTML = `<div class="search-result-item"><span style="color:var(--muted);">No people found</span></div>`;
+      } else {
+        results.innerHTML = data.map(user => `
+          <div class="search-result-item">
+            <div class="creator-info">
+              <div class="creator-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div>
+              <div>
+                <div class="creator-name">${escapeHtml(user.display_name)}</div>
+                <div class="creator-handle">@${escapeHtml(user.username)}</div>
+              </div>
+            </div>
+            <button class="follow-button">Follow</button>
+          </div>`).join("");
+      }
+
+      results.classList.add("open");
+    }, 250);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !results.contains(e.target)){
+      results.classList.remove("open");
+    }
+  });
+}
+
+// ==========================================
+// REALTIME
+// ==========================================
 function listenForRealtime(){
-
-
-
-supabaseClient
-
-.channel("relvia-social-feed")
-
-.on(
-
-"postgres_changes",
-
-{
-
-
-event:"*",
-
-
-schema:"public",
-
-
-table:"social_posts"
-
-
-
-},
-
-
-(payload)=>{
-
-
-
-console.log(
-
-"Feed Updated",
-
-payload
-
-);
-
-
-
-loadFeed();
-
-
-
+  supabaseClient
+    .channel("relvia-social-feed")
+    .on("postgres_changes", { event:"*", schema:"public", table:"social_posts" }, () => {
+      if (currentView === "home") loadFeed();
+      if (currentView === "explore") { exploreViewLoaded = false; }
+    })
+    .subscribe();
 }
 
-
-
-)
-
-.subscribe();
-
-
-
-}
-
-
-
-
-
-
-
 // ==========================================
-// START APPLICATION
+// START
 // ==========================================
-
-
 initialize();
 
-
-
 </script>
-
-
-
 </body>
-
 </html>
