@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -17,33 +17,41 @@
    RELVIA SOCIAL — DESIGN TOKENS
    ========================================== */
 :root{
-  --background:#050505;
-  --surface:#0d0d0d;
-  --surface-light:#151515;
-  --glass:rgba(21,21,21,.6);
-  --border:#242424;
-  --border-soft:#1a1a1a;
+  --background:#0a0806;
+  --surface:rgba(20,16,11,.78);
+  --surface-light:#1c150d;
+  --glass:rgba(18,14,10,.6);
+  --border:#2a2018;
+  --border-soft:#1c1610;
 
-  --gold-start:#d9a94b;
-  --gold-end:#f0c465;
-  --gold:#d9a94b;
+  --gold-start:#f2c766;
+  --gold-end:#b9832f;
+  --gold:#e0b158;
 
-  --text:#ffffff;
-  --muted:#8c8c8c;
-  --muted-soft:#5f5f5f;
+  --text:#f5f1ea;
+  --muted:#a89e8f;
+  --muted-soft:#6b6255;
   --danger:#e0574f;
 
   --radius-lg:24px;
   --radius-md:16px;
   --radius-sm:10px;
 
-  --font-display:"Cormorant Garamond",serif;
+  --font-display:"Playfair Display",serif;
   --font-body:"Inter",sans-serif;
 }
 
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
 html{ scroll-behavior:smooth; }
-body{ background:var(--background); color:var(--text); overflow-x:hidden; }
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(185,131,47,.06), transparent 55%),
+    var(--background);
+  background-attachment:fixed;
+  color:var(--text);
+  overflow-x:hidden;
+}
 button, input, textarea{ font-family:inherit; }
 button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
 img{ max-width:100%; display:block; }
@@ -70,12 +78,25 @@ img{ max-width:100%; display:block; }
   z-index:999;
 }
 
-.brand{
-  font-family:var(--font-display);
-  font-size:26px; font-weight:700; letter-spacing:2px;
-  display:flex; align-items:center; gap:2px;
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:38px; height:38px; border-radius:50%;
+  background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px;
+  color:var(--gold-start);
 }
-.brand span{ color:var(--gold); }
+.brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; color:var(--text); }
+.brand-sub{ font-size:10px; letter-spacing:3px; color:var(--gold); font-weight:600; }
+
+.account-tag{
+  font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase;
+  margin-right:6px; white-space:nowrap;
+}
+@media(max-width:1150px){ .account-tag{ display:none; } }
 
 .search-container{ position:relative; width:420px; }
 .search-container input{
@@ -367,6 +388,51 @@ img{ max-width:100%; display:block; }
 .profile-tab:hover{ color:white; }
 
 /* ==========================================
+   CREATOR PLUS
+   ========================================== */
+.cplus-hero{ text-align:center; padding:44px 30px; }
+.cplus-hero-icon{ font-size:30px; color:var(--gold); margin-bottom:10px; }
+.cplus-hero h1{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:12px; }
+.cplus-hero p{ color:var(--muted); font-size:14.5px; max-width:460px; margin:0 auto; line-height:1.6; }
+
+.cplus-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:22px; }
+@media(max-width:850px){ .cplus-grid{ grid-template-columns:1fr; } }
+
+.cplus-tier{
+  background:var(--glass); border:1px solid var(--border); border-radius:var(--radius-lg);
+  padding:26px 22px; display:flex; flex-direction:column;
+}
+.cplus-tier.recommended{ border-color:var(--gold-end); position:relative; }
+.cplus-tier.recommended::before{
+  content:"Most popular"; position:absolute; top:-12px; left:22px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-size:11px; font-weight:800; padding:4px 12px; border-radius:999px;
+  letter-spacing:.5px;
+}
+.cplus-tier h3{ font-family:var(--font-display); font-size:22px; font-weight:600; }
+.cplus-price{ margin-top:8px; font-size:30px; font-weight:800; }
+.cplus-price span{ font-size:13px; color:var(--muted); font-weight:500; }
+.cplus-perks{ list-style:none; margin:20px 0 24px; flex:1; }
+.cplus-perks li{ font-size:13.5px; color:#ddd; padding:7px 0; display:flex; gap:9px; }
+.cplus-perks li::before{ content:"✦"; color:var(--gold); font-size:11px; margin-top:2px; }
+.cplus-btn{
+  background:var(--surface-light); border:1px solid var(--border); color:var(--text);
+  padding:12px; border-radius:14px; font-weight:700; font-size:13.5px; text-align:center; transition:.2s;
+}
+.cplus-tier.recommended .cplus-btn{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none;
+}
+.cplus-btn:hover{ opacity:.85; }
+.cplus-btn.current{ background:none; border:1px solid var(--border); color:var(--muted); cursor:default; }
+.cplus-note{ font-size:13.5px; color:var(--muted); text-align:center; line-height:1.6; }
+.cplus-note strong{ color:var(--text); }
+
+.crown-badge{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+}
+
+/* ==========================================
    MODAL
    ========================================== */
 .modal-backdrop{
@@ -434,7 +500,13 @@ img{ max-width:100%; display:block; }
 <body>
 
 <header class="topbar">
-  <div class="brand">RELVIA <span>SOCIAL</span></div>
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <div class="brand-text">
+      <span class="brand-name">Relvia</span>
+      <span class="brand-sub">SOCIAL</span>
+    </div>
+  </div>
 
   <div class="search-container">
     <input type="text" placeholder="Search Relvia" id="searchInput" autocomplete="off">
@@ -443,6 +515,7 @@ img{ max-width:100%; display:block; }
   </div>
 
   <div class="nav-actions">
+    <span class="account-tag">SOCIAL · ONE RELVIA ACCOUNT</span>
     <button class="nav-button" id="messagesButton" title="Messages">✉</button>
     <button class="nav-button" id="notificationsButton" title="Notifications">🔔</button>
     <div class="avatar" id="profileAvatar" title="Your profile"></div>
@@ -460,6 +533,7 @@ img{ max-width:100%; display:block; }
       <div class="navigation-item" data-view="messages"><span class="nav-icon">✉</span>Messages</div>
       <div class="navigation-item" data-view="notifications"><span class="nav-icon">🔔</span>Notifications</div>
       <div class="navigation-item" data-view="profile"><span class="nav-icon">◉</span>Profile</div>
+      <div class="navigation-item" data-view="creatorplus"><span class="nav-icon">♛</span>Creator Plus</div>
     </div>
   </aside>
 
@@ -548,6 +622,21 @@ img{ max-width:100%; display:block; }
       </div>
     </div>
 
+    <!-- CREATOR PLUS VIEW -->
+    <div class="view" id="view-creatorplus">
+      <div class="card cplus-hero">
+        <div class="cplus-hero-icon">♛</div>
+        <h1 class="gold-text">Creator Plus</h1>
+        <p>Unlock more from Relvia Social — badges, analytics, and tools built for creators growing their audience across the Relvia ecosystem.</p>
+      </div>
+
+      <div class="cplus-grid" id="cplusGrid"></div>
+
+      <div class="card cplus-note">
+        <p><strong>One Relvia Account.</strong> Creator Plus applies across Relvia Social — and unlocks perks on Relvia Music and Studios as those roll out, all under the same login.</p>
+      </div>
+    </div>
+
     <!-- PLACEHOLDER VIEW (messages / notifications) -->
     <div class="view" id="view-placeholder">
       <div class="card">
@@ -612,6 +701,10 @@ let profile = null;
 let currentView = "home";
 let profileViewLoaded = false;
 let exploreViewLoaded = false;
+
+// Creator Plus tier is kept client-side for this preview (not persisted to Supabase,
+// since the profiles table doesn't yet have a tier column). Resets on page reload.
+let creatorPlusTier = "free";
 
 // ==========================================
 // UTIL
@@ -701,8 +794,10 @@ function renderProfileHeader(){
   document.getElementById("profileDisplayName").textContent = profile.display_name || "Unnamed";
   document.getElementById("profileHandle").textContent = `@${profile.username || "unknown"}`;
   document.getElementById("profileBio").textContent = profile.bio || "No bio yet — tell people about yourself.";
-  document.getElementById("profileVerifiedBadge").innerHTML = profile.verified
-    ? `<span class="verified-badge">Verified</span>` : "";
+  const badges = [];
+  if (profile.verified) badges.push(`<span class="verified-badge">Verified</span>`);
+  if (creatorPlusTier !== "free") badges.push(`<span class="crown-badge">♛ Creator Plus</span>`);
+  document.getElementById("profileVerifiedBadge").innerHTML = badges.join(" ");
   document.getElementById("statFollowers").textContent = profile.follower_count ?? 0;
   document.getElementById("statFollowing").textContent = profile.following_count ?? 0;
 }
@@ -819,6 +914,9 @@ async function switchView(view, navItem){
   } else if (view === "profile"){
     document.getElementById("view-profile").classList.add("active");
     await loadProfileView();
+  } else if (view === "creatorplus"){
+    document.getElementById("view-creatorplus").classList.add("active");
+    renderCreatorPlusTiers();
   } else {
     document.getElementById("view-placeholder").classList.add("active");
     document.getElementById("placeholderTitle").textContent =
@@ -869,6 +967,7 @@ function renderPostCardHTML(post){
             <div class="post-name">
               ${escapeHtml(post.display_name)}
               ${post.verified ? `<span class="verified-badge">Verified</span>` : ""}
+              ${post.user_id === currentUser.id && creatorPlusTier !== "free" ? `<span class="crown-badge">♛ Plus</span>` : ""}
             </div>
             <div class="post-meta">@${escapeHtml(post.username)} · ${timeAgo(post.created_at)}</div>
           </div>
@@ -1071,6 +1170,58 @@ async function loadSuggested(){
         <button class="follow-button">Follow</button>
       </div>`;
   });
+}
+
+// ==========================================
+// CREATOR PLUS
+// ==========================================
+const CPLUS_TIERS = [
+  {
+    id: "free",
+    name: "Free",
+    price: "$0",
+    perks: ["Post, follow, and message", "Standard profile", "Explore & discovery access"]
+  },
+  {
+    id: "plus",
+    name: "Creator Plus",
+    price: "$9",
+    recommended: true,
+    perks: ["Gold Creator Plus badge", "Post & profile analytics", "Priority in Explore", "Early access to new features"]
+  },
+  {
+    id: "pro",
+    name: "Creator Plus Pro",
+    price: "$19",
+    perks: ["Everything in Creator Plus", "Monetization & tipping tools", "Verified fast-track review", "Priority support"]
+  }
+];
+
+function renderCreatorPlusTiers(){
+  const grid = document.getElementById("cplusGrid");
+
+  grid.innerHTML = CPLUS_TIERS.map(tier => {
+    const isCurrent = tier.id === creatorPlusTier;
+    return `
+      <div class="cplus-tier ${tier.recommended ? "recommended" : ""}">
+        <h3>${tier.name}</h3>
+        <div class="cplus-price">${tier.price}<span> /month</span></div>
+        <ul class="cplus-perks">
+          ${tier.perks.map(p => `<li>${escapeHtml(p)}</li>`).join("")}
+        </ul>
+        <button class="cplus-btn ${isCurrent ? "current" : ""}" ${isCurrent ? "disabled" : ""} onclick="setCreatorPlusTier('${tier.id}')">
+          ${isCurrent ? "Current plan" : tier.id === "free" ? "Downgrade" : "Upgrade"}
+        </button>
+      </div>`;
+  }).join("");
+}
+
+function setCreatorPlusTier(tierId){
+  creatorPlusTier = tierId;
+  const tier = CPLUS_TIERS.find(t => t.id === tierId);
+  showToast(tierId === "free" ? "Moved to the Free plan" : `You're on ${tier.name} (preview)`);
+  renderCreatorPlusTiers();
+  if (currentView === "profile") renderProfileHeader();
 }
 
 // ==========================================
