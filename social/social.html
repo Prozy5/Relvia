@@ -641,23 +641,41 @@ function showToast(message){
 // INITIALIZE
 // ==========================================
 async function initialize(){
-  const { data, error } = await supabaseClient.auth.getUser();
-  if (error) { console.error(error); return; }
-  if (!data.user) { window.location.href = "login.html"; return; }
+  try {
+    // Check for a session BEFORE calling getUser() — with no session at all,
+    // getUser() throws AuthSessionMissingError instead of returning it as `error`.
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) console.error(sessionError);
 
-  currentUser = data.user;
+    if (!sessionData || !sessionData.session){
+      window.location.href = "login.html";
+      return;
+    }
 
-  await loadProfile();
-  await loadStories();
-  await loadFeed();
-  await loadTrending();
-  await loadSuggested();
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error || !data.user){
+      console.error(error);
+      window.location.href = "login.html";
+      return;
+    }
 
-  setupNavigation();
-  setupComposer();
-  setupSearch();
-  setupProfileModal();
-  listenForRealtime();
+    currentUser = data.user;
+
+    await loadProfile();
+    await loadStories();
+    await loadFeed();
+    await loadTrending();
+    await loadSuggested();
+
+    setupNavigation();
+    setupComposer();
+    setupSearch();
+    setupProfileModal();
+    listenForRealtime();
+  } catch (err){
+    console.error("Relvia init failed:", err);
+    window.location.href = "login.html";
+  }
 }
 
 // ==========================================
