@@ -517,7 +517,7 @@ img{ max-width:100%; display:block; }
   <div class="nav-actions">
     <span class="account-tag">SOCIAL · ONE RELVIA ACCOUNT</span>
     <button class="nav-button" id="messagesButton" title="Messages">✉</button>
-    <button class="nav-button" id="notificationsButton" title="Notifications">🔔</button>
+    <button class="nav-button" id="notificationsButton" title="Notifications">✧</button>
     <div class="avatar" id="profileAvatar" title="Your profile"></div>
   </div>
 </header>
@@ -531,7 +531,7 @@ img{ max-width:100%; display:block; }
       <div class="navigation-item active" data-view="home"><span class="nav-icon">⌂</span>Home</div>
       <div class="navigation-item" data-view="explore"><span class="nav-icon">◈</span>Explore</div>
       <div class="navigation-item" data-view="messages"><span class="nav-icon">✉</span>Messages</div>
-      <div class="navigation-item" data-view="notifications"><span class="nav-icon">🔔</span>Notifications</div>
+      <div class="navigation-item" data-view="notifications"><span class="nav-icon">✧</span>Notifications</div>
       <div class="navigation-item" data-view="profile"><span class="nav-icon">◉</span>Profile</div>
       <div class="navigation-item" data-view="creatorplus"><span class="nav-icon">♛</span>Creator Plus</div>
     </div>
@@ -557,10 +557,10 @@ img{ max-width:100%; display:block; }
             <textarea class="create-input" id="createPostInput" placeholder="Share something with Relvia..."></textarea>
             <div class="create-actions">
               <div class="media-actions">
-                <button class="media-button">📷 Photo</button>
-                <button class="media-button">🎬 Video</button>
-                <button class="media-button">📊 Poll</button>
-                <button class="media-button">📅 Event</button>
+                <button class="media-button">Photo</button>
+                <button class="media-button">Video</button>
+                <button class="media-button">Poll</button>
+                <button class="media-button">Event</button>
               </div>
               <button class="publish-button" id="publishPost" disabled>Post</button>
             </div>
@@ -741,14 +741,14 @@ async function initialize(){
     if (sessionError) console.error(sessionError);
 
     if (!sessionData || !sessionData.session){
-      window.location.href = "login.html";
+      window.location.href = "/login.html";
       return;
     }
 
     const { data, error } = await supabaseClient.auth.getUser();
     if (error || !data.user){
       console.error(error);
-      window.location.href = "login.html";
+      window.location.href = "/login.html";
       return;
     }
 
@@ -767,7 +767,7 @@ async function initialize(){
     listenForRealtime();
   } catch (err){
     console.error("Relvia init failed:", err);
-    window.location.href = "login.html";
+    window.location.href = "/login.html";
   }
 }
 
@@ -980,9 +980,9 @@ function renderPostCardHTML(post){
 
       <div class="post-actions">
         <div class="action-group">
-          <button class="action-button" onclick="toggleLike('${post.id}')">♥ ${post.likes_count || 0}</button>
-          <button class="action-button">💬 ${post.comments_count || 0}</button>
-          <button class="action-button">⟲ ${post.reposts_count || 0}</button>
+          <button class="action-button" onclick="toggleLike('${post.id}')">Like · ${post.likes_count || 0}</button>
+          <button class="action-button">Comment · ${post.comments_count || 0}</button>
+          <button class="action-button">Repost · ${post.reposts_count || 0}</button>
         </div>
       </div>
     </div>`;
@@ -1308,8 +1308,8 @@ async function loadExploreGrid(){
           ? `<video src="${mediaUrl}" muted playsinline preload="metadata"></video>`
           : `<img src="${mediaUrl}" loading="lazy">`}
         <div class="explore-tile-overlay">
-          <span>♥ ${post.likes_count || 0}</span>
-          <span>💬 ${post.comments_count || 0}</span>
+          <span>Like · ${post.likes_count || 0}</span>
+          <span>Comment · ${post.comments_count || 0}</span>
         </div>
       </div>`;
   });
