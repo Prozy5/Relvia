@@ -50,6 +50,17 @@ img{ max-width:100%; display:block; }
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
 .live-dot{ width:8px; height:8px; border-radius:50%; background:var(--live-red); box-shadow:0 0 0 3px rgba(224,87,79,.2); }
 
+.header-right{ display:flex; align-items:center; gap:14px; }
+.owner-badge{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-size:11px; font-weight:800; padding:5px 12px; border-radius:999px; letter-spacing:.3px;
+}
+.owner-link{
+  font-size:13px; font-weight:700; color:var(--gold); border:1px solid var(--gold-end);
+  padding:8px 16px; border-radius:12px; transition:.2s; text-decoration:none;
+}
+.owner-link:hover{ background:var(--gold); color:#000; }
+
 .avatar{
   width:40px; height:40px; border-radius:50%; overflow:hidden;
   background:linear-gradient(135deg,#2a2a2a,#171717); border:1px solid var(--border);
@@ -153,7 +164,11 @@ img{ max-width:100%; display:block; }
       <span class="brand-name">Live</span>
     </div>
   </div>
-  <div class="avatar" id="profileAvatar" title="Your Live account"></div>
+  <div class="header-right">
+    <span class="owner-badge" id="ownerBadge" style="display:none;"></span>
+    <a class="owner-link" id="ownerLink" href="owner-panel.html" style="display:none;">Owner</a>
+    <div class="avatar" id="profileAvatar" title="Your Live account"></div>
+  </div>
 </header>
 
 <main class="app-container">
@@ -245,13 +260,14 @@ async function initialize(){
     currentUser = userData.user;
 
     await loadLiveProfile();
+    await checkOwnerStatus();
     await loadCategories();
     await loadStreams();
 
     document.getElementById("playerClose").addEventListener("click", closePlayer);
   } catch (err){
     console.error("Relvia Live init failed:", err);
-    window.location.href = "login.html";
+    window.location.href = "live-login.html";
   }
 }
 
@@ -269,6 +285,24 @@ async function loadLiveProfile(){
   avatar.innerHTML = liveProfile?.avatar_url
     ? `<img src="${liveProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
     : initial;
+}
+
+// ==========================================================
+// OWNER STATUS
+// ==========================================================
+async function checkOwnerStatus(){
+  const { data, error } = await supabaseClient
+    .from("live_owners")
+    .select("badge_label")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+
+  if (error){ console.error(error); return; }
+  if (!data) return;
+
+  document.getElementById("ownerBadge").textContent = data.badge_label || "Owner";
+  document.getElementById("ownerBadge").style.display = "inline-block";
+  document.getElementById("ownerLink").style.display = "inline-block";
 }
 
 // ==========================================================
