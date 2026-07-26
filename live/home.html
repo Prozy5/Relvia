@@ -1,964 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Relvia Live</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 
 <style>
-
 :root{
-
---bg:#0B1220;
---surface:#111827;
---surface2:#1A2335;
-
---blue:#2563EB;
---blue-hover:#1D4ED8;
-
---purple:#7C3AED;
-
---text:#FFFFFF;
---muted:#94A3B8;
-
---border:#1F2937;
-
---success:#22C55E;
---danger:#EF4444;
-
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --radius-lg:24px; --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
 }
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-
-}
-
-html{
-
-scroll-behavior:smooth;
-
-}
-
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html{ scroll-behavior:smooth; }
 body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(185,131,47,.06), transparent 55%),
+    var(--background);
+  background-attachment:fixed; color:var(--text); overflow-x:hidden;
+}
+button, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
 
-background:var(--bg);
+/* HEADER — brand only, no nav links */
+.topbar{
+  position:fixed; top:0; left:0; right:0; height:76px;
+  display:flex; align-items:center; justify-content:space-between; padding:0 32px;
+  background:rgba(5,5,5,.82); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-soft);
+  z-index:999;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:38px; height:38px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold-start);
+}
+.brand-text{ display:flex; align-items:center; gap:8px; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.live-dot{ width:8px; height:8px; border-radius:50%; background:var(--live-red); box-shadow:0 0 0 3px rgba(224,87,79,.2); }
 
-color:var(--text);
-
-font-family:Arial,Helvetica,sans-serif;
-
+.avatar{
+  width:40px; height:40px; border-radius:50%; overflow:hidden;
+  background:linear-gradient(135deg,#2a2a2a,#171717); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer;
 }
 
-a{
+/* LAYOUT */
+.app-container{ max-width:1500px; margin:auto; padding:104px 30px 60px; }
 
-text-decoration:none;
-
-color:inherit;
-
+.category-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; margin-bottom:30px; }
+.category-row::-webkit-scrollbar{ display:none; }
+.category-pill{
+  white-space:nowrap; background:var(--surface-light); border:1px solid var(--border);
+  padding:11px 22px; border-radius:999px; font-size:14px; font-weight:600; color:#ddd; transition:.2s;
+}
+.category-pill:hover{ border-color:var(--gold); color:var(--gold); }
+.category-pill.active{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border-color:transparent;
 }
 
-button{
+.stream-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:22px; }
 
-cursor:pointer;
-
-font-family:inherit;
-
+.stream-card{
+  background:var(--glass); border:1px solid var(--border); border-radius:18px; overflow:hidden;
+  cursor:pointer; transition:transform .2s, border-color .2s;
 }
-
-header{
-
-position:sticky;
-
-top:0;
-
-height:72px;
-
-background:rgba(11,18,32,.96);
-
-backdrop-filter:blur(18px);
-
-border-bottom:1px solid var(--border);
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-padding:0 35px;
-
-z-index:999;
-
+.stream-card:hover{ transform:translateY(-3px); border-color:var(--gold-end); }
+.stream-thumb{
+  aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+  position:relative; overflow:hidden;
 }
-
-.logo{
-
-display:flex;
-
-align-items:center;
-
-gap:12px;
-
-font-size:28px;
-
-font-weight:700;
-
+.stream-thumb img{ width:100%; height:100%; object-fit:cover; }
+.live-badge{
+  position:absolute; top:12px; left:12px; background:var(--live-red); color:white;
+  font-size:11px; font-weight:800; letter-spacing:.5px; padding:4px 10px; border-radius:6px;
+  display:flex; align-items:center; gap:6px;
 }
-
-.logoMark{
-
-width:42px;
-
-height:42px;
-
-border-radius:12px;
-
-background:linear-gradient(135deg,var(--blue),var(--purple));
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:18px;
-
-font-weight:bold;
-
+.live-badge .dot{ width:6px; height:6px; border-radius:50%; background:white; }
+.viewer-count{
+  position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,.6); color:white;
+  font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:6px; backdrop-filter:blur(4px);
 }
+.stream-info{ padding:14px 16px; }
+.stream-title{ font-size:14.5px; font-weight:700; margin-bottom:4px; line-height:1.3; }
+.stream-host{ font-size:12.5px; color:var(--muted); }
 
-nav{
+.empty-state{ padding:70px 20px; text-align:center; color:var(--muted); }
+.empty-state h4{ color:#ddd; font-size:17px; margin-bottom:8px; font-family:var(--font-display); font-size:22px; }
+.empty-state p{ font-size:13.5px; }
 
-display:flex;
+.skeleton{ background:linear-gradient(90deg,#141414 25%,#1c1c1c 37%,#141414 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite; border-radius:18px; aspect-ratio:16/9; }
+@keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
 
-gap:28px;
-
+/* PLAYER OVERLAY */
+.player-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.9); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center; z-index:2000; padding:30px;
 }
-
-nav a{
-
-font-size:15px;
-
-color:var(--muted);
-
-transition:.2s;
-
+.player-overlay.open{ display:flex; }
+.player-box{ width:100%; max-width:1100px; }
+.player-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.player-title{ font-family:var(--font-display); font-size:20px; font-weight:600; }
+.player-close{
+  width:40px; height:40px; border-radius:50%; background:var(--surface-light); border:1px solid var(--border);
+  font-size:18px; display:flex; align-items:center; justify-content:center;
 }
-
-nav a:hover{
-
-color:white;
-
+.player-close:hover{ border-color:var(--gold); color:var(--gold); }
+.video-frame{
+  width:100%; aspect-ratio:16/9; background:#000; border-radius:18px; overflow:hidden;
+  border:1px solid var(--border); position:relative;
 }
-
-nav .active{
-
-color:white;
-
+.video-frame video{ width:100%; height:100%; object-fit:contain; background:#000; }
+.player-status{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:var(--muted); font-size:14px; flex-direction:column; gap:10px; text-align:center; padding:20px;
 }
+.player-status.hidden{ display:none; }
 
-.headerRight{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface); border:1px solid var(--gold); color:white;
+  padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
 }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-.search{
-
-width:300px;
-
-height:42px;
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:12px;
-
-padding:0 15px;
-
-outline:none;
-
-color:white;
-
+@media(max-width:700px){
+  .topbar{ padding:0 18px; }
+  .app-container{ padding:92px 16px 40px; }
 }
-
-.profile{
-
-width:42px;
-
-height:42px;
-
-border-radius:50%;
-
-background:var(--surface2);
-
-border:1px solid var(--border);
-
-}
-
-.hero{
-
-padding:60px 40px;
-
-}
-
-.heroCard{
-
-background:linear-gradient(135deg,#111827,#18243A);
-
-border:1px solid var(--border);
-
-border-radius:28px;
-
-padding:60px;
-
-min-height:420px;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-position:relative;
-
-overflow:hidden;
-
-}
-
-.liveBadge{
-
-display:inline-flex;
-
-align-items:center;
-
-gap:10px;
-
-background:rgba(239,68,68,.15);
-
-border:1px solid rgba(239,68,68,.35);
-
-color:#FFB4B4;
-
-padding:8px 18px;
-
-border-radius:999px;
-
-width:max-content;
-
-margin-bottom:24px;
-
-font-size:14px;
-
-font-weight:bold;
-
-}
-
-.liveDot{
-
-width:10px;
-
-height:10px;
-
-background:var(--danger);
-
-border-radius:50%;
-
-}
-
-.hero h1{
-
-font-size:58px;
-
-max-width:760px;
-
-line-height:1.05;
-
-margin-bottom:18px;
-
-}
-
-.hero p{
-
-max-width:700px;
-
-font-size:18px;
-
-line-height:1.8;
-
-color:var(--muted);
-
-margin-bottom:35px;
-
-}
-
-.heroButtons{
-
-display:flex;
-
-gap:15px;
-
-}
-
-.primary{
-
-height:52px;
-
-padding:0 28px;
-
-border:none;
-
-background:var(--blue);
-
-color:white;
-
-border-radius:14px;
-
-font-size:15px;
-
-}
-
-.primary:hover{
-
-background:var(--blue-hover);
-
-}
-
-.secondary{
-
-height:52px;
-
-padding:0 28px;
-
-border:1px solid var(--border);
-
-background:transparent;
-
-color:white;
-
-border-radius:14px;
-
-}
-
-.secondary:hover{
-
-background:var(--surface);
-
-}
-
 </style>
-
 </head>
-
 <body>
 
-<header>
-
-<div class="logo">
-
-<div class="logoMark">
-
-R
-
-</div>
-
-Relvia Live
-
-</div>
-
-<nav>
-
-<a href="/">Home</a>
-
-<a href="/discover">Discover</a>
-
-<a href="/live" class="active">Live</a>
-
-<a href="/videos">Videos</a>
-
-<a href="/communities">Communities</a>
-
-<a href="/studio">Creator Studio</a>
-
-</nav>
-
-<div class="headerRight">
-
-<input
-class="search"
-placeholder="Search creators, broadcasts, events...">
-
-<div class="profile"></div>
-
-</div>
-
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <div class="brand-text">
+      <span class="brand-name">Relvia</span>
+      <span class="live-dot"></span>
+      <span class="brand-name">Live</span>
+    </div>
+  </div>
+  <div class="avatar" id="profileAvatar" title="Your Live account"></div>
 </header>
 
-<section class="hero">
+<main class="app-container">
+  <div class="category-row" id="categoryRow">
+    <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
+    <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
+    <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
+  </div>
 
-<div class="heroCard">
+  <div class="stream-grid" id="streamGrid">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+</main>
 
-<div class="liveBadge">
-
-<div class="liveDot"></div>
-
-LIVE ACROSS RELVIA
-
+<!-- PLAYER OVERLAY -->
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-box">
+    <div class="player-header">
+      <div class="player-title" id="playerTitle">—</div>
+      <button class="player-close" id="playerClose">×</button>
+    </div>
+    <div class="video-frame">
+      <video id="playerVideo" autoplay playsinline></video>
+      <div class="player-status" id="playerStatus">
+        <span>Connecting to stream...</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<h1>
+<div class="toast" id="toast"></div>
 
-Where creators, communities, and live events come together.
-
-</h1>
-
-<p>
-
-Discover live entertainment, gaming, podcasts, music, sports, education, and community events happening across the Relvia ecosystem.
-
-</p>
-
-<div class="heroButtons">
-
-<button class="primary">
-
-Explore Live
-
-</button>
-
-<button class="secondary">
-
-Become a Creator
-
-</button>
-
-</div>
-
-</div>
-
-</section>
-<section class="section">
-
-<div class="sectionHeader">
-
-<h2>
-
-Trending Live
-
-</h2>
-
-<a href="/live/discover">
-
-View All
-
-</a>
-
-</div>
-
-<div
-class="liveGrid"
-id="liveGrid">
-
-</div>
-
-</section>
-
-<section class="section">
-
-<div class="sectionHeader">
-
-<h2>
-
-Browse Categories
-
-</h2>
-
-</div>
-
-<div class="categoryGrid">
-
-<button class="category">
-
-Gaming
-
-</button>
-
-<button class="category">
-
-Music
-
-</button>
-
-<button class="category">
-
-Podcasts
-
-</button>
-
-<button class="category">
-
-IRL
-
-</button>
-
-<button class="category">
-
-Sports
-
-</button>
-
-<button class="category">
-
-Technology
-
-</button>
-
-<button class="category">
-
-Education
-
-</button>
-
-<button class="category">
-
-Events
-
-</button>
-
-</div>
-
-</section>
-
-<style>
-
-.section{
-
-padding:0 40px 50px;
-
-}
-
-.sectionHeader{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-bottom:25px;
-
-}
-
-.sectionHeader h2{
-
-font-size:32px;
-
-}
-
-.sectionHeader a{
-
-color:var(--blue);
-
-font-size:15px;
-
-}
-
-.liveGrid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-
-gap:25px;
-
-}
-
-.liveCard{
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:20px;
-
-overflow:hidden;
-
-transition:.25s;
-
-cursor:pointer;
-
-}
-
-.liveCard:hover{
-
-transform:translateY(-5px);
-
-border-color:var(--blue);
-
-}
-
-.liveThumbnail{
-
-height:190px;
-
-background:linear-gradient(135deg,#16233a,#1b2944);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-position:relative;
-
-}
-
-.liveLabel{
-
-position:absolute;
-
-top:15px;
-
-left:15px;
-
-background:var(--danger);
-
-padding:6px 14px;
-
-border-radius:999px;
-
-font-size:12px;
-
-font-weight:bold;
-
-}
-
-.viewerCount{
-
-position:absolute;
-
-bottom:15px;
-
-right:15px;
-
-background:rgba(0,0,0,.5);
-
-padding:6px 12px;
-
-border-radius:999px;
-
-font-size:12px;
-
-}
-
-.liveInfo{
-
-padding:18px;
-
-}
-
-.liveInfo h3{
-
-margin-bottom:8px;
-
-font-size:20px;
-
-}
-
-.liveInfo p{
-
-color:var(--muted);
-
-font-size:14px;
-
-margin-bottom:6px;
-
-}
-
-.categoryGrid{
-
-display:flex;
-
-flex-wrap:wrap;
-
-gap:15px;
-
-}
-
-.category{
-
-height:48px;
-
-padding:0 22px;
-
-background:var(--surface);
-
-border:1px solid var(--border);
-
-border-radius:999px;
-
-color:white;
-
-font-size:15px;
-
-}
-
-.category:hover{
-
-background:var(--blue);
-
-border-color:var(--blue);
-
-}
-
-</style>
 <script>
 
-const SUPABASE_URL="YOUR_SUPABASE_URL";
-
-const SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
-
-const supabase=window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
-);
-
-async function loadLiveSessions(){
-
-const{
-
-data,
-
-error
-
-}=await supabase
-
-.from("live_sessions")
-
-.select("*")
-
-.eq("status","live")
-
-.order("started_at",{ascending:false});
-
-const grid=document.getElementById("liveGrid");
-
-grid.innerHTML="";
-
-if(error){
-
-console.error(error);
-
-grid.innerHTML=`
-
-<div class="liveCard">
-
-<div class="liveThumbnail">
-
-Database Error
-
-</div>
-
-<div class="liveInfo">
-
-<h3>
-
-Unable to load broadcasts
-
-</h3>
-
-<p>
-
-Please try again later.
-
-</p>
-
-</div>
-
-</div>
-
-`;
-
-return;
-
-}
-
-if(!data||data.length===0){
-
-grid.innerHTML=`
-
-<div class="liveCard">
-
-<div class="liveThumbnail">
-
-No Live Shows
-
-</div>
-
-<div class="liveInfo">
-
-<h3>
-
-Nothing is live right now.
-
-</h3>
-
-<p>
-
-Check back later to discover new broadcasts.
-
-</p>
-
-</div>
-
-</div>
-
-`;
-
-return;
-
-}
-
-data.forEach(stream=>{
-
-grid.innerHTML+=`
-
-<div
-class="liveCard"
-onclick="openBroadcast('${stream.id}')">
-
-<div class="liveThumbnail">
-
-<div class="liveLabel">
-
-LIVE
-
-</div>
-
-<div class="viewerCount">
-
-${stream.current_viewers||0} Watching
-
-</div>
-
-</div>
-
-<div class="liveInfo">
-
-<h3>
-
-${stream.title||"Untitled Broadcast"}
-
-</h3>
-
-<p>
-
-${stream.category||"General"}
-
-</p>
-
-<p>
-
-${stream.status}
-
-</p>
-
-</div>
-
-</div>
-
-`;
-
+// ==========================================================
+// CONFIG — fill in your LiveKit Cloud WebSocket URL below.
+// This URL is safe to expose client-side (it's just an
+// endpoint, not a credential). Find it in your LiveKit Cloud
+// project settings, format: wss://your-project.livekit.cloud
+// ==========================================================
+const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const TOKEN_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-livekit-token`;
+
+// Same isolated storage key as live-login.html, so this session
+// never overlaps with the Social app's session.
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
 });
 
+let currentUser = null;
+let liveProfile = null;
+let categories = [];
+let activeCategoryId = "all";
+let currentRoom = null; // active LiveKit Room instance, if connected
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
 }
 
-function openBroadcast(id){
-
-window.location.href=
-
-"/live/watch.html?id="+id;
-
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
 
+// ==========================================================
+// INIT
+// ==========================================================
+async function initialize(){
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (!sessionData || !sessionData.session){
+      window.location.href = "live-login.html";
+      return;
+    }
+
+    const { data: userData, error } = await supabaseClient.auth.getUser();
+    if (error || !userData.user){
+      window.location.href = "live-login.html";
+      return;
+    }
+
+    currentUser = userData.user;
+
+    await loadLiveProfile();
+    await loadCategories();
+    await loadStreams();
+
+    document.getElementById("playerClose").addEventListener("click", closePlayer);
+  } catch (err){
+    console.error("Relvia Live init failed:", err);
+    window.location.href = "live-login.html";
+  }
+}
+
+async function loadLiveProfile(){
+  const { data } = await supabaseClient
+    .from("live_profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  liveProfile = data;
+
+  const avatar = document.getElementById("profileAvatar");
+  const initial = (liveProfile?.display_name || "R").charAt(0).toUpperCase();
+  avatar.innerHTML = liveProfile?.avatar_url
+    ? `<img src="${liveProfile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
+    : initial;
+}
+
+// ==========================================================
+// CATEGORIES
+// ==========================================================
 async function loadCategories(){
+  const { data, error } = await supabaseClient
+    .from("live_categories")
+    .select("*")
+    .order("sort_order", { ascending:true });
 
-const buttons=
+  const row = document.getElementById("categoryRow");
 
-document.querySelectorAll(".category");
+  if (error){
+    console.error(error);
+    row.innerHTML = "";
+    return;
+  }
 
-buttons.forEach(button=>{
+  categories = data || [];
+  row.innerHTML = "";
 
-button.onclick=()=>{
+  const allPill = document.createElement("div");
+  allPill.className = "category-pill active";
+  allPill.textContent = "All";
+  allPill.dataset.categoryId = "all";
+  allPill.addEventListener("click", () => selectCategory("all", allPill));
+  row.appendChild(allPill);
 
-window.location.href=
-
-"/live/discover.html?category="+
-
-encodeURIComponent(button.innerText);
-
-};
-
-});
-
+  categories.forEach(cat => {
+    const pill = document.createElement("div");
+    pill.className = "category-pill";
+    pill.textContent = cat.name;
+    pill.dataset.categoryId = cat.id;
+    pill.addEventListener("click", () => selectCategory(cat.id, pill));
+    row.appendChild(pill);
+  });
 }
 
-async function initializeRelviaLive(){
-
-await loadLiveSessions();
-
-await loadCategories();
-
+async function selectCategory(categoryId, pillEl){
+  activeCategoryId = categoryId;
+  document.querySelectorAll(".category-pill").forEach(p => p.classList.remove("active"));
+  pillEl.classList.add("active");
+  await loadStreams();
 }
 
-initializeRelviaLive();
+// ==========================================================
+// STREAMS
+// ==========================================================
+async function loadStreams(){
+  const grid = document.getElementById("streamGrid");
+  grid.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
 
-const liveChannel=
+  let query = supabaseClient
+    .from("live_streams")
+    .select("*")
+    .eq("is_live", true)
+    .order("viewer_count", { ascending:false });
 
-supabase
+  if (activeCategoryId !== "all"){
+    query = query.eq("category_id", activeCategoryId);
+  }
 
-.channel("live-updates")
+  const { data, error } = await query;
 
-.on(
+  if (error){
+    console.error(error);
+    grid.innerHTML = "";
+    return;
+  }
 
-"postgres_changes",
+  if (!data || data.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <h4>Nothing live right now</h4>
+        <p>Check back soon, or try a different category.</p>
+      </div>`;
+    return;
+  }
 
-{
+  // Fetch host display names for the visible streams (best-effort).
+  const hostIds = [...new Set(data.map(s => s.host_id).filter(Boolean))];
+  let hostsById = {};
+  if (hostIds.length > 0){
+    const { data: hosts } = await supabaseClient
+      .from("live_profiles")
+      .select("id, display_name, username")
+      .in("id", hostIds);
+    (hosts || []).forEach(h => { hostsById[h.id] = h; });
+  }
 
-event:"*",
+  grid.innerHTML = "";
+  data.forEach(stream => {
+    const host = hostsById[stream.host_id];
+    const hostName = host?.display_name || host?.username || "Relvia Creator";
 
-schema:"public",
-
-table:"live_sessions"
-
-},
-
-()=>{
-
-loadLiveSessions();
-
+    const card = document.createElement("div");
+    card.className = "stream-card";
+    card.innerHTML = `
+      <div class="stream-thumb">
+        ${stream.thumbnail_url ? `<img src="${stream.thumbnail_url}" loading="lazy">` : ""}
+        <div class="live-badge"><span class="dot"></span>LIVE</div>
+        <div class="viewer-count">${stream.viewer_count || 0} watching</div>
+      </div>
+      <div class="stream-info">
+        <div class="stream-title">${escapeHtml(stream.title)}</div>
+        <div class="stream-host">${escapeHtml(hostName)}</div>
+      </div>`;
+    card.addEventListener("click", () => openPlayer(stream));
+    grid.appendChild(card);
+  });
 }
 
-)
+// ==========================================================
+// PLAYER — join LiveKit room as a subscribe-only viewer
+// ==========================================================
+async function openPlayer(stream){
+  const overlay = document.getElementById("playerOverlay");
+  const status = document.getElementById("playerStatus");
+  const video = document.getElementById("playerVideo");
 
-.subscribe();
+  document.getElementById("playerTitle").textContent = stream.title;
+  status.classList.remove("hidden");
+  status.innerHTML = `<span>Connecting to stream...</span>`;
+  overlay.classList.add("open");
+
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    const response = await fetch(TOKEN_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ streamId: stream.id }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok){
+      status.innerHTML = `<span>${escapeHtml(result.error || "Couldn't join this stream.")}</span>`;
+      return;
+    }
+
+    const room = new LivekitClient.Room();
+    currentRoom = room;
+
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === "video" || track.kind === "audio"){
+        track.attach(video);
+        status.classList.add("hidden");
+      }
+    });
+
+    room.on(LivekitClient.RoomEvent.Disconnected, () => {
+      status.classList.remove("hidden");
+      status.innerHTML = `<span>Stream ended or connection lost.</span>`;
+    });
+
+    await room.connect(LIVEKIT_URL, result.token);
+  } catch (err){
+    console.error("Failed to join stream:", err);
+    status.innerHTML = `<span>Couldn't connect to this stream. Try again in a moment.</span>`;
+  }
+}
+
+function closePlayer(){
+  const overlay = document.getElementById("playerOverlay");
+  const video = document.getElementById("playerVideo");
+
+  if (currentRoom){
+    currentRoom.disconnect();
+    currentRoom = null;
+  }
+  video.srcObject = null;
+  overlay.classList.remove("open");
+}
+
+initialize();
 
 </script>
-
 </body>
-
 </html>
