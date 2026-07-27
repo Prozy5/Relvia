@@ -67,8 +67,33 @@ img{ max-width:100%; display:block; }
   display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer;
 }
 
+/* ANNOUNCEMENT BANNER + POPUP */
+.announcement-banner{
+  position:fixed; top:76px; left:0; right:0; z-index:900;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+  padding:11px 32px; font-size:13.5px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:16px; text-align:center;
+}
+.announcement-banner button{ font-size:18px; font-weight:800; line-height:1; color:#000; opacity:.6; }
+.announcement-banner button:hover{ opacity:1; }
+
+.announcement-popup-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
+  z-index:2500; align-items:center; justify-content:center; padding:24px;
+}
+.announcement-popup{
+  background:var(--surface); border:1px solid var(--gold-end); border-radius:22px;
+  padding:36px 30px; text-align:center; max-width:420px;
+}
+.announcement-popup .icon{ font-size:24px; color:var(--gold); margin-bottom:12px; }
+.announcement-popup p{ font-size:15px; line-height:1.6; margin-bottom:22px; }
+.announcement-popup button{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+  padding:11px 26px; border-radius:14px; font-weight:800; font-size:13.5px;
+}
+
 /* LAYOUT */
-.app-container{ max-width:1500px; margin:auto; padding:104px 30px 60px; }
+.app-container{ max-width:1500px; margin:auto; padding:104px 30px 60px; transition:padding-top .2s; }
 
 .category-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; margin-bottom:30px; }
 .category-row::-webkit-scrollbar{ display:none; }
@@ -176,6 +201,19 @@ img{ max-width:100%; display:block; }
   </div>
 </header>
 
+<div class="announcement-banner" id="announcementBanner" style="display:none;">
+  <span id="announcementBannerText"></span>
+  <button id="announcementBannerClose">×</button>
+</div>
+
+<div class="announcement-popup-backdrop" id="announcementPopup" style="display:none;">
+  <div class="announcement-popup">
+    <div class="icon">✦</div>
+    <p id="announcementPopupText"></p>
+    <button id="announcementPopupClose">Got it</button>
+  </div>
+</div>
+
 <main class="app-container">
   <div class="category-row" id="categoryRow">
     <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
@@ -268,6 +306,7 @@ async function initialize(){
     if (banned) return;
 
     await checkOwnerStatus();
+    await loadAnnouncement();
     await loadCategories();
     await loadStreams();
 
@@ -287,11 +326,18 @@ async function loadLiveProfile(){
 
   liveProfile = data;
 
-  if (liveProfile?.banned_from_watching){
+  const now = new Date();
+  const permanentlyBanned = liveProfile?.banned_from_watching;
+  const tempBanActive = liveProfile?.banned_from_watching_until && new Date(liveProfile.banned_from_watching_until) > now;
+
+  if (permanentlyBanned || tempBanActive){
+    const untilText = (!permanentlyBanned && tempBanActive)
+      ? ` Access returns ${new Date(liveProfile.banned_from_watching_until).toLocaleString()}.`
+      : "";
     document.body.innerHTML = `
       <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:24px;">
         <h2 style="font-family:var(--font-display);font-size:24px;">You're restricted from Relvia Live</h2>
-        <p style="color:var(--muted);font-size:14px;max-width:360px;">${liveProfile.ban_reason ? escapeHtml(liveProfile.ban_reason) : "Contact support if you think this is a mistake."}</p>
+        <p style="color:var(--muted);font-size:14px;max-width:360px;">${liveProfile.ban_reason ? escapeHtml(liveProfile.ban_reason) : "Contact support if you think this is a mistake."}${untilText}</p>
       </div>`;
     return true; // signal caller to stop further init
   }
@@ -319,6 +365,46 @@ async function checkOwnerStatus(){
   document.getElementById("ownerBadge").textContent = data.badge_label || "Owner";
   document.getElementById("ownerBadge").style.display = "inline-block";
   document.getElementById("ownerLink").style.display = "inline-block";
+}
+
+// ==========================================================
+// ANNOUNCEMENTS
+// ==========================================================
+async function loadAnnouncement(){
+  const { data, error } = await supabaseClient
+    .from("live_announcements")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending:false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return;
+
+  // Skip if it's expired.
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return;
+
+  // Banner — persistent while active.
+  document.getElementById("announcementBannerText").textContent = data.message;
+  document.getElementById("announcementBanner").style.display = "flex";
+  document.querySelector(".app-container").style.paddingTop = "148px";
+
+  document.getElementById("announcementBannerClose").onclick = () => {
+    document.getElementById("announcementBanner").style.display = "none";
+    document.querySelector(".app-container").style.paddingTop = "104px";
+  };
+
+  // Popup — shown once per announcement, tracked in localStorage.
+  const dismissKey = `relvia-live-announcement-seen-${data.id}`;
+  if (!localStorage.getItem(dismissKey)){
+    document.getElementById("announcementPopupText").textContent = data.message;
+    document.getElementById("announcementPopup").style.display = "flex";
+
+    document.getElementById("announcementPopupClose").onclick = () => {
+      localStorage.setItem(dismissKey, "1");
+      document.getElementById("announcementPopup").style.display = "none";
+    };
+  }
 }
 
 // ==========================================================
