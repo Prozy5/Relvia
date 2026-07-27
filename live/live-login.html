@@ -132,7 +132,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-live-auth" }
 });
 
-const LIVE_URL = "index.html";
+const LIVE_URL = "live.html";
 
 async function checkExistingSession(){
   try {
@@ -171,7 +171,7 @@ document.getElementById("loginSubmit").addEventListener("click", async () => {
   const btn = document.getElementById("loginSubmit");
   btn.disabled = true; btn.textContent = "Signing in...";
 
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  const { data: signInData, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   btn.disabled = false; btn.textContent = "Sign in";
 
@@ -180,6 +180,28 @@ document.getElementById("loginSubmit").addEventListener("click", async () => {
     loginError.classList.add("show");
     return;
   }
+
+  // Fallback: if this account confirmed its email after signup, the
+  // live_profiles row wasn't created yet — create it now from the
+  // metadata that was saved at signup time.
+  const user = signInData.user;
+  if (user){
+    const { data: existingProfile } = await supabaseClient
+      .from("live_profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!existingProfile){
+      const meta = user.user_metadata || {};
+      await supabaseClient.from("live_profiles").insert({
+        id: user.id,
+        display_name: meta.display_name || "Relvia Creator",
+        username: meta.username || `user_${user.id.slice(0, 8)}`,
+      });
+    }
+  }
+
   window.location.href = LIVE_URL;
 });
 
@@ -213,7 +235,11 @@ document.getElementById("signupSubmit").addEventListener("click", async () => {
   const btn = document.getElementById("signupSubmit");
   btn.disabled = true; btn.textContent = "Creating account...";
 
-  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { display_name, username } }
+  });
 
   if (error){
     btn.disabled = false; btn.textContent = "Create account";
@@ -222,23 +248,22 @@ document.getElementById("signupSubmit").addEventListener("click", async () => {
     return;
   }
 
-  // live_profiles is separate from the `profiles` trigger used by Social,
-  // so we insert this row directly rather than relying on a trigger.
-  if (data.user){
+  btn.disabled = false; btn.textContent = "Create account";
+
+  if (data.session){
+    // Only insert now — a session means RLS will actually allow it.
     const { error: profileError } = await supabaseClient
       .from("live_profiles")
       .insert({ id: data.user.id, display_name, username });
 
     if (profileError) console.error("live_profiles insert failed:", profileError);
-  }
 
-  btn.disabled = false; btn.textContent = "Create account";
-
-  if (data.session){
     window.location.href = LIVE_URL;
     return;
   }
 
+  // No session yet — email confirmation is still required. The live_profiles
+  // row will be created on first successful login instead (see below).
   signupSuccess.textContent = "Account created! Check your email to confirm, then sign in.";
   signupSuccess.classList.add("show");
 });
