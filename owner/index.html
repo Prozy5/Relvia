@@ -216,6 +216,71 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- ANNOUNCEMENTS -->
+    <div class="section">
+      <div class="section-head"><h2>Announcements</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Shown as a banner and a one-time popup to every Relvia Live visitor.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Message</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+          <tbody id="announcementsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="text" id="newAnnouncementMessage" placeholder="Announcement message" style="flex:1;min-width:240px;">
+          <button class="btn gold" id="addAnnouncementBtn">Post announcement</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP CREATORS -->
+    <div class="section">
+      <div class="section-head"><h2>Top Creators</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Ranked by total streams hosted and combined viewer activity.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>#</th><th>Creator</th><th>Streams Hosted</th><th>Total Viewer Count</th></tr></thead>
+          <tbody id="leaderboardTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STAFF (owner role only) -->
+    <div class="section" id="staffSection" style="display:none;">
+      <div class="section-head"><h2>Staff</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Owners have full access. Moderators can moderate streams, users, and categories, but not staff or revenue.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Email</th><th>Badge</th><th>Role</th><th>Actions</th></tr></thead>
+          <tbody id="staffTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="email" id="newStaffEmail" placeholder="Email (must already have a Relvia Live account)" style="flex:1;min-width:240px;">
+          <input type="text" id="newStaffBadge" placeholder="Badge label (e.g. Moderator)" style="width:180px;">
+          <select id="newStaffRole" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="moderator">Moderator</option>
+            <option value="owner">Owner</option>
+          </select>
+          <button class="btn gold" id="addStaffBtn">Add staff</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE (owner role only) -->
+    <div class="section" id="revenueSection" style="display:none;">
+      <div class="section-head"><h2>Revenue</h2></div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+        <div class="stat-card"><div class="num" id="statRevenueTotal">—</div><div class="label">Total Revenue</div></div>
+        <div class="stat-card"><div class="num" id="statRevenue30d">—</div><div class="label">Last 30 Days</div></div>
+        <div class="stat-card"><div class="num" id="statRevenueTxns">—</div><div class="label">Transactions</div></div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Date</th><th>Amount</th><th>Description</th><th>Customer</th></tr></thead>
+          <tbody id="revenueTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -297,6 +362,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 let currentUser = null;
+let myRole = "moderator";
 let streamsCache = [];
 let usersCache = [];
 let categoriesCache = [];
@@ -335,7 +401,7 @@ async function gate(){
 
   const { data: owner } = await supabaseClient
     .from("live_owners")
-    .select("badge_label")
+    .select("badge_label, role")
     .eq("user_id", currentUser.id)
     .maybeSingle();
 
@@ -344,16 +410,30 @@ async function gate(){
     return;
   }
 
+  myRole = owner.role || "moderator";
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  await Promise.all([loadStreams(), loadCategories(), loadUsers(), loadLog()]);
+  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard()];
+
+  if (myRole === "owner"){
+    document.getElementById("staffSection").style.display = "block";
+    document.getElementById("revenueSection").style.display = "block";
+    tasks.push(loadStaff(), loadRevenue());
+  }
+
+  await Promise.all(tasks);
   await loadStats();
 
   document.getElementById("addCategoryBtn").addEventListener("click", addCategory);
   document.getElementById("refreshLogBtn").addEventListener("click", loadLog);
   document.getElementById("closeManageModal").addEventListener("click", () => document.getElementById("manageModal").classList.remove("open"));
   document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
+  document.getElementById("addAnnouncementBtn").addEventListener("click", addAnnouncement);
+
+  if (myRole === "owner"){
+    document.getElementById("addStaffBtn").addEventListener("click", addStaff);
+  }
 
   document.getElementById("streamSearch").addEventListener("input", (e) => renderStreams(e.target.value));
   document.getElementById("userSearch").addEventListener("input", (e) => renderUsers(e.target.value));
@@ -778,6 +858,230 @@ async function loadLog(){
       <td>${escapeHtml(entry.action.replace(/_/g, " "))}</td>
       <td>${escapeHtml(entry.target_label || entry.target_type)}</td>
       <td style="color:var(--muted);">${escapeHtml(entry.details || "")}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// ==========================================================
+// ANNOUNCEMENTS
+// ==========================================================
+async function loadAnnouncements(){
+  const tbody = document.getElementById("announcementsTableBody");
+
+  const { data, error } = await supabaseClient
+    .from("live_announcements")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(20);
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load announcements.</td></tr>`; return; }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No announcements yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(a => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(a.message)}</td>
+      <td><span class="pill ${a.is_active ? "live" : ""}">${a.is_active ? "Active" : "Inactive"}</span></td>
+      <td>${new Date(a.created_at).toLocaleString()}</td>
+      <td>
+        <button class="btn" data-action="toggle">${a.is_active ? "Deactivate" : "Activate"}</button>
+        <button class="btn danger" data-action="delete">Delete</button>
+      </td>`;
+    row.querySelector('[data-action="toggle"]').addEventListener("click", () => toggleAnnouncement(a.id, !a.is_active));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteAnnouncement(a.id));
+    tbody.appendChild(row);
+  });
+}
+
+async function addAnnouncement(){
+  const input = document.getElementById("newAnnouncementMessage");
+  const message = input.value.trim();
+  if (!message){ showToast("Enter a message"); return; }
+
+  const { error } = await supabaseClient.from("live_announcements").insert({ message, created_by: currentUser.id });
+  if (error){ console.error(error); showToast("Couldn't post announcement"); return; }
+
+  input.value = "";
+  showToast("Announcement posted");
+  await logAction("post_announcement", "announcement", message.slice(0, 60));
+  await loadAnnouncements();
+}
+
+async function toggleAnnouncement(id, newValue){
+  const { error } = await supabaseClient.from("live_announcements").update({ is_active: newValue }).eq("id", id);
+  if (error){ console.error(error); showToast("Couldn't update announcement"); return; }
+  showToast(newValue ? "Announcement activated" : "Announcement deactivated");
+  await loadAnnouncements();
+}
+
+async function deleteAnnouncement(id){
+  if (!confirm("Delete this announcement?")) return;
+  const { error } = await supabaseClient.from("live_announcements").delete().eq("id", id);
+  if (error){ console.error(error); showToast("Couldn't delete announcement"); return; }
+  showToast("Announcement deleted");
+  await loadAnnouncements();
+}
+
+// ==========================================================
+// LEADERBOARD
+// ==========================================================
+async function loadLeaderboard(){
+  const tbody = document.getElementById("leaderboardTableBody");
+
+  const { data, error } = await supabaseClient
+    .from("live_streams")
+    .select("host_id, viewer_count");
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load leaderboard.</td></tr>`; return; }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No stream data yet.</td></tr>`;
+    return;
+  }
+
+  const totals = {};
+  data.forEach(s => {
+    if (!s.host_id) return;
+    if (!totals[s.host_id]) totals[s.host_id] = { streams: 0, viewers: 0 };
+    totals[s.host_id].streams += 1;
+    totals[s.host_id].viewers += s.viewer_count || 0;
+  });
+
+  const hostIds = Object.keys(totals);
+  if (hostIds.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No stream data yet.</td></tr>`;
+    return;
+  }
+
+  const { data: profiles } = await supabaseClient
+    .from("live_profiles")
+    .select("id, display_name, username")
+    .in("id", hostIds);
+
+  const profileById = {};
+  (profiles || []).forEach(p => { profileById[p.id] = p; });
+
+  const ranked = hostIds
+    .map(id => ({ id, ...totals[id], profile: profileById[id] }))
+    .sort((a, b) => (b.streams * 1000 + b.viewers) - (a.streams * 1000 + a.viewers))
+    .slice(0, 20);
+
+  tbody.innerHTML = "";
+  ranked.forEach((entry, i) => {
+    const name = entry.profile?.display_name || entry.profile?.username || "Unknown creator";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(name)}</td>
+      <td>${entry.streams}</td>
+      <td>${entry.viewers}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// ==========================================================
+// STAFF (owner role only — backed by SECURITY DEFINER functions)
+// ==========================================================
+async function loadStaff(){
+  const tbody = document.getElementById("staffTableBody");
+
+  const { data, error } = await supabaseClient.rpc("get_live_staff");
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load staff.</td></tr>`; return; }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No staff yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(staff => {
+    const row = document.createElement("tr");
+    const isSelf = staff.user_id === currentUser.id;
+    row.innerHTML = `
+      <td>${escapeHtml(staff.email)}</td>
+      <td>${escapeHtml(staff.badge_label)}</td>
+      <td><span class="pill ${staff.role === "owner" ? "featured" : ""}">${escapeHtml(staff.role)}</span></td>
+      <td>${isSelf ? `<span style="color:var(--muted);font-size:12px;">You</span>` : `<button class="btn danger" data-action="remove">Remove</button>`}</td>`;
+
+    if (!isSelf){
+      row.querySelector('[data-action="remove"]').addEventListener("click", () => removeStaff(staff.user_id, staff.email));
+    }
+    tbody.appendChild(row);
+  });
+}
+
+async function addStaff(){
+  const email = document.getElementById("newStaffEmail").value.trim();
+  const badge = document.getElementById("newStaffBadge").value.trim() || "Moderator";
+  const role = document.getElementById("newStaffRole").value;
+
+  if (!email){ showToast("Enter an email"); return; }
+
+  const { error } = await supabaseClient.rpc("add_live_staff", {
+    target_email: email, target_role: role, target_badge: badge
+  });
+
+  if (error){ console.error(error); showToast(error.message || "Couldn't add staff"); return; }
+
+  document.getElementById("newStaffEmail").value = "";
+  document.getElementById("newStaffBadge").value = "";
+  showToast("Staff member added");
+  await logAction("add_staff", "staff", email, role);
+  await loadStaff();
+}
+
+async function removeStaff(userId, email){
+  if (!confirm(`Remove ${email} from staff?`)) return;
+
+  const { error } = await supabaseClient.rpc("remove_live_staff", { target_user_id: userId });
+  if (error){ console.error(error); showToast(error.message || "Couldn't remove staff"); return; }
+
+  showToast("Staff member removed");
+  await logAction("remove_staff", "staff", email);
+  await loadStaff();
+}
+
+// ==========================================================
+// REVENUE (owner role only)
+// ==========================================================
+async function loadRevenue(){
+  const tbody = document.getElementById("revenueTableBody");
+
+  const { data, error } = await supabaseClient
+    .from("live_revenue")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(50);
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load revenue. (Make sure the stripe-webhook function is deployed.)</td></tr>`; return; }
+
+  const total = (data || []).reduce((sum, r) => sum + r.amount_cents, 0);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const last30 = (data || []).filter(r => new Date(r.created_at) > thirtyDaysAgo).reduce((sum, r) => sum + r.amount_cents, 0);
+
+  document.getElementById("statRevenueTotal").textContent = `$${(total / 100).toFixed(2)}`;
+  document.getElementById("statRevenue30d").textContent = `$${(last30 / 100).toFixed(2)}`;
+  document.getElementById("statRevenueTxns").textContent = (data || []).length;
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No transactions yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(r => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${new Date(r.created_at).toLocaleString()}</td>
+      <td>$${(r.amount_cents / 100).toFixed(2)} ${escapeHtml((r.currency || "usd").toUpperCase())}</td>
+      <td>${escapeHtml(r.description || "—")}</td>
+      <td>${escapeHtml(r.customer_email || "—")}</td>`;
     tbody.appendChild(row);
   });
 }
