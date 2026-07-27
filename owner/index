@@ -15,7 +15,7 @@
 :root{
   --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
   --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
-  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f; --ok-green:#5fae7a;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
   --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
@@ -25,29 +25,22 @@ body{
     radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
     var(--background);
 }
-button, input{ font-family:inherit; }
+button, input, textarea{ font-family:inherit; }
 button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
 
 .gate-screen{ min-height:100vh; display:none; align-items:center; justify-content:center; padding:24px; }
-.gate-card{
-  background:var(--glass); border:1px solid var(--border); border-radius:24px;
-  padding:50px 40px; text-align:center; max-width:440px;
-}
+.gate-card{ background:var(--glass); border:1px solid var(--border); border-radius:24px; padding:50px 40px; text-align:center; max-width:440px; }
 .gate-card .icon{ font-size:26px; color:var(--gold); margin-bottom:12px; }
 .gate-card h1{ font-family:var(--font-display); font-size:24px; margin-bottom:10px; }
 .gate-card p{ color:var(--muted); font-size:14px; line-height:1.6; }
-.gate-card a{
-  display:inline-block; margin-top:22px; color:var(--gold); text-decoration:none;
-  border:1px solid var(--gold-end); padding:10px 20px; border-radius:12px; font-weight:700; font-size:13.5px;
-}
+.gate-card a{ display:inline-block; margin-top:22px; color:var(--gold); text-decoration:none; border:1px solid var(--gold-end); padding:10px 20px; border-radius:12px; font-weight:700; font-size:13.5px; }
 .gate-card a:hover{ background:var(--gold); color:#000; }
 
 #dashboard{ display:none; }
 
 .topbar{
   position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
-  z-index:50;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
 }
 .brand{ display:flex; align-items:center; gap:12px; }
 .brand-badge{
@@ -57,10 +50,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
   font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
 }
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
-.badge-label{
-  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
-  font-size:10.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-left:8px;
-}
+.badge-label{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:10.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-left:8px; }
 .back-link{ font-size:13px; font-weight:700; color:var(--muted); text-decoration:none; }
 .back-link:hover{ color:var(--gold); }
 
@@ -72,15 +62,17 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 .stat-card .label{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
 
 .section{ margin-bottom:40px; }
-.section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:14px; flex-wrap:wrap; }
 .section-head h2{ font-family:var(--font-display); font-size:22px; font-weight:600; }
+.search-input{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:9px 14px; color:white; font-size:13px; width:240px;
+}
+.search-input:focus{ outline:none; border-color:var(--gold); }
 
 .panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; overflow:hidden; }
 table{ width:100%; border-collapse:collapse; }
-th{
-  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted);
-  padding:14px 18px; border-bottom:1px solid var(--border); font-weight:700;
-}
+th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); padding:14px 18px; border-bottom:1px solid var(--border); font-weight:700; }
 td{ padding:14px 18px; border-bottom:1px solid var(--border-soft); font-size:13.5px; vertical-align:middle; }
 tr:last-child td{ border-bottom:none; }
 .empty-row td{ color:var(--muted); text-align:center; padding:30px; }
@@ -88,27 +80,23 @@ tr:last-child td{ border-bottom:none; }
 .pill{ display:inline-block; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
 .pill.live{ background:rgba(224,87,79,.15); color:#f2a8a3; }
 .pill.featured{ background:rgba(217,169,75,.15); color:var(--gold); }
+.pill.banned{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+.pill.temp{ background:rgba(217,169,75,.15); color:var(--gold); }
+.pill.ok{ background:rgba(95,174,122,.15); color:#8fd1a8; }
 
-.btn{
-  font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; transition:.15s;
-  border:1px solid var(--border); background:var(--surface-light); color:var(--text); margin-right:6px;
-}
+.btn{ font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; transition:.15s; border:1px solid var(--border); background:var(--surface-light); color:var(--text); margin-right:6px; }
 .btn:hover{ border-color:var(--gold); color:var(--gold); }
 .btn.danger:hover{ border-color:var(--live-red); color:#f2a8a3; }
 .btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
 .btn.gold:hover{ opacity:.85; }
 
-.toggle-btn{
-  font-size:11.5px; font-weight:700; padding:6px 12px; border-radius:8px; border:1px solid var(--border);
-  background:var(--surface-light); color:var(--muted);
-}
-.toggle-btn.on{ border-color:var(--live-red); color:#f2a8a3; background:rgba(224,87,79,.1); }
+.cat-row{ cursor:grab; }
+.cat-row.dragging{ opacity:.4; }
+.drag-handle{ color:var(--muted-soft); font-size:14px; padding-right:6px; }
+.cat-name-input{ background:var(--surface-light); border:1px solid var(--gold-end); border-radius:8px; padding:6px 10px; color:white; font-size:13.5px; width:180px; }
 
 .add-form{ display:flex; gap:10px; padding:16px 18px; border-top:1px solid var(--border); flex-wrap:wrap; }
-.add-form input{
-  background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
-  padding:9px 13px; color:white; font-size:13px;
-}
+.add-form input{ background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 13px; color:white; font-size:13px; }
 .add-form input:focus{ outline:none; border-color:var(--gold); }
 
 .toast{
@@ -118,6 +106,33 @@ tr:last-child td{ border-bottom:none; }
   opacity:0; pointer-events:none; transition:.25s; z-index:3000;
 }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; padding:20px; }
+.modal-backdrop.open{ display:flex; }
+.modal{ background:var(--surface); border:1px solid var(--border); border-radius:20px; width:480px; max-width:100%; padding:26px; max-height:85vh; overflow-y:auto; }
+.modal h3{ font-family:var(--font-display); font-size:21px; margin-bottom:4px; }
+.modal .modal-sub{ color:var(--muted); font-size:13px; margin-bottom:18px; }
+.ban-block{ border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; }
+.ban-block h4{ font-size:13.5px; margin-bottom:10px; }
+.ban-block .status-line{ font-size:12.5px; color:var(--muted); margin-bottom:12px; }
+.ban-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.ban-actions input[type="datetime-local"]{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:8px; padding:7px 10px; color:white; font-size:12.5px;
+}
+.modal-field{ margin-bottom:14px; }
+.modal-field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.modal-field textarea{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:10px 13px; color:white; font-size:13px; min-height:60px; resize:none;
+}
+.modal-close-row{ display:flex; justify-content:flex-end; margin-top:6px; }
+
+.history-item{ padding:12px 0; border-bottom:1px solid var(--border-soft); font-size:13px; }
+.history-item:last-child{ border-bottom:none; }
+.history-item .h-title{ font-weight:700; }
+.history-item .h-meta{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+.log-time{ color:var(--muted-soft); font-size:12px; white-space:nowrap; }
 
 @media(max-width:900px){
   .stats-row{ grid-template-columns:repeat(2,1fr); }
@@ -157,8 +172,12 @@ tr:last-child td{ border-bottom:none; }
       <div class="stat-card"><div class="num" id="statBanned">—</div><div class="label">Banned Users</div></div>
     </div>
 
+    <!-- LIVE STREAMS -->
     <div class="section">
-      <div class="section-head"><h2>Live Streams</h2></div>
+      <div class="section-head">
+        <h2>Live Streams</h2>
+        <input type="text" class="search-input" id="streamSearch" placeholder="Search streams or hosts...">
+      </div>
       <div class="panel">
         <table>
           <thead><tr><th>Title</th><th>Category</th><th>Viewers</th><th>Status</th><th>Actions</th></tr></thead>
@@ -167,31 +186,101 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- CATEGORIES -->
     <div class="section">
       <div class="section-head"><h2>Categories</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Drag rows by the handle to reorder.</p>
       <div class="panel">
         <table>
-          <thead><tr><th>Name</th><th>Order</th><th>Actions</th></tr></thead>
-          <tbody id="categoriesTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          <thead><tr><th style="width:30px;"></th><th>Name</th><th>Order</th><th>Actions</th></tr></thead>
+          <tbody id="categoriesTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
         </table>
         <div class="add-form">
           <input type="text" id="newCategoryName" placeholder="New category name">
-          <input type="number" id="newCategorySort" placeholder="Sort order" style="width:110px;">
           <button class="btn gold" id="addCategoryBtn">Add category</button>
         </div>
       </div>
     </div>
 
+    <!-- USERS -->
     <div class="section">
-      <div class="section-head"><h2>Users</h2></div>
+      <div class="section-head">
+        <h2>Users</h2>
+        <input type="text" class="search-input" id="userSearch" placeholder="Search users...">
+      </div>
       <div class="panel">
         <table>
-          <thead><tr><th>Name</th><th>Username</th><th>Streaming</th><th>Watching</th></tr></thead>
-          <tbody id="usersTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          <thead><tr><th>Name</th><th>Username</th><th>Streaming</th><th>Watching</th><th>Actions</th></tr></thead>
+          <tbody id="usersTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
 
+    <!-- ACTIVITY LOG -->
+    <div class="section">
+      <div class="section-head">
+        <h2>Activity Log</h2>
+        <button class="btn" id="refreshLogBtn">Refresh</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+          <tbody id="logTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MANAGE USER MODAL -->
+<div class="modal-backdrop" id="manageModal">
+  <div class="modal">
+    <h3 id="manageModalName">—</h3>
+    <div class="modal-sub" id="manageModalUsername">@—</div>
+
+    <div class="ban-block">
+      <h4>Streaming access</h4>
+      <div class="status-line" id="streamingStatusLine">—</div>
+      <div class="ban-actions">
+        <button class="btn danger" id="banStreamingPermanentBtn">Ban permanently</button>
+        <input type="datetime-local" id="banStreamingUntil">
+        <button class="btn" id="banStreamingTempBtn">Ban until</button>
+        <button class="btn" id="unbanStreamingBtn">Unban</button>
+      </div>
+    </div>
+
+    <div class="ban-block">
+      <h4>Watching access</h4>
+      <div class="status-line" id="watchingStatusLine">—</div>
+      <div class="ban-actions">
+        <button class="btn danger" id="banWatchingPermanentBtn">Ban permanently</button>
+        <input type="datetime-local" id="banWatchingUntil">
+        <button class="btn" id="banWatchingTempBtn">Ban until</button>
+        <button class="btn" id="unbanWatchingBtn">Unban</button>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label>Reason (applies to your next action above)</label>
+      <textarea id="banReasonInput" placeholder="Optional — shown to the user"></textarea>
+    </div>
+
+    <div class="modal-close-row">
+      <button class="btn" id="closeManageModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- STREAM HISTORY MODAL -->
+<div class="modal-backdrop" id="historyModal">
+  <div class="modal">
+    <h3 id="historyModalName">Stream history</h3>
+    <div class="modal-sub">All streams ever created by this user</div>
+    <div id="historyList"></div>
+    <div class="modal-close-row">
+      <button class="btn" id="closeHistoryModal">Close</button>
+    </div>
   </div>
 </div>
 
@@ -208,6 +297,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 let currentUser = null;
+let streamsCache = [];
+let usersCache = [];
+let categoriesCache = [];
+let activeManageUser = null;
 
 function showToast(message){
   const toast = document.getElementById("toast");
@@ -220,6 +313,17 @@ function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
 
+async function logAction(action, target_type, target_label, details){
+  try {
+    await supabaseClient.from("live_moderation_log").insert({
+      actor_id: currentUser.id, action, target_type, target_label, details,
+    });
+  } catch (err){ console.error("Failed to write log entry:", err); }
+}
+
+// ==========================================================
+// GATE + INIT
+// ==========================================================
 async function gate(){
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
@@ -243,19 +347,33 @@ async function gate(){
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  await Promise.all([loadStreams(), loadCategories(), loadUsers()]);
+  await Promise.all([loadStreams(), loadCategories(), loadUsers(), loadLog()]);
   await loadStats();
 
   document.getElementById("addCategoryBtn").addEventListener("click", addCategory);
+  document.getElementById("refreshLogBtn").addEventListener("click", loadLog);
+  document.getElementById("closeManageModal").addEventListener("click", () => document.getElementById("manageModal").classList.remove("open"));
+  document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
+
+  document.getElementById("streamSearch").addEventListener("input", (e) => renderStreams(e.target.value));
+  document.getElementById("userSearch").addEventListener("input", (e) => renderUsers(e.target.value));
+
+  document.getElementById("banStreamingPermanentBtn").addEventListener("click", () => applyBan("streaming", "permanent"));
+  document.getElementById("banStreamingTempBtn").addEventListener("click", () => applyBan("streaming", "temp"));
+  document.getElementById("unbanStreamingBtn").addEventListener("click", () => applyBan("streaming", "unban"));
+  document.getElementById("banWatchingPermanentBtn").addEventListener("click", () => applyBan("watching", "permanent"));
+  document.getElementById("banWatchingTempBtn").addEventListener("click", () => applyBan("watching", "temp"));
+  document.getElementById("unbanWatchingBtn").addEventListener("click", () => applyBan("watching", "unban"));
 }
 
 async function loadStats(){
+  const nowIso = new Date().toISOString();
   const [liveNow, categories, totalStreams, banned] = await Promise.all([
     supabaseClient.from("live_streams").select("id", { count: "exact", head: true }).eq("is_live", true),
     supabaseClient.from("live_categories").select("id", { count: "exact", head: true }),
     supabaseClient.from("live_streams").select("id", { count: "exact", head: true }),
     supabaseClient.from("live_profiles").select("id", { count: "exact", head: true })
-      .or("banned_from_streaming.eq.true,banned_from_watching.eq.true"),
+      .or(`banned_from_streaming_until.gt.${nowIso},banned_from_watching_until.gt.${nowIso}`),
   ]);
 
   document.getElementById("statLiveNow").textContent = liveNow.count ?? 0;
@@ -264,9 +382,10 @@ async function loadStats(){
   document.getElementById("statBanned").textContent = banned.count ?? 0;
 }
 
+// ==========================================================
+// STREAMS
+// ==========================================================
 async function loadStreams(){
-  const tbody = document.getElementById("streamsTableBody");
-
   const { data: streams, error } = await supabaseClient
     .from("live_streams")
     .select("*, live_categories(name)")
@@ -274,47 +393,66 @@ async function loadStreams(){
     .order("featured", { ascending:false })
     .order("viewer_count", { ascending:false });
 
-  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load streams.</td></tr>`; return; }
+  if (error){ console.error(error); streamsCache = []; }
+  else {
+    const hostIds = [...new Set((streams || []).map(s => s.host_id).filter(Boolean))];
+    let hostsById = {};
+    if (hostIds.length > 0){
+      const { data: hosts } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", hostIds);
+      (hosts || []).forEach(h => { hostsById[h.id] = h; });
+    }
+    streamsCache = (streams || []).map(s => ({ ...s, hostName: hostsById[s.host_id]?.display_name || "Unknown host" }));
+  }
 
-  if (!streams || streams.length === 0){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Nothing is live right now.</td></tr>`;
+  renderStreams(document.getElementById("streamSearch")?.value || "");
+}
+
+function renderStreams(filterText){
+  const tbody = document.getElementById("streamsTableBody");
+  const filter = (filterText || "").trim().toLowerCase();
+
+  const filtered = filter
+    ? streamsCache.filter(s => s.title.toLowerCase().includes(filter) || s.hostName.toLowerCase().includes(filter))
+    : streamsCache;
+
+  if (filtered.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${filter ? "No matching streams." : "Nothing is live right now."}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
-  streams.forEach(stream => {
+  filtered.forEach(stream => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${escapeHtml(stream.title)}</td>
+      <td>${escapeHtml(stream.title)}<div style="color:var(--muted);font-size:11.5px;margin-top:2px;">${escapeHtml(stream.hostName)}</div></td>
       <td>${escapeHtml(stream.live_categories?.name || "Uncategorized")}</td>
       <td>${stream.viewer_count || 0}</td>
-      <td>
-        <span class="pill live">LIVE</span>
-        ${stream.featured ? `<span class="pill featured">Featured</span>` : ""}
-      </td>
+      <td><span class="pill live">LIVE</span> ${stream.featured ? `<span class="pill featured">Featured</span>` : ""}</td>
       <td>
         <button class="btn" data-action="feature">${stream.featured ? "Unfeature" : "Feature"}</button>
         <button class="btn danger" data-action="end">End stream</button>
         <button class="btn danger" data-action="delete">Delete</button>
       </td>`;
 
-    row.querySelector('[data-action="feature"]').addEventListener("click", () => toggleFeatured(stream.id, !stream.featured));
-    row.querySelector('[data-action="end"]').addEventListener("click", () => endStream(stream.id, stream.title));
-    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteStream(stream.id, stream.title, stream.is_live));
+    row.querySelector('[data-action="feature"]').addEventListener("click", () => toggleFeatured(stream));
+    row.querySelector('[data-action="end"]').addEventListener("click", () => endStream(stream));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteStream(stream));
 
     tbody.appendChild(row);
   });
 }
 
-async function toggleFeatured(streamId, newValue){
-  const { error } = await supabaseClient.from("live_streams").update({ featured: newValue }).eq("id", streamId);
+async function toggleFeatured(stream){
+  const newValue = !stream.featured;
+  const { error } = await supabaseClient.from("live_streams").update({ featured: newValue }).eq("id", stream.id);
   if (error){ console.error(error); showToast("Couldn't update featured status"); return; }
+  await logAction(newValue ? "feature_stream" : "unfeature_stream", "stream", stream.title);
   showToast(newValue ? "Stream featured" : "Stream unfeatured");
   await loadStreams();
 }
 
-async function endStream(streamId, title){
-  if (!confirm(`End "${title}" now? This disconnects the broadcaster and all viewers immediately.`)) return;
+async function endStream(stream){
+  if (!confirm(`End "${stream.title}" now? This disconnects the broadcaster and all viewers immediately.`)) return;
 
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const accessToken = sessionData?.session?.access_token;
@@ -323,121 +461,325 @@ async function endStream(streamId, title){
     const response = await fetch(END_STREAM_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken}` },
-      body: JSON.stringify({ streamId }),
+      body: JSON.stringify({ streamId: stream.id }),
     });
     const result = await response.json();
 
     if (!response.ok){ showToast(result.error || "Couldn't end stream"); return; }
 
     showToast("Stream ended");
-    await Promise.all([loadStreams(), loadStats()]);
+    await Promise.all([loadStreams(), loadStats(), loadLog()]);
   } catch (err){
     console.error(err);
     showToast("Couldn't reach the server to end the stream");
   }
 }
 
-async function deleteStream(streamId, title, isLive){
-  if (isLive){ showToast("End the stream before deleting its record"); return; }
-  if (!confirm(`Permanently delete the record for "${title}"?`)) return;
+async function deleteStream(stream){
+  if (stream.is_live){ showToast("End the stream before deleting its record"); return; }
+  if (!confirm(`Permanently delete the record for "${stream.title}"?`)) return;
 
-  const { error } = await supabaseClient.from("live_streams").delete().eq("id", streamId);
+  const { error } = await supabaseClient.from("live_streams").delete().eq("id", stream.id);
   if (error){ console.error(error); showToast("Couldn't delete stream"); return; }
+  await logAction("delete_stream", "stream", stream.title);
   showToast("Stream record deleted");
-  await Promise.all([loadStreams(), loadStats()]);
+  await Promise.all([loadStreams(), loadStats(), loadLog()]);
 }
 
+// ==========================================================
+// CATEGORIES — rename + drag reorder
+// ==========================================================
 async function loadCategories(){
+  const { data, error } = await supabaseClient.from("live_categories").select("*").order("sort_order", { ascending:true });
+  if (error){ console.error(error); categoriesCache = []; }
+  else categoriesCache = data || [];
+  renderCategories();
+}
+
+function renderCategories(){
   const tbody = document.getElementById("categoriesTableBody");
 
-  const { data, error } = await supabaseClient
-    .from("live_categories")
-    .select("*")
-    .order("sort_order", { ascending:true });
-
-  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Couldn't load categories.</td></tr>`; return; }
-
-  if (!data || data.length === 0){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="3">No categories yet.</td></tr>`;
+  if (categoriesCache.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No categories yet.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
-  data.forEach(cat => {
+  categoriesCache.forEach(cat => {
     const row = document.createElement("tr");
+    row.className = "cat-row";
+    row.draggable = true;
+    row.dataset.categoryId = cat.id;
     row.innerHTML = `
-      <td>${escapeHtml(cat.name)}</td>
+      <td class="drag-handle">⋮⋮</td>
+      <td class="cat-name-cell">${escapeHtml(cat.name)}</td>
       <td>${cat.sort_order}</td>
-      <td><button class="btn danger" data-action="delete">Delete</button></td>`;
-    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteCategory(cat.id, cat.name));
+      <td>
+        <button class="btn" data-action="edit">Rename</button>
+        <button class="btn danger" data-action="delete">Delete</button>
+      </td>`;
+
+    row.querySelector('[data-action="edit"]').addEventListener("click", () => startRenameCategory(row, cat));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteCategory(cat));
+
+    row.addEventListener("dragstart", () => row.classList.add("dragging"));
+    row.addEventListener("dragend", () => { row.classList.remove("dragging"); persistCategoryOrder(); });
+    row.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const dragging = tbody.querySelector(".dragging");
+      if (!dragging || dragging === row) return;
+      const rows = [...tbody.querySelectorAll("tr")];
+      const draggingIndex = rows.indexOf(dragging);
+      const targetIndex = rows.indexOf(row);
+      if (draggingIndex < targetIndex) row.after(dragging);
+      else row.before(dragging);
+    });
+
     tbody.appendChild(row);
   });
+}
+
+function startRenameCategory(row, cat){
+  const cell = row.querySelector(".cat-name-cell");
+  cell.innerHTML = `<input type="text" class="cat-name-input" value="${escapeHtml(cat.name)}">`;
+  const input = cell.querySelector("input");
+  input.focus();
+  input.select();
+
+  const save = async () => {
+    const newName = input.value.trim();
+    if (!newName || newName === cat.name){ renderCategories(); return; }
+    const { error } = await supabaseClient.from("live_categories").update({ name: newName }).eq("id", cat.id);
+    if (error){ console.error(error); showToast("Couldn't rename category"); return; }
+    await logAction("rename_category", "category", `${cat.name} → ${newName}`);
+    showToast("Category renamed");
+    await loadCategories();
+  };
+
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); if (e.key === "Escape") renderCategories(); });
+  input.addEventListener("blur", save);
+}
+
+async function persistCategoryOrder(){
+  const tbody = document.getElementById("categoriesTableBody");
+  const rows = [...tbody.querySelectorAll("tr[data-category-id]")];
+  const updates = rows.map((row, index) => ({ id: row.dataset.categoryId, sort_order: index }));
+
+  const changed = updates.filter(u => {
+    const original = categoriesCache.find(c => c.id === u.id);
+    return original && original.sort_order !== u.sort_order;
+  });
+  if (changed.length === 0) return;
+
+  await Promise.all(changed.map(u =>
+    supabaseClient.from("live_categories").update({ sort_order: u.sort_order }).eq("id", u.id)
+  ));
+  await logAction("reorder_categories", "category", "Category order changed");
+  showToast("Category order saved");
+  await loadCategories();
 }
 
 async function addCategory(){
   const nameInput = document.getElementById("newCategoryName");
-  const sortInput = document.getElementById("newCategorySort");
   const name = nameInput.value.trim();
-  const sort_order = parseInt(sortInput.value, 10) || 0;
-
   if (!name){ showToast("Enter a category name"); return; }
 
-  const { error } = await supabaseClient.from("live_categories").insert({ name, sort_order });
+  const nextSort = categoriesCache.length > 0 ? Math.max(...categoriesCache.map(c => c.sort_order)) + 1 : 0;
+
+  const { error } = await supabaseClient.from("live_categories").insert({ name, sort_order: nextSort });
   if (error){ console.error(error); showToast("Couldn't add category"); return; }
 
-  nameInput.value = ""; sortInput.value = "";
+  nameInput.value = "";
+  await logAction("add_category", "category", name);
   showToast("Category added");
   await Promise.all([loadCategories(), loadStats()]);
 }
 
-async function deleteCategory(categoryId, name){
-  if (!confirm(`Delete category "${name}"? Streams in it will become uncategorized.`)) return;
+async function deleteCategory(cat){
+  if (!confirm(`Delete category "${cat.name}"? Streams in it will become uncategorized.`)) return;
 
-  const { error } = await supabaseClient.from("live_categories").delete().eq("id", categoryId);
+  const { error } = await supabaseClient.from("live_categories").delete().eq("id", cat.id);
   if (error){ console.error(error); showToast("Couldn't delete category"); return; }
+  await logAction("delete_category", "category", cat.name);
   showToast("Category deleted");
   await Promise.all([loadCategories(), loadStats()]);
 }
 
-async function loadUsers(){
-  const tbody = document.getElementById("usersTableBody");
+// ==========================================================
+// USERS
+// ==========================================================
+function banStatus(profile, type){
+  const now = new Date();
+  const permanent = profile[`banned_from_${type}`];
+  const until = profile[`banned_from_${type}_until`];
+  const tempActive = until && new Date(until) > now;
 
+  if (permanent) return { state: "permanent", label: "Banned" };
+  if (tempActive) return { state: "temp", label: `Until ${new Date(until).toLocaleString()}` };
+  return { state: "ok", label: "Allowed" };
+}
+
+async function loadUsers(){
   const { data, error } = await supabaseClient
     .from("live_profiles")
     .select("*")
     .order("created_at", { ascending:false })
-    .limit(100);
+    .limit(200);
 
-  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load users.</td></tr>`; return; }
+  if (error){ console.error(error); usersCache = []; }
+  else usersCache = data || [];
 
-  if (!data || data.length === 0){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No users yet.</td></tr>`;
+  renderUsers(document.getElementById("userSearch")?.value || "");
+}
+
+function renderUsers(filterText){
+  const tbody = document.getElementById("usersTableBody");
+  const filter = (filterText || "").trim().toLowerCase();
+
+  const filtered = filter
+    ? usersCache.filter(u => u.display_name.toLowerCase().includes(filter) || u.username.toLowerCase().includes(filter))
+    : usersCache;
+
+  if (filtered.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${filter ? "No matching users." : "No users yet."}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
-  data.forEach(user => {
+  filtered.forEach(user => {
+    const streaming = banStatus(user, "streaming");
+    const watching = banStatus(user, "watching");
+    const pillClass = (s) => s.state === "ok" ? "ok" : (s.state === "temp" ? "temp" : "banned");
+
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${escapeHtml(user.display_name)}</td>
       <td>@${escapeHtml(user.username)}</td>
-      <td><button class="toggle-btn ${user.banned_from_streaming ? "on" : ""}" data-action="streaming">${user.banned_from_streaming ? "Banned" : "Allowed"}</button></td>
-      <td><button class="toggle-btn ${user.banned_from_watching ? "on" : ""}" data-action="watching">${user.banned_from_watching ? "Banned" : "Allowed"}</button></td>`;
+      <td><span class="pill ${pillClass(streaming)}">${streaming.label}</span></td>
+      <td><span class="pill ${pillClass(watching)}">${watching.label}</span></td>
+      <td>
+        <button class="btn" data-action="manage">Manage</button>
+        <button class="btn" data-action="history">History</button>
+      </td>`;
 
-    row.querySelector('[data-action="streaming"]').addEventListener("click", () => toggleBan(user.id, "banned_from_streaming", !user.banned_from_streaming));
-    row.querySelector('[data-action="watching"]').addEventListener("click", () => toggleBan(user.id, "banned_from_watching", !user.banned_from_watching));
+    row.querySelector('[data-action="manage"]').addEventListener("click", () => openManageModal(user));
+    row.querySelector('[data-action="history"]').addEventListener("click", () => openHistoryModal(user));
 
     tbody.appendChild(row);
   });
 }
 
-async function toggleBan(userId, field, newValue){
-  if (newValue && !confirm(`Set ${field.replace(/_/g, " ")} for this user?`)) return;
+function openManageModal(user){
+  activeManageUser = user;
+  document.getElementById("manageModalName").textContent = user.display_name;
+  document.getElementById("manageModalUsername").textContent = `@${user.username}`;
+  document.getElementById("banReasonInput").value = user.ban_reason || "";
+  refreshManageModalStatus();
+  document.getElementById("manageModal").classList.add("open");
+}
 
-  const { error } = await supabaseClient.from("live_profiles").update({ [field]: newValue }).eq("id", userId);
+function refreshManageModalStatus(){
+  const streaming = banStatus(activeManageUser, "streaming");
+  const watching = banStatus(activeManageUser, "watching");
+  document.getElementById("streamingStatusLine").textContent = `Currently: ${streaming.label}`;
+  document.getElementById("watchingStatusLine").textContent = `Currently: ${watching.label}`;
+}
+
+async function applyBan(type, mode){
+  if (!activeManageUser) return;
+  const reason = document.getElementById("banReasonInput").value.trim();
+
+  let update = {};
+  if (mode === "permanent"){
+    update = { [`banned_from_${type}`]: true, [`banned_from_${type}_until`]: null, ban_reason: reason || null };
+  } else if (mode === "temp"){
+    const untilInput = document.getElementById(`ban${type[0].toUpperCase()}${type.slice(1)}Until`);
+    if (!untilInput.value){ showToast("Pick a date/time first"); return; }
+    update = { [`banned_from_${type}`]: false, [`banned_from_${type}_until`]: new Date(untilInput.value).toISOString(), ban_reason: reason || null };
+  } else if (mode === "unban"){
+    update = { [`banned_from_${type}`]: false, [`banned_from_${type}_until`]: null };
+  }
+
+  const { error } = await supabaseClient.from("live_profiles").update(update).eq("id", activeManageUser.id);
   if (error){ console.error(error); showToast("Couldn't update user"); return; }
+
+  await logAction(
+    `${mode}_ban_${type}`,
+    "user",
+    `${activeManageUser.display_name} (@${activeManageUser.username})`,
+    reason || null
+  );
+
   showToast("User updated");
-  await Promise.all([loadUsers(), loadStats()]);
+  await Promise.all([loadUsers(), loadStats(), loadLog()]);
+
+  const refreshed = usersCache.find(u => u.id === activeManageUser.id);
+  if (refreshed){ activeManageUser = refreshed; refreshManageModalStatus(); }
+}
+
+async function openHistoryModal(user){
+  document.getElementById("historyModalName").textContent = `${user.display_name}'s streams`;
+  const list = document.getElementById("historyList");
+  list.innerHTML = `<p style="color:var(--muted);font-size:13px;">Loading...</p>`;
+  document.getElementById("historyModal").classList.add("open");
+
+  const { data, error } = await supabaseClient
+    .from("live_streams")
+    .select("*, live_categories(name)")
+    .eq("host_id", user.id)
+    .order("created_at", { ascending:false });
+
+  if (error){ console.error(error); list.innerHTML = `<p style="color:var(--muted);font-size:13px;">Couldn't load history.</p>`; return; }
+
+  if (!data || data.length === 0){
+    list.innerHTML = `<p style="color:var(--muted);font-size:13px;">No streams yet.</p>`;
+    return;
+  }
+
+  list.innerHTML = data.map(s => `
+    <div class="history-item">
+      <div class="h-title">${escapeHtml(s.title)} ${s.is_live ? `<span class="pill live">LIVE</span>` : ""}</div>
+      <div class="h-meta">${escapeHtml(s.live_categories?.name || "Uncategorized")} · ${s.viewer_count || 0} peak viewers · ${new Date(s.created_at).toLocaleString()}</div>
+    </div>`).join("");
+}
+
+// ==========================================================
+// ACTIVITY LOG
+// ==========================================================
+async function loadLog(){
+  const tbody = document.getElementById("logTableBody");
+
+  const { data, error } = await supabaseClient
+    .from("live_moderation_log")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(50);
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load activity log.</td></tr>`; return; }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No activity yet.</td></tr>`;
+    return;
+  }
+
+  const actorIds = [...new Set(data.map(l => l.actor_id).filter(Boolean))];
+  let actorsById = {};
+  if (actorIds.length > 0){
+    const { data: actors } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", actorIds);
+    (actors || []).forEach(a => { actorsById[a.id] = a; });
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(entry => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="log-time">${new Date(entry.created_at).toLocaleString()}</td>
+      <td>${escapeHtml(actorsById[entry.actor_id]?.display_name || "Unknown")}</td>
+      <td>${escapeHtml(entry.action.replace(/_/g, " "))}</td>
+      <td>${escapeHtml(entry.target_label || entry.target_type)}</td>
+      <td style="color:var(--muted);">${escapeHtml(entry.details || "")}</td>`;
+    tbody.appendChild(row);
+  });
 }
 
 gate();
