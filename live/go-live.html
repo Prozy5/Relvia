@@ -192,18 +192,32 @@ async function initialize(){
 
   currentUser = userData.user;
 
-  const { data: ownerRow } = await supabaseClient
-    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "go_live");
+  const unlockKey = "relvia-live-unlock-go_live";
 
-  const { data: lock } = await supabaseClient
-    .from("live_page_locks").select("*").eq("page_key", "go_live").maybeSingle();
-
-  if (lock?.is_closed && !ownerRow){
+  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
     document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;">
         <h2 style="font-family:var(--font-display);font-size:24px;">Broadcasting is temporarily closed</h2>
         <p style="color:var(--muted);font-size:14px;max-width:380px;">${(lock.message || "Check back soon.").replace(/[<>&]/g, "")}</p>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
+          <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+        </div>
+        <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
       </div>`;
+
+    document.getElementById("unlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("unlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "go_live", passcode });
+      if (isValid){
+        sessionStorage.setItem(unlockKey, "true");
+        window.location.reload();
+      } else {
+        document.getElementById("unlockError").style.display = "block";
+      }
+    });
     return;
   }
 
