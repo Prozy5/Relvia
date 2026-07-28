@@ -401,8 +401,27 @@ let liveProfile = null;
 let categories = [];
 let activeCategoryId = "all";
 let currentRoom = null; // active LiveKit Room instance, if connected
+let isCurrentUserOwner = false;
 let streamsCache = [];
 let hostsCache = {};
+
+async function checkPageLock(pageKey, bypassForOwners){
+  const { data: lock } = await supabaseClient
+    .from("live_page_locks")
+    .select("*")
+    .eq("page_key", pageKey)
+    .maybeSingle();
+
+  if (!lock || !lock.is_closed) return false;
+  if (bypassForOwners) return false; // owners/staff can still get in
+
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+      <h2 style="font-family:var(--font-display);font-size:24px;">This part of Relvia Live is closed</h2>
+      <p style="color:var(--muted);font-size:14px;max-width:380px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+    </div>`;
+  return true;
+}
 let ownerBadgesCache = {};
 
 function showToast(message){
@@ -439,6 +458,10 @@ async function initialize(){
     if (banned) return;
 
     await checkOwnerStatus();
+
+    const locked = await checkPageLock("live", isCurrentUserOwner);
+    if (locked) return;
+
     await loadAnnouncement();
     await loadCategories();
     await loadStreams();
@@ -504,6 +527,7 @@ async function checkOwnerStatus(){
     .maybeSingle();
 
   if (error){ console.error(error); return; }
+  isCurrentUserOwner = !!data;
   if (!data) return;
 
   document.getElementById("ownerBadge").textContent = data.badge_label || "Owner";
