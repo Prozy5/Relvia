@@ -405,21 +405,37 @@ let isCurrentUserOwner = false;
 let streamsCache = [];
 let hostsCache = {};
 
-async function checkPageLock(pageKey, bypassForOwners){
-  const { data: lock } = await supabaseClient
-    .from("live_page_locks")
-    .select("*")
-    .eq("page_key", pageKey)
-    .maybeSingle();
+async function checkPageLock(pageKey){
+  const unlockKey = `relvia-live-unlock-${pageKey}`;
+  if (sessionStorage.getItem(unlockKey) === "true") return false;
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === pageKey);
 
   if (!lock || !lock.is_closed) return false;
-  if (bypassForOwners) return false; // owners/staff can still get in
 
   document.body.innerHTML = `
-    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;">
       <h2 style="font-family:var(--font-display);font-size:24px;">This part of Relvia Live is closed</h2>
       <p style="color:var(--muted);font-size:14px;max-width:380px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
+        <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+      </div>
+      <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
     </div>`;
+
+  document.getElementById("unlockSubmit").addEventListener("click", async () => {
+    const passcode = document.getElementById("unlockPasscode").value;
+    const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: pageKey, passcode });
+    if (isValid){
+      sessionStorage.setItem(unlockKey, "true");
+      window.location.reload();
+    } else {
+      document.getElementById("unlockError").style.display = "block";
+    }
+  });
+
   return true;
 }
 let ownerBadgesCache = {};
@@ -459,7 +475,7 @@ async function initialize(){
 
     await checkOwnerStatus();
 
-    const locked = await checkPageLock("live", isCurrentUserOwner);
+    const locked = await checkPageLock("live");
     if (locked) return;
 
     await loadAnnouncement();
