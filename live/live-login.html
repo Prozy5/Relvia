@@ -143,8 +143,11 @@ async function checkExistingSession(){
 checkExistingSession();
 
 async function checkSignupLock(){
-  const { data: lock } = await supabaseClient
-    .from("live_page_locks").select("*").eq("page_key", "signup").maybeSingle();
+  const unlockKey = "relvia-live-unlock-signup";
+  if (sessionStorage.getItem(unlockKey) === "true") return;
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "signup");
 
   if (lock?.is_closed){
     const tabSignupEl = document.getElementById("tabSignup");
@@ -153,7 +156,22 @@ async function checkSignupLock(){
     tabSignupEl.style.pointerEvents = "none";
     document.getElementById("panelSignup").innerHTML = `
       <h2>Sign-ups are closed</h2>
-      <p class="sub">${(lock.message || "New accounts aren't being accepted right now.").replace(/[<>&]/g, "")}</p>`;
+      <p class="sub">${(lock.message || "New accounts aren't being accepted right now.").replace(/[<>&]/g, "")}</p>
+      <div class="field"><label>Have a passcode?</label><input type="password" id="signupUnlockPasscode" placeholder="Passcode"></div>
+      <button class="submit-btn" id="signupUnlockSubmit">Unlock sign-ups</button>
+      <p id="signupUnlockError" style="color:#f2a8a3;font-size:12.5px;margin-top:10px;display:none;">Incorrect passcode.</p>
+    `;
+
+    document.getElementById("signupUnlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("signupUnlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "signup", passcode });
+      if (isValid){
+        sessionStorage.setItem(unlockKey, "true");
+        window.location.reload();
+      } else {
+        document.getElementById("signupUnlockError").style.display = "block";
+      }
+    });
   }
 }
 checkSignupLock();
