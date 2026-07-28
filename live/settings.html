@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Settings — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+button, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
+  z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); text-decoration:none; }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:640px; margin:auto; padding:40px 24px 80px; }
+.container h1{ font-family:var(--font-display); font-size:30px; font-weight:600; margin-bottom:28px; }
+
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:26px; margin-bottom:24px; }
+.panel h2{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:6px; }
+.panel .sub{ color:var(--muted); font-size:13px; margin-bottom:18px; }
+
+.field{ margin-bottom:14px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:11px 14px; color:white; font-size:14px;
+}
+.field input:focus{ outline:none; border-color:var(--gold); }
+
+.btn{
+  font-size:13px; font-weight:700; padding:11px 20px; border-radius:12px; transition:.15s;
+  border:1px solid var(--border); background:var(--surface-light); color:var(--text);
+}
+.btn:hover{ border-color:var(--gold); color:var(--gold); }
+.btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.btn.gold:hover{ opacity:.88; color:#000; }
+.btn.danger{ border-color:var(--live-red); color:#f2a8a3; }
+.btn.danger:hover{ background:rgba(224,87,79,.12); }
+
+.danger-zone{ border-color:rgba(224,87,79,.35); }
+.danger-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-top:1px solid var(--border-soft); }
+.danger-row:first-of-type{ border-top:none; }
+.danger-row div p:first-child{ font-weight:700; font-size:14px; }
+.danger-row div p:last-child{ color:var(--muted); font-size:12.5px; margin-top:2px; }
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface); border:1px solid var(--gold); color:white;
+  padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }
+.modal-backdrop.open{ display:flex; }
+.modal{ background:var(--surface); border:1px solid var(--live-red); border-radius:20px; padding:28px; max-width:400px; }
+.modal h3{ font-family:var(--font-display); font-size:20px; margin-bottom:10px; }
+.modal p{ color:var(--muted); font-size:13.5px; line-height:1.6; margin-bottom:18px; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Account Settings</span>
+  </div>
+  <a class="back-link" href="live.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+  <h1>Your Account</h1>
+
+  <div class="panel">
+    <h2>Profile</h2>
+    <p class="sub">Visible on Relvia Live to other viewers.</p>
+    <div class="field"><label>Display name</label><input type="text" id="displayNameInput"></div>
+    <div class="field"><label>Username</label><input type="text" id="usernameInput"></div>
+    <div class="field"><label>Avatar URL</label><input type="text" id="avatarInput" placeholder="https://..."></div>
+    <button class="btn gold" id="saveProfileBtn">Save changes</button>
+  </div>
+
+  <div class="panel">
+    <h2>Password</h2>
+    <p class="sub">Update your Relvia Live sign-in password.</p>
+    <div class="field"><label>New password</label><input type="password" id="newPasswordInput" placeholder="At least 6 characters"></div>
+    <div class="field"><label>Confirm new password</label><input type="password" id="confirmPasswordInput"></div>
+    <button class="btn gold" id="savePasswordBtn">Update password</button>
+  </div>
+
+  <div class="panel danger-zone">
+    <h2>Danger Zone</h2>
+    <div class="danger-row">
+      <div>
+        <p id="deactivateLabel">Deactivate account</p>
+        <p>Hides your access. Reversible — you can reactivate from the sign-in screen.</p>
+      </div>
+      <button class="btn" id="deactivateBtn">Deactivate</button>
+    </div>
+    <div class="danger-row">
+      <div>
+        <p>Delete account</p>
+        <p>Permanent. Cannot be undone. Removes your Relvia Live account entirely.</p>
+      </div>
+      <button class="btn danger" id="deleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>Delete your account?</h3>
+    <p>This permanently deletes your Relvia Live account, profile, and stream history. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn" id="cancelDeleteBtn">Cancel</button>
+      <button class="btn danger" id="confirmDeleteBtn">Yes, delete permanently</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const DELETE_ENDPOINT = `${SUPABASE_URL}/functions/v1/delete-live-account`;
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+let currentUser = null;
+let profile = null;
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+
+  currentUser = userData.user;
+
+  const { data, error } = await supabaseClient
+    .from("live_profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (error || !data){ showToast("Couldn't load your profile"); return; }
+  profile = data;
+
+  document.getElementById("displayNameInput").value = profile.display_name || "";
+  document.getElementById("usernameInput").value = profile.username || "";
+  document.getElementById("avatarInput").value = profile.avatar_url || "";
+  document.getElementById("deactivateLabel").textContent = profile.is_deactivated ? "Reactivate account" : "Deactivate account";
+  document.getElementById("deactivateBtn").textContent = profile.is_deactivated ? "Reactivate" : "Deactivate";
+}
+
+document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+  const display_name = document.getElementById("displayNameInput").value.trim();
+  const username = document.getElementById("usernameInput").value.trim().toLowerCase();
+  const avatar_url = document.getElementById("avatarInput").value.trim();
+
+  if (!display_name || !username){ showToast("Display name and username are required"); return; }
+  if (!/^[a-z0-9_]+$/.test(username)){ showToast("Username can only use lowercase letters, numbers, underscores"); return; }
+
+  const { error } = await supabaseClient
+    .from("live_profiles")
+    .update({ display_name, username, avatar_url })
+    .eq("id", currentUser.id);
+
+  if (error){ console.error(error); showToast(error.message?.includes("duplicate") ? "That username is taken" : "Couldn't save changes"); return; }
+  showToast("Profile updated");
+});
+
+document.getElementById("savePasswordBtn").addEventListener("click", async () => {
+  const newPassword = document.getElementById("newPasswordInput").value;
+  const confirmPassword = document.getElementById("confirmPasswordInput").value;
+
+  if (newPassword.length < 6){ showToast("Password must be at least 6 characters"); return; }
+  if (newPassword !== confirmPassword){ showToast("Passwords don't match"); return; }
+
+  const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+  if (error){ console.error(error); showToast(error.message || "Couldn't update password"); return; }
+
+  document.getElementById("newPasswordInput").value = "";
+  document.getElementById("confirmPasswordInput").value = "";
+  showToast("Password updated");
+});
+
+document.getElementById("deactivateBtn").addEventListener("click", async () => {
+  const newValue = !profile.is_deactivated;
+  const { error } = await supabaseClient
+    .from("live_profiles")
+    .update({ is_deactivated: newValue })
+    .eq("id", currentUser.id);
+
+  if (error){ console.error(error); showToast("Couldn't update account status"); return; }
+
+  profile.is_deactivated = newValue;
+  document.getElementById("deactivateLabel").textContent = newValue ? "Reactivate account" : "Deactivate account";
+  document.getElementById("deactivateBtn").textContent = newValue ? "Reactivate" : "Deactivate";
+  showToast(newValue ? "Account deactivated" : "Account reactivated");
+
+  if (newValue){
+    setTimeout(async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = "live-login.html";
+    }, 1200);
+  }
+});
+
+document.getElementById("deleteBtn").addEventListener("click", () => document.getElementById("deleteModal").classList.add("open"));
+document.getElementById("cancelDeleteBtn").addEventListener("click", () => document.getElementById("deleteModal").classList.remove("open"));
+
+document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("confirmDeleteBtn");
+  btn.disabled = true; btn.textContent = "Deleting...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(DELETE_ENDPOINT, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${accessToken}` },
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      showToast(result.error || "Couldn't delete account");
+      btn.disabled = false; btn.textContent = "Yes, delete permanently";
+      return;
+    }
+
+    await supabaseClient.auth.signOut();
+    window.location.href = "live-login.html";
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't reach the server");
+    btn.disabled = false; btn.textContent = "Yes, delete permanently";
+  }
+});
+
+initialize();
+</script>
+</body>
+</html>
