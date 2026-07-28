@@ -84,6 +84,15 @@ tr:last-child td{ border-bottom:none; }
 .pill.temp{ background:rgba(217,169,75,.15); color:var(--gold); }
 .pill.ok{ background:rgba(95,174,122,.15); color:#8fd1a8; }
 
+.toggle-btn{
+  font-size:11.5px; font-weight:700; padding:6px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface-light); color:var(--muted);
+}
+.toggle-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.toggle-btn.on{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800;
+}
+
 .btn{ font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; transition:.15s; border:1px solid var(--border); background:var(--surface-light); color:var(--text); margin-right:6px; }
 .btn:hover{ border-color:var(--gold); color:var(--gold); }
 .btn.danger:hover{ border-color:var(--live-red); color:#f2a8a3; }
@@ -213,7 +222,7 @@ tr:last-child td{ border-bottom:none; }
       </div>
       <div class="panel">
         <table>
-          <thead><tr><th>Name</th><th>Username</th><th>Streaming</th><th>Watching</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Username</th><th>Creator+</th><th>Streaming</th><th>Watching</th><th>Actions</th></tr></thead>
           <tbody id="usersTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -730,7 +739,7 @@ function renderUsers(filterText){
     : usersCache;
 
   if (filtered.length === 0){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${filter ? "No matching users." : "No users yet."}</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">${filter ? "No matching users." : "No users yet."}</td></tr>`;
     return;
   }
 
@@ -744,6 +753,7 @@ function renderUsers(filterText){
     row.innerHTML = `
       <td>${escapeHtml(user.display_name)}</td>
       <td>@${escapeHtml(user.username)}</td>
+      <td><button class="toggle-btn ${user.creator_plus ? "on" : ""}" data-action="creatorplus">${user.creator_plus ? "✓ Verified" : "Grant"}</button></td>
       <td><span class="pill ${pillClass(streaming)}">${streaming.label}</span></td>
       <td><span class="pill ${pillClass(watching)}">${watching.label}</span></td>
       <td>
@@ -753,9 +763,19 @@ function renderUsers(filterText){
 
     row.querySelector('[data-action="manage"]').addEventListener("click", () => openManageModal(user));
     row.querySelector('[data-action="history"]').addEventListener("click", () => openHistoryModal(user));
+    row.querySelector('[data-action="creatorplus"]').addEventListener("click", () => toggleCreatorPlus(user.id, !user.creator_plus, user.display_name));
 
     tbody.appendChild(row);
   });
+}
+
+async function toggleCreatorPlus(userId, newValue, displayName){
+  const { error } = await supabaseClient.from("live_profiles").update({ creator_plus: newValue }).eq("id", userId);
+  if (error){ console.error(error); showToast("Couldn't update Creator+ status"); return; }
+
+  showToast(newValue ? `${displayName} is now Creator+ verified` : `Removed Creator+ from ${displayName}`);
+  await logAction(newValue ? "grant_creator_plus" : "revoke_creator_plus", "user", displayName);
+  await loadUsers();
 }
 
 function openManageModal(user){
