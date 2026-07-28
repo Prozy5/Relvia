@@ -265,7 +265,7 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
   try {
     const response = await fetch(DELETE_ENDPOINT, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
+      headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
     });
     const result = await response.json();
 
