@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+a{ text-decoration:none; color:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-family:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
+  z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:760px; margin:auto; padding:36px 24px 80px; }
+
+.profile-card{ background:var(--glass); border:1px solid var(--border); border-radius:22px; overflow:hidden; margin-bottom:26px; }
+.profile-banner{
+  height:130px; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative;
+}
+.profile-banner::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 25% 30%, rgba(217,169,75,.18), transparent 60%); }
+.profile-body{ padding:0 28px 26px; position:relative; }
+.profile-avatar{
+  width:96px; height:96px; border-radius:50%; overflow:hidden; border:4px solid var(--surface);
+  background:linear-gradient(135deg,#2a2a2a,#171717); display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:30px; margin-top:-48px;
+}
+.profile-avatar img{ width:100%; height:100%; object-fit:cover; }
+
+.profile-name-row{ display:flex; align-items:center; gap:9px; margin-top:16px; flex-wrap:wrap; }
+.profile-name-row h1{ font-family:var(--font-display); font-size:26px; font-weight:700; }
+.verified-badge{
+  display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:11px; font-weight:900;
+}
+.staff-badge{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+  font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:999px;
+}
+.profile-handle{ color:var(--muted); font-size:14px; margin-top:3px; }
+.profile-bio{ margin-top:14px; font-size:14px; line-height:1.6; color:#dcdcdc; max-width:520px; }
+.profile-meta{ margin-top:14px; font-size:12.5px; color:var(--muted-soft); }
+
+.profile-actions{ margin-top:18px; display:flex; gap:10px; }
+.btn{ font-size:13px; font-weight:700; padding:10px 20px; border-radius:12px; border:1px solid var(--border); background:var(--surface-light); }
+.btn:hover{ border-color:var(--gold); color:var(--gold); }
+.btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800; }
+.btn.gold:hover{ opacity:.88; color:#000; }
+
+.stats-row{ display:flex; gap:26px; margin-top:20px; }
+.stat{ display:flex; flex-direction:column; }
+.stat b{ font-size:19px; font-weight:800; }
+.stat span{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+.section-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+
+.stream-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; }
+.stream-card{ background:var(--glass); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:.2s; }
+.stream-card:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
+.stream-thumb{ aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; overflow:hidden; }
+.stream-thumb img{ width:100%; height:100%; object-fit:cover; }
+.live-pill{ position:absolute; top:9px; left:9px; background:var(--live-red); color:white; font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; }
+.stream-info{ padding:10px 12px; }
+.stream-title{ font-size:13px; font-weight:700; margin-bottom:2px; }
+.stream-date{ font-size:11.5px; color:var(--muted); }
+
+.empty-state{ padding:40px 20px; text-align:center; color:var(--muted); font-size:13.5px; }
+.loading-state{ padding:60px 0; text-align:center; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="live.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Live</span>
+  </a>
+  <a class="back-link" href="live.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading profile...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+
+  const currentUserId = userData.user.id;
+  const params = new URLSearchParams(window.location.search);
+  const targetId = params.get("user") || currentUserId;
+  const isOwnProfile = targetId === currentUserId;
+
+  const { data: profile, error } = await supabaseClient
+    .from("live_profiles")
+    .select("*")
+    .eq("id", targetId)
+    .maybeSingle();
+
+  if (error || !profile){
+    document.getElementById("container").innerHTML = `<div class="empty-state">This profile doesn't exist.</div>`;
+    return;
+  }
+
+  // Check for a staff badge (owner/moderator), safe public lookup via RPC.
+  let staffBadge = null;
+  try {
+    const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: [targetId] });
+    if (badges && badges.length > 0) staffBadge = badges[0];
+  } catch (err){ /* function may not exist in every deployment — fail silently */ }
+
+  const { data: streams } = await supabaseClient
+    .from("live_streams")
+    .select("*")
+    .eq("host_id", targetId)
+    .order("created_at", { ascending:false })
+    .limit(12);
+
+  const streamCount = (streams || []).length;
+
+  document.getElementById("container").innerHTML = `
+    <div class="profile-card">
+      <div class="profile-banner"></div>
+      <div class="profile-body">
+        <div class="profile-avatar">
+          ${profile.avatar_url ? `<img src="${profile.avatar_url}">` : escapeHtml((profile.display_name || "R").charAt(0).toUpperCase())}
+        </div>
+        <div class="profile-name-row">
+          <h1>${escapeHtml(profile.display_name)}</h1>
+          ${profile.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
+          ${staffBadge ? `<span class="staff-badge">${escapeHtml(staffBadge.badge_label)}</span>` : ""}
+        </div>
+        <div class="profile-handle">@${escapeHtml(profile.username)}</div>
+        ${profile.bio ? `<p class="profile-bio">${escapeHtml(profile.bio)}</p>` : ""}
+        <div class="profile-meta">Joined ${new Date(profile.created_at).toLocaleDateString(undefined, { month:"long", year:"numeric" })}</div>
+
+        <div class="stats-row">
+          <div class="stat"><b>${streamCount}</b><span>Streams</span></div>
+        </div>
+
+        <div class="profile-actions">
+          ${isOwnProfile
+            ? `<a class="btn gold" href="account-settings.html">Edit Profile</a><a class="btn" href="go-live.html">Go Live</a>`
+            : ""}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">${isOwnProfile ? "Your Streams" : "Recent Streams"}</div>
+    <div id="streamsContainer"></div>
+  `;
+
+  const streamsContainer = document.getElementById("streamsContainer");
+
+  if (!streams || streams.length === 0){
+    streamsContainer.innerHTML = `<div class="empty-state">No streams yet.</div>`;
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "stream-grid";
+  streams.forEach(stream => {
+    const card = document.createElement("div");
+    card.className = "stream-card";
+    card.innerHTML = `
+      <div class="stream-thumb">
+        ${stream.thumbnail_url ? `<img src="${stream.thumbnail_url}">` : ""}
+        ${stream.is_live ? `<div class="live-pill">LIVE</div>` : ""}
+      </div>
+      <div class="stream-info">
+        <div class="stream-title">${escapeHtml(stream.title)}</div>
+        <div class="stream-date">${new Date(stream.created_at).toLocaleDateString()}</div>
+      </div>`;
+    if (stream.is_live){
+      card.addEventListener("click", () => { window.location.href = "live.html"; });
+    }
+    grid.appendChild(card);
+  });
+  streamsContainer.appendChild(grid);
+}
+
+initialize();
+</script>
+</body>
+</html>
