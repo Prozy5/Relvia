@@ -77,6 +77,16 @@ a{ text-decoration:none; }
 .auto-tag{ font-size:10px; font-weight:800; color:var(--muted); border:1px solid var(--border); padding:1px 7px; border-radius:999px; margin-left:6px; }
 
 .empty{ text-align:center; color:var(--muted); padding:40px 0; font-size:13.5px; }
+
+.components{ margin-bottom:36px; }
+.component-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:var(--glass); border:1px solid var(--border); border-radius:14px; margin-bottom:8px;
+}
+.component-name{ font-size:14px; font-weight:600; }
+.component-pill{ font-size:11.5px; font-weight:800; padding:4px 12px; border-radius:999px; }
+.component-pill.open{ background:rgba(95,174,122,.15); color:var(--ok-green); }
+.component-pill.closed{ background:rgba(224,87,79,.15); color:#f2a8a3; }
 </style>
 </head>
 <body>
@@ -94,6 +104,11 @@ a{ text-decoration:none; }
     <div class="status-dot" id="statusDot"></div>
     <h1 id="statusHeroText">Checking status...</h1>
     <p id="statusHeroTime"></p>
+  </div>
+
+  <div class="eyebrow">Components</div>
+  <div class="components" id="components">
+    <div class="empty">Loading...</div>
   </div>
 
   <div class="eyebrow">History</div>
@@ -155,7 +170,33 @@ async function loadStatus(){
   });
 }
 
+async function loadComponents(){
+  const container = document.getElementById("components");
+
+  const { data, error } = await supabaseClient
+    .from("live_page_locks")
+    .select("*")
+    .order("page_key", { ascending:true });
+
+  if (error || !data || data.length === 0){
+    container.innerHTML = `<div class="empty">No component data available.</div>`;
+    return;
+  }
+
+  container.innerHTML = "";
+  data.forEach(page => {
+    const row = document.createElement("div");
+    row.className = "component-row";
+    row.innerHTML = `
+      <span class="component-name">${escapeHtml(page.label)}</span>
+      <span class="component-pill ${page.is_closed ? "closed" : "open"}">${page.is_closed ? "Unavailable" : "Operational"}</span>`;
+    container.appendChild(row);
+  });
+}
+
 loadStatus();
+loadComponents();
+setInterval(() => { loadStatus(); loadComponents(); }, 30000);
 </script>
 </body>
 </html>
