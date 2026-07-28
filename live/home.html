@@ -60,6 +60,17 @@ img{ max-width:100%; display:block; }
   padding:8px 16px; border-radius:12px; transition:.2s; text-decoration:none;
 }
 .owner-link:hover{ background:var(--gold); color:#000; }
+.go-live-btn{
+  font-size:13px; font-weight:800; color:#000; text-decoration:none;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  padding:9px 18px; border-radius:12px; transition:.2s;
+}
+.go-live-btn:hover{ opacity:.88; }
+.settings-link{
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--surface-light); border:1px solid var(--border); color:var(--muted); text-decoration:none; font-size:15px;
+}
+.settings-link:hover{ border-color:var(--gold); color:var(--gold); }
 
 .avatar{
   width:40px; height:40px; border-radius:50%; overflow:hidden;
@@ -97,6 +108,29 @@ img{ max-width:100%; display:block; }
 
 .category-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; margin-bottom:30px; }
 .category-row::-webkit-scrollbar{ display:none; }
+
+.live-search-row{ margin-bottom:20px; }
+.live-search-input{
+  width:100%; max-width:420px; height:46px; background:var(--surface-light); border:1px solid var(--border);
+  border-radius:999px; padding:0 20px; color:white; font-size:14px;
+}
+.live-search-input:focus{ outline:none; border-color:var(--gold); }
+.live-search-input::placeholder{ color:var(--muted-soft); }
+
+.featured-carousel{ display:flex; gap:16px; overflow-x:auto; padding-bottom:8px; margin-bottom:30px; }
+.featured-carousel::-webkit-scrollbar{ display:none; }
+.featured-card{
+  min-width:320px; max-width:320px; border-radius:18px; overflow:hidden; cursor:pointer;
+  border:1px solid var(--gold-end); background:var(--glass); transition:transform .2s;
+}
+.featured-card:hover{ transform:translateY(-3px); }
+.featured-card .thumb{
+  aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; overflow:hidden;
+}
+.featured-card .thumb img{ width:100%; height:100%; object-fit:cover; }
+.featured-card .info{ padding:12px 14px; }
+.featured-card .info .title{ font-size:14px; font-weight:700; margin-bottom:3px; }
+.featured-card .info .host{ font-size:12px; color:var(--muted); }
 .category-pill{
   white-space:nowrap; background:var(--surface-light); border:1px solid var(--border);
   padding:11px 22px; border-radius:999px; font-size:14px; font-weight:600; color:#ddd; transition:.2s;
@@ -196,7 +230,9 @@ img{ max-width:100%; display:block; }
   </div>
   <div class="header-right">
     <span class="owner-badge" id="ownerBadge" style="display:none;"></span>
-    <a class="owner-link" id="ownerLink" href="owner-panel.html" style="display:none;">Owner</a>
+    <a class="owner-link" id="ownerLink" href="/owner/index.html" style="display:none;">Owner</a>
+    <a class="go-live-btn" href="go-live.html">Go Live</a>
+    <a class="settings-link" href="account-settings.html" title="Account settings">⚙</a>
     <div class="avatar" id="profileAvatar" title="Your Live account"></div>
   </div>
 </header>
@@ -215,6 +251,12 @@ img{ max-width:100%; display:block; }
 </div>
 
 <main class="app-container">
+  <div class="live-search-row">
+    <input type="text" id="liveSearch" placeholder="Search live streams..." class="live-search-input">
+  </div>
+
+  <div class="featured-carousel" id="featuredCarousel" style="display:none;"></div>
+
   <div class="category-row" id="categoryRow">
     <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
     <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
@@ -271,6 +313,8 @@ let liveProfile = null;
 let categories = [];
 let activeCategoryId = "all";
 let currentRoom = null; // active LiveKit Room instance, if connected
+let streamsCache = [];
+let hostsCache = {};
 
 function showToast(message){
   const toast = document.getElementById("toast");
@@ -311,6 +355,7 @@ async function initialize(){
     await loadStreams();
 
     document.getElementById("playerClose").addEventListener("click", closePlayer);
+    document.getElementById("liveSearch").addEventListener("input", (e) => renderStreamGrid(e.target.value));
   } catch (err){
     console.error("Relvia Live init failed:", err);
     window.location.href = "live-login.html";
@@ -325,6 +370,16 @@ async function loadLiveProfile(){
     .maybeSingle();
 
   liveProfile = data;
+
+  if (liveProfile?.is_deactivated){
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;">Your account is deactivated</h2>
+        <p style="color:var(--muted);font-size:14px;max-width:360px;">You can reactivate it anytime from Account Settings.</p>
+        <a href="account-settings.html" style="color:var(--gold);border:1px solid var(--gold-end);padding:10px 20px;border-radius:12px;font-weight:700;font-size:13.5px;text-decoration:none;">Go to Account Settings</a>
+      </div>`;
+    return true;
+  }
 
   const now = new Date();
   const permanentlyBanned = liveProfile?.banned_from_watching;
@@ -477,29 +532,79 @@ async function loadStreams(){
     return;
   }
 
-  if (!data || data.length === 0){
-    grid.innerHTML = `
-      <div class="empty-state" style="grid-column:1/-1;">
-        <h4>Nothing live right now</h4>
-        <p>Check back soon, or try a different category.</p>
-      </div>`;
-    return;
-  }
+  streamsCache = data || [];
+  hostsCache = {};
 
-  // Fetch host display names for the visible streams (best-effort).
-  const hostIds = [...new Set(data.map(s => s.host_id).filter(Boolean))];
-  let hostsById = {};
+  const hostIds = [...new Set(streamsCache.map(s => s.host_id).filter(Boolean))];
   if (hostIds.length > 0){
     const { data: hosts } = await supabaseClient
       .from("live_profiles")
       .select("id, display_name, username")
       .in("id", hostIds);
-    (hosts || []).forEach(h => { hostsById[h.id] = h; });
+    (hosts || []).forEach(h => { hostsCache[h.id] = h; });
+  }
+
+  renderFeaturedCarousel();
+  renderStreamGrid(document.getElementById("liveSearch").value.trim());
+}
+
+function renderFeaturedCarousel(){
+  const carousel = document.getElementById("featuredCarousel");
+  const featured = streamsCache.filter(s => s.featured);
+
+  if (featured.length === 0){
+    carousel.style.display = "none";
+    carousel.innerHTML = "";
+    return;
+  }
+
+  carousel.style.display = "flex";
+  carousel.innerHTML = "";
+
+  featured.forEach(stream => {
+    const host = hostsCache[stream.host_id];
+    const hostName = host?.display_name || host?.username || "Relvia Creator";
+
+    const card = document.createElement("div");
+    card.className = "featured-card";
+    card.innerHTML = `
+      <div class="thumb">
+        ${stream.thumbnail_url ? `<img src="${stream.thumbnail_url}" loading="lazy">` : ""}
+        <div class="live-badge"><span class="dot"></span>LIVE</div>
+        <div class="viewer-count">${stream.viewer_count || 0} watching</div>
+      </div>
+      <div class="info">
+        <div class="title">${escapeHtml(stream.title)}</div>
+        <div class="host">${escapeHtml(hostName)}</div>
+      </div>`;
+    card.addEventListener("click", () => openPlayer(stream));
+    carousel.appendChild(card);
+  });
+}
+
+function renderStreamGrid(searchTerm){
+  const grid = document.getElementById("streamGrid");
+  const term = (searchTerm || "").toLowerCase().trim();
+
+  const filtered = streamsCache.filter(stream => {
+    if (!term) return true;
+    const host = hostsCache[stream.host_id];
+    const hostName = (host?.display_name || host?.username || "").toLowerCase();
+    return stream.title.toLowerCase().includes(term) || hostName.includes(term);
+  });
+
+  if (filtered.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <h4>${term ? "No matching streams" : "Nothing live right now"}</h4>
+        <p>${term ? "Try a different search term." : "Check back soon, or try a different category."}</p>
+      </div>`;
+    return;
   }
 
   grid.innerHTML = "";
-  data.forEach(stream => {
-    const host = hostsById[stream.host_id];
+  filtered.forEach(stream => {
+    const host = hostsCache[stream.host_id];
     const hostName = host?.display_name || host?.username || "Relvia Creator";
 
     const card = document.createElement("div");
