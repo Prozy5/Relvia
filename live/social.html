@@ -199,6 +199,22 @@ async function initialize(){
 
   currentUser = userData.user;
 
+  const { data: ownerRow } = await supabaseClient
+    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+  isOwner = !!ownerRow;
+
+  const { data: lock } = await supabaseClient
+    .from("live_page_locks").select("*").eq("page_key", "social").maybeSingle();
+
+  if (lock?.is_closed && !isOwner){
+    document.querySelector(".container").innerHTML = `
+      <div style="text-align:center;padding:80px 20px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;margin-bottom:10px;">Relvia Social is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+      </div>`;
+    return;
+  }
+
   const { data: profile } = await supabaseClient
     .from("live_profiles")
     .select("*")
@@ -215,10 +231,6 @@ async function initialize(){
     document.getElementById("postInput").addEventListener("input", handleInputChange);
     document.getElementById("postBtn").addEventListener("click", () => submitPost());
   }
-
-  const { data: ownerRow } = await supabaseClient
-    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
-  isOwner = !!ownerRow;
 
   const { data: myLikes } = await supabaseClient
     .from("live_community_likes").select("post_id").eq("user_id", currentUser.id);
