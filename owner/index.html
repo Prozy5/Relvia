@@ -462,7 +462,7 @@ async function loadStats(){
     supabaseClient.from("live_categories").select("id", { count: "exact", head: true }),
     supabaseClient.from("live_streams").select("id", { count: "exact", head: true }),
     supabaseClient.from("live_profiles").select("id", { count: "exact", head: true })
-      .or(`banned_from_streaming_until.gt.${nowIso},banned_from_watching_until.gt.${nowIso}`),
+      .or(`banned_from_streaming_until.gt."${nowIso}",banned_from_watching_until.gt."${nowIso}"`),
   ]);
 
   document.getElementById("statLiveNow").textContent = liveNow.count ?? 0;
@@ -549,7 +549,7 @@ async function endStream(stream){
   try {
     const response = await fetch(END_STREAM_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken}` },
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
       body: JSON.stringify({ streamId: stream.id }),
     });
     const result = await response.json();
@@ -924,7 +924,7 @@ async function emergencyStopAll(){
     try {
       const response = await fetch(END_STREAM_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken}` },
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
         body: JSON.stringify({ streamId: stream.id }),
       });
       if (response.ok) succeeded++;
