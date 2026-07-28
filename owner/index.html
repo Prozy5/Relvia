@@ -257,6 +257,26 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- SYSTEM BOT -->
+    <div class="section">
+      <div class="section-head"><h2>System Bot</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">A real, clearly-labeled account that posts on real events (new categories, first streams, signups, milestones). Sign up a normal account for it first via live-login.html, then set it here.</p>
+      <div class="panel" style="padding:18px;">
+        <div id="botStatusLine" style="margin-bottom:14px;font-size:13.5px;color:var(--muted);">Loading...</div>
+        <div class="add-form" style="border-top:none;padding:0;">
+          <input type="text" id="botUsernameInput" placeholder="Bot account username">
+          <button class="btn gold" id="setBotBtn">Set as bot account</button>
+          <button class="btn" id="toggleBotEnabledBtn">Pause bot</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>When</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody id="botActivityTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- PAGE ACCESS -->
     <div class="section">
       <div class="section-head"><h2>Page Access</h2></div>
@@ -445,6 +465,67 @@ async function logAction(action, target_type, target_label, details){
 }
 
 // ==========================================================
+// SYSTEM BOT
+// ==========================================================
+async function loadBotStatus(){
+  const { data: config } = await supabaseClient
+    .from("live_bot_config").select("*, live_profiles!live_bot_config_bot_user_id_fkey(display_name, username)").eq("id", 1).maybeSingle();
+
+  const statusLine = document.getElementById("botStatusLine");
+  const toggleBtn = document.getElementById("toggleBotEnabledBtn");
+
+  if (!config || !config.bot_user_id){
+    statusLine.textContent = "No bot account set yet.";
+    toggleBtn.style.display = "none";
+  } else {
+    const name = config.live_profiles?.display_name || "Unknown";
+    statusLine.innerHTML = `Bot account: <strong style="color:var(--text);">${escapeHtml(name)}</strong> — ${config.enabled ? `<span style="color:#8fd1a8;">Active</span>` : `<span style="color:#f2a8a3;">Paused</span>`}`;
+    toggleBtn.style.display = "inline-block";
+    toggleBtn.textContent = config.enabled ? "Pause bot" : "Resume bot";
+  }
+
+  document.getElementById("setBotBtn").onclick = async () => {
+    const username = document.getElementById("botUsernameInput").value.trim().toLowerCase();
+    if (!username){ showToast("Enter a username"); return; }
+
+    const { error } = await supabaseClient.rpc("set_bot_account", { target_username: username });
+    if (error){ console.error(error); showToast(error.message || "Couldn't set bot account"); return; }
+
+    document.getElementById("botUsernameInput").value = "";
+    showToast("Bot account set");
+    await logAction("set_bot_account", "bot", username);
+    await loadBotStatus();
+  };
+
+  toggleBtn.onclick = async () => {
+    const newEnabled = !config.enabled;
+    const { error } = await supabaseClient.rpc("set_bot_enabled", { new_enabled: newEnabled });
+    if (error){ console.error(error); showToast("Couldn't update bot status"); return; }
+    showToast(newEnabled ? "Bot resumed" : "Bot paused");
+    await loadBotStatus();
+  };
+
+  const { data: activity } = await supabaseClient
+    .from("live_bot_activity").select("*").order("created_at", { ascending:false }).limit(30);
+
+  const tbody = document.getElementById("botActivityTableBody");
+  if (!activity || activity.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="3">No bot activity yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  activity.forEach(a => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="log-time">${new Date(a.created_at).toLocaleString()}</td>
+      <td>${escapeHtml(a.action_type.replace(/_/g, " "))}</td>
+      <td style="color:var(--muted);">${escapeHtml(a.description)}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// ==========================================================
 // PAGE ACCESS (maintenance mode per page)
 // ==========================================================
 async function loadPageLocks(){
@@ -492,7 +573,7 @@ async function togglePageLock(page){
   const message = prompt(`Message to show visitors while "${page.label}" is closed:`, "This part of Relvia Live is temporarily unavailable.");
   if (message === null) return;
 
-  const passcode = prompt(`asjjsdfjhjfjsafhn754"${page.label}" while it's closed:`, "");
+  const passcode = prompt(`Set a passcode to unlock "${page.label}" while it's closed:`, "");
   if (!passcode || !passcode.trim()){
     showToast("A passcode is required to close a page");
     return;
@@ -535,7 +616,7 @@ async function gate(){
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks()];
+  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks(), loadBotStatus()];
 
   if (myRole === "owner"){
     document.getElementById("staffSection").style.display = "block";
