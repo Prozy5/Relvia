@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  color:var(--text); min-height:100vh;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(185,131,47,.06), transparent 55%),
+    var(--background);
+}
+a{ color:var(--gold); }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
+}
+.brand{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--text); }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); text-decoration:none; }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:720px; margin:auto; padding:70px 24px 90px; }
+.eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+h1{ font-family:var(--font-display); font-size:42px; font-weight:600; line-height:1.15; margin-bottom:22px; }
+h1 em{ font-style:italic; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+p.lead{ font-size:16px; line-height:1.7; color:#dcdcdc; margin-bottom:40px; }
+
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:40px; }
+@media(max-width:640px){ .grid{ grid-template-columns:1fr; } }
+.card{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:22px; }
+.card h3{ font-family:var(--font-display); font-size:18px; font-weight:600; margin-bottom:8px; }
+.card p{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+
+.divider{ height:1px; background:var(--border); margin:40px 0; }
+
+.faq-item{ margin-bottom:22px; }
+.faq-item h4{ font-size:15px; font-weight:700; margin-bottom:6px; }
+.faq-item p{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+
+.cta-row{ display:flex; gap:12px; margin-top:36px; flex-wrap:wrap; }
+.btn{
+  font-size:13.5px; font-weight:800; padding:12px 24px; border-radius:14px; text-decoration:none;
+}
+.btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.btn.outline{ border:1px solid var(--border); color:var(--text); }
+.btn.outline:hover{ border-color:var(--gold); color:var(--gold); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="live.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Live</span>
+  </a>
+  <a class="back-link" href="live.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+  <div class="eyebrow">About</div>
+  <h1>The live stage of<br><em>Relvia Entertainment</em></h1>
+  <p class="lead">
+    Relvia Live is where creators broadcast in real time — conversations, performances,
+    behind-the-scenes moments, and everything in between. It's built as its own space
+    within the wider Relvia Entertainment ecosystem, alongside Relvia Studios, Relvia
+    Music, and Relvia Social.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Go Live</h3>
+      <p>Broadcast straight from your browser — no separate software required. Pick a category, hit Go Live, and you're on air.</p>
+    </div>
+    <div class="card">
+      <h3>Categories</h3>
+      <p>Streams are organized into categories curated by Relvia's owners, so viewers can find what they're looking for quickly.</p>
+    </div>
+    <div class="card">
+      <h3>Real-Time Chat</h3>
+      <p>Every stream has live chat, so viewers and creators can talk while the broadcast is happening.</p>
+    </div>
+    <div class="card">
+      <h3>Independent Access</h3>
+      <p>Relvia Live uses its own sign-in, separate from Relvia Social — so moderation on one never affects your standing on the other.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="eyebrow">Common Questions</div>
+
+  <div class="faq-item">
+    <h4>Do I need a separate account from Relvia Social?</h4>
+    <p>Yes. Relvia Live is intentionally kept on its own sign-in so that moderation decisions on Live and Social stay independent of each other.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>What do I need to go live?</h4>
+    <p>Just a browser with camera and microphone access. No external streaming software is required.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>Is there a way to monetize streams?</h4>
+    <p>Creator monetization is on the roadmap. Nothing is live yet — this page will be updated when it launches.</p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn gold" href="go-live.html">Start a broadcast</a>
+    <a class="btn outline" href="live.html">Browse live streams</a>
+  </div>
+</div>
+
+</body>
+</html>
