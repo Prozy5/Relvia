@@ -192,6 +192,21 @@ async function initialize(){
 
   currentUser = userData.user;
 
+  const { data: ownerRow } = await supabaseClient
+    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+
+  const { data: lock } = await supabaseClient
+    .from("live_page_locks").select("*").eq("page_key", "go_live").maybeSingle();
+
+  if (lock?.is_closed && !ownerRow){
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;">Broadcasting is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;max-width:380px;">${(lock.message || "Check back soon.").replace(/[<>&]/g, "")}</p>
+      </div>`;
+    return;
+  }
+
   const { data: categories } = await supabaseClient
     .from("live_categories")
     .select("*")
