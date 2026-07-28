@@ -117,20 +117,62 @@ img{ max-width:100%; display:block; }
 .live-search-input:focus{ outline:none; border-color:var(--gold); }
 .live-search-input::placeholder{ color:var(--muted-soft); }
 
-.featured-carousel{ display:flex; gap:16px; overflow-x:auto; padding-bottom:8px; margin-bottom:30px; }
-.featured-carousel::-webkit-scrollbar{ display:none; }
-.featured-card{
-  min-width:320px; max-width:320px; border-radius:18px; overflow:hidden; cursor:pointer;
-  border:1px solid var(--gold-end); background:var(--glass); transition:transform .2s;
+/* FEATURED SECTION */
+.featured-section{ margin-bottom:36px; display:none; }
+.featured-eyebrow{
+  font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase;
+  font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;
 }
-.featured-card:hover{ transform:translateY(-3px); }
+.featured-eyebrow::before{ content:""; width:16px; height:1px; background:var(--gold); }
+
+.featured-hero{
+  position:relative; border-radius:24px; overflow:hidden; cursor:pointer;
+  aspect-ratio:21/9; min-height:280px; border:1px solid var(--gold-end);
+  background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+}
+.featured-hero img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; }
+.featured-hero::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(0deg, rgba(5,4,3,.95) 5%, rgba(5,4,3,.35) 55%, transparent 90%);
+}
+.featured-hero-content{ position:absolute; left:0; right:0; bottom:0; padding:32px; z-index:2; }
+.featured-hero-badge{
+  display:inline-flex; align-items:center; gap:7px; background:var(--live-red); color:white;
+  font-size:11.5px; font-weight:800; letter-spacing:.5px; padding:6px 13px; border-radius:8px; margin-bottom:14px;
+}
+.featured-hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:white; animation:pulse 1.4s infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+.featured-hero-title{ font-family:var(--font-display); font-size:32px; font-weight:600; color:white; margin-bottom:10px; max-width:70%; line-height:1.15; }
+.featured-hero-meta{ display:flex; align-items:center; gap:14px; color:#e6ddd0; font-size:14px; }
+.featured-hero-host{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.featured-hero-cta{
+  position:absolute; top:28px; right:28px; z-index:2;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+  font-weight:800; font-size:13.5px; padding:11px 22px; border-radius:14px;
+}
+
+.featured-strip{ display:flex; gap:14px; overflow-x:auto; margin-top:16px; padding-bottom:6px; }
+.featured-strip::-webkit-scrollbar{ display:none; }
+.featured-card{
+  min-width:260px; max-width:260px; border-radius:16px; overflow:hidden; cursor:pointer;
+  border:1px solid var(--border); background:var(--glass); transition:transform .2s, border-color .2s;
+}
+.featured-card:hover{ transform:translateY(-3px); border-color:var(--gold-end); }
 .featured-card .thumb{
   aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; overflow:hidden;
 }
 .featured-card .thumb img{ width:100%; height:100%; object-fit:cover; }
 .featured-card .info{ padding:12px 14px; }
 .featured-card .info .title{ font-size:14px; font-weight:700; margin-bottom:3px; }
-.featured-card .info .host{ font-size:12px; color:var(--muted); }
+.featured-card .info .host{ font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+
+/* VERIFIED BADGE */
+.verified-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:15px; height:15px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; font-size:10px; font-weight:900; flex-shrink:0;
+}
 .category-pill{
   white-space:nowrap; background:var(--surface-light); border:1px solid var(--border);
   padding:11px 22px; border-radius:999px; font-size:14px; font-weight:600; color:#ddd; transition:.2s;
@@ -278,7 +320,11 @@ img{ max-width:100%; display:block; }
     <input type="text" id="liveSearch" placeholder="Search live streams..." class="live-search-input">
   </div>
 
-  <div class="featured-carousel" id="featuredCarousel" style="display:none;"></div>
+  <div class="featured-section" id="featuredSection">
+    <div class="featured-eyebrow">Featured on Relvia Live</div>
+    <div id="featuredHeroContainer"></div>
+    <div class="featured-strip" id="featuredStrip"></div>
+  </div>
 
   <div class="category-row" id="categoryRow">
     <div class="skeleton" style="width:100px;height:40px;border-radius:999px;aspect-ratio:auto;"></div>
@@ -571,7 +617,7 @@ async function loadStreams(){
   if (hostIds.length > 0){
     const { data: hosts } = await supabaseClient
       .from("live_profiles")
-      .select("id, display_name, username")
+      .select("id, display_name, username, creator_plus")
       .in("id", hostIds);
     (hosts || []).forEach(h => { hostsCache[h.id] = h; });
   }
@@ -580,20 +626,46 @@ async function loadStreams(){
   renderStreamGrid(document.getElementById("liveSearch").value.trim());
 }
 
+function verifiedBadgeHTML(host){
+  return host?.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : "";
+}
+
 function renderFeaturedCarousel(){
-  const carousel = document.getElementById("featuredCarousel");
+  const section = document.getElementById("featuredSection");
+  const heroContainer = document.getElementById("featuredHeroContainer");
+  const strip = document.getElementById("featuredStrip");
   const featured = streamsCache.filter(s => s.featured);
 
   if (featured.length === 0){
-    carousel.style.display = "none";
-    carousel.innerHTML = "";
+    section.style.display = "none";
+    heroContainer.innerHTML = "";
+    strip.innerHTML = "";
     return;
   }
 
-  carousel.style.display = "flex";
-  carousel.innerHTML = "";
+  section.style.display = "block";
 
-  featured.forEach(stream => {
+  const [hero, ...rest] = featured;
+  const heroHost = hostsCache[hero.host_id];
+  const heroHostName = heroHost?.display_name || heroHost?.username || "Relvia Creator";
+
+  heroContainer.innerHTML = `
+    <div class="featured-hero">
+      ${hero.thumbnail_url ? `<img src="${hero.thumbnail_url}" loading="lazy">` : ""}
+      <div class="featured-hero-cta">Watch Now</div>
+      <div class="featured-hero-content">
+        <div class="featured-hero-badge"><span class="dot"></span>LIVE NOW</div>
+        <div class="featured-hero-title">${escapeHtml(hero.title)}</div>
+        <div class="featured-hero-meta">
+          <span class="featured-hero-host">${escapeHtml(heroHostName)} ${verifiedBadgeHTML(heroHost)}</span>
+          <span>${hero.viewer_count || 0} watching</span>
+        </div>
+      </div>
+    </div>`;
+  heroContainer.querySelector(".featured-hero").addEventListener("click", () => openPlayer(hero));
+
+  strip.innerHTML = "";
+  rest.forEach(stream => {
     const host = hostsCache[stream.host_id];
     const hostName = host?.display_name || host?.username || "Relvia Creator";
 
@@ -607,10 +679,10 @@ function renderFeaturedCarousel(){
       </div>
       <div class="info">
         <div class="title">${escapeHtml(stream.title)}</div>
-        <div class="host">${escapeHtml(hostName)}</div>
+        <div class="host">${escapeHtml(hostName)} ${verifiedBadgeHTML(host)}</div>
       </div>`;
     card.addEventListener("click", () => openPlayer(stream));
-    carousel.appendChild(card);
+    strip.appendChild(card);
   });
 }
 
@@ -650,7 +722,7 @@ function renderStreamGrid(searchTerm){
       </div>
       <div class="stream-info">
         <div class="stream-title">${escapeHtml(stream.title)}</div>
-        <div class="stream-host">${escapeHtml(hostName)}</div>
+        <div class="stream-host">${escapeHtml(hostName)} ${verifiedBadgeHTML(host)}</div>
       </div>`;
     card.addEventListener("click", () => openPlayer(stream));
     grid.appendChild(card);
