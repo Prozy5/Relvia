@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Live — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+button, input, select{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
+  z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); text-decoration:none; }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:820px; margin:auto; padding:40px 24px 80px; }
+
+.setup-panel{ background:var(--glass); border:1px solid var(--border); border-radius:22px; padding:30px; }
+.setup-panel h1{ font-family:var(--font-display); font-size:26px; font-weight:600; margin-bottom:8px; }
+.setup-panel .sub{ color:var(--muted); font-size:13.5px; margin-bottom:24px; }
+
+.field{ margin-bottom:16px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input, .field select{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:white; font-size:14px;
+}
+.field input:focus, .field select:focus{ outline:none; border-color:var(--gold); }
+
+.btn{
+  font-size:14px; font-weight:800; padding:13px 26px; border-radius:14px; transition:.15s;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none;
+}
+.btn:hover{ opacity:.88; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; }
+.btn.danger{ background:var(--live-red); color:white; }
+
+.error-box{
+  background:rgba(224,87,79,.1); border:1px solid rgba(224,87,79,.35); color:#f2a8a3;
+  padding:11px 14px; border-radius:12px; font-size:13px; margin-bottom:16px; display:none;
+}
+.error-box.show{ display:block; }
+
+/* BROADCAST VIEW */
+#broadcastView{ display:none; }
+.broadcast-frame{
+  width:100%; aspect-ratio:16/9; background:#000; border-radius:20px; overflow:hidden;
+  border:1px solid var(--border); position:relative; margin-bottom:20px;
+}
+.broadcast-frame video{ width:100%; height:100%; object-fit:cover; }
+.on-air{
+  position:absolute; top:14px; left:14px; background:var(--live-red); color:white;
+  font-size:11px; font-weight:800; letter-spacing:.5px; padding:5px 12px; border-radius:6px;
+  display:flex; align-items:center; gap:6px;
+}
+.on-air .dot{ width:6px; height:6px; border-radius:50%; background:white; animation:pulse 1.4s infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+.viewer-count-badge{
+  position:absolute; top:14px; right:14px; background:rgba(0,0,0,.6); color:white;
+  font-size:12px; font-weight:600; padding:5px 12px; border-radius:6px; backdrop-filter:blur(4px);
+}
+.broadcast-title{ font-family:var(--font-display); font-size:22px; font-weight:600; margin-bottom:16px; }
+.broadcast-controls{ display:flex; gap:12px; }
+.mute-btn{
+  background:var(--surface-light); border:1px solid var(--border); padding:12px 20px; border-radius:14px; font-weight:700; font-size:13.5px;
+}
+.mute-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.mute-btn.off{ border-color:var(--live-red); color:#f2a8a3; }
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface); border:1px solid var(--gold); color:white;
+  padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Go Live</span>
+  </div>
+  <a class="back-link" href="live.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+
+  <div class="setup-panel" id="setupPanel">
+    <h1>Start a broadcast</h1>
+    <p class="sub">You'll be asked for camera and microphone access when you go live.</p>
+
+    <div class="error-box" id="setupError"></div>
+
+    <div class="field">
+      <label>Stream title</label>
+      <input type="text" id="streamTitle" placeholder="What are you streaming?">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="streamCategory"><option value="">Loading categories...</option></select>
+    </div>
+
+    <button class="btn" id="goLiveBtn">Go Live</button>
+  </div>
+
+  <div id="broadcastView">
+    <div class="broadcast-frame">
+      <div class="on-air"><span class="dot"></span>ON AIR</div>
+      <div class="viewer-count-badge" id="viewerCountBadge">0 watching</div>
+      <video id="localVideo" autoplay muted playsinline></video>
+    </div>
+    <div class="broadcast-title" id="liveTitleDisplay"></div>
+    <div class="broadcast-controls">
+      <button class="mute-btn" id="toggleMicBtn">Mute mic</button>
+      <button class="mute-btn" id="toggleCamBtn">Turn off camera</button>
+      <button class="btn danger" id="endStreamBtn">End Stream</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const BROADCAST_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-broadcast-token`;
+
+// Same as live.html — replace with your real LiveKit Cloud WebSocket URL.
+const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+let currentUser = null;
+let currentRoom = null;
+let currentStreamId = null;
+let viewerPollInterval = null;
+let micOn = true;
+let camOn = true;
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+
+  currentUser = userData.user;
+
+  const { data: categories } = await supabaseClient
+    .from("live_categories")
+    .select("*")
+    .order("sort_order", { ascending:true });
+
+  const select = document.getElementById("streamCategory");
+  select.innerHTML = `<option value="">Uncategorized</option>`;
+  (categories || []).forEach(cat => {
+    select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+  });
+
+  document.getElementById("goLiveBtn").addEventListener("click", goLive);
+  document.getElementById("endStreamBtn").addEventListener("click", endStream);
+  document.getElementById("toggleMicBtn").addEventListener("click", toggleMic);
+  document.getElementById("toggleCamBtn").addEventListener("click", toggleCam);
+
+  window.addEventListener("beforeunload", () => {
+    if (currentRoom) currentRoom.disconnect();
+  });
+}
+
+async function goLive(){
+  const title = document.getElementById("streamTitle").value.trim();
+  const categoryId = document.getElementById("streamCategory").value || null;
+  const errorBox = document.getElementById("setupError");
+  errorBox.classList.remove("show");
+
+  if (!title){
+    errorBox.textContent = "Enter a stream title.";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  const btn = document.getElementById("goLiveBtn");
+  btn.disabled = true; btn.textContent = "Starting...";
+
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    const response = await fetch(BROADCAST_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ title, categoryId }),
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      errorBox.textContent = result.error || "Couldn't start the stream.";
+      errorBox.classList.add("show");
+      btn.disabled = false; btn.textContent = "Go Live";
+      return;
+    }
+
+    currentStreamId = result.streamId;
+
+    const room = new LivekitClient.Room();
+    currentRoom = room;
+
+    await room.connect(LIVEKIT_URL, result.token);
+    await room.localParticipant.setCameraEnabled(true);
+    await room.localParticipant.setMicrophoneEnabled(true);
+
+    // Attach local camera preview.
+    const videoPub = room.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+    if (videoPub?.track){
+      videoPub.track.attach(document.getElementById("localVideo"));
+    }
+
+    document.getElementById("setupPanel").style.display = "none";
+    document.getElementById("broadcastView").style.display = "block";
+    document.getElementById("liveTitleDisplay").textContent = title;
+
+    viewerPollInterval = setInterval(pollViewerCount, 5000);
+    pollViewerCount();
+
+    showToast("You're live");
+  } catch (err){
+    console.error(err);
+    errorBox.textContent = "Couldn't access your camera/microphone, or couldn't connect. Check permissions and try again.";
+    errorBox.classList.add("show");
+    btn.disabled = false; btn.textContent = "Go Live";
+  }
+}
+
+async function pollViewerCount(){
+  if (!currentStreamId) return;
+  const { data } = await supabaseClient
+    .from("live_streams")
+    .select("viewer_count")
+    .eq("id", currentStreamId)
+    .maybeSingle();
+
+  if (data){
+    document.getElementById("viewerCountBadge").textContent = `${data.viewer_count || 0} watching`;
+  }
+}
+
+function toggleMic(){
+  if (!currentRoom) return;
+  micOn = !micOn;
+  currentRoom.localParticipant.setMicrophoneEnabled(micOn);
+  const btn = document.getElementById("toggleMicBtn");
+  btn.textContent = micOn ? "Mute mic" : "Unmute mic";
+  btn.classList.toggle("off", !micOn);
+}
+
+function toggleCam(){
+  if (!currentRoom) return;
+  camOn = !camOn;
+  currentRoom.localParticipant.setCameraEnabled(camOn);
+  const btn = document.getElementById("toggleCamBtn");
+  btn.textContent = camOn ? "Turn off camera" : "Turn on camera";
+  btn.classList.toggle("off", !camOn);
+}
+
+async function endStream(){
+  if (!confirm("End your stream?")) return;
+
+  if (viewerPollInterval) clearInterval(viewerPollInterval);
+  if (currentRoom) currentRoom.disconnect();
+
+  if (currentStreamId){
+    await supabaseClient
+      .from("live_streams")
+      .update({ is_live: false, viewer_count: 0 })
+      .eq("id", currentStreamId);
+  }
+
+  showToast("Stream ended");
+  setTimeout(() => { window.location.href = "live.html"; }, 1000);
+}
+
+initialize();
+</script>
+</body>
+</html>
