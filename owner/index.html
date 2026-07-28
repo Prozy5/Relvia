@@ -228,6 +228,35 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- STATUS PAGE -->
+    <div class="section">
+      <div class="section-head"><h2>System Status</h2></div>
+      <div class="panel" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <span id="currentStatusPill" class="pill">—</span>
+          <span style="color:var(--muted);font-size:12.5px;">is the current public status</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+          <button class="btn" data-status="operational" data-msg="All systems operational.">All Operational</button>
+          <button class="btn" data-status="degraded" data-msg="We're investigating reports of degraded performance.">Investigating Issue</button>
+          <button class="btn" data-status="degraded" data-msg="The issue has been identified. A fix is in progress.">Identified — Fixing</button>
+          <button class="btn" data-status="operational" data-msg="The issue has been resolved.">Resolved</button>
+          <button class="btn" data-status="outage" data-msg="Relvia Live is currently experiencing an outage. We're on it.">Major Outage</button>
+          <button class="btn" data-status="maintenance" data-msg="Scheduled maintenance is underway. Some features may be unavailable.">Maintenance</button>
+        </div>
+        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
+          <select id="customStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="operational">Operational</option>
+            <option value="degraded">Degraded</option>
+            <option value="outage">Outage</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+          <input type="text" id="customStatusMessage" placeholder="Custom status message" style="flex:1;min-width:220px;">
+          <button class="btn gold" id="postCustomStatusBtn">Post</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ANNOUNCEMENTS -->
     <div class="section">
       <div class="section-head"><h2>Announcements</h2></div>
