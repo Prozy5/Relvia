@@ -176,7 +176,10 @@ tr:last-child td{ border-bottom:none; }
     <div class="section">
       <div class="section-head">
         <h2>Live Streams</h2>
-        <input type="text" class="search-input" id="streamSearch" placeholder="Search streams or hosts...">
+        <div style="display:flex;gap:10px;">
+          <input type="text" class="search-input" id="streamSearch" placeholder="Search streams or hosts...">
+          <button class="btn danger" id="emergencyStopBtn">Emergency: End All</button>
+        </div>
       </div>
       <div class="panel">
         <table>
@@ -285,7 +288,10 @@ tr:last-child td{ border-bottom:none; }
     <div class="section">
       <div class="section-head">
         <h2>Activity Log</h2>
-        <button class="btn" id="refreshLogBtn">Refresh</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="exportLogBtn">Export CSV</button>
+          <button class="btn" id="refreshLogBtn">Refresh</button>
+        </div>
       </div>
       <div class="panel">
         <table>
@@ -363,6 +369,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 let currentUser = null;
 let myRole = "moderator";
+let logCache = [];
 let streamsCache = [];
 let usersCache = [];
 let categoriesCache = [];
@@ -427,6 +434,8 @@ async function gate(){
 
   document.getElementById("addCategoryBtn").addEventListener("click", addCategory);
   document.getElementById("refreshLogBtn").addEventListener("click", loadLog);
+  document.getElementById("exportLogBtn").addEventListener("click", exportLogToCsv);
+  document.getElementById("emergencyStopBtn").addEventListener("click", emergencyStopAll);
   document.getElementById("closeManageModal").addEventListener("click", () => document.getElementById("manageModal").classList.remove("open"));
   document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
   document.getElementById("addAnnouncementBtn").addEventListener("click", addAnnouncement);
@@ -839,6 +848,7 @@ async function loadLog(){
 
   if (!data || data.length === 0){
     tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No activity yet.</td></tr>`;
+    logCache = [];
     return;
   }
 
@@ -849,17 +859,81 @@ async function loadLog(){
     (actors || []).forEach(a => { actorsById[a.id] = a; });
   }
 
+  logCache = data.map(entry => ({ ...entry, actorName: actorsById[entry.actor_id]?.display_name || "Unknown" }));
+
   tbody.innerHTML = "";
-  data.forEach(entry => {
+  logCache.forEach(entry => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td class="log-time">${new Date(entry.created_at).toLocaleString()}</td>
-      <td>${escapeHtml(actorsById[entry.actor_id]?.display_name || "Unknown")}</td>
+      <td>${escapeHtml(entry.actorName)}</td>
       <td>${escapeHtml(entry.action.replace(/_/g, " "))}</td>
       <td>${escapeHtml(entry.target_label || entry.target_type)}</td>
       <td style="color:var(--muted);">${escapeHtml(entry.details || "")}</td>`;
     tbody.appendChild(row);
   });
+}
+
+function exportLogToCsv(){
+  if (!logCache || logCache.length === 0){ showToast("Nothing to export"); return; }
+
+  const rows = [["When", "Owner", "Action", "Target", "Details"]];
+  logCache.forEach(e => {
+    rows.push([
+      new Date(e.created_at).toISOString(),
+      e.actorName,
+      e.action,
+      e.target_label || e.target_type || "",
+      e.details || "",
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `relvia-live-activity-log-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==========================================================
+// EMERGENCY STOP — ends every currently live stream
+// ==========================================================
+async function emergencyStopAll(){
+  const { data: liveStreams, error } = await supabaseClient
+    .from("live_streams")
+    .select("id, title")
+    .eq("is_live", true);
+
+  if (error){ console.error(error); showToast("Couldn't load live streams"); return; }
+
+  if (!liveStreams || liveStreams.length === 0){
+    showToast("Nothing is currently live");
+    return;
+  }
+
+  if (!confirm(`This will immediately end ALL ${liveStreams.length} live stream(s). This cannot be undone. Continue?`)) return;
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  let succeeded = 0;
+  for (const stream of liveStreams){
+    try {
+      const response = await fetch(END_STREAM_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken}` },
+        body: JSON.stringify({ streamId: stream.id }),
+      });
+      if (response.ok) succeeded++;
+    } catch (err){ console.error(err); }
+  }
+
+  showToast(`Ended ${succeeded} of ${liveStreams.length} stream(s)`);
+  await logAction("emergency_stop_all", "system", `Ended ${succeeded} stream(s)`);
+  await Promise.all([loadStreams(), loadStats(), loadLog()]);
 }
 
 // ==========================================================
