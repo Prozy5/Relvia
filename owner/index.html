@@ -477,23 +477,34 @@ async function loadPageLocks(){
 }
 
 async function togglePageLock(page){
-  const newValue = !page.is_closed;
-  let message = page.message || "";
+  if (page.is_closed){
+    if (!confirm(`Reopen "${page.label}"? The passcode will stop working.`)) return;
 
-  if (newValue){
-    message = prompt(`Message to show visitors while "${page.label}" is closed:`, "This part of Relvia Live is temporarily unavailable.");
-    if (message === null) return; // cancelled
+    const { error } = await supabaseClient.rpc("reopen_live_page", { target_page_key: page.page_key });
+    if (error){ console.error(error); showToast("Couldn't reopen page"); return; }
+
+    showToast(`${page.label} reopened`);
+    await logAction("reopen_page", "page", page.label);
+    await loadPageLocks();
+    return;
   }
 
-  const { error } = await supabaseClient
-    .from("live_page_locks")
-    .update({ is_closed: newValue, message, updated_by: currentUser.id, updated_at: new Date().toISOString() })
-    .eq("page_key", page.page_key);
+  const message = prompt(`Message to show visitors while "${page.label}" is closed:`, "This part of Relvia Live is temporarily unavailable.");
+  if (message === null) return;
 
-  if (error){ console.error(error); showToast("Couldn't update page access"); return; }
+  const passcode = prompt(`Set a passcode to unlock "${page.label}" while it's closed:`, "");
+  if (!passcode || !passcode.trim()){
+    showToast("A passcode is required to close a page");
+    return;
+  }
 
-  showToast(newValue ? `${page.label} closed` : `${page.label} reopened`);
-  await logAction(newValue ? "close_page" : "reopen_page", "page", page.label, message);
+  const { error } = await supabaseClient.rpc("close_live_page", {
+    target_page_key: page.page_key, new_message: message, new_passcode: passcode.trim()
+  });
+  if (error){ console.error(error); showToast("Couldn't close page"); return; }
+
+  showToast(`${page.label} closed`);
+  await logAction("close_page", "page", page.label, message);
   await loadPageLocks();
 }
 
