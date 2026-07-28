@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relvia Social — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+a{ text-decoration:none; color:inherit; }
+button, textarea{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
+  z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:620px; margin:auto; padding:32px 20px 90px; }
+.page-title{ font-family:var(--font-display); font-size:28px; font-weight:600; margin-bottom:6px; }
+.page-sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
+
+.composer{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:26px; }
+.composer textarea{ width:100%; min-height:70px; background:transparent; border:none; resize:none; color:white; font-size:14.5px; line-height:1.5; }
+.composer textarea:focus{ outline:none; }
+.composer textarea::placeholder{ color:var(--muted-soft); }
+.composer-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:12px; border-top:1px solid var(--border-soft); }
+.char-count{ font-size:12px; color:var(--muted-soft); }
+.post-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; padding:9px 20px; border-radius:12px; font-weight:800; font-size:13px; }
+.post-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+.restricted-note{ background:rgba(224,87,79,.1); border:1px solid rgba(224,87,79,.35); color:#f2a8a3; padding:12px 16px; border-radius:14px; font-size:13px; margin-bottom:26px; display:none; }
+.restricted-note.show{ display:block; }
+
+.post-card{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:14px; }
+.post-header{ display:flex; align-items:center; gap:11px; }
+.post-avatar{
+  width:42px; height:42px; border-radius:50%; overflow:hidden; background:linear-gradient(135deg,#2a2a2a,#171717);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;
+}
+.post-avatar img{ width:100%; height:100%; object-fit:cover; }
+.post-avatar.sm{ width:30px; height:30px; font-size:12px; }
+.post-name-row{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; }
+.verified-badge{
+  display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:9px; font-weight:900;
+}
+.staff-badge{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:9.5px; font-weight:800; padding:2px 8px; border-radius:999px; }
+.post-time{ font-size:12px; color:var(--muted); margin-top:1px; }
+.post-content{ margin-top:12px; font-size:14.5px; line-height:1.6; color:#e6e6e6; white-space:pre-wrap; }
+.post-actions{ display:flex; gap:16px; margin-top:12px; align-items:center; }
+.action-btn{ font-size:13px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.action-btn:hover{ color:var(--gold); }
+.action-btn.active{ color:var(--gold); font-weight:700; }
+.delete-btn{ font-size:12.5px; color:var(--muted-soft); margin-left:auto; }
+.delete-btn:hover{ color:#f2a8a3; }
+
+.repost-embed{ margin-top:12px; border:1px solid var(--border); border-radius:14px; padding:14px; background:var(--surface-light); }
+.repost-embed .post-header{ margin-bottom:8px; }
+.repost-embed .post-content{ margin-top:6px; font-size:13.5px; }
+.repost-tag{ font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+
+.comments-section{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border-soft); display:none; }
+.comments-section.open{ display:block; }
+.comment-composer{ display:flex; gap:10px; margin-bottom:14px; }
+.comment-composer textarea{
+  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:9px 12px; color:white; font-size:13.5px; resize:none; min-height:38px;
+}
+.comment-composer textarea:focus{ outline:none; border-color:var(--gold); }
+.comment-composer button{ background:var(--gold); color:#000; font-weight:700; font-size:12.5px; padding:0 16px; border-radius:10px; }
+
+.comment{ display:flex; gap:10px; margin-bottom:12px; }
+.comment-body{ flex:1; }
+.comment-bubble{ background:var(--surface-light); border-radius:12px; padding:9px 12px; }
+.comment-name{ font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:5px; }
+.comment-text{ font-size:13px; color:#ddd; margin-top:2px; line-height:1.5; }
+.comment-meta{ display:flex; gap:14px; margin-top:5px; padding-left:4px; }
+.comment-meta button{ font-size:11.5px; color:var(--muted); }
+.comment-meta button:hover{ color:var(--gold); }
+.comment-replies{ margin-left:28px; margin-top:10px; }
+.reply-composer{ display:none; gap:8px; margin-top:8px; margin-left:4px; }
+.reply-composer.open{ display:flex; }
+.reply-composer textarea{
+  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
+  padding:7px 10px; color:white; font-size:12.5px; resize:none; min-height:32px;
+}
+.reply-composer button{ background:var(--gold); color:#000; font-weight:700; font-size:11.5px; padding:0 12px; border-radius:8px; }
+
+.empty-state, .loading-state{ text-align:center; color:var(--muted); padding:50px 0; font-size:13.5px; }
+.empty-comments{ color:var(--muted-soft); font-size:12.5px; padding:6px 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="live.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Social</span>
+  </a>
+  <a class="back-link" href="live.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+  <div class="page-title">Relvia Social</div>
+  <div class="page-sub">Where Relvia Live creators and viewers hang out between streams.</div>
+
+  <div class="restricted-note" id="restrictedNote">Your account is currently restricted from posting.</div>
+
+  <div class="composer" id="composer">
+    <textarea id="postInput" placeholder="Share something with the community..." maxlength="500"></textarea>
+    <div class="composer-actions">
+      <span class="char-count" id="charCount">500 left</span>
+      <button class="post-btn" id="postBtn" disabled>Post</button>
+    </div>
+  </div>
+
+  <div id="feed"><div class="loading-state">Loading feed...</div></div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+let currentUser = null;
+let isOwner = false;
+let likedPostIds = new Set();
+let profileCache = {};
+let badgeCache = {};
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function timeAgo(dateStr){
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
+function nameBadgesHTML(userId){
+  const author = profileCache[userId];
+  const badge = badgeCache[userId];
+  return `${author?.creator_plus ? `<span class="verified-badge">✓</span>` : ""}${badge ? `<span class="staff-badge">${escapeHtml(badge.badge_label)}</span>` : ""}`;
+}
+
+function avatarHTML(userId){
+  const author = profileCache[userId];
+  const initial = escapeHtml((author?.display_name || "R").charAt(0).toUpperCase());
+  return author?.avatar_url ? `<img src="${author.avatar_url}">` : initial;
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+
+  currentUser = userData.user;
+
+  const { data: profile } = await supabaseClient
+    .from("live_profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  const restricted = profile?.is_deactivated ||
+    (profile?.banned_from_watching_until && new Date(profile.banned_from_watching_until) > new Date());
+
+  if (restricted){
+    document.getElementById("restrictedNote").classList.add("show");
+    document.getElementById("composer").style.display = "none";
+  } else {
+    document.getElementById("postInput").addEventListener("input", handleInputChange);
+    document.getElementById("postBtn").addEventListener("click", () => submitPost());
+  }
+
+  const { data: ownerRow } = await supabaseClient
+    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+  isOwner = !!ownerRow;
+
+  const { data: myLikes } = await supabaseClient
+    .from("live_community_likes").select("post_id").eq("user_id", currentUser.id);
+  likedPostIds = new Set((myLikes || []).map(l => l.post_id));
+
+  await loadFeed();
+  listenForRealtime();
+}
+
+function handleInputChange(e){
+  const len = e.target.value.length;
+  document.getElementById("charCount").textContent = `${500 - len} left`;
+  document.getElementById("postBtn").disabled = e.target.value.trim().length === 0;
+}
+
+async function submitPost(){
+  const input = document.getElementById("postInput");
+  const content = input.value.trim();
+  if (!content) return;
+
+  const { error } = await supabaseClient
+    .from("live_community_posts")
+    .insert({ user_id: currentUser.id, content });
+
+  if (error){ console.error(error); alert("Couldn't post. Try again."); return; }
+
+  input.value = "";
+  document.getElementById("charCount").textContent = "500 left";
+  document.getElementById("postBtn").disabled = true;
+  await loadFeed();
+}
+
+async function submitRepost(originalId){
+  const note = prompt("Add a comment to your repost (optional):", "");
+  if (note === null) return;
+  const { error } = await supabaseClient
+    .from("live_community_posts")
+    .insert({ user_id: currentUser.id, content: note.trim(), repost_of: originalId });
+  if (error){ console.error(error); alert("Couldn't repost."); return; }
+  await loadFeed();
+}
+
+async function loadFeed(){
+  const feed = document.getElementById("feed");
+
+  const { data: posts, error } = await supabaseClient
+    .from("live_community_posts")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(50);
+
+  if (error){ console.error(error); feed.innerHTML = `<div class="empty-state">Couldn't load the feed.</div>`; return; }
+
+  if (!posts || posts.length === 0){
+    feed.innerHTML = `<div class="empty-state">No posts yet — be the first to share something.</div>`;
+    return;
+  }
+
+  const repostSourceIds = posts.map(p => p.repost_of).filter(Boolean);
+  let originals = {};
+  if (repostSourceIds.length > 0){
+    const { data: originalPosts } = await supabaseClient
+      .from("live_community_posts").select("*").in("id", repostSourceIds);
+    (originalPosts || []).forEach(p => { originals[p.id] = p; });
+  }
+
+  const allUserIds = [...new Set([
+    ...posts.map(p => p.user_id),
+    ...Object.values(originals).map(p => p.user_id),
+  ])];
+
+  const { data: profiles } = await supabaseClient
+    .from("live_profiles")
+    .select("id, display_name, username, avatar_url, creator_plus")
+    .in("id", allUserIds);
+  profileCache = {};
+  (profiles || []).forEach(p => { profileCache[p.id] = p; });
+
+  badgeCache = {};
+  try {
+    const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: allUserIds });
+    (badges || []).forEach(b => { badgeCache[b.user_id] = b; });
+  } catch (err){}
+
+  const postIds = posts.map(p => p.id);
+  const { data: likeRows } = await supabaseClient.from("live_community_likes").select("post_id").in("post_id", postIds);
+  const likeCounts = {};
+  (likeRows || []).forEach(l => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
+
+  const { data: commentRows } = await supabaseClient.from("live_community_comments").select("post_id").in("post_id", postIds);
+  const commentCounts = {};
+  (commentRows || []).forEach(c => { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1; });
+
+  feed.innerHTML = "";
+  posts.forEach(post => {
+    feed.appendChild(buildPostCard(post, { likeCount: likeCounts[post.id] || 0, commentCount: commentCounts[post.id] || 0, original: post.repost_of ? originals[post.repost_of] : null }));
+  });
+}
+
+function buildPostCard(post, { likeCount, commentCount, original }){
+  const isLiked = likedPostIds.has(post.id);
+  const canDelete = post.user_id === currentUser.id || isOwner;
+
+  const card = document.createElement("div");
+  card.className = "post-card";
+  card.innerHTML = `
+    <div class="post-header">
+      <div class="post-avatar">${avatarHTML(post.user_id)}</div>
+      <div>
+        <div class="post-name-row">
+          <a href="profile.html?user=${post.user_id}" style="color:inherit;">${escapeHtml(profileCache[post.user_id]?.display_name || "Unknown")}</a>
+          ${nameBadgesHTML(post.user_id)}
+        </div>
+        <div class="post-time">${timeAgo(post.created_at)}</div>
+      </div>
+    </div>
+    ${post.content ? `<div class="post-content">${escapeHtml(post.content)}</div>` : ""}
+    ${original ? `
+      <div class="repost-embed">
+        <div class="repost-tag">↻ Reposted</div>
+        <div class="post-header">
+          <div class="post-avatar sm">${avatarHTML(original.user_id)}</div>
+          <div>
+            <div class="post-name-row">
+              <a href="profile.html?user=${original.user_id}" style="color:inherit;">${escapeHtml(profileCache[original.user_id]?.display_name || "Unknown")}</a>
+              ${nameBadgesHTML(original.user_id)}
+            </div>
+            <div class="post-time">${timeAgo(original.created_at)}</div>
+          </div>
+        </div>
+        <div class="post-content">${escapeHtml(original.content || "")}</div>
+      </div>` : ""}
+    <div class="post-actions">
+      <button class="action-btn ${isLiked ? "active" : ""}" data-action="like">${isLiked ? "♥" : "♡"} ${likeCount}</button>
+      <button class="action-btn" data-action="comment">💬 ${commentCount}</button>
+      <button class="action-btn" data-action="repost">↻ Repost</button>
+      ${canDelete ? `<button class="delete-btn" data-action="delete">Delete</button>` : ""}
+    </div>
+    <div class="comments-section" id="comments-${post.id}"></div>
+  `;
+
+  card.querySelector('[data-action="like"]').addEventListener("click", () => toggleLike(post.id));
+  card.querySelector('[data-action="comment"]').addEventListener("click", () => toggleComments(post.id));
+  card.querySelector('[data-action="repost"]').addEventListener("click", () => submitRepost(post.id));
+  const deleteBtn = card.querySelector('[data-action="delete"]');
+  if (deleteBtn) deleteBtn.addEventListener("click", () => deletePost(post.id));
+
+  return card;
+}
+
+async function toggleLike(postId){
+  if (likedPostIds.has(postId)){
+    await supabaseClient.from("live_community_likes").delete().eq("post_id", postId).eq("user_id", currentUser.id);
+    likedPostIds.delete(postId);
+  } else {
+    await supabaseClient.from("live_community_likes").insert({ post_id: postId, user_id: currentUser.id });
+    likedPostIds.add(postId);
+  }
+  await loadFeed();
+}
+
+async function deletePost(postId){
+  if (!confirm("Delete this post?")) return;
+  const { error } = await supabaseClient.from("live_community_posts").delete().eq("id", postId);
+  if (error){ console.error(error); alert("Couldn't delete post."); return; }
+  await loadFeed();
+}
+
+async function toggleComments(postId){
+  const section = document.getElementById(`comments-${postId}`);
+  const isOpen = section.classList.contains("open");
+
+  if (isOpen){
+    section.classList.remove("open");
+    return;
+  }
+
+  section.classList.add("open");
+  section.innerHTML = `<div class="empty-comments">Loading comments...</div>`;
+  await renderComments(postId, section);
+}
+
+async function renderComments(postId, section){
+  const { data: comments, error } = await supabaseClient
+    .from("live_community_comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending:true });
+
+  if (error){ section.innerHTML = `<div class="empty-comments">Couldn't load comments.</div>`; return; }
+
+  const userIds = [...new Set((comments || []).map(c => c.user_id))];
+  if (userIds.length > 0){
+    const { data: profiles } = await supabaseClient
+      .from("live_profiles").select("id, display_name, username, avatar_url, creator_plus").in("id", userIds);
+    (profiles || []).forEach(p => { profileCache[p.id] = p; });
+    try {
+      const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: userIds });
+      (badges || []).forEach(b => { badgeCache[b.user_id] = b; });
+    } catch (err){}
+  }
+
+  section.innerHTML = `
+    <div class="comment-composer">
+      <textarea placeholder="Write a comment..." data-role="top-comment-input" maxlength="300"></textarea>
+      <button data-role="top-comment-submit">Reply</button>
+    </div>
+    <div data-role="comment-list"></div>
+  `;
+
+  section.querySelector('[data-role="top-comment-submit"]').addEventListener("click", async () => {
+    const textarea = section.querySelector('[data-role="top-comment-input"]');
+    await addComment(postId, null, textarea.value.trim());
+    textarea.value = "";
+    await renderComments(postId, section);
+  });
+
+  const list = section.querySelector('[data-role="comment-list"]');
+
+  if (!comments || comments.length === 0){
+    list.innerHTML = `<div class="empty-comments">No comments yet.</div>`;
+    return;
+  }
+
+  const byParent = {};
+  comments.forEach(c => {
+    const key = c.parent_comment_id || "root";
+    if (!byParent[key]) byParent[key] = [];
+    byParent[key].push(c);
+  });
+
+  function renderComment(c){
+    const el = document.createElement("div");
+    el.className = "comment";
+    el.innerHTML = `
+      <div class="post-avatar sm">${avatarHTML(c.user_id)}</div>
+      <div class="comment-body">
+        <div class="comment-bubble">
+          <div class="comment-name">${escapeHtml(profileCache[c.user_id]?.display_name || "Unknown")} ${nameBadgesHTML(c.user_id)}</div>
+          <div class="comment-text">${escapeHtml(c.content)}</div>
+        </div>
+        <div class="comment-meta">
+          <span>${timeAgo(c.created_at)}</span>
+          <button data-role="reply-toggle">Reply</button>
+        </div>
+        <div class="reply-composer" data-role="reply-box">
+          <textarea placeholder="Write a reply..." maxlength="300"></textarea>
+          <button data-role="reply-submit">Reply</button>
+        </div>
+        <div class="comment-replies" data-role="replies"></div>
+      </div>
+    `;
+
+    el.querySelector('[data-role="reply-toggle"]').addEventListener("click", () => {
+      el.querySelector('[data-role="reply-box"]').classList.toggle("open");
+    });
+
+    el.querySelector('[data-role="reply-submit"]').addEventListener("click", async () => {
+      const textarea = el.querySelector('[data-role="reply-box"] textarea');
+      await addComment(postId, c.id, textarea.value.trim());
+      await renderComments(postId, section);
+    });
+
+    const repliesContainer = el.querySelector('[data-role="replies"]');
+    const childItems = byParent[c.id] || [];
+    childItems.forEach(child => repliesContainer.appendChild(renderComment(child)));
+
+    return el;
+  }
+
+  list.appendChild((() => {
+    const wrap = document.createElement("div");
+    (byParent["root"] || []).forEach(c => wrap.appendChild(renderComment(c)));
+    return wrap;
+  })());
+}
+
+async function addComment(postId, parentCommentId, content){
+  if (!content) return;
+  const { error } = await supabaseClient
+    .from("live_community_comments")
+    .insert({ post_id: postId, parent_comment_id: parentCommentId, user_id: currentUser.id, content });
+  if (error){ console.error(error); alert("Couldn't post comment."); }
+  await loadFeed();
+}
+
+function listenForRealtime(){
+  supabaseClient
+    .channel("relvia-live-social-feed")
+    .on("postgres_changes", { event:"*", schema:"public", table:"live_community_posts" }, () => loadFeed())
+    .subscribe();
+}
+
+initialize();
+</script>
+</body>
+</html>
