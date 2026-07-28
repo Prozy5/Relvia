@@ -173,18 +173,17 @@ async function loadStatus(){
 async function loadComponents(){
   const container = document.getElementById("components");
 
-  const { data, error } = await supabaseClient
-    .from("live_page_locks")
-    .select("*")
-    .order("page_key", { ascending:true });
+  const { data, error } = await supabaseClient.rpc("get_page_locks_public");
 
   if (error || !data || data.length === 0){
     container.innerHTML = `<div class="empty">No component data available.</div>`;
     return;
   }
 
+  const sorted = [...data].sort((a, b) => a.page_key.localeCompare(b.page_key));
+
   container.innerHTML = "";
-  data.forEach(page => {
+  sorted.forEach(page => {
     const row = document.createElement("div");
     row.className = "component-row";
     row.innerHTML = `
