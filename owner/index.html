@@ -257,6 +257,18 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- PAGE ACCESS -->
+    <div class="section">
+      <div class="section-head"><h2>Page Access</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Close a page to put it into maintenance mode for everyone except owners/staff. Also feeds the public status page.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Page</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead>
+          <tbody id="pageLocksTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ANNOUNCEMENTS -->
     <div class="section">
       <div class="section-head"><h2>Announcements</h2></div>
@@ -433,6 +445,59 @@ async function logAction(action, target_type, target_label, details){
 }
 
 // ==========================================================
+// PAGE ACCESS (maintenance mode per page)
+// ==========================================================
+async function loadPageLocks(){
+  const tbody = document.getElementById("pageLocksTableBody");
+
+  const { data, error } = await supabaseClient
+    .from("live_page_locks")
+    .select("*")
+    .order("page_key", { ascending:true });
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load page access.</td></tr>`; return; }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No pages configured yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(page => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(page.label)}</td>
+      <td><span class="pill ${page.is_closed ? "banned" : "ok"}">${page.is_closed ? "Closed" : "Open"}</span></td>
+      <td style="color:var(--muted);font-size:12.5px;">${escapeHtml(page.message || "—")}</td>
+      <td><button class="btn ${page.is_closed ? "" : "danger"}" data-action="toggle">${page.is_closed ? "Reopen" : "Close"}</button></td>`;
+
+    row.querySelector('[data-action="toggle"]').addEventListener("click", () => togglePageLock(page));
+    tbody.appendChild(row);
+  });
+}
+
+async function togglePageLock(page){
+  const newValue = !page.is_closed;
+  let message = page.message || "";
+
+  if (newValue){
+    message = prompt(`Message to show visitors while "${page.label}" is closed:`, "This part of Relvia Live is temporarily unavailable.");
+    if (message === null) return; // cancelled
+  }
+
+  const { error } = await supabaseClient
+    .from("live_page_locks")
+    .update({ is_closed: newValue, message, updated_by: currentUser.id, updated_at: new Date().toISOString() })
+    .eq("page_key", page.page_key);
+
+  if (error){ console.error(error); showToast("Couldn't update page access"); return; }
+
+  showToast(newValue ? `${page.label} closed` : `${page.label} reopened`);
+  await logAction(newValue ? "close_page" : "reopen_page", "page", page.label, message);
+  await loadPageLocks();
+}
+
+// ==========================================================
 // GATE + INIT
 // ==========================================================
 async function gate(){
@@ -459,7 +524,7 @@ async function gate(){
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard()];
+  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks()];
 
   if (myRole === "owner"){
     document.getElementById("staffSection").style.display = "block";
