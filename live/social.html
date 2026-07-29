@@ -181,7 +181,7 @@ function timeAgo(dateStr){
 function nameBadgesHTML(userId){
   const author = profileCache[userId];
   const badge = badgeCache[userId];
-  return `${author?.creator_plus ? `<span class="verified-badge">✓</span>` : ""}${badge ? `<span class="staff-badge">${escapeHtml(badge.badge_label)}</span>` : ""}`;
+  return `${author?.is_bot ? `<span class="staff-badge" style="background:linear-gradient(135deg,#8a9bd9,#5f6fb0);">BOT</span>` : ""}${author?.creator_plus ? `<span class="verified-badge">✓</span>` : ""}${badge ? `<span class="staff-badge">${escapeHtml(badge.badge_label)}</span>` : ""}`;
 }
 
 function avatarHTML(userId){
@@ -321,7 +321,7 @@ async function loadFeed(){
 
   const { data: profiles } = await supabaseClient
     .from("live_profiles")
-    .select("id, display_name, username, avatar_url, creator_plus")
+    .select("id, display_name, username, avatar_url, creator_plus, is_bot")
     .in("id", allUserIds);
   profileCache = {};
   (profiles || []).forEach(p => { profileCache[p.id] = p; });
@@ -442,7 +442,7 @@ async function renderComments(postId, section){
   const userIds = [...new Set((comments || []).map(c => c.user_id))];
   if (userIds.length > 0){
     const { data: profiles } = await supabaseClient
-      .from("live_profiles").select("id, display_name, username, avatar_url, creator_plus").in("id", userIds);
+      .from("live_profiles").select("id, display_name, username, avatar_url, creator_plus, is_bot").in("id", userIds);
     (profiles || []).forEach(p => { profileCache[p.id] = p; });
     try {
       const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: userIds });
