@@ -199,7 +199,7 @@ async function initialize(){
   // If already signed in, skip the landing page entirely.
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (sessionData && sessionData.session){
-    window.location.href = "live.html";
+    window.location.href = "";
     return;
   }
 
