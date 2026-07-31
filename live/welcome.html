@@ -197,10 +197,15 @@ function escapeHtml(str){
 
 async function initialize(){
   // If already signed in, skip the landing page entirely.
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData && sessionData.session){
-    window.location.href = "";
-    return;
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (sessionData && sessionData.session){
+      window.location.href = "live.html";
+      return;
+    }
+  } catch (err){
+    console.error("Session check failed on welcome.html:", err);
+    // fall through and show the landing page regardless
   }
 
   await loadPreview();
