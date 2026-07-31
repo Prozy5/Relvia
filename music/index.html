@@ -3,22 +3,562 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Relvia Music</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
-    :root{--black:#0c0b0a;--panel:#15120f;--panel2:#1d1812;--cream:#f4eee2;--muted:#958d81;--gold:#cc9c3b;--line:rgba(242,231,206,.11)}*{box-sizing:border-box}body{margin:0;background:var(--black);color:var(--cream);font-family:'DM Sans',sans-serif}button{font:inherit;color:inherit;border:0;background:0;cursor:pointer}.app{min-height:100vh;padding-bottom:98px;display:grid;grid-template-columns:230px minmax(0,1fr) 270px;background:radial-gradient(circle at 55% 0,#282013 0,transparent 30%),var(--black)}
-    .sidebar{border-right:1px solid var(--line);padding:29px 24px;position:fixed;width:230px;top:0;bottom:98px;background:rgba(12,11,10,.78);backdrop-filter:blur(14px)}.logo{display:flex;align-items:baseline;gap:7px;margin-bottom:48px;color:var(--cream);line-height:1}.logo-rel{font:600 20px 'Playfair Display',serif;letter-spacing:-.085em;color:var(--gold)}.logo-music{font:500 8px 'DM Mono',monospace;letter-spacing:.19em;text-transform:uppercase;color:var(--muted)}.mini{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.17em;color:#71695f;margin:30px 0 12px}.nav a{display:block;padding:10px 9px;border-radius:4px;font-size:13px;color:var(--muted);margin:2px 0}.nav a.active,.nav a:hover{background:rgba(204,156,59,.12);color:var(--cream)}.nav a span{color:var(--gold);display:inline-block;width:24px;font-size:12px}.profile{position:absolute;bottom:24px;left:24px;right:24px;padding-top:18px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;font-size:12px}.avatar{width:25px;height:25px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#54380e)}.profile small{display:block;color:var(--muted);font:8px 'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
-    main{grid-column:2;padding:28px 38px 42px;min-width:0}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}.top p{margin:0;font:500 9px 'DM Mono',monospace;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}.search{border:1px solid var(--line);border-radius:18px;padding:8px 12px;color:var(--muted);font-size:12px;width:190px}.search span{color:var(--gold);margin-right:8px}.feature{min-height:286px;position:relative;overflow:hidden;padding:30px;border:1px solid var(--line);background:linear-gradient(115deg,#2a2116 0%,#17120e 54%,#71501a 155%);display:flex;align-items:flex-end}.feature:after{content:'R';font:600 420px/.7 'Playfair Display',serif;font-style:italic;position:absolute;right:-12px;bottom:-92px;color:rgba(207,157,56,.22)}.feature-copy{position:relative;z-index:1;max-width:460px}.tag{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.18em;color:#d8b56d}.feature h1{font:500 clamp(37px,4vw,59px)/.94 'Playfair Display',serif;letter-spacing:-.06em;margin:13px 0}.feature h1 em{font-style:italic;color:var(--gold)}.feature p{color:#c6bfb1;font-size:13px;line-height:1.6;margin:0 0 18px;max-width:370px}.play-big{background:var(--gold);color:#17120a;padding:11px 17px;font:500 9px 'DM Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.section-head{display:flex;justify-content:space-between;align-items:baseline;margin:39px 0 17px}.section-head h2{font:500 24px 'Playfair Display',serif;letter-spacing:-.04em;margin:0}.section-head a{color:var(--gold);font:500 9px 'DM Mono',monospace;letter-spacing:.15em;text-transform:uppercase}.albums{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.album{min-width:0}.cover{aspect-ratio:1;background:#272019;position:relative;overflow:hidden;margin-bottom:11px}.cover:after{position:absolute;inset:0;display:grid;place-items:center;font:600 clamp(52px,7vw,90px)/1 'Playfair Display',serif;font-style:italic}.cover.one{background:linear-gradient(135deg,#a47a2c,#201a15)}.cover.one:after{content:'E';color:#f5e2b5}.cover.two{background:#27424a}.cover.two:after{content:'LOW';font:600 clamp(24px,3vw,40px) 'DM Mono',monospace;color:#d8d9c7}.cover.three{background:#ded5c1}.cover.three:after{content:'III';color:#191512}.cover.four{background:#3b1925}.cover.four:after{content:'S';color:#c99b3a}.album strong{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.album span{color:var(--muted);font-size:11px;margin-top:3px;display:block}.recent{width:100%;border-collapse:collapse;font-size:12px}.recent tr{border-top:1px solid var(--line)}.recent td{padding:12px 4px;color:var(--muted)}.recent td:first-child{color:var(--gold);font:500 9px 'DM Mono',monospace;width:26px}.recent td:nth-child(2){color:var(--cream);font-weight:500}.recent td:last-child{text-align:right;font:500 9px 'DM Mono',monospace}
-    .queue{grid-column:3;border-left:1px solid var(--line);padding:31px 22px;background:rgba(13,11,9,.36)}.queue h3{margin:0 0 4px;font:500 21px 'Playfair Display',serif;letter-spacing:-.04em}.queue>p{margin:0 0 23px;color:var(--muted);font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.15em}.q-track{display:grid;grid-template-columns:37px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.thumb{width:37px;height:37px;background:#4e3718;display:grid;place-items:center;font:500 16px 'Playfair Display',serif;color:var(--gold)}.q-track:nth-of-type(3) .thumb{background:#28424a}.q-track:nth-of-type(4) .thumb{background:#40212a}.q-track strong{font-size:11px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.q-track span{font-size:10px;color:var(--muted);display:block;margin-top:4px}.queue-art{margin-top:32px;padding-top:27px;border-top:1px solid var(--line)}.queue-art p{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);line-height:1.75}.queue-art em{font:500 31px/1.05 'Playfair Display',serif;color:var(--gold);display:block;margin-top:10px}
-    .player{position:fixed;z-index:5;bottom:0;left:0;right:0;height:98px;border-top:1px solid rgba(204,156,59,.45);background:rgba(20,16,12,.93);backdrop-filter:blur(16px);display:grid;grid-template-columns:230px 1fr 270px;align-items:center}.now-playing{padding-left:24px;display:flex;gap:10px;align-items:center}.now-cover{height:50px;width:50px;background:linear-gradient(135deg,#a47a2c,#201a15);display:grid;place-items:center;font:600 25px 'Playfair Display',serif;font-style:italic}.now-playing strong{font-size:12px;font-weight:500;display:block}.now-playing span{font-size:10px;color:var(--muted);display:block;margin-top:4px}.controls{text-align:center}.control-buttons{display:flex;justify-content:center;align-items:center;gap:19px;font-size:12px}.control-buttons .main-control{width:29px;height:29px;border-radius:50%;background:var(--cream);color:#15120e;display:grid;place-items:center;font-size:10px}.progress{height:2px;background:#4d453a;max-width:420px;margin:11px auto 0;position:relative}.progress:before{content:'';position:absolute;left:0;top:0;bottom:0;width:32%;background:var(--gold)}.volume{justify-self:end;padding-right:25px;color:var(--muted);font:500 9px 'DM Mono',monospace;letter-spacing:.13em}.volume i{color:var(--gold);font-style:normal}
-    @media(max-width:1000px){.app{grid-template-columns:190px 1fr}.sidebar{width:190px}.queue{display:none}.player{grid-template-columns:190px 1fr 105px}.albums{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.app{display:block;padding-bottom:79px}.sidebar{position:relative;width:auto;bottom:auto;border-right:0;padding:18px 20px}.logo{margin-bottom:15px}.sidebar .mini,.sidebar .nav:not(:first-of-type),.profile{display:none}.nav{display:flex;gap:5px;overflow:auto}.nav a{white-space:nowrap;padding:7px 9px}.nav a span{display:none}main{padding:19px}.top{margin-bottom:20px}.top p{display:none}.feature{min-height:300px;padding:23px}.albums{grid-template-columns:repeat(2,1fr)}.queue{display:none}.player{height:79px;grid-template-columns:1fr 1fr}.now-playing{padding-left:18px}.now-cover{width:41px;height:41px}.now-playing span{display:none}.controls .progress,.volume{display:none}.control-buttons{gap:15px}.player{padding-right:14px}.feature h1{font-size:43px}}
+    :root{--black:#0c0b0a;--panel:#15120f;--panel2:#1d1812;--cream:#f4eee2;--muted:#958d81;--gold:#cc9c3b;--line:rgba(242,231,206,.11)}
+    *{box-sizing:border-box}body{margin:0;background:var(--black);color:var(--cream);font-family:'DM Sans',sans-serif}
+    button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    .app{min-height:100vh;padding-bottom:98px;display:grid;grid-template-columns:230px minmax(0,1fr) 270px;background:radial-gradient(circle at 55% 0,#282013 0,transparent 30%),var(--black)}
+    .sidebar{border-right:1px solid var(--line);padding:29px 24px;position:fixed;width:230px;top:0;bottom:98px;background:rgba(12,11,10,.78);backdrop-filter:blur(14px);overflow-y:auto}
+    .logo{display:flex;align-items:baseline;gap:7px;margin-bottom:48px;color:var(--cream);line-height:1}
+    .logo-rel{font:600 20px 'Playfair Display',serif;letter-spacing:-.085em;color:var(--gold)}
+    .logo-music{font:500 8px 'DM Mono',monospace;letter-spacing:.19em;text-transform:uppercase;color:var(--muted)}
+    .mini{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.17em;color:#71695f;margin:30px 0 12px}
+    .nav a,.nav button{display:flex;width:100%;text-align:left;align-items:center;padding:10px 9px;border-radius:4px;font-size:13px;color:var(--muted);margin:2px 0}
+    .nav a.active,.nav a:hover,.nav button.active,.nav button:hover{background:rgba(204,156,59,.12);color:var(--cream)}
+    .nav a span,.nav button span{color:var(--gold);display:inline-block;width:24px;font-size:12px}
+    .profile{position:absolute;bottom:24px;left:24px;right:24px;padding-top:18px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;font-size:12px}
+    .avatar{width:25px;height:25px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#54380e);overflow:hidden;flex-shrink:0}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .profile small{display:block;color:var(--muted);font:8px 'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+    main{grid-column:2;padding:28px 38px 42px;min-width:0}
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;gap:16px}
+    .top p{margin:0;font:500 9px 'DM Mono',monospace;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+    .search{border:1px solid var(--line);border-radius:18px;padding:8px 12px;color:var(--muted);font-size:12px;width:220px;display:flex;align-items:center}
+    .search span{color:var(--gold);margin-right:8px}
+    .search input{background:none;border:none;color:var(--cream);width:100%;font-size:12px}
+    .search input::placeholder{color:var(--muted)}
+    .feature{min-height:220px;position:relative;overflow:hidden;padding:30px;border:1px solid var(--line);background:linear-gradient(115deg,#2a2116 0%,#17120e 54%,#71501a 155%);display:flex;align-items:flex-end}
+    .feature:after{content:'R';font:600 320px/.7 'Playfair Display',serif;font-style:italic;position:absolute;right:-12px;bottom:-70px;color:rgba(207,157,56,.22)}
+    .feature-copy{position:relative;z-index:1;max-width:460px}
+    .tag{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.18em;color:#d8b56d}
+    .feature h1{font:500 clamp(28px,3.4vw,46px)/.98 'Playfair Display',serif;letter-spacing:-.05em;margin:13px 0}
+    .feature h1 em{font-style:italic;color:var(--gold)}
+    .feature p{color:#c6bfb1;font-size:13px;line-height:1.6;margin:0 0 18px;max-width:370px}
+    .section-head{display:flex;justify-content:space-between;align-items:baseline;margin:39px 0 17px}
+    .section-head h2{font:500 24px 'Playfair Display',serif;letter-spacing:-.04em;margin:0}
+    .section-head a,.section-head button{color:var(--gold);font:500 9px 'DM Mono',monospace;letter-spacing:.15em;text-transform:uppercase}
+    .albums{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+    .album{min-width:0;cursor:pointer}
+    .cover{aspect-ratio:1;background:#272019;position:relative;overflow:hidden;margin-bottom:11px}
+    .cover img{width:100%;height:100%;object-fit:cover}
+    .cover:not(:has(img)):after{position:absolute;inset:0;display:grid;place-items:center;font:600 clamp(40px,5vw,64px)/1 'Playfair Display',serif;font-style:italic;content:attr(data-initial);color:var(--gold)}
+    .cover .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.15s;font-size:22px;color:var(--gold)}
+    .album:hover .play-overlay{opacity:1}
+    .album strong{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+    .album span{color:var(--muted);font-size:11px;margin-top:3px;display:block}
+    .recent{width:100%;border-collapse:collapse;font-size:12px}
+    .recent tr{border-top:1px solid var(--line);cursor:pointer}
+    .recent tr:hover{background:rgba(204,156,59,.06)}
+    .recent td{padding:12px 4px;color:var(--muted)}
+    .recent td:first-child{color:var(--gold);font:500 9px 'DM Mono',monospace;width:26px}
+    .recent td:nth-child(2){color:var(--cream);font-weight:500}
+    .recent td:last-child{text-align:right;font:500 9px 'DM Mono',monospace}
+    .recent .like-cell{width:20px;text-align:center;color:var(--muted)}
+    .recent .like-cell.liked{color:var(--gold)}
+    .empty-msg{color:var(--muted);font-size:13px;padding:20px 0}
+    .queue{grid-column:3;border-left:1px solid var(--line);padding:31px 22px;background:rgba(13,11,9,.36);position:fixed;right:0;top:0;bottom:98px;width:270px;overflow-y:auto}
+    .queue h3{margin:0 0 4px;font:500 21px 'Playfair Display',serif;letter-spacing:-.04em}
+    .queue>p{margin:0 0 23px;color:var(--muted);font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.15em}
+    .q-track{display:grid;grid-template-columns:37px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+    .q-track:hover{background:rgba(204,156,59,.06)}
+    .thumb{width:37px;height:37px;background:#4e3718;display:grid;place-items:center;font:500 16px 'Playfair Display',serif;color:var(--gold);overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .q-track strong{font-size:11px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .q-track span{font-size:10px;color:var(--muted);display:block;margin-top:4px}
+    .player{position:fixed;z-index:5;bottom:0;left:0;right:0;height:98px;border-top:1px solid rgba(204,156,59,.45);background:rgba(20,16,12,.93);backdrop-filter:blur(16px);display:grid;grid-template-columns:230px 1fr 270px;align-items:center}
+    .now-playing{padding-left:24px;display:flex;gap:10px;align-items:center;min-width:0}
+    .now-cover{height:50px;width:50px;background:linear-gradient(135deg,#a47a2c,#201a15);display:grid;place-items:center;font:600 25px 'Playfair Display',serif;font-style:italic;overflow:hidden;flex-shrink:0}
+    .now-cover img{width:100%;height:100%;object-fit:cover}
+    .now-playing strong{font-size:12px;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .now-playing span{font-size:10px;color:var(--muted);display:block;margin-top:4px}
+    .controls{text-align:center}
+    .control-buttons{display:flex;justify-content:center;align-items:center;gap:19px;font-size:14px}
+    .control-buttons .main-control{width:29px;height:29px;border-radius:50%;background:var(--cream);color:#15120e;display:grid;place-items:center;font-size:11px}
+    .progress-row{display:flex;align-items:center;gap:8px;max-width:420px;margin:11px auto 0}
+    .progress-row span{font:500 9px 'DM Mono',monospace;color:var(--muted);width:30px}
+    .progress{height:2px;background:#4d453a;flex:1;position:relative;cursor:pointer}
+    .progress-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--gold)}
+    .volume{justify-self:end;padding-right:25px;color:var(--muted);font:500 9px 'DM Mono',monospace;letter-spacing:.13em;display:flex;align-items:center;gap:8px}
+    .volume i{color:var(--gold);font-style:normal}
+    .volume input{width:70px}
+    .loading-state{color:var(--muted);font-size:13px;padding:30px 0;text-align:center}
+    @media(max-width:1000px){.app{grid-template-columns:190px 1fr}.sidebar{width:190px}.queue{display:none}.player{grid-template-columns:190px 1fr 105px}.albums{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:650px){.app{display:block;padding-bottom:79px}.sidebar{position:relative;width:auto;bottom:auto;border-right:0;padding:18px 20px}.logo{margin-bottom:15px}.sidebar .mini,.sidebar .nav:not(:first-of-type),.profile{display:none}.nav{display:flex;gap:5px;overflow:auto}.nav a,.nav button{white-space:nowrap;padding:7px 9px;width:auto}.nav a span,.nav button span{display:none}main{padding:19px}.top{margin-bottom:20px}.top p{display:none}.feature{min-height:200px;padding:23px}.albums{grid-template-columns:repeat(2,1fr)}.queue{display:none}.player{height:79px;grid-template-columns:1fr 1fr}.now-playing{padding-left:18px}.now-cover{width:41px;height:41px}.now-playing span{display:none}.controls .progress-row,.volume{display:none}.control-buttons{gap:15px}.player{padding-right:14px}}
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar"><a class="logo" href="https://relvia.online/"><span class="logo-rel">Relvia</span><span class="logo-music">Music</span></a><div class="nav"><a class="active" href="#"><span>â—‰</span>Listen now</a><a href="#"><span>âŒ•</span>Search</a><a href="#"><span>â—«</span>Browse</a></div><div class="mini">Your library</div><div class="nav"><a href="#"><span>â–£</span>Recently played</a><a href="#"><span>â™¡</span>Liked songs</a><a href="#"><span>ï¼‹</span>New playlist</a></div><div class="mini">Relvia</div><div class="nav"><a href="#"><span>R</span>Records</a><a href="#"><span>â—Œ</span>Artists</a></div><div class="profile"><span class="avatar"></span><div>My Relvia<small>Free listener</small></div></div></aside>
-    <main><div class="top"><p>Relvia Music / Streaming the new generation</p><div class="search"><span>âŒ•</span>Search music</div></div><section class="feature"><div class="feature-copy"><div class="tag">New on Relvia Music</div><h1>Sound for the <em>next</em> generation.</h1><p>New releases and new voices from Relvia Records. Press play and find what moves you.</p><button class="play-big">â–¶ &nbsp; Play the selection</button></div></section><div class="section-head"><h2>Made for you</h2><a href="#">See all â†—</a></div><section class="albums" id="release-grid"><article class="album"><div class="cover one"></div><strong>Elsewhere, Only</strong><span>BBRY Â· Single</span></article><article class="album"><div class="cover two"></div><strong>After Hours</strong><span>VÃ‰NUS Â· EP</span></article><article class="album"><div class="cover three"></div><strong>Third Nature</strong><span>REYES Â· Album</span></article><article class="album"><div class="cover four"></div><strong>Slowburn</strong><span>Mica Â· Single</span></article></section><div class="section-head"><h2>Recently played</h2><a href="#">View history â†—</a></div><table class="recent" id="recent-tracks"><tr><td>01</td><td>Elsewhere, Only</td><td>BBRY</td><td>3:21</td></tr><tr><td>02</td><td>Slowburn</td><td>Mica</td><td>2:56</td></tr><tr><td>03</td><td>Corner Store</td><td>WOLVES</td><td>2:49</td></tr></table></main>
-    <aside class="queue"><h3>Up next</h3><p>Your queue Â· 5 songs</p><div class="q-track"><div class="thumb">E</div><div><strong>Elsewhere, Only</strong><span>BBRY Â· 3:21</span></div></div><div class="q-track"><div class="thumb">L</div><div><strong>Slowburn</strong><span>Mica Â· 2:56</span></div></div><div class="q-track"><div class="thumb">S</div><div><strong>New Weather</strong><span>VÃ‰NUS Â· 3:42</span></div></div><div class="q-track"><div class="thumb">T</div><div><strong>Third Nature</strong><span>REYES Â· 3:15</span></div></div><div class="queue-art"><p>From Relvia Records</p><em>Find your<br>next favorite.</em></div></aside>
-  </div>
-  <footer class="player"><div class="now-playing"><div class="now-cover">E</div><div><strong>Elsewhere, Only</strong><span>BBRY</span></div></div><div class="controls"><div class="control-buttons"><button>â†¶</button><button>â€¹</button><button class="main-control">â–¶</button><button>â€º</button><button>â†·</button></div><div class="progress"></div></div><div class="volume"><i>â—–</i>&nbsp; Volume&nbsp;&nbsp; 68%</div></footer><script src="./supabase-config.js"></script><script type="module" src="./relvia-supabase.js"></script>
-</body></html>
+    <aside class="sidebar">
+      <a class="logo" href="welcome.html"><span class="logo-rel">Relvia</span><span class="logo-music">Music</span></a>
+      <div class="nav">
+        <button class="active" data-view="home"><span>&#9673;</span>Listen now</button>
+        <button data-view="browse"><span>&#9714;</span>Browse</button>
+      </div>
+      <div class="mini">Your library</div>
+      <div class="nav">
+        <button data-view="recent"><span>&#9635;</span>Recently played</button>
+        <button data-view="liked"><span>&#9825;</span>Liked songs</button>
+        <button data-view="playlists"><span>+</span>Playlists</button>
+      </div>
+      <div class="mini">Relvia</div>
+      <div class="nav">
+        <a href="music-upload.html"><span>R</span>Artist Studio</a>
+        <a href="welcome.html"><span>&#9678;</span>Relvia Live</a>
+      </div>
+      <div class="profile">
+        <span class="avatar" id="sidebarAvatar"></span>
+        <div><span id="sidebarName">Loading...</span><small>Relvia Music</small></div>
+      </div>
+    </aside>
 
+    <main>
+      <div class="top">
+        <p id="topLabel">Relvia Music / Streaming the new generation</p>
+        <div class="search"><span>&#8981;</span><input type="text" id="searchInput" placeholder="Search music"></div>
+      </div>
+
+      <section class="feature" id="featureBanner">
+        <div class="feature-copy">
+          <div class="tag">New on Relvia Music</div>
+          <h1>Sound for the <em>next</em> generation.</h1>
+          <p>New releases and new voices from Relvia creators. Press play and find what moves you.</p>
+        </div>
+      </section>
+
+      <div id="viewContainer"></div>
+    </main>
+
+    <aside class="queue">
+      <h3>Up next</h3>
+      <p id="queueCount">Your queue &middot; 0 songs</p>
+      <div id="queueList"><div class="empty-msg">Nothing queued yet.</div></div>
+    </aside>
+  </div>
+
+  <footer class="player">
+    <div class="now-playing">
+      <div class="now-cover" id="nowCover">R</div>
+      <div><strong id="nowTitle">Nothing playing</strong><span id="nowArtist">Pick a track to start</span></div>
+    </div>
+    <div class="controls">
+      <div class="control-buttons">
+        <button title="Previous" id="prevBtn">&#9198;</button>
+        <button class="main-control" id="playPauseBtn" title="Play">&#9654;</button>
+        <button title="Next" id="nextBtn">&#9197;</button>
+        <button title="Like" id="likeBtn">&#9825;</button>
+      </div>
+      <div class="progress-row">
+        <span id="currentTimeLabel">0:00</span>
+        <div class="progress" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+        <span id="durationLabel">0:00</span>
+      </div>
+    </div>
+    <div class="volume"><i>&#9678;</i>Volume<input type="range" id="volumeSlider" min="0" max="100" value="80"></div>
+  </footer>
+
+  <audio id="audioEl"></audio>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+// Default storage key — shares the same session as Relvia Social /
+// the main login.html, since Music uses One Relvia Account.
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let queue = [];
+let queueIndex = -1;
+let likedTrackIds = new Set();
+const audioEl = document.getElementById("audioEl");
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function formatTime(seconds){
+  if (!isFinite(seconds) || seconds < 0) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+function audioUrl(path){
+  const { data } = supabaseClient.storage.from("music-audio").getPublicUrl(path);
+  return data.publicUrl;
+}
+function coverUrl(path){
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  const { data } = supabaseClient.storage.from("music-covers").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// ==========================================================
+// INIT
+// ==========================================================
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){
+    window.location.href = "/login.html";
+    return;
+  }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "/login.html"; return; }
+  currentUser = userData.user;
+
+  const { data: profile } = await supabaseClient.from("profiles").select("display_name, avatar_url").eq("id", currentUser.id).maybeSingle();
+  document.getElementById("sidebarName").textContent = profile?.display_name || "My Relvia";
+  if (profile?.avatar_url){
+    document.getElementById("sidebarAvatar").innerHTML = `<img src="${profile.avatar_url}">`;
+  }
+
+  const { data: likes } = await supabaseClient.from("music_likes").select("track_id").eq("user_id", currentUser.id);
+  likedTrackIds = new Set((likes || []).map(l => l.track_id));
+
+  document.querySelectorAll(".nav button[data-view]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav button[data-view]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderView(btn.dataset.view);
+    });
+  });
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    if (e.target.value.trim().length > 1) renderSearch(e.target.value.trim());
+    else renderView("home");
+  });
+
+  setupPlayer();
+  await renderView("home");
+}
+
+// ==========================================================
+// VIEWS
+// ==========================================================
+async function renderView(view){
+  const container = document.getElementById("viewContainer");
+  container.innerHTML = `<div class="loading-state">Loading...</div>`;
+
+  if (view === "home") return renderHome(container);
+  if (view === "browse") return renderBrowse(container);
+  if (view === "recent") return renderRecent(container);
+  if (view === "liked") return renderLiked(container);
+  if (view === "playlists") return renderPlaylists(container);
+}
+
+async function renderHome(container){
+  const { data: releases } = await supabaseClient
+    .from("music_releases").select("*, music_artists(name)")
+    .order("created_at", { ascending:false }).limit(8);
+
+  container.innerHTML = `
+    <div class="section-head"><h2>Made for you</h2><a href="#" data-view-link="browse">See all &#8599;</a></div>
+    <section class="albums" id="homeAlbums"></section>
+  `;
+  container.querySelector('[data-view-link]').addEventListener("click", (e) => { e.preventDefault(); renderView("browse"); });
+
+  await renderReleaseGrid(document.getElementById("homeAlbums"), releases);
+  await appendRecentSection(container);
+}
+
+async function renderBrowse(container){
+  const { data: releases } = await supabaseClient
+    .from("music_releases").select("*, music_artists(name)")
+    .order("created_at", { ascending:false }).limit(50);
+
+  container.innerHTML = `<div class="section-head"><h2>Browse</h2></div><section class="albums" id="browseAlbums"></section>`;
+  await renderReleaseGrid(document.getElementById("browseAlbums"), releases);
+}
+
+async function renderSearch(term){
+  const container = document.getElementById("viewContainer");
+  const { data: tracks } = await supabaseClient
+    .from("music_tracks").select("*, music_artists(name), music_releases(cover_url)")
+    .ilike("title", `%${term}%`).limit(30);
+
+  container.innerHTML = `<div class="section-head"><h2>Results for "${escapeHtml(term)}"</h2></div>`;
+  const table = document.createElement("table");
+  table.className = "recent";
+  if (!tracks || tracks.length === 0){
+    container.innerHTML += `<div class="empty-msg">No tracks found.</div>`;
+    return;
+  }
+  tracks.forEach((t, i) => table.appendChild(buildTrackRow(t, i, tracks)));
+  container.appendChild(table);
+}
+
+async function renderRecent(container){
+  const { data: history } = await supabaseClient
+    .from("music_recently_played")
+    .select("played_at, music_tracks(*, music_artists(name), music_releases(cover_url))")
+    .eq("user_id", currentUser.id)
+    .order("played_at", { ascending:false }).limit(30);
+
+  container.innerHTML = `<div class="section-head"><h2>Recently played</h2></div>`;
+  if (!history || history.length === 0){
+    container.innerHTML += `<div class="empty-msg">Nothing played yet — go start something.</div>`;
+    return;
+  }
+  const tracks = history.map(h => h.music_tracks).filter(Boolean);
+  const table = document.createElement("table");
+  table.className = "recent";
+  tracks.forEach((t, i) => table.appendChild(buildTrackRow(t, i, tracks)));
+  container.appendChild(table);
+}
+
+async function renderLiked(container){
+  const { data: likes } = await supabaseClient
+    .from("music_likes")
+    .select("music_tracks(*, music_artists(name), music_releases(cover_url))")
+    .eq("user_id", currentUser.id);
+
+  container.innerHTML = `<div class="section-head"><h2>Liked songs</h2></div>`;
+  const tracks = (likes || []).map(l => l.music_tracks).filter(Boolean);
+  if (tracks.length === 0){
+    container.innerHTML += `<div class="empty-msg">No liked songs yet — tap the heart on any track.</div>`;
+    return;
+  }
+  const table = document.createElement("table");
+  table.className = "recent";
+  tracks.forEach((t, i) => table.appendChild(buildTrackRow(t, i, tracks)));
+  container.appendChild(table);
+}
+
+async function renderPlaylists(container){
+  const { data: playlists } = await supabaseClient
+    .from("music_playlists").select("*").eq("user_id", currentUser.id).order("created_at", { ascending:false });
+
+  container.innerHTML = `
+    <div class="section-head"><h2>Playlists</h2><button id="newPlaylistBtn">+ New playlist</button></div>
+    <div id="playlistList"></div>`;
+
+  document.getElementById("newPlaylistBtn").addEventListener("click", async () => {
+    const name = prompt("Playlist name:");
+    if (!name || !name.trim()) return;
+    await supabaseClient.from("music_playlists").insert({ user_id: currentUser.id, name: name.trim() });
+    renderPlaylists(container);
+  });
+
+  const list = document.getElementById("playlistList");
+  if (!playlists || playlists.length === 0){
+    list.innerHTML = `<div class="empty-msg">No playlists yet.</div>`;
+    return;
+  }
+  playlists.forEach(p => {
+    const row = document.createElement("div");
+    row.style.cssText = "padding:14px 0;border-top:1px solid var(--line);font-size:13px;";
+    row.textContent = p.name;
+    list.appendChild(row);
+  });
+}
+
+async function appendRecentSection(container){
+  const { data: history } = await supabaseClient
+    .from("music_recently_played")
+    .select("played_at, music_tracks(*, music_artists(name), music_releases(cover_url))")
+    .eq("user_id", currentUser.id)
+    .order("played_at", { ascending:false }).limit(6);
+
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<div class="section-head"><h2>Recently played</h2><a href="#" data-view-link="recent">View history &#8599;</a></div>`;
+  wrap.querySelector('[data-view-link]').addEventListener("click", (e) => { e.preventDefault(); renderView("recent"); });
+
+  const tracks = (history || []).map(h => h.music_tracks).filter(Boolean);
+  if (tracks.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty-msg";
+    empty.textContent = "Nothing played yet.";
+    wrap.appendChild(empty);
+  } else {
+    const table = document.createElement("table");
+    table.className = "recent";
+    tracks.forEach((t, i) => table.appendChild(buildTrackRow(t, i, tracks)));
+    wrap.appendChild(table);
+  }
+  container.appendChild(wrap);
+}
+
+async function renderReleaseGrid(gridEl, releases){
+  if (!releases || releases.length === 0){
+    gridEl.innerHTML = `<div class="empty-msg">No releases yet. Head to Artist Studio to upload the first one.</div>`;
+    return;
+  }
+  gridEl.innerHTML = "";
+  for (const release of releases){
+    const card = document.createElement("article");
+    card.className = "album";
+    const cover = coverUrl(release.cover_url);
+    card.innerHTML = `
+      <div class="cover" data-initial="${escapeHtml((release.title || "R").charAt(0).toUpperCase())}">
+        ${cover ? `<img src="${cover}">` : ""}
+        <div class="play-overlay">&#9654;</div>
+      </div>
+      <strong>${escapeHtml(release.title)}</strong>
+      <span>${escapeHtml(release.music_artists?.name || "Unknown")} &middot; ${escapeHtml(release.release_type)}</span>`;
+    card.addEventListener("click", async () => {
+      const { data: tracks } = await supabaseClient
+        .from("music_tracks").select("*, music_artists(name), music_releases(cover_url)")
+        .eq("release_id", release.id).order("track_number", { ascending:true });
+      if (tracks && tracks.length > 0) playQueue(tracks, 0);
+    });
+    gridEl.appendChild(card);
+  }
+}
+
+function buildTrackRow(track, index, fullList){
+  const tr = document.createElement("tr");
+  const isLiked = likedTrackIds.has(track.id);
+  tr.innerHTML = `
+    <td>${String(index + 1).padStart(2, "0")}</td>
+    <td>${escapeHtml(track.title)}</td>
+    <td>${escapeHtml(track.music_artists?.name || "Unknown")}</td>
+    <td class="like-cell ${isLiked ? "liked" : ""}" data-like>&#9825;</td>
+    <td>${formatTime(track.duration_seconds || 0)}</td>`;
+  tr.addEventListener("click", (e) => {
+    if (e.target.closest("[data-like]")) return;
+    playQueue(fullList, index);
+  });
+  tr.querySelector("[data-like]").addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleLike(track.id, tr.querySelector("[data-like]"));
+  });
+  return tr;
+}
+
+// ==========================================================
+// LIKES
+// ==========================================================
+async function toggleLike(trackId, cellEl){
+  if (likedTrackIds.has(trackId)){
+    await supabaseClient.from("music_likes").delete().eq("user_id", currentUser.id).eq("track_id", trackId);
+    likedTrackIds.delete(trackId);
+    cellEl.classList.remove("liked");
+  } else {
+    await supabaseClient.from("music_likes").insert({ user_id: currentUser.id, track_id: trackId });
+    likedTrackIds.add(trackId);
+    cellEl.classList.add("liked");
+  }
+  updateNowPlayingLikeState();
+}
+
+function updateNowPlayingLikeState(){
+  const likeBtn = document.getElementById("likeBtn");
+  const current = queue[queueIndex];
+  if (!current){ likeBtn.style.color = ""; return; }
+  likeBtn.style.color = likedTrackIds.has(current.id) ? "var(--gold)" : "";
+}
+
+// ==========================================================
+// PLAYER
+// ==========================================================
+function setupPlayer(){
+  document.getElementById("playPauseBtn").addEventListener("click", togglePlayPause);
+  document.getElementById("nextBtn").addEventListener("click", playNext);
+  document.getElementById("prevBtn").addEventListener("click", playPrev);
+  document.getElementById("likeBtn").addEventListener("click", () => {
+    const current = queue[queueIndex];
+    if (!current) return;
+    const cell = { classList: { add(){}, remove(){}, toggle(){} } }; // no table cell to sync here
+    toggleLike(current.id, document.getElementById("likeBtn"));
+  });
+
+  document.getElementById("volumeSlider").addEventListener("input", (e) => {
+    audioEl.volume = e.target.value / 100;
+  });
+  audioEl.volume = 0.8;
+
+  audioEl.addEventListener("timeupdate", () => {
+    const pct = audioEl.duration ? (audioEl.currentTime / audioEl.duration) * 100 : 0;
+    document.getElementById("progressFill").style.width = `${pct}%`;
+    document.getElementById("currentTimeLabel").textContent = formatTime(audioEl.currentTime);
+  });
+  audioEl.addEventListener("loadedmetadata", () => {
+    document.getElementById("durationLabel").textContent = formatTime(audioEl.duration);
+  });
+  audioEl.addEventListener("ended", playNext);
+
+  document.getElementById("progressBar").addEventListener("click", (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    if (audioEl.duration) audioEl.currentTime = pct * audioEl.duration;
+  });
+}
+
+function playQueue(tracks, startIndex){
+  queue = tracks;
+  queueIndex = startIndex;
+  renderQueueList();
+  playCurrent();
+}
+
+function playCurrent(){
+  const track = queue[queueIndex];
+  if (!track) return;
+
+  audioEl.src = audioUrl(track.audio_path);
+  audioEl.play();
+  document.getElementById("playPauseBtn").innerHTML = "&#10074;&#10074;";
+
+  document.getElementById("nowTitle").textContent = track.title;
+  document.getElementById("nowArtist").textContent = track.music_artists?.name || "Unknown";
+  const cover = coverUrl(track.music_releases?.cover_url);
+  document.getElementById("nowCover").innerHTML = cover ? `<img src="${cover}">` : escapeHtml(track.title.charAt(0).toUpperCase());
+
+  updateNowPlayingLikeState();
+  renderQueueList();
+  logRecentlyPlayed(track.id);
+  bumpPlayCount(track.id);
+}
+
+async function logRecentlyPlayed(trackId){
+  await supabaseClient.from("music_recently_played").insert({ user_id: currentUser.id, track_id: trackId });
+}
+async function bumpPlayCount(trackId){
+  try { await supabaseClient.rpc("increment_track_play_count", { target_track_id: trackId }); } catch(e){}
+}
+
+function togglePlayPause(){
+  if (!queue[queueIndex]) return;
+  if (audioEl.paused){
+    audioEl.play();
+    document.getElementById("playPauseBtn").innerHTML = "&#10074;&#10074;";
+  } else {
+    audioEl.pause();
+    document.getElementById("playPauseBtn").innerHTML = "&#9654;";
+  }
+}
+function playNext(){
+  if (queueIndex + 1 < queue.length){ queueIndex++; playCurrent(); }
+}
+function playPrev(){
+  if (queueIndex > 0){ queueIndex--; playCurrent(); }
+}
+
+function renderQueueList(){
+  const list = document.getElementById("queueList");
+  document.getElementById("queueCount").textContent = `Your queue \u00b7 ${queue.length} song${queue.length === 1 ? "" : "s"}`;
+  if (queue.length === 0){
+    list.innerHTML = `<div class="empty-msg">Nothing queued yet.</div>`;
+    return;
+  }
+  list.innerHTML = "";
+  queue.forEach((t, i) => {
+    const div = document.createElement("div");
+    div.className = "q-track";
+    const cover = coverUrl(t.music_releases?.cover_url);
+    div.style.opacity = i === queueIndex ? "1" : ".6";
+    div.innerHTML = `
+      <div class="thumb">${cover ? `<img src="${cover}">` : escapeHtml((t.title||"R").charAt(0).toUpperCase())}</div>
+      <div><strong>${escapeHtml(t.title)}</strong><span>${escapeHtml(t.music_artists?.name || "Unknown")} &middot; ${formatTime(t.duration_seconds || 0)}</span></div>`;
+    div.addEventListener("click", () => { queueIndex = i; playCurrent(); });
+    list.appendChild(div);
+  });
+}
+
+initialize();
+</script>
+</body>
+</html>
