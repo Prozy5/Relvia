@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Artist Studio — Relvia Music</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
+    :root{--black:#0c0b0a;--panel:#15120f;--cream:#f4eee2;--muted:#958d81;--gold:#cc9c3b;--line:rgba(242,231,206,.11)}
+    *{box-sizing:border-box}body{margin:0;background:var(--black);color:var(--cream);font-family:'DM Sans',sans-serif}
+    button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;cursor:pointer}
+    a{color:var(--gold);text-decoration:none}
+
+    .topbar{position:sticky;top:0;height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;background:rgba(12,11,10,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:10}
+    .logo{display:flex;align-items:baseline;gap:7px}
+    .logo-rel{font:600 19px 'Playfair Display',serif;letter-spacing:-.08em;color:var(--gold)}
+    .logo-music{font:500 8px 'DM Mono',monospace;letter-spacing:.19em;text-transform:uppercase;color:var(--muted)}
+    .back{font:500 11px 'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .back:hover{color:var(--gold)}
+
+    .container{max-width:760px;margin:auto;padding:40px 24px 90px}
+    .page-title{font:500 30px 'Playfair Display',serif;letter-spacing:-.03em;margin-bottom:6px}
+    .page-sub{color:var(--muted);font-size:13px;margin-bottom:30px}
+
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:22px}
+    .panel h2{font:500 18px 'Playfair Display',serif;margin:0 0 6px}
+    .panel .sub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+
+    .field{margin-bottom:14px}
+    .field label{font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:block;margin-bottom:6px}
+    .field input[type=text],.field textarea,.field select{width:100%;background:#1d1812;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px}
+    .field input[type=file]{width:100%;font-size:12px;color:var(--muted)}
+    .field textarea{resize:vertical;min-height:70px}
+    .field-row{display:flex;gap:12px}
+    .field-row .field{flex:1}
+
+    .btn{background:var(--gold);color:#17120a;padding:10px 20px;border-radius:8px;font:500 11px 'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase}
+    .btn:hover{opacity:.88}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn.ghost{background:none;border:1px solid var(--line);color:var(--cream)}
+    .btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+    .status-msg{font-size:12.5px;margin-top:10px;display:none}
+    .status-msg.show{display:block}
+    .status-msg.error{color:#e0574f}
+    .status-msg.success{color:var(--gold)}
+
+    .list-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:13px}
+    .list-row:first-child{border-top:none}
+    .list-row .meta{color:var(--muted);font-size:11.5px;margin-top:2px}
+    .empty-msg{color:var(--muted);font-size:13px;padding:10px 0}
+
+    .gate-screen{max-width:420px;margin:100px auto;text-align:center;padding:0 24px}
+    .gate-screen h2{font:500 24px 'Playfair Display',serif;margin-bottom:10px}
+    .gate-screen p{color:var(--muted);font-size:13px;line-height:1.6}
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="music.html"><span class="logo-rel">Relvia</span><span class="logo-music">Music</span></a>
+  <a class="back" href="music.html">&larr; Back to Relvia Music</a>
+</header>
+
+<div class="container" id="container">
+  <div class="page-title">Artist Studio</div>
+  <div class="page-sub">Loading...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let myArtist = null;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "/login.html"; return; }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "/login.html"; return; }
+  currentUser = userData.user;
+
+  const { data: artist } = await supabaseClient
+    .from("music_artists").select("*").eq("user_id", currentUser.id).maybeSingle();
+  myArtist = artist;
+
+  if (!myArtist){
+    renderCreateArtistForm();
+  } else {
+    await renderStudio();
+  }
+}
+
+function renderCreateArtistForm(){
+  const container = document.getElementById("container");
+  container.innerHTML = `
+    <div class="page-title">Set up your artist profile</div>
+    <div class="page-sub">This is what listeners see — you can only have one artist profile per account.</div>
+    <div class="panel">
+      <div class="field"><label>Artist / project name</label><input type="text" id="artistName"></div>
+      <div class="field"><label>Bio</label><textarea id="artistBio" placeholder="Tell listeners about yourself..."></textarea></div>
+      <div class="field"><label>Avatar image (optional)</label><input type="file" id="artistAvatarFile" accept="image/*"></div>
+      <button class="btn" id="createArtistBtn">Create artist profile</button>
+      <div class="status-msg" id="createArtistStatus"></div>
+    </div>
+  `;
+
+  document.getElementById("createArtistBtn").addEventListener("click", async () => {
+    const name = document.getElementById("artistName").value.trim();
+    const bio = document.getElementById("artistBio").value.trim();
+    const fileInput = document.getElementById("artistAvatarFile");
+    const statusEl = document.getElementById("createArtistStatus");
+    const btn = document.getElementById("createArtistBtn");
+
+    if (!name){ showStatus(statusEl, "Enter an artist name.", true); return; }
+
+    btn.disabled = true; btn.textContent = "Creating...";
+
+    let avatar_url = null;
+    if (fileInput.files[0]){
+      const file = fileInput.files[0];
+      const path = `${currentUser.id}/avatar-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabaseClient.storage.from("music-covers").upload(path, file);
+      if (uploadError){
+        showStatus(statusEl, "Couldn't upload avatar: " + uploadError.message, true);
+        btn.disabled = false; btn.textContent = "Create artist profile";
+        return;
+      }
+      const { data: urlData } = supabaseClient.storage.from("music-covers").getPublicUrl(path);
+      avatar_url = urlData.publicUrl;
+    }
+
+    const { error } = await supabaseClient.from("music_artists").insert({ user_id: currentUser.id, name, bio, avatar_url });
+    if (error){
+      showStatus(statusEl, "Couldn't create artist profile: " + error.message, true);
+      btn.disabled = false; btn.textContent = "Create artist profile";
+      return;
+    }
+
+    window.location.reload();
+  });
+}
+
+function showStatus(el, message, isError){
+  el.textContent = message;
+  el.classList.add("show");
+  el.classList.toggle("error", !!isError);
+  el.classList.toggle("success", !isError);
+}
+
+async function renderStudio(){
+  const container = document.getElementById("container");
+  container.innerHTML = `
+    <div class="page-title">${escapeHtml(myArtist.name)}</div>
+    <div class="page-sub">Artist Studio</div>
+
+    <div class="panel">
+      <h2>New release</h2>
+      <div class="sub">Create a release, then add tracks to it below.</div>
+      <div class="field-row">
+        <div class="field"><label>Title</label><input type="text" id="releaseTitle"></div>
+        <div class="field"><label>Type</label>
+          <select id="releaseType">
+            <option value="single">Single</option>
+            <option value="ep">EP</option>
+            <option value="album">Album</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Cover art (optional)</label><input type="file" id="releaseCoverFile" accept="image/*"></div>
+      <button class="btn" id="createReleaseBtn">Create release</button>
+      <div class="status-msg" id="releaseStatus"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Add a track</h2>
+      <div class="sub">Upload an audio file to one of your releases.</div>
+      <div class="field"><label>Release</label><select id="trackReleaseSelect"><option value="">Loading releases...</option></select></div>
+      <div class="field-row">
+        <div class="field"><label>Track title</label><input type="text" id="trackTitle"></div>
+        <div class="field"><label>Track #</label><input type="text" id="trackNumber" value="1"></div>
+      </div>
+      <div class="field"><label>Audio file (mp3, wav, etc.)</label><input type="file" id="trackAudioFile" accept="audio/*"></div>
+      <button class="btn" id="uploadTrackBtn">Upload track</button>
+      <div class="status-msg" id="trackStatus"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Your releases</h2>
+      <div id="myReleasesList"><div class="empty-msg">Loading...</div></div>
+    </div>
+  `;
+
+  await populateReleaseSelect();
+  await loadMyReleases();
+
+  document.getElementById("createReleaseBtn").addEventListener("click", createRelease);
+  document.getElementById("uploadTrackBtn").addEventListener("click", uploadTrack);
+}
+
+async function populateReleaseSelect(){
+  const { data: releases } = await supabaseClient
+    .from("music_releases").select("id, title").eq("artist_id", myArtist.id).order("created_at", { ascending:false });
+
+  const select = document.getElementById("trackReleaseSelect");
+  if (!releases || releases.length === 0){
+    select.innerHTML = `<option value="">Create a release first</option>`;
+    return;
+  }
+  select.innerHTML = releases.map(r => `<option value="${r.id}">${escapeHtml(r.title)}</option>`).join("");
+}
+
+async function createRelease(){
+  const title = document.getElementById("releaseTitle").value.trim();
+  const release_type = document.getElementById("releaseType").value;
+  const fileInput = document.getElementById("releaseCoverFile");
+  const statusEl = document.getElementById("releaseStatus");
+  const btn = document.getElementById("createReleaseBtn");
+
+  if (!title){ showStatus(statusEl, "Enter a release title.", true); return; }
+
+  btn.disabled = true; btn.textContent = "Creating...";
+
+  let cover_url = null;
+  if (fileInput.files[0]){
+    const file = fileInput.files[0];
+    const path = `${currentUser.id}/cover-${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabaseClient.storage.from("music-covers").upload(path, file);
+    if (uploadError){
+      showStatus(statusEl, "Couldn't upload cover: " + uploadError.message, true);
+      btn.disabled = false; btn.textContent = "Create release";
+      return;
+    }
+    cover_url = path;
+  }
+
+  const { error } = await supabaseClient.from("music_releases").insert({
+    artist_id: myArtist.id, title, release_type, cover_url
+  });
+
+  btn.disabled = false; btn.textContent = "Create release";
+
+  if (error){ showStatus(statusEl, "Couldn't create release: " + error.message, true); return; }
+
+  showStatus(statusEl, "Release created.", false);
+  document.getElementById("releaseTitle").value = "";
+  fileInput.value = "";
+  await populateReleaseSelect();
+  await loadMyReleases();
+}
+
+async function uploadTrack(){
+  const release_id = document.getElementById("trackReleaseSelect").value;
+  const title = document.getElementById("trackTitle").value.trim();
+  const track_number = parseInt(document.getElementById("trackNumber").value, 10) || 1;
+  const fileInput = document.getElementById("trackAudioFile");
+  const statusEl = document.getElementById("trackStatus");
+  const btn = document.getElementById("uploadTrackBtn");
+
+  if (!release_id){ showStatus(statusEl, "Choose or create a release first.", true); return; }
+  if (!title){ showStatus(statusEl, "Enter a track title.", true); return; }
+  if (!fileInput.files[0]){ showStatus(statusEl, "Choose an audio file.", true); return; }
+
+  const file = fileInput.files[0];
+  btn.disabled = true; btn.textContent = "Uploading...";
+
+  const path = `${currentUser.id}/track-${Date.now()}-${file.name}`;
+  const { error: uploadError } = await supabaseClient.storage.from("music-audio").upload(path, file);
+
+  if (uploadError){
+    showStatus(statusEl, "Upload failed: " + uploadError.message, true);
+    btn.disabled = false; btn.textContent = "Upload track";
+    return;
+  }
+
+  // Best-effort duration read via a temporary audio element.
+  let duration_seconds = null;
+  try {
+    duration_seconds = await new Promise((resolve) => {
+      const tempAudio = new Audio(URL.createObjectURL(file));
+      tempAudio.addEventListener("loadedmetadata", () => resolve(Math.round(tempAudio.duration)));
+      tempAudio.addEventListener("error", () => resolve(null));
+      setTimeout(() => resolve(null), 4000);
+    });
+  } catch (e){}
+
+  const { error } = await supabaseClient.from("music_tracks").insert({
+    release_id, artist_id: myArtist.id, title, track_number, audio_path: path, duration_seconds
+  });
+
+  btn.disabled = false; btn.textContent = "Upload track";
+
+  if (error){ showStatus(statusEl, "Couldn't save track: " + error.message, true); return; }
+
+  showStatus(statusEl, "Track uploaded.", false);
+  document.getElementById("trackTitle").value = "";
+  fileInput.value = "";
+  await loadMyReleases();
+}
+
+async function loadMyReleases(){
+  const list = document.getElementById("myReleasesList");
+  const { data: releases } = await supabaseClient
+    .from("music_releases").select("*, music_tracks(id, title)")
+    .eq("artist_id", myArtist.id).order("created_at", { ascending:false });
+
+  if (!releases || releases.length === 0){
+    list.innerHTML = `<div class="empty-msg">No releases yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  releases.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "list-row";
+    row.innerHTML = `
+      <div>
+        <div>${escapeHtml(r.title)}</div>
+        <div class="meta">${escapeHtml(r.release_type)} &middot; ${(r.music_tracks || []).length} track${(r.music_tracks || []).length === 1 ? "" : "s"}</div>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+initialize();
+</script>
+</body>
+</html>
