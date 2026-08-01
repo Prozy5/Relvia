@@ -110,6 +110,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
     <div class="field"><label>Display name</label><input type="text" id="displayNameInput"></div>
     <div class="field"><label>Username</label><input type="text" id="usernameInput"></div>
     <div class="field"><label>Avatar URL</label><input type="text" id="avatarInput" placeholder="https://..."></div>
+    <div class="field"><label>Banner URL</label><input type="text" id="bannerInput" placeholder="https://..."></div>
     <button class="btn gold" id="saveProfileBtn">Save changes</button>
   </div>
 
@@ -194,6 +195,7 @@ async function initialize(){
   document.getElementById("displayNameInput").value = profile.display_name || "";
   document.getElementById("usernameInput").value = profile.username || "";
   document.getElementById("avatarInput").value = profile.avatar_url || "";
+  document.getElementById("bannerInput").value = profile.banner_url || "";
   document.getElementById("deactivateLabel").textContent = profile.is_deactivated ? "Reactivate account" : "Deactivate account";
   document.getElementById("deactivateBtn").textContent = profile.is_deactivated ? "Reactivate" : "Deactivate";
 }
@@ -202,13 +204,14 @@ document.getElementById("saveProfileBtn").addEventListener("click", async () => 
   const display_name = document.getElementById("displayNameInput").value.trim();
   const username = document.getElementById("usernameInput").value.trim().toLowerCase();
   const avatar_url = document.getElementById("avatarInput").value.trim();
+  const banner_url = document.getElementById("bannerInput").value.trim();
 
   if (!display_name || !username){ showToast("Display name and username are required"); return; }
   if (!/^[a-z0-9_]+$/.test(username)){ showToast("Username can only use lowercase letters, numbers, underscores"); return; }
 
   const { error } = await supabaseClient
     .from("live_profiles")
-    .update({ display_name, username, avatar_url })
+    .update({ display_name, username, avatar_url, banner_url })
     .eq("id", currentUser.id);
 
   if (error){ console.error(error); showToast(error.message?.includes("duplicate") ? "That username is taken" : "Couldn't save changes"); return; }
