@@ -458,13 +458,13 @@ async function initialize(){
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
     if (!sessionData || !sessionData.session){
-      window.location.href = "live-login.html";
+      window.location.href = "welcome.html";
       return;
     }
 
     const { data: userData, error } = await supabaseClient.auth.getUser();
     if (error || !userData.user){
-      window.location.href = "live-login.html";
+      window.location.href = "welcome.html";
       return;
     }
 
@@ -841,15 +841,10 @@ async function openPlayer(stream){
       status.innerHTML = `<span>Stream ended or connection lost.</span>`;
     });
 
-    room.on(LivekitClient.RoomEvent.DataReceived, (payload) => {
-      try {
-        const msg = JSON.parse(new TextDecoder().decode(payload));
-        appendChatMessage(msg.name, msg.text);
-      } catch (err){ console.error("Bad chat payload:", err); }
-    });
-
     await room.connect(LIVEKIT_URL, result.token);
-    setupChatSend();
+    await loadChatHistory(stream.id);
+    subscribeToChatRealtime(stream.id);
+    setupChatSend(stream.id);
   } catch (err){
     console.error("Failed to join stream:", err);
     status.innerHTML = `<span>Couldn't connect to this stream. Try again in a moment.</span>`;
@@ -858,6 +853,43 @@ async function openPlayer(stream){
 
 function resetChat(){
   document.getElementById("chatMessages").innerHTML = `<div class="chat-empty">Messages appear here once you're connected.</div>`;
+}
+
+async function loadChatHistory(streamId){
+  const { data: messages, error } = await supabaseClient
+    .from("live_chat_messages")
+    .select("*")
+    .eq("stream_id", streamId)
+    .order("created_at", { ascending:true })
+    .limit(200);
+
+  if (error || !messages || messages.length === 0) return;
+
+  const senderIds = [...new Set(messages.map(m => m.user_id).filter(Boolean))];
+  const { data: senders } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", senderIds);
+  const nameById = {};
+  (senders || []).forEach(s => { nameById[s.id] = s.display_name; });
+
+  const container = document.getElementById("chatMessages");
+  const empty = container.querySelector(".chat-empty");
+  if (empty) empty.remove();
+
+  messages.forEach(m => appendChatMessage(nameById[m.user_id] || "Viewer", m.message));
+}
+
+let chatRealtimeChannel = null;
+
+function subscribeToChatRealtime(streamId){
+  chatRealtimeChannel = supabaseClient
+    .channel(`relvia-live-chat-${streamId}`)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"live_chat_messages", filter:`stream_id=eq.${streamId}` }, async (payload) => {
+      const msg = payload.new;
+      // Skip our own message — already rendered optimistically on send.
+      if (msg.user_id === currentUser?.id) return;
+      const { data: sender } = await supabaseClient.from("live_profiles").select("display_name").eq("id", msg.user_id).maybeSingle();
+      appendChatMessage(sender?.display_name || "Viewer", msg.message);
+    })
+    .subscribe();
 }
 
 function appendChatMessage(name, text){
@@ -872,24 +904,27 @@ function appendChatMessage(name, text){
   container.scrollTop = container.scrollHeight;
 }
 
-function setupChatSend(){
+function setupChatSend(streamId){
   const input = document.getElementById("chatInput");
   const sendBtn = document.getElementById("chatSendBtn");
 
   const send = async () => {
     const text = input.value.trim();
-    if (!text || !currentRoom) return;
+    if (!text || !currentUser) return;
 
     const name = liveProfile?.display_name || liveProfile?.username || "Viewer";
-    const payload = new TextEncoder().encode(JSON.stringify({ name, text }));
 
-    try {
-      await currentRoom.localParticipant.publishData(payload, { reliable: true });
-      appendChatMessage(name, text); // show our own message immediately
-      input.value = "";
-    } catch (err){
-      console.error("Failed to send chat message:", err);
+    const { error } = await supabaseClient
+      .from("live_chat_messages")
+      .insert({ stream_id: streamId, user_id: currentUser.id, message: text });
+
+    if (error){
+      console.error("Failed to send chat message:", error);
+      return;
     }
+
+    appendChatMessage(name, text); // show our own message immediately
+    input.value = "";
   };
 
   sendBtn.onclick = send;
@@ -904,8 +939,13 @@ function closePlayer(){
     currentRoom.disconnect();
     currentRoom = null;
   }
+  if (chatRealtimeChannel){
+    supabaseClient.removeChannel(chatRealtimeChannel);
+    chatRealtimeChannel = null;
+  }
   video.srcObject = null;
   overlay.classList.remove("open");
+  resetChat();
 }
 
 initialize();
