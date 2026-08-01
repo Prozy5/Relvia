@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relvia Studios</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  color:var(--text); min-height:100vh;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+  background-attachment:fixed;
+}
+a{ text-decoration:none; color:inherit; }
+button, input, textarea, select{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:76px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.82); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:36px; height:36px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:18px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:900px; margin:auto; padding:34px 24px 90px; }
+
+.status-pill{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:999px; margin-bottom:14px; }
+.status-pill.development{ background:rgba(217,169,75,.15); color:var(--gold); }
+.status-pill.production{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+.status-pill.post{ background:rgba(110,168,216,.15); color:#8fbde0; }
+.status-pill.released{ background:rgba(95,174,122,.15); color:#8fd1a8; }
+
+.project-title{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:10px; }
+.project-logline{ color:#dcdcdc; font-size:15px; line-height:1.6; margin-bottom:8px; max-width:640px; }
+.project-meta{ color:var(--muted); font-size:12.5px; margin-bottom:26px; }
+
+.video-frame{ width:100%; aspect-ratio:16/9; border-radius:18px; overflow:hidden; border:1px solid var(--border); margin-bottom:26px; background:#000; }
+.video-frame iframe{ width:100%; height:100%; border:none; }
+
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:22px; margin-bottom:20px; }
+.panel h3{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+.panel .sub{ color:var(--muted); font-size:12.5px; margin:-8px 0 14px; }
+
+.role-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-top:1px solid var(--border-soft); }
+.role-row:first-child{ border-top:none; }
+.role-name{ font-weight:700; font-size:14px; }
+.role-desc{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+.role-status{ font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; }
+.role-status.open{ background:rgba(217,169,75,.15); color:var(--gold); }
+.role-status.filled{ background:rgba(95,174,122,.15); color:#8fd1a8; }
+.btn{ font-size:12.5px; font-weight:700; padding:8px 16px; border-radius:10px; border:1px solid var(--border); background:var(--surface-light); }
+.btn:hover{ border-color:var(--gold); color:var(--gold); }
+.btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800; }
+.btn.gold:hover{ opacity:.88; color:#000; }
+.btn.danger:hover{ border-color:#e0574f; color:#f2a8a3; }
+.btn.sm{ padding:6px 12px; font-size:11.5px; }
+
+.collab-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-top:1px solid var(--border-soft); font-size:13px; }
+.collab-row:first-child{ border-top:none; }
+.collab-role{ color:var(--muted); font-size:12px; }
+
+.request-row{ padding:12px 0; border-top:1px solid var(--border-soft); }
+.request-row:first-child{ border-top:none; }
+.request-msg{ font-size:12.5px; color:#ddd; margin:6px 0 10px; }
+.request-actions{ display:flex; gap:8px; }
+
+.discussion-list{ max-height:340px; overflow-y:auto; margin-bottom:14px; }
+.discussion-msg{ margin-bottom:12px; font-size:13px; }
+.discussion-msg strong{ color:var(--gold); }
+.discussion-time{ font-size:11px; color:var(--muted-soft); margin-left:6px; }
+.discussion-input-row{ display:flex; gap:8px; }
+.discussion-input-row textarea{
+  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
+  padding:9px 12px; color:white; font-size:13px; resize:none; min-height:40px;
+}
+.discussion-input-row button{ background:var(--gold); color:#000; font-weight:700; font-size:12.5px; padding:0 16px; border-radius:10px; }
+
+.field{ margin-bottom:14px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input, .field textarea{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:10px 13px; color:white; font-size:13.5px;
+}
+.field textarea{ resize:none; min-height:70px; }
+.field input:focus, .field textarea:focus{ outline:none; border-color:var(--gold); }
+
+.status-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.empty-msg{ color:var(--muted); font-size:13px; padding:8px 0; }
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="studios.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Studios</span>
+  </a>
+  <a class="back-link" href="studios.html">← Back to Studios</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading project...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const projectId = params.get("id");
+
+let currentUser = null;
+let project = null;
+let isCreator = false;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function timeAgo(dateStr){
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return new Date(dateStr).toLocaleDateString();
+}
+// Extracts a Google Drive file ID from any typical share link format.
+function extractDriveFileId(url){
+  const match = url.match(/[-\w]{25,}/);
+  return match ? match[0] : null;
+}
+
+async function initialize(){
+  if (!projectId){
+    document.getElementById("container").innerHTML = `<div class="empty-msg">No project specified.</div>`;
+    return;
+  }
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "/login.html"; return; }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "/login.html"; return; }
+  currentUser = userData.user;
+
+  const { data: proj, error } = await supabaseClient.from("studios_projects").select("*").eq("id", projectId).maybeSingle();
+  if (error || !proj){
+    document.getElementById("container").innerHTML = `<div class="empty-msg">This project doesn't exist.</div>`;
+    return;
+  }
+  project = proj;
+  isCreator = project.creator_id === currentUser.id;
+
+  await render();
+}
+
+async function render(){
+  const container = document.getElementById("container");
+
+  let filmHtml = "";
+  if (project.status === "released"){
+    const { data: film } = await supabaseClient.from("studios_films").select("*").eq("project_id", project.id).maybeSingle();
+    if (film){
+      supabaseClient.rpc("increment_film_view_count", { target_film_id: film.id });
+      filmHtml = `
+        <div class="video-frame">
+          <iframe src="https://drive.google.com/file/d/${film.drive_file_id}/preview" allow="autoplay" allowfullscreen></iframe>
+        </div>
+        ${film.description ? `<p class="project-logline">${escapeHtml(film.description)}</p>` : ""}`;
+    }
+  }
+
+  container.innerHTML = `
+    <span class="status-pill ${project.status}">${escapeHtml(project.status)}</span>
+    <div class="project-title">${escapeHtml(project.title)}</div>
+    <p class="project-logline">${escapeHtml(project.logline || "")}</p>
+    <div class="project-meta">${escapeHtml(project.genre || "Unspecified genre")}</div>
+
+    ${filmHtml}
+
+    ${isCreator && project.status !== "released" ? `<div class="status-actions" id="statusActions"></div>` : ""}
+    ${isCreator && project.status === "post" ? `<div class="panel" id="submitFilmPanel"></div>` : ""}
+
+    <div class="panel">
+      <h3>Roles</h3>
+      <div class="sub">${isCreator ? "Add roles you need filled." : "Request to join a role below."}</div>
+      <div id="rolesList"><div class="empty-msg">Loading...</div></div>
+      ${isCreator ? `
+        <div class="field-row" style="display:flex;gap:10px;margin-top:16px;">
+          <input type="text" id="newRoleName" placeholder="Role (e.g. Editor)" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <button class="btn gold" id="addRoleBtn">Add role</button>
+        </div>` : ""}
+    </div>
+
+    ${isCreator ? `<div class="panel"><h3>Join Requests</h3><div id="requestsList"><div class="empty-msg">Loading...</div></div></div>` : ""}
+
+    <div class="panel">
+      <h3>Collaborators</h3>
+      <div id="collabList"><div class="empty-msg">Loading...</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Discussion</h3>
+      <div class="discussion-list" id="discussionList"><div class="empty-msg">Loading...</div></div>
+      <div class="discussion-input-row">
+        <textarea id="discussionInput" placeholder="Say something to the team..."></textarea>
+        <button id="discussionSendBtn">Send</button>
+      </div>
+    </div>
+  `;
+
+  if (isCreator && project.status !== "released") renderStatusActions();
+  if (isCreator && project.status === "post") renderSubmitFilmPanel();
+
+  await loadRoles();
+  if (isCreator) await loadRequests();
+  await loadCollaborators();
+  await loadDiscussion();
+  listenForDiscussionRealtime();
+
+  document.getElementById("discussionSendBtn").addEventListener("click", sendDiscussionMessage);
+}
+
+function renderStatusActions(){
+  const stages = ["development", "production", "post", "released"];
+  const currentIndex = stages.indexOf(project.status);
+  const nextStage = stages[currentIndex + 1];
+  if (!nextStage) return;
+
+  const el = document.getElementById("statusActions");
+  el.innerHTML = `<button class="btn gold" id="advanceStatusBtn">Move to "${nextStage}"</button>`;
+  document.getElementById("advanceStatusBtn").addEventListener("click", async () => {
+    if (nextStage === "released"){
+      alert('Submit the film below to move to "released" — it happens automatically once you submit.');
+      return;
+    }
+    const { error } = await supabaseClient.from("studios_projects").update({ status: nextStage }).eq("id", project.id);
+    if (error){ alert("Couldn't update status."); return; }
+    project.status = nextStage;
+    render();
+  });
+}
+
+function renderSubmitFilmPanel(){
+  const el = document.getElementById("submitFilmPanel");
+  el.innerHTML = `
+    <h3>Submit the finished film</h3>
+    <div class="sub">Paste a Google Drive share link (make sure sharing is set to "Anyone with the link").</div>
+    <div class="field"><label>Google Drive link</label><input type="text" id="driveLink" placeholder="https://drive.google.com/file/d/..."></div>
+    <div class="field"><label>Description</label><textarea id="filmDescription" placeholder="What's this short about?"></textarea></div>
+    <div class="field"><label>Cover image URL (optional)</label><input type="text" id="filmCover" placeholder="https://..."></div>
+    <button class="btn gold" id="submitFilmBtn">Submit &amp; release</button>
+    <div class="empty-msg" id="submitFilmStatus"></div>
+  `;
+
+  document.getElementById("submitFilmBtn").addEventListener("click", async () => {
+    const link = document.getElementById("driveLink").value.trim();
+    const description = document.getElementById("filmDescription").value.trim();
+    const cover_url = document.getElementById("filmCover").value.trim() || null;
+    const statusEl = document.getElementById("submitFilmStatus");
+
+    const drive_file_id = extractDriveFileId(link);
+    if (!drive_file_id){
+      statusEl.textContent = "Couldn't read a file ID from that link — double check it's a real Drive share link.";
+      return;
+    }
+
+    const btn = document.getElementById("submitFilmBtn");
+    btn.disabled = true; btn.textContent = "Submitting...";
+
+    const { error: filmError } = await supabaseClient.from("studios_films").insert({
+      project_id: project.id, title: project.title, description, drive_file_id, cover_url
+    });
+
+    if (filmError){
+      statusEl.textContent = "Couldn't submit film: " + filmError.message;
+      btn.disabled = false; btn.textContent = "Submit & release";
+      return;
+    }
+
+    await supabaseClient.from("studios_projects").update({ status: "released" }).eq("id", project.id);
+    project.status = "released";
+    render();
+  });
+}
+
+async function loadRoles(){
+  const list = document.getElementById("rolesList");
+  const { data: roles } = await supabaseClient.from("studios_roles").select("*").eq("project_id", project.id).order("created_at", { ascending:true });
+
+  if (!roles || roles.length === 0){
+    list.innerHTML = `<div class="empty-msg">No roles listed yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  roles.forEach(role => {
+    const row = document.createElement("div");
+    row.className = "role-row";
+    row.innerHTML = `
+      <div>
+        <div class="role-name">${escapeHtml(role.role_name)}</div>
+        ${role.description ? `<div class="role-desc">${escapeHtml(role.description)}</div>` : ""}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="role-status ${role.filled ? "filled" : "open"}">${role.filled ? "Filled" : "Open"}</span>
+        ${!role.filled && !isCreator ? `<button class="btn sm" data-request-role="${role.id}">Request</button>` : ""}
+      </div>`;
+    const requestBtn = row.querySelector("[data-request-role]");
+    if (requestBtn) requestBtn.addEventListener("click", () => requestToJoin(role.id));
+    list.appendChild(row);
+  });
+}
+
+document.addEventListener("click", (e) => {}); // placeholder to keep structure consistent
+
+async function requestToJoin(roleId){
+  const message = prompt("Optional message to the project creator:", "");
+  const { error } = await supabaseClient.from("studios_join_requests").insert({
+    project_id: project.id, role_id: roleId, user_id: currentUser.id, message: message || null
+  });
+  if (error){ alert("Couldn't send request: " + error.message); return; }
+  alert("Request sent.");
+}
+
+async function loadRequests(){
+  const list = document.getElementById("requestsList");
+  const { data: requests } = await supabaseClient
+    .from("studios_join_requests")
+    .select("*, studios_roles(role_name)")
+    .eq("project_id", project.id).eq("status", "pending")
+    .order("created_at", { ascending:false });
+
+  if (!requests || requests.length === 0){
+    list.innerHTML = `<div class="empty-msg">No pending requests.</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(requests.map(r => r.user_id))];
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  list.innerHTML = "";
+  requests.forEach(req => {
+    const row = document.createElement("div");
+    row.className = "request-row";
+    row.innerHTML = `
+      <div><strong>${escapeHtml(nameById[req.user_id] || "Unknown")}</strong> wants to join${req.studios_roles ? ` as <strong>${escapeHtml(req.studios_roles.role_name)}</strong>` : ""}</div>
+      ${req.message ? `<div class="request-msg">"${escapeHtml(req.message)}"</div>` : ""}
+      <div class="request-actions">
+        <button class="btn sm gold" data-accept>Accept</button>
+        <button class="btn sm danger" data-decline>Decline</button>
+      </div>`;
+    row.querySelector("[data-accept]").addEventListener("click", () => respondToRequest(req, "accepted"));
+    row.querySelector("[data-decline]").addEventListener("click", () => respondToRequest(req, "declined"));
+    list.appendChild(row);
+  });
+}
+
+async function respondToRequest(req, status){
+  await supabaseClient.from("studios_join_requests").update({ status }).eq("id", req.id);
+
+  if (status === "accepted"){
+    await supabaseClient.from("studios_collaborators").insert({
+      project_id: project.id, user_id: req.user_id, role_name: req.studios_roles?.role_name || null
+    });
+    if (req.role_id){
+      await supabaseClient.from("studios_roles").update({ filled: true, filled_by: req.user_id }).eq("id", req.role_id);
+    }
+  }
+
+  await loadRequests();
+  await loadRoles();
+  await loadCollaborators();
+}
+
+async function loadCollaborators(){
+  const list = document.getElementById("collabList");
+  const { data: collabs } = await supabaseClient.from("studios_collaborators").select("*").eq("project_id", project.id);
+
+  const { data: creatorProfile } = await supabaseClient.from("profiles").select("display_name, username").eq("id", project.creator_id).maybeSingle();
+
+  list.innerHTML = "";
+
+  const creatorRow = document.createElement("div");
+  creatorRow.className = "collab-row";
+  creatorRow.innerHTML = `<span>${escapeHtml(creatorProfile?.display_name || creatorProfile?.username || "Unknown")}</span><span class="collab-role">Creator</span>`;
+  list.appendChild(creatorRow);
+
+  if (!collabs || collabs.length === 0) return;
+
+  const userIds = collabs.map(c => c.user_id);
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  collabs.forEach(c => {
+    const row = document.createElement("div");
+    row.className = "collab-row";
+    row.innerHTML = `<span>${escapeHtml(nameById[c.user_id] || "Unknown")}</span><span class="collab-role">${escapeHtml(c.role_name || "Collaborator")}</span>`;
+    list.appendChild(row);
+  });
+}
+
+document.getElementById("container").addEventListener("click", (e) => {
+  if (e.target.id === "addRoleBtn"){
+    const input = document.getElementById("newRoleName");
+    const name = input.value.trim();
+    if (!name) return;
+    supabaseClient.from("studios_roles").insert({ project_id: project.id, role_name: name }).then(() => {
+      input.value = "";
+      loadRoles();
+    });
+  }
+});
+
+async function loadDiscussion(){
+  const list = document.getElementById("discussionList");
+  const { data: messages } = await supabaseClient
+    .from("studios_comments").select("*").eq("project_id", project.id).order("created_at", { ascending:true }).limit(200);
+
+  if (!messages || messages.length === 0){
+    list.innerHTML = `<div class="empty-msg">No messages yet.</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(messages.map(m => m.user_id))];
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  list.innerHTML = "";
+  messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "discussion-msg";
+    div.innerHTML = `<strong>${escapeHtml(nameById[m.user_id] || "Unknown")}</strong> ${escapeHtml(m.content)}<span class="discussion-time">${timeAgo(m.created_at)}</span>`;
+    list.appendChild(div);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+async function sendDiscussionMessage(){
+  const input = document.getElementById("discussionInput");
+  const content = input.value.trim();
+  if (!content) return;
+  const { error } = await supabaseClient.from("studios_comments").insert({ project_id: project.id, user_id: currentUser.id, content });
+  if (error){ alert("Couldn't send message."); return; }
+  input.value = "";
+  await loadDiscussion();
+}
+
+function listenForDiscussionRealtime(){
+  supabaseClient
+    .channel(`studios-project-${project.id}`)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"studios_comments", filter:`project_id=eq.${project.id}` }, () => loadDiscussion())
+    .subscribe();
+}
+
+initialize();
+</script>
+</body>
+</html>
