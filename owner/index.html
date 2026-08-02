@@ -56,6 +56,15 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 
 .container{ max-width:1400px; margin:auto; padding:30px; }
 
+.ecosystem-tabs{ display:flex; gap:6px; margin-bottom:26px; background:var(--surface-light); border:1px solid var(--border); border-radius:16px; padding:6px; width:fit-content; }
+.eco-tab{
+  font-size:13.5px; font-weight:800; padding:11px 22px; border-radius:11px; border:none; background:none; color:var(--muted); cursor:pointer;
+}
+.eco-tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.eco-tab:not(.active):hover{ color:var(--text); }
+.eco-panel{ display:none; }
+.eco-panel.active{ display:block; }
+
 .stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:34px; }
 .stat-card{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:20px; }
 .stat-card .num{ font-size:28px; font-weight:800; font-family:var(--font-display); }
@@ -94,6 +103,7 @@ tr:last-child td{ border-bottom:none; }
 }
 
 .btn{ font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; transition:.15s; border:1px solid var(--border); background:var(--surface-light); color:var(--text); margin-right:6px; }
+.btn.sm{ font-size:11.5px; padding:6px 11px; }
 .btn:hover{ border-color:var(--gold); color:var(--gold); }
 .btn.danger:hover{ border-color:var(--live-red); color:#f2a8a3; }
 .btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
@@ -186,6 +196,14 @@ tr:last-child td{ border-bottom:none; }
   </header>
 
   <div class="container">
+
+    <div class="ecosystem-tabs">
+      <button class="eco-tab active" data-eco-tab="live">Relvia Live</button>
+      <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
+      <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
+    </div>
+
+    <div class="eco-panel active" id="eco-live">
 
     <div class="stats-row">
       <div class="stat-card"><div class="num" id="statLiveNow">—</div><div class="label">Live Now</div></div>
@@ -434,6 +452,76 @@ tr:last-child td{ border-bottom:none; }
         </table>
       </div>
     </div>
+
+    </div><!-- /eco-live -->
+
+    <!-- ================= STUDIOS TAB ================= -->
+    <div class="eco-panel" id="eco-studios">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statStudiosProjects">—</div><div class="label">Total Projects</div></div>
+        <div class="stat-card"><div class="num" id="statStudiosPublished">—</div><div class="label">Published Films</div></div>
+        <div class="stat-card"><div class="num" id="statStudiosOpen">—</div><div class="label">Open Collabs</div></div>
+        <div class="stat-card"><div class="num" id="statStudiosViews">—</div><div class="label">Total Views</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Projects</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Title</th><th>Creator</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
+            <tbody id="studiosProjectsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Studios Staff</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Email</th><th>Since</th><th>Actions</th></tr></thead>
+            <tbody id="studiosStaffTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          </table>
+          <div class="add-form">
+            <input type="email" id="newStudiosAdminEmail" placeholder="Email (must already have a Relvia account)" style="flex:1;min-width:240px;">
+            <button class="btn gold" id="addStudiosAdminBtn">Add admin</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /eco-studios -->
+
+    <!-- ================= MUSIC TAB ================= -->
+    <div class="eco-panel" id="eco-music">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statMusicArtists">—</div><div class="label">Artists</div></div>
+        <div class="stat-card"><div class="num" id="statMusicReleases">—</div><div class="label">Releases</div></div>
+        <div class="stat-card"><div class="num" id="statMusicTracks">—</div><div class="label">Tracks</div></div>
+        <div class="stat-card"><div class="num" id="statMusicPlays">—</div><div class="label">Total Plays</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Releases</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Title</th><th>Artist</th><th>Type</th><th>Tracks</th><th>Actions</th></tr></thead>
+            <tbody id="musicReleasesTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Music Staff</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Email</th><th>Since</th><th>Actions</th></tr></thead>
+            <tbody id="musicStaffTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          </table>
+          <div class="add-form">
+            <input type="email" id="newMusicAdminEmail" placeholder="Email (must already have a Relvia account)" style="flex:1;min-width:240px;">
+            <button class="btn gold" id="addMusicAdminBtn">Add admin</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /eco-music -->
 
   </div>
 </div>
@@ -816,6 +904,7 @@ async function gate(){
 
   document.getElementById("streamSearch").addEventListener("input", (e) => renderStreams(e.target.value));
   document.getElementById("userSearch").addEventListener("input", (e) => renderUsers(e.target.value));
+  setupEcosystemTabs();
 
   document.getElementById("banStreamingPermanentBtn").addEventListener("click", () => applyBan("streaming", "permanent"));
   document.getElementById("banStreamingTempBtn").addEventListener("click", () => applyBan("streaming", "temp"));
@@ -1575,6 +1664,261 @@ async function saveRelvbitsFee(){
 
   showToast(`Platform fee set to ${value}%`);
   await logAction("update_relvbits_fee", "platform_config", `${value}%`);
+}
+
+// ==========================================================
+// ECOSYSTEM TABS
+// ==========================================================
+let studiosLoaded = false;
+let musicLoaded = false;
+
+function setupEcosystemTabs(){
+  document.querySelectorAll(".eco-tab").forEach(tab => {
+    tab.addEventListener("click", async () => {
+      document.querySelectorAll(".eco-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".eco-panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      const target = tab.dataset.ecoTab;
+      document.getElementById(`eco-${target}`).classList.add("active");
+
+      if (target === "studios" && !studiosLoaded){ studiosLoaded = true; await loadStudiosTab(); }
+      if (target === "music" && !musicLoaded){ musicLoaded = true; await loadMusicTab(); }
+    });
+  });
+}
+
+// ==========================================================
+// STUDIOS TAB
+// ==========================================================
+async function loadStudiosTab(){
+  await Promise.all([loadStudiosStats(), loadStudiosProjects(), loadStudiosStaff()]);
+  document.getElementById("addStudiosAdminBtn").addEventListener("click", addStudiosAdmin);
+}
+
+async function loadStudiosStats(){
+  const { count: totalProjects } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true });
+  const { count: published } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "published");
+  const { count: openCollabs } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "collab");
+  const { data: viewsData } = await supabaseClient.from("studios_projects").select("view_count");
+  const totalViews = (viewsData || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
+
+  document.getElementById("statStudiosProjects").textContent = totalProjects ?? 0;
+  document.getElementById("statStudiosPublished").textContent = published ?? 0;
+  document.getElementById("statStudiosOpen").textContent = openCollabs ?? 0;
+  document.getElementById("statStudiosViews").textContent = totalViews;
+}
+
+async function loadStudiosProjects(){
+  const tbody = document.getElementById("studiosProjectsTableBody");
+
+  const { data: projects, error } = await supabaseClient
+    .from("studios_projects").select("*").order("created_at", { ascending:false }).limit(100);
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load projects. (Are you a Studios admin?)</td></tr>`; return; }
+
+  if (!projects || projects.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No projects yet.</td></tr>`;
+    return;
+  }
+
+  const creatorIds = [...new Set(projects.map(p => p.creator_id))];
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", creatorIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  tbody.innerHTML = "";
+  projects.forEach(project => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(project.title)}</td>
+      <td>${escapeHtml(nameById[project.creator_id] || "Unknown")}</td>
+      <td><span class="pill ${project.status === "published" ? "ok" : project.status === "rejected" ? "banned" : "temp"}">${escapeHtml(project.status)}</span></td>
+      <td>${project.view_count || 0}</td>
+      <td>
+        ${project.status === "in_review" ? `<button class="btn gold sm" data-action="approve">Approve</button><button class="btn danger sm" data-action="reject">Reject</button>` : ""}
+        <button class="btn danger sm" data-action="delete">Delete</button>
+      </td>`;
+
+    const approveBtn = row.querySelector('[data-action="approve"]');
+    if (approveBtn) approveBtn.addEventListener("click", () => approveStudiosProject(project.id, project.title));
+    const rejectBtn = row.querySelector('[data-action="reject"]');
+    if (rejectBtn) rejectBtn.addEventListener("click", () => rejectStudiosProject(project.id, project.title));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteStudiosProject(project.id, project.title));
+
+    tbody.appendChild(row);
+  });
+}
+
+async function approveStudiosProject(projectId, title){
+  const { error } = await supabaseClient.rpc("approve_project", { target_project_id: projectId });
+  if (error){ console.error(error); showToast("Couldn't approve project"); return; }
+  showToast(`"${title}" published`);
+  await logAction("approve_studios_project", "studios_project", title);
+  await Promise.all([loadStudiosProjects(), loadStudiosStats()]);
+}
+
+async function rejectStudiosProject(projectId, title){
+  const reason = prompt(`Reason for rejecting "${title}" (shown to the creator):`, "");
+  if (reason === null) return;
+  const { error } = await supabaseClient.rpc("reject_project", { target_project_id: projectId, reason });
+  if (error){ console.error(error); showToast("Couldn't reject project"); return; }
+  showToast(`"${title}" rejected`);
+  await logAction("reject_studios_project", "studios_project", title, reason);
+  await Promise.all([loadStudiosProjects(), loadStudiosStats()]);
+}
+
+async function deleteStudiosProject(projectId, title){
+  if (!confirm(`Permanently delete "${title}"? This removes the project, its roster, and its film if published.`)) return;
+  const { error } = await supabaseClient.from("studios_projects").delete().eq("id", projectId);
+  if (error){ console.error(error); showToast("Couldn't delete project"); return; }
+  showToast(`"${title}" deleted`);
+  await logAction("delete_studios_project", "studios_project", title);
+  await Promise.all([loadStudiosProjects(), loadStudiosStats()]);
+}
+
+async function loadStudiosStaff(){
+  const tbody = document.getElementById("studiosStaffTableBody");
+
+  const { data, error } = await supabaseClient.rpc("get_studios_admins");
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Couldn't load staff. (Are you a Studios admin?)</td></tr>`; return; }
+
+  if (!data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="3">No Studios admins yet.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(admin => {
+    const isSelf = admin.user_id === currentUser.id;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(admin.email)}</td>
+      <td>${new Date(admin.created_at).toLocaleDateString()}</td>
+      <td>${isSelf ? `<span style="color:var(--muted);font-size:12px;">You</span>` : `<button class="btn danger sm" data-action="remove">Remove</button>`}</td>`;
+    if (!isSelf) row.querySelector('[data-action="remove"]').addEventListener("click", () => removeStudiosAdmin(admin.user_id, admin.email));
+    tbody.appendChild(row);
+  });
+}
+
+async function addStudiosAdmin(){
+  const email = document.getElementById("newStudiosAdminEmail").value.trim();
+  if (!email){ showToast("Enter an email"); return; }
+
+  const { error } = await supabaseClient.rpc("add_studios_admin", { target_email: email });
+  if (error){ console.error(error); showToast(error.message || "Couldn't add admin"); return; }
+
+  document.getElementById("newStudiosAdminEmail").value = "";
+  showToast("Studios admin added");
+  await logAction("add_studios_admin", "studios_staff", email);
+  await loadStudiosStaff();
+}
+
+async function removeStudiosAdmin(userId, email){
+  if (!confirm(`Remove ${email} from Studios staff?`)) return;
+  const { error } = await supabaseClient.rpc("remove_studios_admin", { target_user_id: userId });
+  if (error){ console.error(error); showToast(error.message || "Couldn't remove admin"); return; }
+  showToast("Studios admin removed");
+  await logAction("remove_studios_admin", "studios_staff", email);
+  await loadStudiosStaff();
+}
+
+// ==========================================================
+// MUSIC TAB
+// ==========================================================
+async function loadMusicTab(){
+  await Promise.all([loadMusicStats(), loadMusicReleases(), loadMusicStaff()]);
+  document.getElementById("addMusicAdminBtn").addEventListener("click", addMusicAdmin);
+}
+
+async function loadMusicStats(){
+  const { count: artists } = await supabaseClient.from("music_artists").select("*", { count: "exact", head: true });
+  const { count: releases } = await supabaseClient.from("music_releases").select("*", { count: "exact", head: true });
+  const { count: tracks } = await supabaseClient.from("music_tracks").select("*", { count: "exact", head: true });
+  const { data: playData } = await supabaseClient.from("music_tracks").select("play_count");
+  const totalPlays = (playData || []).reduce((sum, t) => sum + (t.play_count || 0), 0);
+
+  document.getElementById("statMusicArtists").textContent = artists ?? 0;
+  document.getElementById("statMusicReleases").textContent = releases ?? 0;
+  document.getElementById("statMusicTracks").textContent = tracks ?? 0;
+  document.getElementById("statMusicPlays").textContent = totalPlays;
+}
+
+async function loadMusicReleases(){
+  const tbody = document.getElementById("musicReleasesTableBody");
+
+  const { data: releases, error } = await supabaseClient
+    .from("music_releases").select("*, music_tracks(id)").order("created_at", { ascending:false }).limit(100);
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load releases.</td></tr>`; return; }
+
+  if (!releases || releases.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No releases yet.</td></tr>`; return; }
+
+  const artistIds = [...new Set(releases.map(r => r.artist_id).filter(Boolean))];
+  const { data: artists } = await supabaseClient.from("music_artists").select("id, name").in("id", artistIds);
+  const nameById = {};
+  (artists || []).forEach(a => { nameById[a.id] = a.name; });
+
+  tbody.innerHTML = "";
+  releases.forEach(release => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(release.title)}</td>
+      <td>${escapeHtml(nameById[release.artist_id] || "Unknown")}</td>
+      <td>${escapeHtml(release.release_type)}</td>
+      <td>${(release.music_tracks || []).length}</td>
+      <td><button class="btn danger sm" data-action="delete">Delete</button></td>`;
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteMusicRelease(release.id, release.title));
+    tbody.appendChild(row);
+  });
+}
+
+async function deleteMusicRelease(releaseId, title){
+  if (!confirm(`Permanently delete "${title}" and all its tracks?`)) return;
+  const { error } = await supabaseClient.from("music_releases").delete().eq("id", releaseId);
+  if (error){ console.error(error); showToast("Couldn't delete release"); return; }
+  showToast(`"${title}" deleted`);
+  await logAction("delete_music_release", "music_release", title);
+  await Promise.all([loadMusicReleases(), loadMusicStats()]);
+}
+
+async function loadMusicStaff(){
+  const tbody = document.getElementById("musicStaffTableBody");
+
+  const { data, error } = await supabaseClient.rpc("get_music_admins");
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Couldn't load staff. (Are you a Music admin?)</td></tr>`; return; }
+
+  if (!data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="3">No Music admins yet.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(admin => {
+    const isSelf = admin.user_id === currentUser.id;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(admin.email)}</td>
+      <td>${new Date(admin.created_at).toLocaleDateString()}</td>
+      <td>${isSelf ? `<span style="color:var(--muted);font-size:12px;">You</span>` : `<button class="btn danger sm" data-action="remove">Remove</button>`}</td>`;
+    if (!isSelf) row.querySelector('[data-action="remove"]').addEventListener("click", () => removeMusicAdmin(admin.user_id, admin.email));
+    tbody.appendChild(row);
+  });
+}
+
+async function addMusicAdmin(){
+  const email = document.getElementById("newMusicAdminEmail").value.trim();
+  if (!email){ showToast("Enter an email"); return; }
+
+  const { error } = await supabaseClient.rpc("add_music_admin", { target_email: email });
+  if (error){ console.error(error); showToast(error.message || "Couldn't add admin"); return; }
+
+  document.getElementById("newMusicAdminEmail").value = "";
+  showToast("Music admin added");
+  await logAction("add_music_admin", "music_staff", email);
+  await loadMusicStaff();
+}
+
+async function removeMusicAdmin(userId, email){
+  if (!confirm(`Remove ${email} from Music staff?`)) return;
+  const { error } = await supabaseClient.rpc("remove_music_admin", { target_user_id: userId });
+  if (error){ console.error(error); showToast(error.message || "Couldn't remove admin"); return; }
+  showToast("Music admin removed");
+  await logAction("remove_music_admin", "music_staff", email);
+  await loadMusicStaff();
 }
 
 gate();
