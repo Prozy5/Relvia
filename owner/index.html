@@ -529,7 +529,7 @@ async function logAction(action, target_type, target_label, details){
 // ==========================================================
 async function loadBotStatus(){
   const { data: config } = await supabaseClient
-    .from("live_bot_config").select("*, live_profiles!live_bot_config_bot_user_id_fkey(display_name, username)").eq("id", 1).maybeSingle();
+    .from("live_bot_config").select("*").eq("id", 1).maybeSingle();
 
   const statusLine = document.getElementById("botStatusLine");
   const toggleBtn = document.getElementById("toggleBotEnabledBtn");
@@ -538,7 +538,10 @@ async function loadBotStatus(){
     statusLine.textContent = "No bot account set yet.";
     toggleBtn.style.display = "none";
   } else {
-    const name = config.live_profiles?.display_name || "Unknown";
+    const { data: botProfile } = await supabaseClient
+      .from("live_profiles").select("display_name, username").eq("id", config.bot_user_id).maybeSingle();
+
+    const name = botProfile?.display_name || "Unknown";
     statusLine.innerHTML = `Bot account: <strong style="color:var(--text);">${escapeHtml(name)}</strong> — ${config.enabled ? `<span style="color:#8fd1a8;">Active</span>` : `<span style="color:#f2a8a3;">Paused</span>`}`;
     toggleBtn.style.display = "inline-block";
     toggleBtn.textContent = config.enabled ? "Pause bot" : "Resume bot";
