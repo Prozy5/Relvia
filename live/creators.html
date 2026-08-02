@@ -3,102 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relvia Social — Relvia Live</title>
+<title>RelviaCreators</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
-  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
-  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
-  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --background:#0a0806; --surface:rgba(20,16,11,.78); --surface-light:#1c150d; --glass:rgba(18,14,10,.6);
+  --border:#2a2018; --border-soft:#1c1610;
+  --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f; --bot-blue:#6ea8d8;
+  --radius-lg:24px; --radius-md:16px; --radius-sm:10px;
   --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html{ scroll-behavior:smooth; }
 body{
-  min-height:100vh; color:var(--text);
   background:
     radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(185,131,47,.06), transparent 55%),
     var(--background);
+  background-attachment:fixed; color:var(--text); overflow-x:hidden;
 }
-a{ text-decoration:none; color:inherit; }
-button, textarea{ font-family:inherit; }
+button, input, textarea{ font-family:inherit; }
 button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
 
+.gold-text{
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* TOPBAR */
 .topbar{
-  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft);
-  z-index:50;
+  position:fixed; top:0; left:0; right:0; height:76px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.82); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-soft); z-index:999;
 }
 .brand{ display:flex; align-items:center; gap:12px; }
 .brand-badge{
-  width:34px; height:34px; border-radius:50%; background:#000;
+  width:38px; height:38px; border-radius:50%; background:#000;
   background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
   border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold-start);
 }
-.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
-.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
-.back-link:hover{ color:var(--gold); }
+.brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.brand-sub{ font-size:10px; letter-spacing:3px; color:var(--gold); font-weight:600; display:flex; align-items:center; gap:5px; }
+.live-dot{ width:5px; height:5px; border-radius:50%; background:var(--live-red); }
 
-.container{ max-width:620px; margin:auto; padding:32px 20px 90px; }
-.page-title{ font-family:var(--font-display); font-size:28px; font-weight:600; margin-bottom:6px; }
-.page-sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
-
-.composer{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:26px; }
-.composer textarea{ width:100%; min-height:70px; background:transparent; border:none; resize:none; color:white; font-size:14.5px; line-height:1.5; }
-.composer textarea:focus{ outline:none; }
-.composer textarea::placeholder{ color:var(--muted-soft); }
-.composer-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:12px; border-top:1px solid var(--border-soft); }
-.char-count{ font-size:12px; color:var(--muted-soft); }
-.post-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; padding:9px 20px; border-radius:12px; font-weight:800; font-size:13px; }
-.post-btn:disabled{ opacity:.4; cursor:not-allowed; }
-
-.restricted-note{ background:rgba(224,87,79,.1); border:1px solid rgba(224,87,79,.35); color:#f2a8a3; padding:12px 16px; border-radius:14px; font-size:13px; margin-bottom:26px; display:none; }
-.restricted-note.show{ display:block; }
-
-.post-card{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:14px; }
-.post-header{ display:flex; align-items:center; gap:11px; }
-.post-avatar{
-  width:42px; height:42px; border-radius:50%; overflow:hidden; background:linear-gradient(135deg,#2a2a2a,#171717);
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;
+.search-container{ position:relative; width:400px; }
+.search-container input{
+  width:100%; height:44px; background:var(--surface-light); border:1px solid var(--border); border-radius:999px;
+  padding:0 44px 0 18px; color:white; font-size:14px; transition:border-color .2s;
 }
-.post-avatar img{ width:100%; height:100%; object-fit:cover; }
-.post-avatar.sm{ width:30px; height:30px; font-size:12px; }
-.post-name-row{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; }
+.search-container input:focus{ outline:none; border-color:var(--gold); }
+.search-container input::placeholder{ color:var(--muted-soft); }
+.search-icon{ position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none; }
+.search-results{
+  position:absolute; top:52px; left:0; right:0; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,.5); display:none; max-height:360px; overflow-y:auto;
+}
+.search-results.open{ display:block; }
+.search-result-item{
+  display:flex; align-items:center; justify-content:space-between; padding:12px 16px;
+  border-bottom:1px solid var(--border-soft); transition:background .2s;
+}
+.search-result-item:last-child{ border-bottom:none; }
+.search-result-item:hover{ background:var(--surface-light); }
+
+.nav-actions{ display:flex; align-items:center; gap:12px; }
+.back-pill{ font-size:11.5px; font-weight:700; color:var(--muted); border:1px solid var(--border); padding:8px 14px; border-radius:999px; }
+.back-pill:hover{ border-color:var(--gold); color:var(--gold); }
+.nav-button{
+  width:42px; height:42px; border-radius:50%; background:var(--surface-light); border:1px solid var(--border);
+  color:white; display:flex; align-items:center; justify-content:center; font-size:16px; transition:.2s;
+}
+.nav-button:hover{ background:var(--gold); color:#000; border-color:var(--gold); }
+.avatar{
+  width:44px; height:44px; border-radius:50%; overflow:hidden; background:linear-gradient(135deg,#2a2a2a,#171717);
+  border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; cursor:pointer;
+}
+
+/* LAYOUT */
+.app-container{
+  max-width:1700px; margin:auto; padding:104px 30px 60px; display:grid;
+  grid-template-columns:270px minmax(500px,820px) 340px; gap:26px; align-items:start;
+}
+.sidebar{ position:sticky; top:100px; }
+.feed{ width:100%; min-height:60vh; }
+.card{ background:var(--glass); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; margin-bottom:22px; backdrop-filter:blur(8px); }
+.view{ display:none; }
+.view.active{ display:block; }
+
+/* LEFT NAV */
+.navigation-card{ background:var(--glass); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; }
+.navigation-title{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin:6px 6px 16px; }
+.navigation-item{
+  height:48px; display:flex; align-items:center; gap:14px; padding:0 16px; border-radius:14px; color:#bdbdbd;
+  transition:.2s; margin-bottom:4px; font-size:15px; font-weight:500;
+}
+.navigation-item .nav-icon{ font-size:17px; width:20px; text-align:center; }
+.navigation-item:hover{ background:var(--surface-light); color:white; }
+.navigation-item.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-weight:700; }
+
+/* STORIES */
+.stories-container{ display:flex; gap:18px; overflow-x:auto; padding-bottom:2px; }
+.stories-container::-webkit-scrollbar{ display:none; }
+.story{ min-width:74px; text-align:center; cursor:pointer; }
+.story-border{ width:70px; height:70px; padding:2.5px; border-radius:50%; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); transition:transform .2s; }
+.story:hover .story-border{ transform:scale(1.05); }
+.story-avatar{ width:100%; height:100%; border-radius:50%; background:#1a1a1a; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:700; border:2px solid var(--background); }
+.story-name{ font-size:12px; color:var(--muted); margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:74px; }
+
+/* COMPOSER */
+.create-post{ display:flex; gap:16px; }
+.create-content{ flex:1; }
+.create-input{ width:100%; min-height:70px; background:transparent; border:none; resize:none; color:white; font-size:15.5px; line-height:1.6; }
+.create-input:focus{ outline:none; }
+.create-input::placeholder{ color:var(--muted-soft); }
+.image-url-row{ display:none; margin-top:10px; }
+.image-url-row.open{ display:block; }
+.image-url-row input{ width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:8px 12px; color:white; font-size:13px; }
+.create-actions{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:16px; border-top:1px solid var(--border-soft); }
+.media-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.media-button{ background:var(--surface-light); border:1px solid var(--border); color:#ccc; padding:9px 15px; border-radius:12px; font-size:13px; transition:.2s; }
+.media-button:hover{ border-color:var(--gold); color:var(--gold); }
+.publish-button{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; padding:11px 26px; border-radius:14px; font-weight:700; font-size:14px; transition:opacity .2s; }
+.publish-button:disabled{ opacity:.4; cursor:not-allowed; }
+.publish-button:not(:disabled):hover{ opacity:.88; }
+
+/* POST CARDS */
+.post-card{ transition:.2s; }
+.post-header{ display:flex; align-items:center; justify-content:space-between; }
+.post-user{ display:flex; align-items:center; gap:13px; }
+.post-avatar{ width:50px; height:50px; border-radius:50%; background:#1a1a1a; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.post-avatar.sm{ width:32px; height:32px; font-size:12px; }
+.post-info{ display:flex; flex-direction:column; }
+.post-name{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:7px; }
+.post-meta{ font-size:13px; color:var(--muted); margin-top:2px; }
 .verified-badge{
-  display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%;
-  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:9px; font-weight:900;
+  display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:10px; font-weight:900;
 }
-.staff-badge{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:9.5px; font-weight:800; padding:2px 8px; border-radius:999px; }
-.post-time{ font-size:12px; color:var(--muted); margin-top:1px; }
-.post-content{ margin-top:12px; font-size:14.5px; line-height:1.6; color:#e6e6e6; white-space:pre-wrap; }
-.post-actions{ display:flex; gap:16px; margin-top:12px; align-items:center; }
-.action-btn{ font-size:13px; color:var(--muted); display:flex; align-items:center; gap:6px; }
-.action-btn:hover{ color:var(--gold); }
-.action-btn.active{ color:var(--gold); font-weight:700; }
-.delete-btn{ font-size:12.5px; color:var(--muted-soft); margin-left:auto; }
+.staff-badge{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; }
+.bot-badge{ background:var(--bot-blue); color:#06111c; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; }
+.follow-button{
+  background:var(--surface-light); border:1px solid var(--gold); color:var(--gold);
+  padding:7px 16px; border-radius:12px; font-weight:700; font-size:12.5px; transition:.2s;
+}
+.follow-button:hover{ background:var(--gold); color:#000; }
+.follow-button.following{ border-color:var(--border); color:var(--muted); }
+.post-text{ margin-top:16px; font-size:15.5px; line-height:1.65; white-space:pre-wrap; color:#e6e6e6; }
+.post-media{ margin-top:16px; border-radius:18px; overflow:hidden; background:#141414; }
+.post-media img{ width:100%; display:block; max-height:600px; object-fit:cover; }
+
+.post-actions{ display:flex; justify-content:flex-start; gap:6px; align-items:center; border-top:1px solid var(--border-soft); margin-top:16px; padding-top:14px; }
+.action-button{ background:none; color:var(--muted); padding:8px 13px; border-radius:12px; transition:.2s; font-size:13.5px; display:flex; align-items:center; gap:6px; }
+.action-button:hover{ background:var(--surface-light); color:white; }
+.action-button.active{ color:var(--gold); font-weight:700; }
+.delete-btn{ margin-left:auto; font-size:12.5px; color:var(--muted-soft); }
 .delete-btn:hover{ color:#f2a8a3; }
 
-.repost-embed{ margin-top:12px; border:1px solid var(--border); border-radius:14px; padding:14px; background:var(--surface-light); }
-.repost-embed .post-header{ margin-bottom:8px; }
-.repost-embed .post-content{ margin-top:6px; font-size:13.5px; }
-.repost-tag{ font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.repost-embed{ margin-top:14px; border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--surface-light); }
+.repost-tag{ font-size:12px; color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
 
-.comments-section{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border-soft); display:none; }
+/* COMMENTS */
+.comments-section{ margin-top:16px; padding-top:16px; border-top:1px solid var(--border-soft); display:none; }
 .comments-section.open{ display:block; }
 .comment-composer{ display:flex; gap:10px; margin-bottom:14px; }
-.comment-composer textarea{
-  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
-  padding:9px 12px; color:white; font-size:13.5px; resize:none; min-height:38px;
-}
-.comment-composer textarea:focus{ outline:none; border-color:var(--gold); }
+.comment-composer textarea{ flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:9px 12px; color:white; font-size:13.5px; resize:none; min-height:38px; }
 .comment-composer button{ background:var(--gold); color:#000; font-weight:700; font-size:12.5px; padding:0 16px; border-radius:10px; }
-
 .comment{ display:flex; gap:10px; margin-bottom:12px; }
 .comment-body{ flex:1; }
 .comment-bubble{ background:var(--surface-light); border-radius:12px; padding:9px 12px; }
@@ -110,63 +189,293 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 .comment-replies{ margin-left:28px; margin-top:10px; }
 .reply-composer{ display:none; gap:8px; margin-top:8px; margin-left:4px; }
 .reply-composer.open{ display:flex; }
-.reply-composer textarea{
-  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
-  padding:7px 10px; color:white; font-size:12.5px; resize:none; min-height:32px;
-}
+.reply-composer textarea{ flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:7px 10px; color:white; font-size:12.5px; resize:none; min-height:32px; }
 .reply-composer button{ background:var(--gold); color:#000; font-weight:700; font-size:11.5px; padding:0 12px; border-radius:8px; }
-
-.empty-state, .loading-state{ text-align:center; color:var(--muted); padding:50px 0; font-size:13.5px; }
 .empty-comments{ color:var(--muted-soft); font-size:12.5px; padding:6px 0; }
+
+/* RIGHT SIDEBAR */
+.sidebar-panel{ background:var(--glass); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; margin-bottom:22px; }
+.sidebar-title{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:16px; }
+.trending-item{ padding:13px 0; border-bottom:1px solid var(--border-soft); }
+.trending-item:last-child{ border-bottom:none; }
+.trending-item h4{ font-size:14.5px; font-weight:600; }
+.trending-item p{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+.creator-card{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border-soft); }
+.creator-card:last-child{ border-bottom:none; }
+.creator-info{ display:flex; align-items:center; gap:11px; }
+.creator-avatar{ width:42px; height:42px; border-radius:50%; background:#1a1a1a; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+.creator-name{ font-size:13.5px; font-weight:700; }
+.creator-handle{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* EXPLORE */
+.explore-header{ margin-bottom:22px; }
+.explore-header h1{ font-family:var(--font-display); font-size:34px; font-weight:600; margin-bottom:6px; }
+.explore-header p{ color:var(--muted); font-size:14.5px; }
+.chip-row{ display:flex; gap:10px; overflow-x:auto; margin-bottom:26px; padding-bottom:4px; }
+.chip-row::-webkit-scrollbar{ display:none; }
+.chip{ white-space:nowrap; background:var(--surface-light); border:1px solid var(--border); padding:9px 18px; border-radius:999px; font-size:13.5px; color:#ddd; }
+.explore-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; border-radius:var(--radius-lg); overflow:hidden; }
+.explore-tile{ position:relative; aspect-ratio:1/1; background:#141414; overflow:hidden; cursor:pointer; }
+.explore-tile img{ width:100%; height:100%; object-fit:cover; transition:transform .35s; }
+.explore-tile:hover img{ transform:scale(1.06); }
+.explore-tile-overlay{
+  position:absolute; inset:0; background:rgba(0,0,0,.45); opacity:0; display:flex; align-items:center; justify-content:center;
+  gap:22px; transition:opacity .2s; color:white; font-weight:700; font-size:14px;
+}
+.explore-tile:hover .explore-tile-overlay{ opacity:1; }
+
+/* PROFILE */
+.profile-banner{ height:190px; border-radius:var(--radius-lg) var(--radius-lg) 0 0; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; overflow:hidden; border:1px solid var(--border); border-bottom:none; }
+.profile-banner::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 25% 30%, rgba(217,169,75,.18), transparent 60%); }
+.profile-header-card{ padding:0; margin-bottom:22px; overflow:hidden; }
+.profile-body{ padding:0 26px 26px; position:relative; }
+.profile-avatar-lg{
+  width:110px; height:110px; border-radius:50%; overflow:hidden; border:4px solid var(--surface); background:#1a1a1a;
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:34px; margin-top:-55px;
+}
+.profile-top-row{ display:flex; align-items:flex-end; justify-content:space-between; }
+.edit-profile-btn{ margin-top:16px; background:var(--surface-light); border:1px solid var(--border); padding:10px 20px; border-radius:14px; font-weight:700; font-size:13.5px; }
+.edit-profile-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.profile-name-row{ display:flex; align-items:center; gap:10px; margin-top:16px; }
+.profile-name-row h2{ font-family:var(--font-display); font-size:28px; font-weight:700; }
+.profile-handle{ color:var(--muted); font-size:14.5px; margin-top:2px; }
+.profile-bio{ margin-top:14px; font-size:14.5px; line-height:1.6; color:#dcdcdc; max-width:520px; }
+.profile-stats{ display:flex; gap:28px; margin-top:20px; }
+.profile-stat{ display:flex; flex-direction:column; }
+.profile-stat b{ font-size:18px; font-weight:800; }
+.profile-stat span{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+
+/* CREATOR PLUS */
+.cplus-hero{ text-align:center; padding:44px 30px; }
+.cplus-hero-icon{ font-size:30px; color:var(--gold); margin-bottom:10px; }
+.cplus-hero h1{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:12px; }
+.cplus-hero p{ color:var(--muted); font-size:14.5px; max-width:460px; margin:0 auto; line-height:1.6; }
+.cplus-status-card{ text-align:center; padding:30px; }
+.cplus-status-card.active{ border-color:var(--gold-end); }
+.cplus-perks-list{ list-style:none; max-width:400px; margin:20px auto 0; text-align:left; }
+.cplus-perks-list li{ font-size:14px; color:#ddd; padding:8px 0; display:flex; gap:9px; }
+.cplus-perks-list li::before{ content:"✦"; color:var(--gold); font-size:11px; margin-top:3px; }
+
+.empty-state{ padding:50px 20px; text-align:center; color:var(--muted); }
+.empty-state .empty-icon{ font-size:32px; margin-bottom:12px; opacity:.6; }
+.empty-state h4{ color:#ddd; font-size:16px; margin-bottom:6px; }
+.empty-state p{ font-size:13.5px; }
+.skeleton{ background:linear-gradient(90deg,#141414 25%,#1c1c1c 37%,#141414 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite; border-radius:14px; }
+@keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+.skeleton-post{ height:150px; margin-bottom:22px; }
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--surface);
+  border:1px solid var(--gold); color:white; padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media(max-width:1350px){ .app-container{ grid-template-columns:1fr; } .sidebar{ display:none; } .search-container{ width:280px; } }
+@media(max-width:850px){
+  .topbar{ padding:0 16px; } .search-container{ display:none; } .app-container{ padding:92px 14px 40px; }
+  .card{ padding:16px; border-radius:20px; } .create-actions{ flex-direction:column; align-items:stretch; gap:14px; }
+  .publish-button{ width:100%; } .explore-grid{ grid-template-columns:repeat(2,1fr); }
+}
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="live.html">
+  <div class="brand">
     <div class="brand-badge">R</div>
-    <span class="brand-name">Relvia Social</span>
-  </a>
-  <a class="back-link" href="live.html">← Back to Relvia Live</a>
-</header>
-
-<div class="container">
-  <div class="page-title">Relvia Social</div>
-  <div class="page-sub">Where Relvia Live creators and viewers hang out between streams.</div>
-
-  <div class="restricted-note" id="restrictedNote">Your account is currently restricted from posting.</div>
-
-  <div class="composer" id="composer">
-    <textarea id="postInput" placeholder="Share something with the community..." maxlength="500"></textarea>
-    <div class="composer-actions">
-      <span class="char-count" id="charCount">500 left</span>
-      <button class="post-btn" id="postBtn" disabled>Post</button>
+    <div class="brand-text">
+      <span class="brand-name">RelviaCreators</span>
+      <span class="brand-sub"><span class="live-dot"></span>PART OF RELVIA LIVE</span>
     </div>
   </div>
 
-  <div id="feed"><div class="loading-state">Loading feed...</div></div>
-</div>
+  <div class="search-container">
+    <input type="text" placeholder="Search RelviaCreators" id="searchInput" autocomplete="off">
+    <span class="search-icon">⌕</span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="nav-actions">
+    <a class="back-pill" href="welcome.html">← Relvia Live</a>
+    <button class="nav-button" id="notificationsButton" title="Notifications">✧</button>
+    <div class="avatar" id="profileAvatar" title="Your profile"></div>
+  </div>
+</header>
+
+<main class="app-container">
+
+  <aside class="sidebar">
+    <div class="navigation-card">
+      <div class="navigation-title">Menu</div>
+      <div class="navigation-item active" data-view="home"><span class="nav-icon">⌂</span>Home</div>
+      <div class="navigation-item" data-view="following"><span class="nav-icon">◍</span>Following</div>
+      <div class="navigation-item" data-view="explore"><span class="nav-icon">◈</span>Explore</div>
+      <div class="navigation-item" data-view="notifications"><span class="nav-icon">✧</span>Notifications</div>
+      <div class="navigation-item" data-view="profile"><span class="nav-icon">◉</span>Profile</div>
+      <div class="navigation-item" data-view="creatorplus"><span class="nav-icon">♛</span>Creator Plus</div>
+    </div>
+  </aside>
+
+  <section class="feed">
+
+    <!-- HOME -->
+    <div class="view active" id="view-home">
+      <div class="card">
+        <div class="stories-container" id="storiesContainer">
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+          <div class="skeleton" style="width:74px;height:74px;border-radius:50%;"></div>
+        </div>
+      </div>
+
+      <div class="card" id="composerCard">
+        <div class="create-post">
+          <div class="avatar" id="createAvatar"></div>
+          <div class="create-content">
+            <textarea class="create-input" id="createPostInput" placeholder="Share something with RelviaCreators..." maxlength="500"></textarea>
+            <div class="image-url-row" id="imageUrlRow">
+              <input type="text" id="imageUrlInput" placeholder="Paste an image URL...">
+            </div>
+            <div class="create-actions">
+              <div class="media-actions">
+                <button class="media-button" id="toggleImageBtn">Add image</button>
+              </div>
+              <button class="publish-button" id="publishPost" disabled>Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="restrictedNote" style="display:none;color:var(--muted);font-size:13.5px;"></div>
+
+      <div id="feedContainer">
+        <div class="card skeleton skeleton-post"></div>
+        <div class="card skeleton skeleton-post"></div>
+      </div>
+    </div>
+
+    <!-- FOLLOWING -->
+    <div class="view" id="view-following">
+      <div class="explore-header"><h1 class="gold-text">Following</h1><p>Posts from creators you follow</p></div>
+      <div id="followingContainer"></div>
+    </div>
+
+    <!-- EXPLORE -->
+    <div class="view" id="view-explore">
+      <div class="explore-header">
+        <h1 class="gold-text">Explore</h1>
+        <p>Discover creators and posts across RelviaCreators</p>
+      </div>
+      <div class="chip-row" id="exploreChips"></div>
+      <div class="explore-grid" id="exploreGrid">
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+        <div class="skeleton" style="aspect-ratio:1/1;"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="view" id="view-profile">
+      <div class="card profile-header-card">
+        <div class="profile-banner"></div>
+        <div class="profile-body">
+          <div class="profile-top-row">
+            <div class="profile-avatar-lg" id="profileAvatarLg"></div>
+            <a class="edit-profile-btn" href="account-settings.html">Edit profile</a>
+          </div>
+          <div class="profile-name-row">
+            <h2 id="profileDisplayName">—</h2>
+            <span id="profileBadges"></span>
+          </div>
+          <div class="profile-handle" id="profileHandle">@—</div>
+          <p class="profile-bio" id="profileBio"></p>
+          <div class="profile-stats">
+            <div class="profile-stat"><b id="statPosts">0</b><span>Posts</span></div>
+            <div class="profile-stat"><b id="statFollowers">0</b><span>Followers</span></div>
+            <div class="profile-stat"><b id="statFollowing">0</b><span>Following</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="profilePostsContainer">
+        <div class="card skeleton skeleton-post"></div>
+      </div>
+    </div>
+
+    <!-- CREATOR PLUS -->
+    <div class="view" id="view-creatorplus">
+      <div class="card cplus-hero">
+        <div class="cplus-hero-icon">♛</div>
+        <h1 class="gold-text">Creator Plus</h1>
+        <p>The verified badge for Relvia Live creators — shown next to your name everywhere on RelviaCreators and in every stream you host.</p>
+      </div>
+      <div class="card cplus-status-card" id="cplusStatusCard"></div>
+    </div>
+
+    <!-- PLACEHOLDER (notifications) -->
+    <div class="view" id="view-placeholder">
+      <div class="card">
+        <div class="empty-state">
+          <div class="empty-icon">✦</div>
+          <h4>Notifications coming soon</h4>
+          <p>You'll see likes, comments, and follows here soon.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <aside class="sidebar">
+    <div class="sidebar-panel">
+      <h3 class="sidebar-title">Trending</h3>
+      <div id="trendingContainer"></div>
+    </div>
+    <div class="sidebar-panel">
+      <h3 class="sidebar-title">Suggested Creators</h3>
+      <div id="suggestedContainer"></div>
+    </div>
+  </aside>
+
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
 
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 
+// Isolated storage key — same Live-only session as the rest of
+// Relvia Live. This is intentionally NOT the main Relvia account.
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-live-auth" }
 });
 
 let currentUser = null;
+let profile = null;
 let isOwner = false;
+let currentView = "home";
 let likedPostIds = new Set();
+let followingIds = new Set();
 let profileCache = {};
 let badgeCache = {};
+let exploreLoaded = false;
 
 function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
-
+function avatarInnerHTML(url, name){
+  return url ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">` : (name || "R").charAt(0).toUpperCase();
+}
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
 function timeAgo(dateStr){
+  if (!dateStr) return "";
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
@@ -177,156 +486,236 @@ function timeAgo(dateStr){
   if (days < 7) return `${days}d`;
   return new Date(dateStr).toLocaleDateString();
 }
-
 function nameBadgesHTML(userId){
   const author = profileCache[userId];
   const badge = badgeCache[userId];
-  return `${author?.is_bot ? `<span class="staff-badge" style="background:linear-gradient(135deg,#8a9bd9,#5f6fb0);">BOT</span>` : ""}${author?.creator_plus ? `<span class="verified-badge">✓</span>` : ""}${badge ? `<span class="staff-badge">${escapeHtml(badge.badge_label)}</span>` : ""}`;
+  return `${author?.is_bot ? `<span class="bot-badge">BOT</span>` : ""}${author?.creator_plus ? `<span class="verified-badge">✓</span>` : ""}${badge ? `<span class="staff-badge">${escapeHtml(badge.badge_label)}</span>` : ""}`;
+}
+function followBtnHTML(userId){
+  if (!currentUser || userId === currentUser.id) return "";
+  const isFollowing = followingIds.has(userId);
+  return `<button class="follow-button ${isFollowing ? "following" : ""}" data-follow-target="${userId}">${isFollowing ? "Following" : "Follow"}</button>`;
 }
 
-function avatarHTML(userId){
-  const author = profileCache[userId];
-  const initial = escapeHtml((author?.display_name || "R").charAt(0).toUpperCase());
-  return author?.avatar_url ? `<img src="${author.avatar_url}">` : initial;
-}
-
+// ==========================================================
+// INIT
+// ==========================================================
 async function initialize(){
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
 
-  const { data: userData } = await supabaseClient.auth.getUser();
-  if (!userData.user){ window.location.href = "live-login.html"; return; }
+    const { data: userData, error } = await supabaseClient.auth.getUser();
+    if (error || !userData.user){ window.location.href = "live-login.html"; return; }
+    currentUser = userData.user;
 
-  currentUser = userData.user;
+    await loadProfile();
 
-  const { data: ownerRow } = await supabaseClient
-    .from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
-  isOwner = !!ownerRow;
+    const restricted = profile?.is_deactivated ||
+      (profile?.banned_from_watching_until && new Date(profile.banned_from_watching_until) > new Date());
+    if (restricted){
+      document.getElementById("composerCard").style.display = "none";
+      document.getElementById("restrictedNote").style.display = "block";
+      document.getElementById("restrictedNote").textContent = "Your account is currently restricted from posting.";
+    } else {
+      setupComposer();
+    }
 
-  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
-  const lock = (locks || []).find(l => l.page_key === "social");
-  const unlockKey = "relvia-live-unlock-social";
+    const { data: ownerRow } = await supabaseClient.from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+    isOwner = !!ownerRow;
 
-  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
-    document.querySelector(".container").innerHTML = `
-      <div style="text-align:center;padding:80px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
-        <h2 style="font-family:var(--font-display);font-size:24px;">Relvia Social is temporarily closed</h2>
-        <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
-          <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
-        </div>
-        <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
-      </div>`;
+    const { data: myLikes } = await supabaseClient.from("live_community_likes").select("post_id").eq("user_id", currentUser.id);
+    likedPostIds = new Set((myLikes || []).map(l => l.post_id));
 
-    document.getElementById("unlockSubmit").addEventListener("click", async () => {
-      const passcode = document.getElementById("unlockPasscode").value;
-      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "social", passcode });
-      if (isValid){
-        sessionStorage.setItem(unlockKey, "true");
-        window.location.reload();
-      } else {
-        document.getElementById("unlockError").style.display = "block";
-      }
-    });
-    return;
+    const { data: myFollows } = await supabaseClient.from("live_follows").select("followed_id").eq("follower_id", currentUser.id);
+    followingIds = new Set((myFollows || []).map(f => f.followed_id));
+
+    setupNavigation();
+    setupSearch();
+    await loadStories();
+    await loadFeed();
+    await loadTrendingSidebar();
+    await loadSuggestedSidebar();
+    listenForRealtime();
+  } catch (err){
+    console.error("RelviaCreators init failed:", err);
+    window.location.href = "live-login.html";
   }
+}
 
-  const { data: profile } = await supabaseClient
-    .from("live_profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .maybeSingle();
+async function loadProfile(){
+  const { data } = await supabaseClient.from("live_profiles").select("*").eq("id", currentUser.id).maybeSingle();
+  profile = data;
+  profileCache[currentUser.id] = profile;
+  const html = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
+  document.getElementById("profileAvatar").innerHTML = html;
+  document.getElementById("createAvatar").innerHTML = html;
+}
 
-  const restricted = profile?.is_deactivated ||
-    (profile?.banned_from_watching_until && new Date(profile.banned_from_watching_until) > new Date());
+// ==========================================================
+// NAVIGATION
+// ==========================================================
+function setupNavigation(){
+  document.querySelectorAll(".navigation-item").forEach(item => {
+    item.addEventListener("click", () => switchView(item.dataset.view, item));
+  });
+  document.getElementById("notificationsButton").addEventListener("click", () => {
+    switchView("notifications", document.querySelector('.navigation-item[data-view="notifications"]'));
+  });
+  document.getElementById("profileAvatar").addEventListener("click", () => {
+    switchView("profile", document.querySelector('.navigation-item[data-view="profile"]'));
+  });
+}
 
-  if (restricted){
-    document.getElementById("restrictedNote").classList.add("show");
-    document.getElementById("composer").style.display = "none";
+async function switchView(view, navItem){
+  currentView = view;
+  document.querySelectorAll(".navigation-item").forEach(i => i.classList.remove("active"));
+  if (navItem) navItem.classList.add("active");
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+
+  if (view === "home"){
+    document.getElementById("view-home").classList.add("active");
+  } else if (view === "following"){
+    document.getElementById("view-following").classList.add("active");
+    await loadFollowingFeed();
+  } else if (view === "explore"){
+    document.getElementById("view-explore").classList.add("active");
+    if (!exploreLoaded) await loadExplore();
+  } else if (view === "profile"){
+    document.getElementById("view-profile").classList.add("active");
+    await loadProfileView();
+  } else if (view === "creatorplus"){
+    document.getElementById("view-creatorplus").classList.add("active");
+    renderCreatorPlusStatus();
   } else {
-    document.getElementById("postInput").addEventListener("input", handleInputChange);
-    document.getElementById("postBtn").addEventListener("click", () => submitPost());
+    document.getElementById("view-placeholder").classList.add("active");
   }
-
-  const { data: myLikes } = await supabaseClient
-    .from("live_community_likes").select("post_id").eq("user_id", currentUser.id);
-  likedPostIds = new Set((myLikes || []).map(l => l.post_id));
-
-  await loadFeed();
-  listenForRealtime();
 }
 
-function handleInputChange(e){
-  const len = e.target.value.length;
-  document.getElementById("charCount").textContent = `${500 - len} left`;
-  document.getElementById("postBtn").disabled = e.target.value.trim().length === 0;
+// ==========================================================
+// STORIES (top creators)
+// ==========================================================
+async function loadStories(){
+  const { data } = await supabaseClient.from("live_profiles").select("*").order("created_at", { ascending:false }).limit(15);
+  const container = document.getElementById("storiesContainer");
+  if (!data || data.length === 0){ container.innerHTML = `<div class="empty-comments">No creators yet.</div>`; return; }
+  container.innerHTML = "";
+  data.forEach(user => {
+    profileCache[user.id] = user;
+    container.innerHTML += `
+      <a class="story" href="profile.html?user=${user.id}">
+        <div class="story-border"><div class="story-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div></div>
+        <div class="story-name">${escapeHtml(user.display_name)}</div>
+      </a>`;
+  });
 }
 
-async function submitPost(){
-  const input = document.getElementById("postInput");
+// ==========================================================
+// COMPOSER
+// ==========================================================
+function setupComposer(){
+  const input = document.getElementById("createPostInput");
+  const button = document.getElementById("publishPost");
+  const imageUrlRow = document.getElementById("imageUrlRow");
+  const imageUrlInput = document.getElementById("imageUrlInput");
+
+  function update(){ button.disabled = input.value.trim().length === 0 && imageUrlInput.value.trim().length === 0; }
+  input.addEventListener("input", update);
+  imageUrlInput.addEventListener("input", update);
+  document.getElementById("toggleImageBtn").addEventListener("click", () => imageUrlRow.classList.toggle("open"));
+  button.addEventListener("click", publishPost);
+}
+
+async function publishPost(){
+  const input = document.getElementById("createPostInput");
+  const imageUrlInput = document.getElementById("imageUrlInput");
   const content = input.value.trim();
-  if (!content) return;
+  const image_url = imageUrlInput.value.trim() || null;
+  if (!content && !image_url) return;
 
-  const { error } = await supabaseClient
-    .from("live_community_posts")
-    .insert({ user_id: currentUser.id, content });
+  const { error } = await supabaseClient.from("live_community_posts").insert({ user_id: currentUser.id, content, image_url });
+  if (error){ console.error(error); showToast("Couldn't post"); return; }
 
-  if (error){ console.error(error); alert("Couldn't post. Try again."); return; }
-
-  input.value = "";
-  document.getElementById("charCount").textContent = "500 left";
-  document.getElementById("postBtn").disabled = true;
+  input.value = ""; imageUrlInput.value = "";
+  document.getElementById("imageUrlRow").classList.remove("open");
+  document.getElementById("publishPost").disabled = true;
+  showToast("Posted to RelviaCreators");
   await loadFeed();
 }
 
 async function submitRepost(originalId){
   const note = prompt("Add a comment to your repost (optional):", "");
   if (note === null) return;
-  const { error } = await supabaseClient
-    .from("live_community_posts")
-    .insert({ user_id: currentUser.id, content: note.trim(), repost_of: originalId });
-  if (error){ console.error(error); alert("Couldn't repost."); return; }
+  const { error } = await supabaseClient.from("live_community_posts").insert({ user_id: currentUser.id, content: note.trim(), repost_of: originalId });
+  if (error){ console.error(error); showToast("Couldn't repost"); return; }
+  showToast("Reposted");
   await loadFeed();
 }
 
+async function toggleFollow(targetId){
+  if (followingIds.has(targetId)){
+    await supabaseClient.from("live_follows").delete().eq("follower_id", currentUser.id).eq("followed_id", targetId);
+    followingIds.delete(targetId);
+  } else {
+    await supabaseClient.from("live_follows").insert({ follower_id: currentUser.id, followed_id: targetId });
+    followingIds.add(targetId);
+  }
+  document.querySelectorAll(`[data-follow-target="${targetId}"]`).forEach(btn => {
+    const following = followingIds.has(targetId);
+    btn.textContent = following ? "Following" : "Follow";
+    btn.classList.toggle("following", following);
+  });
+  await loadSuggestedSidebar();
+}
+
+// ==========================================================
+// FEED (shared post card renderer + comments, reused everywhere)
+// ==========================================================
 async function loadFeed(){
-  const feed = document.getElementById("feed");
-
+  const container = document.getElementById("feedContainer");
   const { data: posts, error } = await supabaseClient
-    .from("live_community_posts")
-    .select("*")
-    .order("created_at", { ascending:false })
-    .limit(50);
+    .from("live_community_posts").select("*").order("created_at", { ascending:false }).limit(50);
 
-  if (error){ console.error(error); feed.innerHTML = `<div class="empty-state">Couldn't load the feed.</div>`; return; }
+  if (error){ console.error(error); container.innerHTML = ""; return; }
 
   if (!posts || posts.length === 0){
-    feed.innerHTML = `<div class="empty-state">No posts yet — be the first to share something.</div>`;
+    container.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">✦</div><h4>No posts yet</h4><p>Be the first to share something.</p></div></div>`;
     return;
   }
 
+  await renderPostList(posts, container);
+}
+
+async function loadFollowingFeed(){
+  const container = document.getElementById("followingContainer");
+  const ids = [...followingIds];
+  if (ids.length === 0){
+    container.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">◍</div><h4>You're not following anyone yet</h4><p>Check the sidebar for suggestions.</p></div></div>`;
+    return;
+  }
+  const { data: posts } = await supabaseClient
+    .from("live_community_posts").select("*").in("user_id", ids).order("created_at", { ascending:false }).limit(50);
+
+  if (!posts || posts.length === 0){
+    container.innerHTML = `<div class="card"><div class="empty-state"><p>No posts from people you follow yet.</p></div></div>`;
+    return;
+  }
+  await renderPostList(posts, container);
+}
+
+async function renderPostList(posts, container){
   const repostSourceIds = posts.map(p => p.repost_of).filter(Boolean);
   let originals = {};
   if (repostSourceIds.length > 0){
-    const { data: originalPosts } = await supabaseClient
-      .from("live_community_posts").select("*").in("id", repostSourceIds);
+    const { data: originalPosts } = await supabaseClient.from("live_community_posts").select("*").in("id", repostSourceIds);
     (originalPosts || []).forEach(p => { originals[p.id] = p; });
   }
 
-  const allUserIds = [...new Set([
-    ...posts.map(p => p.user_id),
-    ...Object.values(originals).map(p => p.user_id),
-  ])];
-
+  const allUserIds = [...new Set([...posts.map(p => p.user_id), ...Object.values(originals).map(p => p.user_id)])];
   const { data: profiles } = await supabaseClient
-    .from("live_profiles")
-    .select("id, display_name, username, avatar_url, creator_plus, is_bot")
-    .in("id", allUserIds);
-  profileCache = {};
+    .from("live_profiles").select("id, display_name, username, avatar_url, creator_plus, is_bot").in("id", allUserIds);
   (profiles || []).forEach(p => { profileCache[p.id] = p; });
 
-  badgeCache = {};
   try {
     const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: allUserIds });
     (badges || []).forEach(b => { badgeCache[b.user_id] = b; });
@@ -341,49 +730,60 @@ async function loadFeed(){
   const commentCounts = {};
   (commentRows || []).forEach(c => { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1; });
 
-  feed.innerHTML = "";
+  container.innerHTML = "";
   posts.forEach(post => {
-    feed.appendChild(buildPostCard(post, { likeCount: likeCounts[post.id] || 0, commentCount: commentCounts[post.id] || 0, original: post.repost_of ? originals[post.repost_of] : null }));
+    container.appendChild(buildPostCard(post, {
+      likeCount: likeCounts[post.id] || 0, commentCount: commentCounts[post.id] || 0,
+      original: post.repost_of ? originals[post.repost_of] : null,
+    }));
   });
 }
 
 function buildPostCard(post, { likeCount, commentCount, original }){
   const isLiked = likedPostIds.has(post.id);
   const canDelete = post.user_id === currentUser.id || isOwner;
+  const author = profileCache[post.user_id];
 
   const card = document.createElement("div");
-  card.className = "post-card";
+  card.className = "card post-card";
   card.innerHTML = `
     <div class="post-header">
-      <div class="post-avatar">${avatarHTML(post.user_id)}</div>
-      <div>
-        <div class="post-name-row">
-          <a href="profile.html?user=${post.user_id}" style="color:inherit;">${escapeHtml(profileCache[post.user_id]?.display_name || "Unknown")}</a>
-          ${nameBadgesHTML(post.user_id)}
+      <div class="post-user">
+        <div class="post-avatar">${avatarInnerHTML(author?.avatar_url, author?.display_name)}</div>
+        <div class="post-info">
+          <div class="post-name">
+            <a href="profile.html?user=${post.user_id}">${escapeHtml(author?.display_name || "Unknown")}</a>
+            ${nameBadgesHTML(post.user_id)}
+          </div>
+          <div class="post-meta">@${escapeHtml(author?.username || "unknown")} · ${timeAgo(post.created_at)}</div>
         </div>
-        <div class="post-time">${timeAgo(post.created_at)}</div>
       </div>
+      ${followBtnHTML(post.user_id)}
     </div>
-    ${post.content ? `<div class="post-content">${escapeHtml(post.content)}</div>` : ""}
+
+    ${post.content ? `<div class="post-text">${escapeHtml(post.content)}</div>` : ""}
+    ${post.image_url ? `<div class="post-media"><img src="${post.image_url}" loading="lazy"></div>` : ""}
+
     ${original ? `
       <div class="repost-embed">
         <div class="repost-tag">↻ Reposted</div>
         <div class="post-header">
-          <div class="post-avatar sm">${avatarHTML(original.user_id)}</div>
-          <div>
-            <div class="post-name-row">
-              <a href="profile.html?user=${original.user_id}" style="color:inherit;">${escapeHtml(profileCache[original.user_id]?.display_name || "Unknown")}</a>
-              ${nameBadgesHTML(original.user_id)}
+          <div class="post-user">
+            <div class="post-avatar sm">${avatarInnerHTML(profileCache[original.user_id]?.avatar_url, profileCache[original.user_id]?.display_name)}</div>
+            <div class="post-info">
+              <div class="post-name"><a href="profile.html?user=${original.user_id}">${escapeHtml(profileCache[original.user_id]?.display_name || "Unknown")}</a> ${nameBadgesHTML(original.user_id)}</div>
+              <div class="post-meta">${timeAgo(original.created_at)}</div>
             </div>
-            <div class="post-time">${timeAgo(original.created_at)}</div>
           </div>
         </div>
-        <div class="post-content">${escapeHtml(original.content || "")}</div>
+        ${original.content ? `<div class="post-text">${escapeHtml(original.content)}</div>` : ""}
+        ${original.image_url ? `<div class="post-media"><img src="${original.image_url}" loading="lazy"></div>` : ""}
       </div>` : ""}
+
     <div class="post-actions">
-      <button class="action-btn ${isLiked ? "active" : ""}" data-action="like">${isLiked ? "♥" : "♡"} ${likeCount}</button>
-      <button class="action-btn" data-action="comment">💬 ${commentCount}</button>
-      <button class="action-btn" data-action="repost">↻ Repost</button>
+      <button class="action-button ${isLiked ? "active" : ""}" data-action="like">${isLiked ? "♥" : "♡"} ${likeCount}</button>
+      <button class="action-button" data-action="comment">Comment · ${commentCount}</button>
+      <button class="action-button" data-action="repost">↻ Repost</button>
       ${canDelete ? `<button class="delete-btn" data-action="delete">Delete</button>` : ""}
     </div>
     <div class="comments-section" id="comments-${post.id}"></div>
@@ -394,6 +794,8 @@ function buildPostCard(post, { likeCount, commentCount, original }){
   card.querySelector('[data-action="repost"]').addEventListener("click", () => submitRepost(post.id));
   const deleteBtn = card.querySelector('[data-action="delete"]');
   if (deleteBtn) deleteBtn.addEventListener("click", () => deletePost(post.id));
+  const followBtn = card.querySelector('[data-follow-target]');
+  if (followBtn) followBtn.addEventListener("click", () => toggleFollow(post.user_id));
 
   return card;
 }
@@ -406,25 +808,26 @@ async function toggleLike(postId){
     await supabaseClient.from("live_community_likes").insert({ post_id: postId, user_id: currentUser.id });
     likedPostIds.add(postId);
   }
-  await loadFeed();
+  if (currentView === "profile") await loadProfileView();
+  else if (currentView === "following") await loadFollowingFeed();
+  else await loadFeed();
 }
 
 async function deletePost(postId){
   if (!confirm("Delete this post?")) return;
   const { error } = await supabaseClient.from("live_community_posts").delete().eq("id", postId);
-  if (error){ console.error(error); alert("Couldn't delete post."); return; }
-  await loadFeed();
+  if (error){ console.error(error); showToast("Couldn't delete post"); return; }
+  showToast("Post deleted");
+  if (currentView === "profile") await loadProfileView();
+  else await loadFeed();
 }
 
+// ==========================================================
+// COMMENTS (threaded)
+// ==========================================================
 async function toggleComments(postId){
   const section = document.getElementById(`comments-${postId}`);
-  const isOpen = section.classList.contains("open");
-
-  if (isOpen){
-    section.classList.remove("open");
-    return;
-  }
-
+  if (section.classList.contains("open")){ section.classList.remove("open"); return; }
   section.classList.add("open");
   section.innerHTML = `<div class="empty-comments">Loading comments...</div>`;
   await renderComments(postId, section);
@@ -432,17 +835,13 @@ async function toggleComments(postId){
 
 async function renderComments(postId, section){
   const { data: comments, error } = await supabaseClient
-    .from("live_community_comments")
-    .select("*")
-    .eq("post_id", postId)
-    .order("created_at", { ascending:true });
+    .from("live_community_comments").select("*").eq("post_id", postId).order("created_at", { ascending:true });
 
   if (error){ section.innerHTML = `<div class="empty-comments">Couldn't load comments.</div>`; return; }
 
   const userIds = [...new Set((comments || []).map(c => c.user_id))];
   if (userIds.length > 0){
-    const { data: profiles } = await supabaseClient
-      .from("live_profiles").select("id, display_name, username, avatar_url, creator_plus, is_bot").in("id", userIds);
+    const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name, username, avatar_url, creator_plus, is_bot").in("id", userIds);
     (profiles || []).forEach(p => { profileCache[p.id] = p; });
     try {
       const { data: badges } = await supabaseClient.rpc("get_owner_badges", { target_ids: userIds });
@@ -455,8 +854,7 @@ async function renderComments(postId, section){
       <textarea placeholder="Write a comment..." data-role="top-comment-input" maxlength="300"></textarea>
       <button data-role="top-comment-submit">Reply</button>
     </div>
-    <div data-role="comment-list"></div>
-  `;
+    <div data-role="comment-list"></div>`;
 
   section.querySelector('[data-role="top-comment-submit"]').addEventListener("click", async () => {
     const textarea = section.querySelector('[data-role="top-comment-input"]');
@@ -466,11 +864,7 @@ async function renderComments(postId, section){
   });
 
   const list = section.querySelector('[data-role="comment-list"]');
-
-  if (!comments || comments.length === 0){
-    list.innerHTML = `<div class="empty-comments">No comments yet.</div>`;
-    return;
-  }
+  if (!comments || comments.length === 0){ list.innerHTML = `<div class="empty-comments">No comments yet.</div>`; return; }
 
   const byParent = {};
   comments.forEach(c => {
@@ -482,62 +876,258 @@ async function renderComments(postId, section){
   function renderComment(c){
     const el = document.createElement("div");
     el.className = "comment";
+    const author = profileCache[c.user_id];
     el.innerHTML = `
-      <div class="post-avatar sm">${avatarHTML(c.user_id)}</div>
+      <div class="post-avatar sm">${avatarInnerHTML(author?.avatar_url, author?.display_name)}</div>
       <div class="comment-body">
         <div class="comment-bubble">
-          <div class="comment-name">${escapeHtml(profileCache[c.user_id]?.display_name || "Unknown")} ${nameBadgesHTML(c.user_id)}</div>
+          <div class="comment-name">${escapeHtml(author?.display_name || "Unknown")} ${nameBadgesHTML(c.user_id)}</div>
           <div class="comment-text">${escapeHtml(c.content)}</div>
         </div>
-        <div class="comment-meta">
-          <span>${timeAgo(c.created_at)}</span>
-          <button data-role="reply-toggle">Reply</button>
-        </div>
-        <div class="reply-composer" data-role="reply-box">
-          <textarea placeholder="Write a reply..." maxlength="300"></textarea>
-          <button data-role="reply-submit">Reply</button>
-        </div>
+        <div class="comment-meta"><span>${timeAgo(c.created_at)}</span><button data-role="reply-toggle">Reply</button></div>
+        <div class="reply-composer" data-role="reply-box"><textarea placeholder="Write a reply..." maxlength="300"></textarea><button data-role="reply-submit">Reply</button></div>
         <div class="comment-replies" data-role="replies"></div>
-      </div>
-    `;
-
-    el.querySelector('[data-role="reply-toggle"]').addEventListener("click", () => {
-      el.querySelector('[data-role="reply-box"]').classList.toggle("open");
-    });
-
+      </div>`;
+    el.querySelector('[data-role="reply-toggle"]').addEventListener("click", () => el.querySelector('[data-role="reply-box"]').classList.toggle("open"));
     el.querySelector('[data-role="reply-submit"]').addEventListener("click", async () => {
       const textarea = el.querySelector('[data-role="reply-box"] textarea');
       await addComment(postId, c.id, textarea.value.trim());
       await renderComments(postId, section);
     });
-
     const repliesContainer = el.querySelector('[data-role="replies"]');
-    const childItems = byParent[c.id] || [];
-    childItems.forEach(child => repliesContainer.appendChild(renderComment(child)));
-
+    (byParent[c.id] || []).forEach(child => repliesContainer.appendChild(renderComment(child)));
     return el;
   }
 
-  list.appendChild((() => {
-    const wrap = document.createElement("div");
-    (byParent["root"] || []).forEach(c => wrap.appendChild(renderComment(c)));
-    return wrap;
-  })());
+  const wrap = document.createElement("div");
+  (byParent["root"] || []).forEach(c => wrap.appendChild(renderComment(c)));
+  list.appendChild(wrap);
 }
 
 async function addComment(postId, parentCommentId, content){
   if (!content) return;
-  const { error } = await supabaseClient
-    .from("live_community_comments")
-    .insert({ post_id: postId, parent_comment_id: parentCommentId, user_id: currentUser.id, content });
-  if (error){ console.error(error); alert("Couldn't post comment."); }
-  await loadFeed();
+  const { error } = await supabaseClient.from("live_community_comments").insert({ post_id: postId, parent_comment_id: parentCommentId, user_id: currentUser.id, content });
+  if (error){ console.error(error); showToast("Couldn't post comment"); }
 }
 
+// ==========================================================
+// EXPLORE
+// ==========================================================
+async function loadExplore(){
+  await loadExploreChips();
+  await loadExploreGrid();
+  exploreLoaded = true;
+}
+
+async function loadExploreChips(){
+  const { data } = await supabaseClient.from("live_community_posts").select("content").not("content", "is", null).limit(10);
+  const container = document.getElementById("exploreChips");
+  if (!data || data.length === 0){ container.innerHTML = `<div class="chip">No trends yet</div>`; return; }
+  container.innerHTML = "";
+  data.slice(0, 8).forEach(post => {
+    const label = (post.content || "RelviaCreators").split(" ").slice(0, 3).join(" ");
+    container.innerHTML += `<div class="chip">${escapeHtml(label)}</div>`;
+  });
+}
+
+async function loadExploreGrid(){
+  const grid = document.getElementById("exploreGrid");
+  const { data: posts } = await supabaseClient
+    .from("live_community_posts").select("*").not("image_url", "is", null).order("created_at", { ascending:false }).limit(30);
+
+  if (!posts || posts.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">◈</div><h4>No image posts yet</h4><p>Posts with images will show up here.</p></div>`;
+    return;
+  }
+
+  const userIds = [...new Set(posts.map(p => p.user_id))];
+  const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name; });
+
+  const postIds = posts.map(p => p.id);
+  const { data: likeRows } = await supabaseClient.from("live_community_likes").select("post_id").in("post_id", postIds);
+  const likeCounts = {};
+  (likeRows || []).forEach(l => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
+
+  grid.innerHTML = "";
+  posts.forEach(post => {
+    grid.innerHTML += `
+      <div class="explore-tile">
+        <img src="${post.image_url}" loading="lazy">
+        <div class="explore-tile-overlay">
+          <span>♥ ${likeCounts[post.id] || 0}</span>
+        </div>
+      </div>`;
+  });
+}
+
+// ==========================================================
+// PROFILE VIEW
+// ==========================================================
+async function loadProfileView(){
+  const { data: followers } = await supabaseClient.from("live_follows").select("follower_id", { count: "exact", head: true }).eq("followed_id", currentUser.id);
+  const { data: following } = await supabaseClient.from("live_follows").select("followed_id", { count: "exact", head: true }).eq("follower_id", currentUser.id);
+
+  const badges = [];
+  if (profile?.creator_plus) badges.push(`<span class="verified-badge">✓</span>`);
+  document.getElementById("profileAvatarLg").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
+  document.getElementById("profileDisplayName").textContent = profile?.display_name || "Unnamed";
+  document.getElementById("profileBadges").innerHTML = badges.join(" ");
+  document.getElementById("profileHandle").textContent = `@${profile?.username || "unknown"}`;
+  document.getElementById("profileBio").textContent = profile?.bio || "No bio yet — tell people about yourself.";
+
+  const { count: followerCount } = await supabaseClient.from("live_follows").select("*", { count: "exact", head: true }).eq("followed_id", currentUser.id);
+  const { count: followingCount } = await supabaseClient.from("live_follows").select("*", { count: "exact", head: true }).eq("follower_id", currentUser.id);
+  document.getElementById("statFollowers").textContent = followerCount || 0;
+  document.getElementById("statFollowing").textContent = followingCount || 0;
+
+  const container = document.getElementById("profilePostsContainer");
+  container.innerHTML = `<div class="card skeleton skeleton-post"></div>`;
+
+  const { data: posts, error } = await supabaseClient
+    .from("live_community_posts").select("*").eq("user_id", currentUser.id).order("created_at", { ascending:false });
+
+  if (error){ container.innerHTML = ""; return; }
+  document.getElementById("statPosts").textContent = (posts || []).length;
+
+  if (!posts || posts.length === 0){
+    container.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">✎</div><h4>No posts yet</h4><p>Share something on Home and it'll show up here.</p></div></div>`;
+    return;
+  }
+  await renderPostList(posts, container);
+}
+
+// ==========================================================
+// CREATOR PLUS (real status, owner-granted — not self-serve)
+// ==========================================================
+function renderCreatorPlusStatus(){
+  const card = document.getElementById("cplusStatusCard");
+  const isVerified = !!profile?.creator_plus;
+  card.className = `card cplus-status-card ${isVerified ? "active" : ""}`;
+  card.innerHTML = isVerified ? `
+    <div class="verified-badge" style="width:32px;height:32px;font-size:16px;margin:0 auto 14px;">✓</div>
+    <h3 style="font-family:var(--font-display);font-size:20px;">You're Creator Plus verified</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:8px;">Your gold checkmark shows up next to your name across streams, posts, and comments.</p>
+  ` : `
+    <h3 style="font-family:var(--font-display);font-size:20px;">Not verified yet</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:8px;max-width:400px;margin-left:auto;margin-right:auto;">
+      Creator Plus is granted by Relvia Live's owners — it's not a self-serve purchase. Keep creating, and reach out if you think you qualify.
+    </p>
+    <ul class="cplus-perks-list">
+      <li>Gold verified checkmark everywhere your name appears</li>
+      <li>Priority visibility across Relvia Live</li>
+      <li>A mark of trust for viewers and other creators</li>
+    </ul>
+  `;
+}
+
+// ==========================================================
+// SIDEBAR
+// ==========================================================
+async function loadTrendingSidebar(){
+  const container = document.getElementById("trendingContainer");
+  try {
+    const { data: trendData } = await supabaseClient.rpc("get_trending_posts", { hours_back: 48, limit_count: 6 });
+    if (!trendData || trendData.length === 0){ container.innerHTML = `<div class="empty-comments">Nothing trending yet.</div>`; return; }
+
+    const postIds = trendData.map(t => t.post_id);
+    const { data: posts } = await supabaseClient.from("live_community_posts").select("id, content, user_id").in("id", postIds);
+    const postById = {};
+    (posts || []).forEach(p => { postById[p.id] = p; });
+    const userIds = [...new Set((posts || []).map(p => p.user_id))];
+    const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", userIds);
+    const nameById = {};
+    (profiles || []).forEach(p => { nameById[p.id] = p.display_name; });
+
+    container.innerHTML = "";
+    trendData.forEach(t => {
+      const post = postById[t.post_id];
+      if (!post) return;
+      container.innerHTML += `
+        <div class="trending-item">
+          <h4>${escapeHtml((post.content || "Shared an image").slice(0, 45))}</h4>
+          <p>${escapeHtml(nameById[post.user_id] || "Unknown")}</p>
+        </div>`;
+    });
+  } catch (err){
+    container.innerHTML = `<div class="empty-comments">Nothing trending yet.</div>`;
+  }
+}
+
+async function loadSuggestedSidebar(){
+  const container = document.getElementById("suggestedContainer");
+  const { data } = await supabaseClient.from("live_profiles").select("*").neq("id", currentUser.id).limit(20);
+  if (!data || data.length === 0){ container.innerHTML = `<div class="empty-comments">No suggestions right now.</div>`; return; }
+
+  const notFollowing = data.filter(p => !followingIds.has(p.id)).slice(0, 5);
+  if (notFollowing.length === 0){ container.innerHTML = `<div class="empty-comments">You're following everyone here.</div>`; return; }
+
+  notFollowing.forEach(p => { profileCache[p.id] = p; });
+
+  container.innerHTML = "";
+  notFollowing.forEach(user => {
+    container.innerHTML += `
+      <div class="creator-card">
+        <a class="creator-info" href="profile.html?user=${user.id}">
+          <div class="creator-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div>
+          <div><div class="creator-name">${escapeHtml(user.display_name)} ${nameBadgesHTML(user.id)}</div><div class="creator-handle">@${escapeHtml(user.username)}</div></div>
+        </a>
+        ${followBtnHTML(user.id)}
+      </div>`;
+  });
+  container.querySelectorAll('[data-follow-target]').forEach(btn => {
+    btn.addEventListener("click", () => toggleFollow(btn.dataset.followTarget));
+  });
+}
+
+// ==========================================================
+// SEARCH
+// ==========================================================
+function setupSearch(){
+  const input = document.getElementById("searchInput");
+  const results = document.getElementById("searchResults");
+  let debounceTimer;
+
+  input.addEventListener("input", (event) => {
+    clearTimeout(debounceTimer);
+    const value = event.target.value.trim();
+    if (value.length < 2){ results.classList.remove("open"); return; }
+
+    debounceTimer = setTimeout(async () => {
+      const { data } = await supabaseClient.from("live_profiles").select("*").ilike("display_name", `%${value}%`).limit(6);
+
+      if (!data || data.length === 0){
+        results.innerHTML = `<div class="search-result-item"><span style="color:var(--muted);">No people found</span></div>`;
+      } else {
+        results.innerHTML = data.map(user => `
+          <a class="search-result-item" href="profile.html?user=${user.id}">
+            <div class="creator-info">
+              <div class="creator-avatar">${avatarInnerHTML(user.avatar_url, user.display_name)}</div>
+              <div><div class="creator-name">${escapeHtml(user.display_name)}</div><div class="creator-handle">@${escapeHtml(user.username)}</div></div>
+            </div>
+          </a>`).join("");
+      }
+      results.classList.add("open");
+    }, 250);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !results.contains(e.target)) results.classList.remove("open");
+  });
+}
+
+// ==========================================================
+// REALTIME
+// ==========================================================
 function listenForRealtime(){
   supabaseClient
-    .channel("relvia-live-social-feed")
-    .on("postgres_changes", { event:"*", schema:"public", table:"live_community_posts" }, () => loadFeed())
+    .channel("relviacreators-feed")
+    .on("postgres_changes", { event:"*", schema:"public", table:"live_community_posts" }, () => {
+      if (currentView === "home") loadFeed();
+      if (currentView === "following") loadFollowingFeed();
+      if (currentView === "explore") exploreLoaded = false;
+    })
     .subscribe();
 }
 
