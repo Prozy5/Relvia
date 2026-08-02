@@ -132,5 +132,38 @@ p.lead{ font-size:16px; line-height:1.7; color:#dcdcdc; margin-bottom:40px; }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storageKey: "relvia-live-auth" } });
+
+(async () => {
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "about", target_label: "About Relvia Live" }); } catch (e){}
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "about");
+  const unlockKey = "relvia-live-unlock-about";
+
+  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
+    document.querySelector(".container").innerHTML = `
+      <div style="text-align:center;padding:80px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;">This page is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;">${lock.message || "Check back soon."}</p>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-size:14px;">
+          <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+        </div>
+        <p id="unlockError" style="color:#e0574f;font-size:12.5px;display:none;">Incorrect passcode.</p>
+      </div>`;
+    document.getElementById("unlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("unlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "about", passcode });
+      if (isValid){ sessionStorage.setItem(unlockKey, "true"); window.location.reload(); }
+      else { document.getElementById("unlockError").style.display = "block"; }
+    });
+  }
+})();
+</script>
 </body>
 </html>
