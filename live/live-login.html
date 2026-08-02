@@ -134,7 +134,33 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const LIVE_URL = "live.html";
 
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function checkIpBan(){
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/check-ip-ban`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_ANON_KEY },
+    });
+    const result = await response.json();
+    if (result.banned){
+      document.body.innerHTML = `
+        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+          <h2 style="font-family:var(--font-display);font-size:24px;">Access restricted</h2>
+          <p style="color:var(--muted);font-size:14px;max-width:380px;">${escapeHtml(result.reason || "This address has been restricted from Relvia.")}</p>
+        </div>`;
+      return true;
+    }
+  } catch (err){ console.error("IP ban check failed:", err); }
+  return false;
+}
+
 async function checkExistingSession(){
+  const banned = await checkIpBan();
+  if (banned) return;
+
   try {
     const { data } = await supabaseClient.auth.getSession();
     if (data && data.session) window.location.href = LIVE_URL;
@@ -293,6 +319,13 @@ document.getElementById("signupSubmit").addEventListener("click", async () => {
       .insert({ id: data.user.id, display_name, username });
 
     if (profileError) console.error("live_profiles insert failed:", profileError);
+
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/record-signup-ip`, {
+        method: "POST",
+        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${data.session.access_token}` },
+      });
+    } catch (err){ console.error("Couldn't record signup IP:", err); }
 
     window.location.href = LIVE_URL;
     return;
