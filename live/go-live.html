@@ -192,6 +192,8 @@ async function initialize(){
 
   currentUser = userData.user;
 
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "go_live", target_label: "Go Live (Broadcasting)" }); } catch (e){}
+
   const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
   const lock = (locks || []).find(l => l.page_key === "go_live");
   const unlockKey = "relvia-live-unlock-go_live";
