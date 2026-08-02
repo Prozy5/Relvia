@@ -521,6 +521,37 @@ async function initialize(){
       setupComposer();
     }
 
+    try { await supabaseClient.rpc("register_page_visit", { target_page_key: "social", target_label: "RelviaCreators" }); } catch (e){}
+
+    const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+    const lock = (locks || []).find(l => l.page_key === "social");
+    const unlockKey = "relvia-live-unlock-social";
+
+    if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
+      document.querySelector(".app-container").innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:80px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <h2 style="font-family:var(--font-display);font-size:24px;">RelviaCreators is temporarily closed</h2>
+          <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
+            <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+          </div>
+          <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
+        </div>`;
+
+      document.getElementById("unlockSubmit").addEventListener("click", async () => {
+        const passcode = document.getElementById("unlockPasscode").value;
+        const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "social", passcode });
+        if (isValid){
+          sessionStorage.setItem(unlockKey, "true");
+          window.location.reload();
+        } else {
+          document.getElementById("unlockError").style.display = "block";
+        }
+      });
+      return;
+    }
+
     const { data: ownerRow } = await supabaseClient.from("live_owners").select("user_id").eq("user_id", currentUser.id).maybeSingle();
     isOwner = !!ownerRow;
 
