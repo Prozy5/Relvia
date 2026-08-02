@@ -264,6 +264,40 @@ img{ max-width:100%; display:block; }
   font-size:18px; display:flex; align-items:center; justify-content:center;
 }
 .player-close:hover{ border-color:var(--gold); color:var(--gold); }
+.send-relvbits-btn{
+  font-size:12.5px; font-weight:800; padding:9px 16px; border-radius:12px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+}
+.send-relvbits-btn:hover{ opacity:.88; }
+
+.relvbits-modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:2500; padding:24px;
+}
+.relvbits-modal-backdrop.open{ display:flex; }
+.relvbits-modal{ background:var(--surface); border:1px solid var(--gold-end); border-radius:20px; padding:26px; max-width:400px; width:100%; }
+.relvbits-modal h3{ font-family:var(--font-display); font-size:19px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.amount-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+.amount-option{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
+  padding:10px 0; font-size:13px; font-weight:700; text-align:center;
+}
+.amount-option.selected{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-field{ margin-bottom:12px; }
+.relvbits-field label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.relvbits-field input, .relvbits-field textarea{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
+  padding:9px 12px; color:white; font-size:13px;
+}
+.relvbits-field textarea{ resize:none; min-height:50px; }
+.anon-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:var(--muted); }
+.relvbits-error{ color:#f2a8a3; font-size:12px; margin-bottom:10px; display:none; }
+.relvbits-error.show{ display:block; }
+.relvbits-modal-actions{ display:flex; gap:10px; }
+.relvbits-modal-actions button{ flex:1; padding:11px; border-radius:12px; font-weight:800; font-size:13px; }
+.relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
 .video-frame{
   width:100%; aspect-ratio:16/9; background:#000; border-radius:18px; overflow:hidden;
   border:1px solid var(--border); position:relative;
@@ -354,7 +388,10 @@ img{ max-width:100%; display:block; }
   <div class="player-box">
     <div class="player-header">
       <div class="player-title" id="playerTitle">—</div>
-      <button class="player-close" id="playerClose">×</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="send-relvbits-btn" id="sendRelvbitsBtn">✦ Send RelvBits</button>
+        <button class="player-close" id="playerClose">×</button>
+      </div>
     </div>
     <div class="player-layout">
       <div class="video-frame">
@@ -374,6 +411,35 @@ img{ max-width:100%; display:block; }
   </div>
 </div>
 
+<div class="relvbits-modal-backdrop" id="relvbitsModal">
+  <div class="relvbits-modal">
+    <h3>✦ Send RelvBits</h3>
+    <div class="relvbits-error" id="relvbitsError"></div>
+    <div class="relvbits-field">
+      <label>Amount</label>
+      <div class="amount-grid" id="amountGrid">
+        <button class="amount-option" data-amount="200">$2</button>
+        <button class="amount-option selected" data-amount="500">$5</button>
+        <button class="amount-option" data-amount="1000">$10</button>
+        <button class="amount-option" data-amount="2500">$25</button>
+      </div>
+      <input type="number" id="customAmount" placeholder="Custom amount ($1–$1000)" min="1" max="1000" step="1">
+    </div>
+    <div class="relvbits-field">
+      <label>Message (optional)</label>
+      <textarea id="relvbitsMessage" maxlength="280" placeholder="Say something..."></textarea>
+    </div>
+    <div class="anon-row">
+      <input type="checkbox" id="relvbitsAnon">
+      <label for="relvbitsAnon">Send anonymously</label>
+    </div>
+    <div class="relvbits-modal-actions">
+      <button class="relvbits-cancel-btn" id="relvbitsCancelBtn">Cancel</button>
+      <button class="relvbits-confirm-btn" id="relvbitsConfirmBtn">Continue to payment</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -389,6 +455,7 @@ const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 const TOKEN_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-livekit-token`;
+const RELVBITS_CHECKOUT_ENDPOINT = `${SUPABASE_URL}/functions/v1/create-relvbits-checkout`;
 
 // Same isolated storage key as live-login.html, so this session
 // never overlaps with the Social app's session.
@@ -402,6 +469,7 @@ let categories = [];
 let activeCategoryId = "all";
 let currentRoom = null; // active LiveKit Room instance, if connected
 let isCurrentUserOwner = false;
+let currentPlayerStream = null;
 let streamsCache = [];
 let hostsCache = {};
 
@@ -484,6 +552,7 @@ async function initialize(){
 
     document.getElementById("playerClose").addEventListener("click", closePlayer);
     document.getElementById("liveSearch").addEventListener("input", (e) => renderStreamGrid(e.target.value));
+    setupRelvbitsModal();
   } catch (err){
     console.error("Relvia Live init failed:", err);
     window.location.href = "live-login.html";
@@ -799,6 +868,7 @@ async function openPlayer(stream){
   const status = document.getElementById("playerStatus");
   const video = document.getElementById("playerVideo");
 
+  currentPlayerStream = stream;
   document.getElementById("playerTitle").textContent = stream.title;
   status.classList.remove("hidden");
   status.innerHTML = `<span>Connecting to stream...</span>`;
@@ -904,6 +974,83 @@ function appendChatMessage(name, text){
   container.scrollTop = container.scrollHeight;
 }
 
+function setupRelvbitsModal(){
+  const modal = document.getElementById("relvbitsModal");
+  const amountGrid = document.getElementById("amountGrid");
+  const customAmount = document.getElementById("customAmount");
+  let selectedAmountCents = 500;
+
+  document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
+    if (!currentPlayerStream){ return; }
+    document.getElementById("relvbitsError").classList.remove("show");
+    modal.classList.add("open");
+  });
+
+  document.getElementById("relvbitsCancelBtn").addEventListener("click", () => modal.classList.remove("open"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+
+  amountGrid.querySelectorAll(".amount-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedAmountCents = parseInt(btn.dataset.amount, 10);
+      customAmount.value = "";
+    });
+  });
+
+  customAmount.addEventListener("input", () => {
+    amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+    const dollars = parseFloat(customAmount.value);
+    selectedAmountCents = isFinite(dollars) ? Math.round(dollars * 100) : 0;
+  });
+
+  document.getElementById("relvbitsConfirmBtn").addEventListener("click", async () => {
+    const errorEl = document.getElementById("relvbitsError");
+    errorEl.classList.remove("show");
+
+    if (!selectedAmountCents || selectedAmountCents < 100 || selectedAmountCents > 100000){
+      errorEl.textContent = "Choose an amount between $1 and $1,000.";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("relvbitsConfirmBtn");
+    btn.disabled = true; btn.textContent = "Redirecting to payment...";
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    try {
+      const response = await fetch(RELVBITS_CHECKOUT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          creatorId: currentPlayerStream.host_id,
+          amountCents: selectedAmountCents,
+          message: document.getElementById("relvbitsMessage").value.trim(),
+          isAnonymous: document.getElementById("relvbitsAnon").checked,
+          streamId: currentPlayerStream.id,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.checkoutUrl){
+        errorEl.textContent = result.error || "Couldn't start checkout.";
+        errorEl.classList.add("show");
+        btn.disabled = false; btn.textContent = "Continue to payment";
+        return;
+      }
+
+      window.location.href = result.checkoutUrl;
+    } catch (err){
+      console.error(err);
+      errorEl.textContent = "Couldn't reach the server.";
+      errorEl.classList.add("show");
+      btn.disabled = false; btn.textContent = "Continue to payment";
+    }
+  });
+}
+
 function setupChatSend(streamId){
   const input = document.getElementById("chatInput");
   const sendBtn = document.getElementById("chatSendBtn");
@@ -946,6 +1093,7 @@ function closePlayer(){
   video.srcObject = null;
   overlay.classList.remove("open");
   resetChat();
+  currentPlayerStream = null;
 }
 
 initialize();
