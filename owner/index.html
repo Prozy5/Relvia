@@ -270,6 +270,38 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- STATUS OVERRIDE (drives the auto-computed status hero) -->
+    <div class="section">
+      <div class="section-head"><h2>Status Override</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        The status page auto-detects issues from closed pages. Use this ONLY for things it can't see on its own — Supabase, LiveKit, or Stripe having problems. Overrides the auto-detected status until cleared.
+      </p>
+      <div class="panel" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <span id="overrideStatusPill" class="pill">—</span>
+          <span style="color:var(--muted);font-size:12.5px;" id="overrideStatusSub">Loading...</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" data-override="degraded_performance" data-msg="We're seeing degraded performance on some services.">Degraded Performance</button>
+          <button class="btn" data-override="partial_outage" data-msg="Some services are currently unavailable.">Partial Outage</button>
+          <button class="btn danger" data-override="major_outage" data-msg="We're experiencing a major outage. We're on it.">Major Outage</button>
+          <button class="btn" data-override="maintenance" data-msg="Scheduled maintenance is underway.">Under Maintenance</button>
+        </div>
+        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
+          <select id="overrideStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="degraded_performance">Degraded Performance</option>
+            <option value="partial_outage">Partial Outage</option>
+            <option value="major_outage">Major Outage</option>
+            <option value="maintenance">Under Maintenance</option>
+            <option value="operational">Operational</option>
+          </select>
+          <input type="text" id="overrideMessageInput" placeholder="Message shown on the status page" style="flex:1;min-width:220px;">
+          <button class="btn gold" id="applyOverrideBtn">Apply Override</button>
+          <button class="btn" id="clearOverrideBtn">Clear (back to auto-detect)</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SYSTEM BOT -->
     <div class="section">
       <div class="section-head"><h2>System Bot</h2></div>
@@ -527,6 +559,57 @@ async function logAction(action, target_type, target_label, details){
 // ==========================================================
 // SYSTEM BOT
 // ==========================================================
+// ==========================================================
+// STATUS OVERRIDE
+// ==========================================================
+async function loadStatusOverride(){
+  const { data } = await supabaseClient.rpc("get_ecosystem_status");
+  const pill = document.getElementById("overrideStatusPill");
+  const sub = document.getElementById("overrideStatusSub");
+
+  if (!data || data.length === 0){
+    pill.textContent = "Unknown";
+    sub.textContent = "Couldn't load status.";
+    return;
+  }
+
+  const { overall_status, is_override, closed_count, total_count } = data[0];
+  pill.textContent = overall_status.replace(/_/g, " ");
+  pill.className = `pill ${overall_status === "operational" ? "ok" : overall_status === "major_outage" ? "banned" : "temp"}`;
+  sub.textContent = is_override
+    ? "Currently manually overridden."
+    : `Auto-detected from page locks (${closed_count}/${total_count} closed).`;
+
+  document.querySelectorAll("[data-override]").forEach(btn => {
+    btn.onclick = () => {
+      document.getElementById("overrideMessageInput").value = btn.dataset.msg;
+      document.getElementById("overrideStatusLevel").value = btn.dataset.override;
+    };
+  });
+
+  document.getElementById("applyOverrideBtn").onclick = () => {
+    const status = document.getElementById("overrideStatusLevel").value;
+    const message = document.getElementById("overrideMessageInput").value.trim();
+    applyStatusOverride(status, message);
+  };
+
+  document.getElementById("clearOverrideBtn").onclick = async () => {
+    const { error } = await supabaseClient.rpc("clear_status_override");
+    if (error){ console.error(error); showToast("Couldn't clear override"); return; }
+    showToast("Back to auto-detected status");
+    await logAction("clear_status_override", "status", "cleared");
+    await loadStatusOverride();
+  };
+}
+
+async function applyStatusOverride(status, message){
+  const { error } = await supabaseClient.rpc("set_status_override", { new_status: status, new_message: message || null });
+  if (error){ console.error(error); showToast("Couldn't apply override"); return; }
+  showToast(`Status overridden to "${status.replace(/_/g, " ")}"`);
+  await logAction("set_status_override", "status", status, message);
+  await loadStatusOverride();
+}
+
 async function loadBotStatus(){
   const { data: config } = await supabaseClient
     .from("live_bot_config").select("*").eq("id", 1).maybeSingle();
@@ -706,7 +789,7 @@ async function gate(){
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks(), loadBotStatus()];
+  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks(), loadBotStatus(), loadStatusOverride()];
 
   if (myRole === "owner"){
     document.getElementById("staffSection").style.display = "block";
