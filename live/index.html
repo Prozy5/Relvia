@@ -543,6 +543,8 @@ async function initialize(){
 
     await checkOwnerStatus();
 
+    try { await supabaseClient.rpc("register_page_visit", { target_page_key: "live", target_label: "Relvia Live (Home)" }); } catch (e){}
+
     const locked = await checkPageLock("live");
     if (locked) return;
 
