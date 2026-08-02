@@ -354,6 +354,25 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- RELVBITS (owner role only) -->
+    <div class="section" id="relvbitsSection" style="display:none;">
+      <div class="section-head"><h2>RelvBits</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Platform fee taken from every RelvBits tip, before the rest goes to the creator.</p>
+      <div class="panel" style="padding:20px;display:flex;align-items:center;gap:14px;">
+        <div style="flex:1;">
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;">Platform fee percentage</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" id="feePercentInput" min="0" max="100" step="0.1" style="width:100px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:14px;">
+            <span style="color:var(--muted);">%</span>
+            <button class="btn gold" id="saveFeeBtn">Save</button>
+          </div>
+        </div>
+        <div class="stat-card" style="min-width:140px;">
+          <div class="num" id="statRelvbitsTotal">—</div><div class="label">Fees Collected</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -621,7 +640,8 @@ async function gate(){
   if (myRole === "owner"){
     document.getElementById("staffSection").style.display = "block";
     document.getElementById("revenueSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue());
+    document.getElementById("relvbitsSection").style.display = "block";
+    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig());
   }
 
   await Promise.all(tasks);
@@ -1364,6 +1384,42 @@ async function loadRevenue(){
       <td>${escapeHtml(r.customer_email || "—")}</td>`;
     tbody.appendChild(row);
   });
+}
+
+// ==========================================================
+// RELVBITS (owner role only)
+// ==========================================================
+async function loadRelvbitsConfig(){
+  const { data: config } = await supabaseClient
+    .from("live_platform_config").select("platform_fee_percent").eq("id", 1).maybeSingle();
+
+  document.getElementById("feePercentInput").value = config?.platform_fee_percent ?? 5;
+
+  const { data: bits } = await supabaseClient
+    .from("live_relvbits").select("platform_fee_cents").eq("status", "succeeded");
+
+  const totalFees = (bits || []).reduce((sum, b) => sum + b.platform_fee_cents, 0);
+  document.getElementById("statRelvbitsTotal").textContent = `$${(totalFees / 100).toFixed(2)}`;
+
+  document.getElementById("saveFeeBtn").addEventListener("click", saveRelvbitsFee);
+}
+
+async function saveRelvbitsFee(){
+  const value = parseFloat(document.getElementById("feePercentInput").value);
+  if (isNaN(value) || value < 0 || value > 100){
+    showToast("Enter a fee between 0 and 100");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("live_platform_config")
+    .update({ platform_fee_percent: value, updated_by: currentUser.id, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+
+  if (error){ console.error(error); showToast("Couldn't update fee — make sure you're an 'owner' role, not just moderator"); return; }
+
+  showToast(`Platform fee set to ${value}%`);
+  await logAction("update_relvbits_fee", "platform_config", `${value}%`);
 }
 
 gate();
