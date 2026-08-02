@@ -13,7 +13,7 @@
 :root{
   --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d;
   --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
-  --text:#f5f1ea; --muted:#a89e8f; --live-red:#e0574f;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
   --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
@@ -36,7 +36,6 @@ img{ max-width:100%; display:block; }
   padding:0 40px; background:rgba(5,5,5,.8); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-soft); z-index:50;
 }
 .logo{ font-family:var(--font-display); font-style:italic; font-weight:600; font-size:22px; color:var(--gold-start); letter-spacing:.5px; }
-.nav-tag{ font-size:11px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
 .nav-links{ display:flex; align-items:center; gap:26px; }
 .nav-links a{ font-size:12.5px; color:var(--muted); font-weight:600; letter-spacing:.3px; }
 .nav-links a:hover{ color:var(--gold); }
@@ -73,31 +72,27 @@ img{ max-width:100%; display:block; }
 .section{ max-width:1140px; margin:auto; padding:70px 32px; }
 .section-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:14px; }
 .section h2{ font-family:var(--font-display); font-size:clamp(28px,3.4vw,42px); font-weight:600; letter-spacing:-.01em; margin-bottom:14px; }
-.section-sub{ color:var(--muted); font-size:14.5px; max-width:560px; line-height:1.7; margin-bottom:44px; }
+.section-sub{ color:var(--muted); font-size:14.5px; max-width:600px; line-height:1.7; margin-bottom:44px; }
 
 /* ECOSYSTEM GRID */
-.eco-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-@media(max-width:900px){ .eco-grid{ grid-template-columns:repeat(2,1fr); } }
-@media(max-width:600px){ .eco-grid{ grid-template-columns:1fr; } }
+.eco-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+@media(max-width:700px){ .eco-grid{ grid-template-columns:1fr; } }
 
 .eco-card{
-  background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:28px;
+  background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:30px;
   display:flex; flex-direction:column; transition:border-color .2s, transform .2s;
 }
-.eco-card.linked:hover{ border-color:var(--gold-end); transform:translateY(-3px); }
-.eco-card.soon{ opacity:.55; }
+.eco-card:hover{ border-color:var(--gold-end); transform:translateY(-3px); }
 .eco-mark{
-  width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   background:linear-gradient(135deg,rgba(242,199,102,.15),rgba(185,131,47,.08)); border:1px solid var(--border);
-  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold);
-  margin-bottom:18px;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold);
+  margin-bottom:20px;
 }
-.eco-card h3{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-.eco-tagline{ font-size:10.5px; letter-spacing:1px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
-.eco-card p{ font-size:13px; color:var(--muted); line-height:1.65; flex:1; }
-.eco-status{ margin-top:16px; font-size:11.5px; font-weight:700; }
-.eco-status.live{ color:#8fd1a8; }
-.eco-status.soon{ color:var(--muted-soft, #6b6255); }
+.eco-card h3{ font-family:var(--font-display); font-size:22px; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.eco-tagline{ font-size:10.5px; letter-spacing:1px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:12px; }
+.eco-card p{ font-size:13.5px; color:var(--muted); line-height:1.7; flex:1; }
+.eco-status{ margin-top:18px; font-size:12px; font-weight:700; color:#8fd1a8; }
 .live-dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--live-red); margin-right:6px; }
 
 /* ONE ACCOUNT */
@@ -109,7 +104,7 @@ img{ max-width:100%; display:block; }
 /* FOOTER */
 footer{ border-top:1px solid var(--border-soft); padding:40px 32px; text-align:center; }
 footer .logo{ font-size:17px; margin-bottom:10px; display:inline-block; }
-footer p{ font-size:12px; color:var(--muted-soft, #6b6255); }
+footer p{ font-size:12px; color:var(--muted-soft); }
 </style>
 </head>
 <body>
@@ -117,10 +112,10 @@ footer p{ font-size:12px; color:var(--muted-soft, #6b6255); }
 <header class="topbar">
   <div class="logo">Relvia</div>
   <div class="nav-links">
-    <a href="about.html">About</a>
     <a href="studios/index.html">Studios</a>
     <a href="music/index.html">Music</a>
     <a href="live/welcome.html">Live</a>
+    <a href="live/creators.html">Creators</a>
     <a href="/login.html" class="nav-cta">Sign In</a>
   </div>
 </header>
@@ -138,58 +133,42 @@ footer p{ font-size:12px; color:var(--muted-soft, #6b6255); }
 
 <div class="section" id="ecosystem">
   <div class="section-eyebrow">The Ecosystem</div>
-  <h2>Six divisions. One universe.</h2>
-  <p class="section-sub">Every part of Relvia Entertainment connects back to the same account — from the stories being made to the people making them.</p>
+  <h2>Made here. Watched here.</h2>
+  <p class="section-sub">Relvia isn't a separate platform waiting to launch — it's what Relvia Studios already streams on. Every division below is live today.</p>
 
   <div class="eco-grid">
 
-    <a class="eco-card linked" href="studios.html">
+    <a class="eco-card" href="studios/index.html">
       <div class="eco-mark">S</div>
       <h3>Relvia Studios</h3>
-      <div class="eco-tagline">Produces for Relvia</div>
-      <p>Original films and scripted series, produced in-house — filmmakers collaborate here from first draft to final cut.</p>
-      <div class="eco-status live">Live now →</div>
+      <div class="eco-tagline">Made &amp; Streamed Here</div>
+      <p>Filmmakers collaborate on original short films from first draft to final cut — then the finished film streams right here on Relvia. No separate app, no waiting.</p>
+      <div class="eco-status">Live now →</div>
     </a>
 
-    <div class="eco-card soon">
-      <div class="eco-mark">R</div>
-      <h3>Relvia</h3>
-      <div class="eco-tagline">The Main Stage</div>
-      <p>The flagship platform. Everything Relvia Studios makes streams here first.</p>
-      <div class="eco-status soon">Coming soon</div>
-    </div>
-
-    <div class="eco-card soon">
-      <div class="eco-mark">♪</div>
-      <h3>Relvia Records</h3>
-      <div class="eco-tagline">Produces for Relvia Music</div>
-      <p>Our record label — artist development, releases, and sound for a new generation.</p>
-      <div class="eco-status soon">Coming soon</div>
-    </div>
-
-    <a class="eco-card linked" href="music.html">
+    <a class="eco-card" href="music/index.html">
       <div class="eco-mark">♫</div>
       <h3>Relvia Music</h3>
-      <div class="eco-tagline">Streams Relvia Records</div>
-      <p>The streaming home for every Relvia Records release, artist, and drop.</p>
-      <div class="eco-status live">Live now →</div>
+      <div class="eco-tagline">Home of Relvia Records</div>
+      <p>The streaming home for every Relvia Records release, artist, and drop — upload, browse, and listen in one place.</p>
+      <div class="eco-status">Live now →</div>
     </a>
 
-    <a class="eco-card linked" href="welcome.html">
+    <a class="eco-card" href="live/welcome.html">
       <div class="eco-mark">◉</div>
       <h3><span class="live-dot"></span>Relvia Live</h3>
       <div class="eco-tagline">Broadcast in Real Time</div>
-      <p>Go live straight from the browser. Chat, follow, and build an audience as it happens.</p>
-      <div class="eco-status live">Live now →</div>
+      <p>Go live straight from the browser. Chat, follow, and build an audience as it happens — no software required.</p>
+      <div class="eco-status">Live now →</div>
     </a>
 
-    <div class="eco-card soon">
+    <a class="eco-card" href="live/creators.html">
       <div class="eco-mark">◈</div>
-      <h3>Relvia Creators</h3>
-      <div class="eco-tagline">Social &amp; Community</div>
-      <p>Post, build a following, and grow with the community across every division.</p>
-      <div class="eco-status soon">Coming soon</div>
-    </div>
+      <h3>RelviaCreators</h3>
+      <div class="eco-tagline">The Community Feed</div>
+      <p>Post, follow, and talk with the people building Relvia Live — the social layer that runs alongside every stream.</p>
+      <div class="eco-status">Live now →</div>
+    </a>
 
   </div>
 </div>
@@ -198,8 +177,8 @@ footer p{ font-size:12px; color:var(--muted-soft, #6b6255); }
   <div class="section-eyebrow">One Relvia Account</div>
   <h2>Sign up once. Access everything.</h2>
   <p class="account-note">
-    <strong>Studios, Music, and the flagship platform share one login.</strong>
-    Relvia Live is the one exception — it's kept on its own separate sign-in on purpose, so moderation on Live never affects your standing anywhere else in the ecosystem.
+    <strong>Studios and Music share one login.</strong>
+    Relvia Live — and RelviaCreators, its community feed — run on a separate, independent sign-in on purpose, so moderation on Live never affects your standing anywhere else in the ecosystem.
   </p>
 </div>
 
