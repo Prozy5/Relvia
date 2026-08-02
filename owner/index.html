@@ -352,6 +352,52 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- IP BANS -->
+    <div class="section">
+      <div class="section-head"><h2>IP Bans</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Blocks an address from reaching Relvia Live's sign-in and landing pages. Heads up: IPs change and VPNs bypass this easily — treat it as a deterrent for casual abuse, not a hard wall.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>IP Address</th><th>Reason</th><th>Banned</th><th>Actions</th></tr></thead>
+          <tbody id="ipBansTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="text" id="newIpAddress" placeholder="IP address (e.g. 203.0.113.4)" style="width:200px;">
+          <input type="text" id="newIpReason" placeholder="Reason" style="flex:1;min-width:200px;">
+          <button class="btn danger" id="addIpBanBtn">Ban IP</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOUNDER CONTROLS (founder role only) -->
+    <div class="section" id="founderSection" style="display:none;">
+      <div class="section-head"><h2>Founder Controls</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Override tools for genuine emergencies — abusive staff, a compromised account, or a full incident. Use sparingly.
+      </p>
+
+      <div class="panel" style="padding:20px;margin-bottom:16px;">
+        <h4 style="margin-bottom:10px;font-size:14px;">Emergency lockdown</h4>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Closes every registered page across the entire ecosystem at once.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="lockdownMessage" placeholder="Message shown to everyone" style="flex:1;min-width:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <input type="text" id="lockdownPasscode" placeholder="Passcode to lift it" style="width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <button class="btn danger" id="lockdownBtn">Lock Down Everything</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4 style="padding:16px 18px 0;font-size:14px;">All staff — global revoke</h4>
+        <p style="color:var(--muted);font-size:12.5px;padding:6px 18px 14px;">Strips a person's access across Live, Studios, and Music in one action, regardless of who granted it.</p>
+        <table>
+          <thead><tr><th>Email</th><th>Division</th><th>Role</th><th>Actions</th></tr></thead>
+          <tbody id="founderStaffTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ANNOUNCEMENTS -->
     <div class="section">
       <div class="section-head"><h2>Announcements</h2></div>
@@ -877,13 +923,18 @@ async function gate(){
   document.getElementById("badgeLabel").textContent = owner.badge_label || "Owner";
   document.getElementById("dashboard").style.display = "block";
 
-  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks(), loadBotStatus(), loadStatusOverride()];
+  const tasks = [loadStreams(), loadCategories(), loadUsers(), loadLog(), loadAnnouncements(), loadLeaderboard(), loadPageLocks(), loadBotStatus(), loadStatusOverride(), loadIpBans()];
 
-  if (myRole === "owner"){
+  if (myRole === "owner" || myRole === "founder"){
     document.getElementById("staffSection").style.display = "block";
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig());
+  }
+
+  if (myRole === "founder"){
+    document.getElementById("founderSection").style.display = "block";
+    tasks.push(loadFounderOverview());
   }
 
   await Promise.all(tasks);
@@ -897,8 +948,9 @@ async function gate(){
   setupClosePageModal();
   document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
   document.getElementById("addAnnouncementBtn").addEventListener("click", addAnnouncement);
+  document.getElementById("addIpBanBtn").addEventListener("click", addIpBan);
 
-  if (myRole === "owner"){
+  if (myRole === "owner" || myRole === "founder"){
     document.getElementById("addStaffBtn").addEventListener("click", addStaff);
   }
 
@@ -1919,6 +1971,124 @@ async function removeMusicAdmin(userId, email){
   showToast("Music admin removed");
   await logAction("remove_music_admin", "music_staff", email);
   await loadMusicStaff();
+}
+
+// ==========================================================
+// IP BANS
+// ==========================================================
+async function loadIpBans(){
+  const tbody = document.getElementById("ipBansTableBody");
+
+  const { data, error } = await supabaseClient.from("live_ip_bans").select("*").order("banned_at", { ascending:false });
+
+  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load IP bans.</td></tr>`; return; }
+
+  if (!data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No IPs banned.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(ban => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="font-family:monospace;">${escapeHtml(ban.ip_address)}</td>
+      <td>${escapeHtml(ban.reason || "—")}</td>
+      <td>${new Date(ban.banned_at).toLocaleDateString()}</td>
+      <td><button class="btn sm" data-action="unban">Unban</button></td>`;
+    row.querySelector('[data-action="unban"]').addEventListener("click", () => removeIpBan(ban.ip_address));
+    tbody.appendChild(row);
+  });
+}
+
+async function addIpBan(){
+  const ip = document.getElementById("newIpAddress").value.trim();
+  const reason = document.getElementById("newIpReason").value.trim();
+  if (!ip){ showToast("Enter an IP address"); return; }
+
+  const { error } = await supabaseClient.from("live_ip_bans").insert({ ip_address: ip, reason: reason || null, banned_by: currentUser.id });
+  if (error){ console.error(error); showToast(error.message?.includes("duplicate") ? "That IP is already banned" : "Couldn't ban IP"); return; }
+
+  document.getElementById("newIpAddress").value = "";
+  document.getElementById("newIpReason").value = "";
+  showToast(`${ip} banned`);
+  await logAction("ban_ip", "ip_address", ip, reason);
+  await loadIpBans();
+}
+
+async function removeIpBan(ip){
+  if (!confirm(`Unban ${ip}?`)) return;
+  const { error } = await supabaseClient.from("live_ip_bans").delete().eq("ip_address", ip);
+  if (error){ console.error(error); showToast("Couldn't unban IP"); return; }
+  showToast(`${ip} unbanned`);
+  await logAction("unban_ip", "ip_address", ip);
+  await loadIpBans();
+}
+
+// ==========================================================
+// FOUNDER CONTROLS
+// ==========================================================
+async function loadFounderOverview(){
+  document.getElementById("lockdownBtn").addEventListener("click", triggerLockdown);
+  await loadFounderStaffList();
+}
+
+async function triggerLockdown(){
+  const message = document.getElementById("lockdownMessage").value.trim();
+  const passcode = document.getElementById("lockdownPasscode").value.trim();
+
+  if (!message || !passcode){ showToast("Enter both a message and a passcode"); return; }
+  if (!confirm("This closes EVERY page across Live, Studios, and Music right now. Continue?")) return;
+
+  const { error } = await supabaseClient.rpc("lockdown_everything", { new_message: message, new_passcode: passcode });
+  if (error){ console.error(error); showToast(error.message || "Couldn't trigger lockdown"); return; }
+
+  showToast("Full lockdown triggered");
+  await logAction("lockdown_everything", "ecosystem", "all pages", message);
+  await loadPageLocks();
+}
+
+async function loadFounderStaffList(){
+  const tbody = document.getElementById("founderStaffTableBody");
+  const rows = [];
+
+  try {
+    const { data } = await supabaseClient.rpc("get_live_staff");
+    (data || []).forEach(s => rows.push({ ...s, division: "Relvia Live" }));
+  } catch (e){}
+  try {
+    const { data } = await supabaseClient.rpc("get_studios_admins");
+    (data || []).forEach(s => rows.push({ ...s, role: "admin", division: "Relvia Studios" }));
+  } catch (e){}
+  try {
+    const { data } = await supabaseClient.rpc("get_music_admins");
+    (data || []).forEach(s => rows.push({ ...s, role: "admin", division: "Relvia Music" }));
+  } catch (e){}
+
+  if (rows.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No staff found.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  rows.forEach(person => {
+    const isSelf = person.user_id === currentUser.id;
+    const isFounder = person.role === "founder";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(person.email)}</td>
+      <td>${escapeHtml(person.division)}</td>
+      <td>${escapeHtml(person.role)}</td>
+      <td>${isSelf || isFounder ? `<span style="color:var(--muted);font-size:12px;">${isFounder ? "Founder" : "You"}</span>` : `<button class="btn danger sm" data-action="revoke">Revoke everywhere</button>`}</td>`;
+    const revokeBtn = row.querySelector('[data-action="revoke"]');
+    if (revokeBtn) revokeBtn.addEventListener("click", () => globalRevoke(person.user_id, person.email));
+    tbody.appendChild(row);
+  });
+}
+
+async function globalRevoke(userId, email){
+  if (!confirm(`Revoke ALL access for ${email} across Live, Studios, and Music? This cannot be undone from here.`)) return;
+
+  const { error } = await supabaseClient.rpc("global_revoke_access", { target_user_id: userId });
+  if (error){ console.error(error); showToast(error.message || "Couldn't revoke access"); return; }
+
+  showToast(`${email}'s access revoked everywhere`);
+  await logAction("global_revoke_access", "staff", email);
+  await Promise.all([loadFounderStaffList(), loadStaff()]);
 }
 
 gate();
