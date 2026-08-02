@@ -143,6 +143,8 @@ async function checkExistingSession(){
 checkExistingSession();
 
 async function checkSignupLock(){
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "signup", target_label: "New Account Sign-Up" }); } catch (e){}
+
   const unlockKey = "relvia-live-unlock-signup";
   if (sessionStorage.getItem(unlockKey) === "true") return;
 
