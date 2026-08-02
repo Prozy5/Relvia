@@ -200,7 +200,7 @@ async function initialize(){
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
     if (sessionData && sessionData.session){
-      window.location.href = "index.html";
+      window.location.href = "/index.html";
       return;
     }
   } catch (err){
