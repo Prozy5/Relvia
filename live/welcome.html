@@ -195,12 +195,37 @@ function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
 
+async function checkIpBan(){
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/check-ip-ban`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_ANON_KEY },
+    });
+    const result = await response.json();
+    if (result.banned){
+      document.body.innerHTML = `
+        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;">
+          <h2 style="font-family:var(--font-display);font-size:24px;">Access restricted</h2>
+          <p style="color:var(--muted);font-size:14px;max-width:380px;">${escapeHtml(result.reason || "This address has been restricted from Relvia.")}</p>
+        </div>`;
+      return true;
+    }
+  } catch (err){
+    console.error("IP ban check failed:", err);
+    // fail open — don't block real visitors if the check itself errors
+  }
+  return false;
+}
+
 async function initialize(){
+  const banned = await checkIpBan();
+  if (banned) return;
+
   // If already signed in, skip the landing page entirely.
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
     if (sessionData && sessionData.session){
-      window.location.href = "/index.html";
+      window.location.href = "live.html";
       return;
     }
   } catch (err){
