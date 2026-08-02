@@ -134,7 +134,20 @@ tr:last-child td{ border-bottom:none; }
   width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
   padding:10px 13px; color:white; font-size:13px; min-height:60px; resize:none;
 }
-.modal-close-row{ display:flex; justify-content:flex-end; margin-top:6px; }
+.modal-field input{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:10px 13px; color:white; font-size:13px;
+}
+.modal-field input:focus, .modal-field textarea:focus{ outline:none; border-color:var(--gold); }
+.modal-close-row{ display:flex; justify-content:flex-end; gap:10px; margin-top:6px; }
+
+.canned-message-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:16px; }
+.canned-btn{
+  font-size:12px; font-weight:600; padding:10px 12px; border-radius:10px;
+  border:1px solid var(--border); background:var(--surface-light); color:#ddd; text-align:left;
+}
+.canned-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.canned-btn.selected{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800; }
 
 .history-item{ padding:12px 0; border-bottom:1px solid var(--border-soft); font-size:13px; }
 .history-item:last-child{ border-bottom:none; }
@@ -444,6 +457,34 @@ tr:last-child td{ border-bottom:none; }
   </div>
 </div>
 
+<div class="modal-backdrop" id="closePageModal">
+  <div class="modal">
+    <h3 id="closePageModalTitle">Close page</h3>
+    <div class="modal-sub">Choose a quick message, or write your own.</div>
+
+    <div class="canned-message-grid" id="cannedMessageGrid">
+      <button class="canned-btn" data-message="This part of Relvia Live is temporarily unavailable.">Temporarily unavailable</button>
+      <button class="canned-btn" data-message="We're fixing a bug — check back shortly.">Fixing a bug</button>
+      <button class="canned-btn" data-message="Down for scheduled maintenance. Back soon.">Scheduled maintenance</button>
+      <button class="canned-btn" data-message="This feature is under construction.">Under construction</button>
+    </div>
+
+    <div class="modal-field">
+      <label>Message shown to visitors</label>
+      <textarea id="closePageMessage" placeholder="Write a custom message..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Passcode to unlock while closed</label>
+      <input type="text" id="closePagePasscode" placeholder="Set a passcode">
+    </div>
+
+    <div class="modal-close-row">
+      <button class="btn" id="cancelClosePageBtn">Cancel</button>
+      <button class="btn danger" id="confirmClosePageBtn">Close this page</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -576,6 +617,8 @@ async function loadPageLocks(){
   });
 }
 
+let pendingClosePage = null;
+
 async function togglePageLock(page){
   if (page.is_closed){
     if (!confirm(`Reopen "${page.label}"? The passcode will stop working.`)) return;
@@ -589,23 +632,48 @@ async function togglePageLock(page){
     return;
   }
 
-  const message = prompt(`Message to show visitors while "${page.label}" is closed:`, "This part of Relvia Live is temporarily unavailable.");
-  if (message === null) return;
+  pendingClosePage = page;
+  document.getElementById("closePageModalTitle").textContent = `Close "${page.label}"`;
+  document.getElementById("closePageMessage").value = "";
+  document.getElementById("closePagePasscode").value = "";
+  document.querySelectorAll(".canned-btn").forEach(b => b.classList.remove("selected"));
+  document.getElementById("closePageModal").classList.add("open");
+}
 
-  const passcode = prompt(`Set a passcode to unlock "${page.label}" while it's closed:`, "");
-  if (!passcode || !passcode.trim()){
-    showToast("A passcode is required to close a page");
-    return;
-  }
-
-  const { error } = await supabaseClient.rpc("close_live_page", {
-    target_page_key: page.page_key, new_message: message, new_passcode: passcode.trim()
+function setupClosePageModal(){
+  document.querySelectorAll(".canned-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".canned-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      document.getElementById("closePageMessage").value = btn.dataset.message;
+    });
   });
-  if (error){ console.error(error); showToast("Couldn't close page"); return; }
 
-  showToast(`${page.label} closed`);
-  await logAction("close_page", "page", page.label, message);
-  await loadPageLocks();
+  document.getElementById("cancelClosePageBtn").addEventListener("click", () => {
+    document.getElementById("closePageModal").classList.remove("open");
+    pendingClosePage = null;
+  });
+
+  document.getElementById("confirmClosePageBtn").addEventListener("click", async () => {
+    if (!pendingClosePage) return;
+
+    const message = document.getElementById("closePageMessage").value.trim();
+    const passcode = document.getElementById("closePagePasscode").value.trim();
+
+    if (!message){ showToast("Enter or pick a message"); return; }
+    if (!passcode){ showToast("Set a passcode"); return; }
+
+    const { error } = await supabaseClient.rpc("close_live_page", {
+      target_page_key: pendingClosePage.page_key, new_message: message, new_passcode: passcode
+    });
+    if (error){ console.error(error); showToast("Couldn't close page"); return; }
+
+    showToast(`${pendingClosePage.label} closed`);
+    await logAction("close_page", "page", pendingClosePage.label, message);
+    document.getElementById("closePageModal").classList.remove("open");
+    pendingClosePage = null;
+    await loadPageLocks();
+  });
 }
 
 // ==========================================================
@@ -652,6 +720,7 @@ async function gate(){
   document.getElementById("exportLogBtn").addEventListener("click", exportLogToCsv);
   document.getElementById("emergencyStopBtn").addEventListener("click", emergencyStopAll);
   document.getElementById("closeManageModal").addEventListener("click", () => document.getElementById("manageModal").classList.remove("open"));
+  setupClosePageModal();
   document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
   document.getElementById("addAnnouncementBtn").addEventListener("click", addAnnouncement);
 
