@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RelvBits — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --ok-green:#5fae7a; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+a{ text-decoration:none; color:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-family:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:820px; margin:auto; padding:34px 24px 90px; }
+.page-title{ font-family:var(--font-display); font-size:30px; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+.page-sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
+.bits-icon{ color:var(--gold); }
+
+.connect-banner{
+  background:var(--glass); border:1px solid var(--gold-end); border-radius:18px; padding:20px 22px;
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px;
+}
+.connect-banner.enabled{ border-color:var(--ok-green); }
+.connect-banner p{ font-size:13px; color:var(--muted); margin-top:4px; }
+.connect-banner h3{ font-family:var(--font-display); font-size:18px; }
+
+.balance-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+.balance-card{ background:var(--glass); border:1px solid var(--border); border-radius:16px; padding:20px; }
+.balance-card .num{ font-size:26px; font-weight:800; font-family:var(--font-display); }
+.balance-card .label{ font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-top:4px; }
+
+.btn{
+  font-size:13px; font-weight:800; padding:11px 22px; border-radius:12px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+}
+.btn:hover{ opacity:.88; }
+
+.tabs{ display:flex; gap:6px; margin-bottom:18px; background:var(--surface-light); border:1px solid var(--border); border-radius:14px; padding:5px; width:fit-content; }
+.tab{ padding:9px 18px; border-radius:10px; font-size:12.5px; font-weight:700; color:var(--muted); }
+.tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); padding:12px 16px; border-bottom:1px solid var(--border); }
+td{ padding:12px 16px; border-bottom:1px solid var(--border-soft); font-size:13px; }
+tr:last-child td{ border-bottom:none; }
+.empty-row td{ text-align:center; color:var(--muted); padding:30px; }
+.amount-cell{ font-weight:700; color:var(--gold); }
+.status-pill{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; }
+.status-pill.succeeded{ background:rgba(95,174,122,.15); color:var(--ok-green); }
+.status-pill.pending{ background:rgba(217,169,75,.15); color:var(--gold); }
+.status-pill.failed, .status-pill.refunded{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="welcome.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">RelvBits</span>
+  </a>
+  <a class="back-link" href="welcome.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+  <div class="page-title"><span class="bits-icon">✦</span> RelvBits</div>
+  <div class="page-sub">Support creators directly. Relvia keeps a small platform fee — the rest goes straight to them.</div>
+
+  <div class="connect-banner" id="connectBanner">
+    <div>
+      <h3 id="connectTitle">Loading...</h3>
+      <p id="connectSub"></p>
+    </div>
+    <button class="btn" id="connectBtn" style="display:none;">Set up payouts</button>
+  </div>
+
+  <div class="balance-row">
+    <div class="balance-card"><div class="num" id="totalEarned">—</div><div class="label">Total Earned</div></div>
+    <div class="balance-card"><div class="num" id="pendingBalance">—</div><div class="label">Pending Payout</div></div>
+    <div class="balance-card"><div class="num" id="totalPaidOut">—</div><div class="label">Paid Out</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="received">RelvBits Received</div>
+    <div class="tab" data-tab="sent">RelvBits Sent</div>
+    <div class="tab" data-tab="payouts">Payout History</div>
+  </div>
+
+  <div class="panel" id="tableContainer">
+    <table>
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const ONBOARD_ENDPOINT = `${SUPABASE_URL}/functions/v1/create-connect-onboarding-link`;
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+let currentUser = null;
+let activeTab = "received";
+
+function formatMoney(cents){ return `$${((cents || 0) / 100).toFixed(2)}`; }
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+  currentUser = userData.user;
+
+  await loadEarningsSummary();
+  await loadTable();
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeTab = tab.dataset.tab;
+      loadTable();
+    });
+  });
+
+  document.getElementById("connectBtn").addEventListener("click", startOnboarding);
+}
+
+async function loadEarningsSummary(){
+  const { data: earnings } = await supabaseClient
+    .from("live_creator_earnings").select("*").eq("host_id", currentUser.id).maybeSingle();
+
+  document.getElementById("totalEarned").textContent = formatMoney(earnings?.total_earned_cents);
+  document.getElementById("pendingBalance").textContent = formatMoney(earnings?.pending_payout_cents);
+  document.getElementById("totalPaidOut").textContent = formatMoney(earnings?.total_paid_out_cents);
+
+  const banner = document.getElementById("connectBanner");
+  const title = document.getElementById("connectTitle");
+  const sub = document.getElementById("connectSub");
+  const btn = document.getElementById("connectBtn");
+
+  if (earnings?.payouts_enabled){
+    banner.classList.add("enabled");
+    title.textContent = "Payouts are active";
+    sub.textContent = "Stripe pays out to your bank automatically on its regular schedule.";
+    btn.style.display = "none";
+  } else if (earnings?.stripe_connect_account_id){
+    title.textContent = "Finish setting up payouts";
+    sub.textContent = "You started onboarding but haven't finished — pick up where you left off.";
+    btn.textContent = "Continue setup";
+    btn.style.display = "inline-block";
+  } else {
+    title.textContent = "Set up payouts to start receiving RelvBits";
+    sub.textContent = "Takes a few minutes through Stripe. Required before viewers can send you RelvBits.";
+    btn.textContent = "Set up payouts";
+    btn.style.display = "inline-block";
+  }
+}
+
+async function startOnboarding(){
+  const btn = document.getElementById("connectBtn");
+  btn.disabled = true; btn.textContent = "Redirecting...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(ONBOARD_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({}),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.onboardingUrl){
+      alert(result.error || "Couldn't start onboarding.");
+      btn.disabled = false; btn.textContent = "Set up payouts";
+      return;
+    }
+    window.location.href = result.onboardingUrl;
+  } catch (err){
+    console.error(err);
+    alert("Couldn't reach the server.");
+    btn.disabled = false; btn.textContent = "Set up payouts";
+  }
+}
+
+async function loadTable(){
+  const head = document.getElementById("tableHead");
+  const body = document.getElementById("tableBody");
+  body.innerHTML = `<tr class="empty-row"><td colspan="4">Loading...</td></tr>`;
+
+  if (activeTab === "received"){
+    head.innerHTML = `<tr><th>Date</th><th>From</th><th>Amount</th><th>Message</th></tr>`;
+    const { data: bits } = await supabaseClient
+      .from("live_relvbits").select("*").eq("creator_id", currentUser.id)
+      .order("created_at", { ascending:false }).limit(100);
+    renderRelvbitsTable(bits, body, "received");
+  }
+
+  if (activeTab === "sent"){
+    head.innerHTML = `<tr><th>Date</th><th>To</th><th>Amount</th><th>Status</th></tr>`;
+    const { data: bits } = await supabaseClient
+      .from("live_relvbits").select("*").eq("tipper_id", currentUser.id)
+      .order("created_at", { ascending:false }).limit(100);
+    renderRelvbitsTable(bits, body, "sent");
+  }
+
+  if (activeTab === "payouts"){
+    head.innerHTML = `<tr><th>Date</th><th>Amount</th><th>Status</th></tr>`;
+    const { data: payouts } = await supabaseClient
+      .from("live_payouts").select("*").eq("creator_id", currentUser.id)
+      .order("created_at", { ascending:false }).limit(100);
+
+    if (!payouts || payouts.length === 0){
+      body.innerHTML = `<tr class="empty-row"><td colspan="3">No payouts yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = "";
+    payouts.forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(p.created_at).toLocaleString()}</td>
+        <td class="amount-cell">${formatMoney(p.amount_cents)}</td>
+        <td><span class="status-pill succeeded">${escapeHtml(p.status)}</span></td>`;
+      body.appendChild(tr);
+    });
+  }
+}
+
+async function renderRelvbitsTable(bits, body, mode){
+  if (!bits || bits.length === 0){
+    body.innerHTML = `<tr class="empty-row"><td colspan="4">No RelvBits ${mode === "received" ? "received" : "sent"} yet.</td></tr>`;
+    return;
+  }
+
+  const otherPartyIds = [...new Set(bits.map(b => mode === "received" ? b.tipper_id : b.creator_id).filter(Boolean))];
+  const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name, username").in("id", otherPartyIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  body.innerHTML = "";
+  bits.forEach(b => {
+    const tr = document.createElement("tr");
+    if (mode === "received"){
+      const fromName = b.is_anonymous ? "Anonymous" : (nameById[b.tipper_id] || "Unknown");
+      tr.innerHTML = `
+        <td>${new Date(b.created_at).toLocaleString()}</td>
+        <td>${escapeHtml(fromName)}</td>
+        <td class="amount-cell">${formatMoney(b.creator_amount_cents)}</td>
+        <td style="color:var(--muted);">${escapeHtml(b.message || "—")}</td>`;
+    } else {
+      tr.innerHTML = `
+        <td>${new Date(b.created_at).toLocaleString()}</td>
+        <td>${escapeHtml(nameById[b.creator_id] || "Unknown")}</td>
+        <td class="amount-cell">${formatMoney(b.amount_cents)}</td>
+        <td><span class="status-pill ${b.status}">${escapeHtml(b.status)}</span></td>`;
+    }
+    body.appendChild(tr);
+  });
+}
+
+initialize();
+</script>
+</body>
+</html>
