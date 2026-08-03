@@ -154,7 +154,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-campus-auth" }
 });
 
-const CAMPUS_URL = "campus.html";
+const CAMPUS_URL = "index.html";
 
 async function checkExistingSession(){
   try {
