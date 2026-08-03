@@ -609,6 +609,40 @@ tr:last-child td{ border-bottom:none; }
         Stripe Checkout revenue and RelvBits creator tipping are the two live payment flows across the ecosystem right now.
         Studios and Music have no monetization wired up yet, so they contribute nothing here.
       </p>
+
+      <div class="section">
+        <div class="section-head"><h2>Investment Reserve</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+          Bookkeeping only — nothing here moves real money. This tracks what you've earmarked and what you've actually invested yourself, so you can see the gap at a glance.
+        </p>
+        <div class="panel" style="padding:20px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--muted);">Reserve percentage of platform revenue</label>
+            <input type="number" id="reservePercentInput" min="0" max="100" step="0.1" style="width:90px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:white;font-size:13px;">
+            <span style="color:var(--muted);">%</span>
+            <button class="btn gold" id="saveReservePercentBtn">Save</button>
+          </div>
+          <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card"><div class="num" id="statReserveTarget">—</div><div class="label">Reserve Target</div></div>
+            <div class="stat-card"><div class="num" id="statTotalInvested">—</div><div class="label">Total Logged Invested</div></div>
+            <div class="stat-card"><div class="num" id="statReserveAvailable">—</div><div class="label">Earmarked, Not Yet Invested</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <table>
+            <thead><tr><th>Date</th><th>Amount</th><th>Destination</th><th>Notes</th><th>Actions</th></tr></thead>
+            <tbody id="investmentLogTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+          </table>
+          <div class="add-form">
+            <input type="date" id="newInvestmentDate" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <input type="text" id="newInvestmentAmount" placeholder="Amount ($)" style="width:120px;">
+            <input type="text" id="newInvestmentDestination" placeholder="Where invested (e.g. S&P 500 index fund)" style="flex:1;min-width:200px;">
+            <input type="text" id="newInvestmentNotes" placeholder="Notes (optional)" style="flex:1;min-width:160px;">
+            <button class="btn gold" id="logInvestmentBtn">Log investment</button>
+          </div>
+        </div>
+      </div>
     </div><!-- /eco-finance -->
 
   </div>
@@ -2203,6 +2237,98 @@ async function loadFinanceTab(){
   document.getElementById("statFinancePaidOut").textContent = fmt(f.total_paid_out_cents);
   document.getElementById("statFinancePending").textContent = fmt(f.pending_payout_cents);
   document.getElementById("statFinanceCount").textContent = f.relvbits_count || 0;
+
+  await loadInvestmentTracking();
+  document.getElementById("saveReservePercentBtn").addEventListener("click", saveReservePercent);
+  document.getElementById("logInvestmentBtn").addEventListener("click", logInvestment);
+}
+
+// ==========================================================
+// INVESTMENT RESERVE (bookkeeping only — see schema comments)
+// ==========================================================
+async function loadInvestmentTracking(){
+  const fmt = (cents) => `$${((cents || 0) / 100).toFixed(2)}`;
+
+  const { data, error } = await supabaseClient.rpc("get_investment_summary");
+  if (!error && data && data.length > 0){
+    const s = data[0];
+    document.getElementById("reservePercentInput").value = s.reserve_percent;
+    document.getElementById("statReserveTarget").textContent = fmt(s.reserve_target_cents);
+    document.getElementById("statTotalInvested").textContent = fmt(s.total_invested_cents);
+    document.getElementById("statReserveAvailable").textContent = fmt(s.reserve_available_cents);
+  }
+
+  const tbody = document.getElementById("investmentLogTableBody");
+  const { data: log, error: logError } = await supabaseClient
+    .from("live_investment_log").select("*").order("invested_at", { ascending:false });
+
+  if (logError){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load investment log.</td></tr>`; return; }
+
+  if (!log || log.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No investments logged yet.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  log.forEach(entry => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${new Date(entry.invested_at).toLocaleDateString()}</td>
+      <td class="amount-cell">$${(entry.amount_cents / 100).toFixed(2)}</td>
+      <td>${escapeHtml(entry.destination)}</td>
+      <td style="color:var(--muted);">${escapeHtml(entry.notes || "—")}</td>
+      <td><button class="btn danger sm" data-action="delete">Delete</button></td>`;
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteInvestmentLog(entry.id));
+    tbody.appendChild(row);
+  });
+}
+
+async function saveReservePercent(){
+  const value = parseFloat(document.getElementById("reservePercentInput").value);
+  if (isNaN(value) || value < 0 || value > 100){ showToast("Enter a percentage between 0 and 100"); return; }
+
+  const { error } = await supabaseClient
+    .from("live_investment_config")
+    .update({ reserve_percent: value, updated_by: currentUser.id, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+
+  if (error){ console.error(error); showToast("Couldn't save reserve percentage"); return; }
+
+  showToast(`Reserve set to ${value}%`);
+  await logAction("set_investment_reserve", "finance", `${value}%`);
+  await loadInvestmentTracking();
+}
+
+async function logInvestment(){
+  const dateInput = document.getElementById("newInvestmentDate").value;
+  const amountInput = parseFloat(document.getElementById("newInvestmentAmount").value);
+  const destination = document.getElementById("newInvestmentDestination").value.trim();
+  const notes = document.getElementById("newInvestmentNotes").value.trim();
+
+  if (!destination){ showToast("Enter where this was invested"); return; }
+  if (isNaN(amountInput) || amountInput <= 0){ showToast("Enter a valid amount"); return; }
+
+  const { error } = await supabaseClient.from("live_investment_log").insert({
+    amount_cents: Math.round(amountInput * 100),
+    destination,
+    notes: notes || null,
+    invested_at: dateInput || new Date().toISOString().slice(0, 10),
+    logged_by: currentUser.id,
+  });
+
+  if (error){ console.error(error); showToast("Couldn't log investment"); return; }
+
+  document.getElementById("newInvestmentAmount").value = "";
+  document.getElementById("newInvestmentDestination").value = "";
+  document.getElementById("newInvestmentNotes").value = "";
+  showToast("Investment logged");
+  await logAction("log_investment", "finance", destination, `$${amountInput.toFixed(2)}`);
+  await loadInvestmentTracking();
+}
+
+async function deleteInvestmentLog(entryId){
+  if (!confirm("Delete this investment log entry? This only removes the record, not any real investment.")) return;
+  const { error } = await supabaseClient.from("live_investment_log").delete().eq("id", entryId);
+  if (error){ console.error(error); showToast("Couldn't delete entry"); return; }
+  showToast("Entry deleted");
+  await loadInvestmentTracking();
 }
 
 async function triggerLockdown(){
