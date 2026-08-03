@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Relvia Campus</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d;
+  --border:#2a2018; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html, body{ height:100%; }
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+  color:var(--text); display:flex; align-items:center; justify-content:center; padding:24px;
+}
+button, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+.wrap{ width:420px; max-width:100%; }
+
+.brand{ display:flex; flex-direction:column; align-items:center; gap:14px; margin-bottom:26px; }
+.brand-badge{
+  width:56px; height:56px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:28px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:24px; }
+.brand-tagline{ font-size:11px; letter-spacing:2.5px; color:var(--muted); text-transform:uppercase; text-align:center; }
+.age-pill{
+  margin-top:6px; font-size:10px; font-weight:800; letter-spacing:1px; color:#000;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); padding:4px 12px; border-radius:999px;
+}
+
+.card{ background:var(--glass); border:1px solid var(--border); border-radius:24px; padding:8px; backdrop-filter:blur(10px); }
+.tabs{ display:flex; gap:4px; margin-bottom:4px; }
+.tab{ flex:1; text-align:center; padding:14px; border-radius:16px; font-size:14px; font-weight:700; color:var(--muted); transition:.2s; }
+.tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.tab:not(.active):hover{ color:white; }
+.panel{ padding:26px 22px 22px; display:none; }
+.panel.active{ display:block; }
+.panel h2{ font-family:var(--font-display); font-size:24px; font-weight:600; margin-bottom:6px; }
+.panel p.sub{ color:var(--muted); font-size:13.5px; margin-bottom:22px; }
+
+.field{ margin-bottom:14px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:white; font-size:14px;
+}
+.field input:focus{ outline:none; border-color:var(--gold); }
+.field-row{ display:flex; gap:10px; }
+.field-row .field{ flex:1; }
+
+.age-gate-box{
+  background:rgba(224,87,79,.08); border:1px solid rgba(224,87,79,.3); border-radius:12px;
+  padding:14px; margin-bottom:16px; font-size:12.5px; color:#f2a8a3; line-height:1.6;
+}
+
+.submit-btn{
+  width:100%; margin-top:6px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  color:#000; padding:13px; border-radius:14px; font-weight:800; font-size:14.5px; transition:opacity .2s;
+}
+.submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.submit-btn:not(:disabled):hover{ opacity:.88; }
+
+.form-error{
+  background:rgba(224,87,79,.1); border:1px solid rgba(224,87,79,.35); color:#f2a8a3;
+  padding:10px 13px; border-radius:12px; font-size:13px; margin-bottom:14px; display:none;
+}
+.form-error.show{ display:block; }
+.form-success{
+  background:rgba(217,169,75,.1); border:1px solid var(--gold-end); color:var(--gold-start);
+  padding:14px; border-radius:12px; font-size:13.5px; margin-bottom:14px; display:none; line-height:1.6;
+}
+.form-success.show{ display:block; }
+
+.note{ margin-top:20px; text-align:center; font-size:12px; color:var(--muted-soft); line-height:1.6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <div class="brand-name">Relvia Campus</div>
+    <div class="brand-tagline">Its Own Sign-In · Separate From Live</div>
+    <div class="age-pill">18+ ONLY</div>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" id="tabLogin">Sign in</div>
+      <div class="tab" id="tabSignup">Create account</div>
+    </div>
+
+    <div class="panel active" id="panelLogin">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to your Relvia Campus account.</p>
+      <div class="form-error" id="loginError"></div>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+      <button class="submit-btn" id="loginSubmit">Sign in</button>
+    </div>
+
+    <div class="panel" id="panelSignup">
+      <h2>Create your account</h2>
+      <p class="sub">Relvia Campus is 18+ only. You'll need to confirm your birthdate to sign up.</p>
+
+      <div class="age-gate-box">
+        Relvia Campus features looser content rules than Relvia Live (mature language, drinking-related content) — but never sexual or explicit content. You must be 18 or older to create an account.
+      </div>
+
+      <div class="form-error" id="signupError"></div>
+      <div class="form-success" id="signupSuccess"></div>
+
+      <div class="field"><label>Date of birth</label><input type="date" id="signupBirthdate"></div>
+      <div class="field"><label>Display name</label><input type="text" id="signupDisplayName"></div>
+      <div class="field"><label>Username</label><input type="text" id="signupUsername"></div>
+      <div class="field"><label>School (optional)</label><input type="text" id="signupSchool" placeholder="e.g. University of..."></div>
+      <div class="field"><label>Email</label><input type="email" id="signupEmail" autocomplete="email"></div>
+      <div class="field-row">
+        <div class="field"><label>Password</label><input type="password" id="signupPassword" autocomplete="new-password"></div>
+        <div class="field"><label>Confirm</label><input type="password" id="signupConfirm" autocomplete="new-password"></div>
+      </div>
+
+      <button class="submit-btn" id="signupSubmit">Create account</button>
+    </div>
+  </div>
+
+  <p class="note">Relvia Campus uses its own sign-in, separate from Relvia Live — even with the same email — so moderation on one never affects your standing on the other.</p>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+// Isolated session — completely separate from Relvia Live's
+// "relvia-live-auth" and the main account's default session.
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-campus-auth" }
+});
+
+const CAMPUS_URL = "campus.html";
+
+async function checkExistingSession(){
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    if (data && data.session) window.location.href = CAMPUS_URL;
+  } catch (err){ console.error(err); }
+}
+checkExistingSession();
+
+const tabLogin = document.getElementById("tabLogin");
+const tabSignup = document.getElementById("tabSignup");
+const panelLogin = document.getElementById("panelLogin");
+const panelSignup = document.getElementById("panelSignup");
+
+tabLogin.addEventListener("click", () => {
+  tabLogin.classList.add("active"); tabSignup.classList.remove("active");
+  panelLogin.classList.add("active"); panelSignup.classList.remove("active");
+});
+tabSignup.addEventListener("click", () => {
+  tabSignup.classList.add("active"); tabLogin.classList.remove("active");
+  panelSignup.classList.add("active"); panelLogin.classList.remove("active");
+});
+
+function calculateAge(birthdateStr){
+  const today = new Date();
+  const birth = new Date(birthdateStr);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+const loginError = document.getElementById("loginError");
+document.getElementById("loginSubmit").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  loginError.classList.remove("show");
+
+  if (!email || !password){
+    loginError.textContent = "Enter your email and password.";
+    loginError.classList.add("show");
+    return;
+  }
+
+  const btn = document.getElementById("loginSubmit");
+  btn.disabled = true; btn.textContent = "Signing in...";
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false; btn.textContent = "Sign in";
+
+  if (error){
+    loginError.textContent = error.message || "Couldn't sign in.";
+    loginError.classList.add("show");
+    return;
+  }
+  window.location.href = CAMPUS_URL;
+});
+
+const signupError = document.getElementById("signupError");
+const signupSuccess = document.getElementById("signupSuccess");
+document.getElementById("signupSubmit").addEventListener("click", async () => {
+  const birthdate = document.getElementById("signupBirthdate").value;
+  const display_name = document.getElementById("signupDisplayName").value.trim();
+  const username = document.getElementById("signupUsername").value.trim().toLowerCase();
+  const school = document.getElementById("signupSchool").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const confirm = document.getElementById("signupConfirm").value;
+
+  signupError.classList.remove("show");
+  signupSuccess.classList.remove("show");
+
+  if (!birthdate || !display_name || !username || !email || !password){
+    signupError.textContent = "Fill in every required field to continue.";
+    signupError.classList.add("show");
+    return;
+  }
+
+  // The actual age gate — checked here BEFORE any account is created.
+  if (calculateAge(birthdate) < 18){
+    signupError.textContent = "You must be 18 or older to create a Relvia Campus account.";
+    signupError.classList.add("show");
+    return;
+  }
+
+  if (!/^[a-z0-9_]+$/.test(username)){
+    signupError.textContent = "Usernames can only use lowercase letters, numbers, and underscores.";
+    signupError.classList.add("show");
+    return;
+  }
+  if (password.length < 6){
+    signupError.textContent = "Password must be at least 6 characters.";
+    signupError.classList.add("show");
+    return;
+  }
+  if (password !== confirm){
+    signupError.textContent = "Passwords don't match.";
+    signupError.classList.add("show");
+    return;
+  }
+
+  const btn = document.getElementById("signupSubmit");
+  btn.disabled = true; btn.textContent = "Creating account...";
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email, password,
+    options: { data: { display_name, username } }
+  });
+
+  if (error){
+    btn.disabled = false; btn.textContent = "Create account";
+    signupError.textContent = error.message || "Couldn't create your account.";
+    signupError.classList.add("show");
+    return;
+  }
+
+  btn.disabled = false; btn.textContent = "Create account";
+
+  if (data.session){
+    const { error: profileError } = await supabaseClient
+      .from("campus_profiles")
+      .insert({ id: data.user.id, display_name, username, school: school || null, birthdate, age_verified: true });
+
+    if (profileError) console.error("campus_profiles insert failed:", profileError);
+
+    window.location.href = CAMPUS_URL;
+    return;
+  }
+
+  signupSuccess.textContent = "Account created! Check your email to confirm, then sign in.";
+  signupSuccess.classList.add("show");
+});
+
+// Fallback: create the campus_profiles row on first login too, in
+// case email confirmation delayed it past signup time.
+document.getElementById("loginSubmit").addEventListener("click", async function fallbackProfileCreate(){});
+</script>
+</body>
+</html>
