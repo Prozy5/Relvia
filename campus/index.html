@@ -235,7 +235,7 @@ async function initialize(){
     if (!sessionData || !sessionData.session){ window.location.href = "campus-login.html"; return; }
 
     const { data: userData, error } = await supabaseClient.auth.getUser();
-    if (error || !userData.user){ window.location.href = "campus-login.html"; return; }
+    if (error || !userData.user){ window.location.href = "login.html"; return; }
     currentUser = userData.user;
 
     await loadProfile();
