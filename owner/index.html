@@ -201,6 +201,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab active" data-eco-tab="live">Relvia Live</button>
       <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
+      <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
     </div>
 
     <div class="eco-panel active" id="eco-live">
@@ -388,8 +389,28 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
 
+      <div class="panel" style="padding:20px;margin-bottom:16px;">
+        <h4 style="margin-bottom:6px;font-size:14px;">Account Lookup &amp; Override</h4>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Look up any account by email to force-logout, force-deactivate, or permanently delete it.</p>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input type="email" id="lookupEmail" placeholder="Account email" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <button class="btn gold" id="lookupBtn">Look up</button>
+        </div>
+        <div id="lookupResult" style="display:none;">
+          <div style="padding:14px;background:var(--surface-light);border-radius:12px;margin-bottom:12px;">
+            <div id="lookupName" style="font-weight:700;font-size:14px;margin-bottom:2px;"></div>
+            <div id="lookupMeta" style="font-size:12.5px;color:var(--muted);"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" id="lookupForceLogoutBtn">Force Logout</button>
+            <button class="btn" id="lookupDeactivateBtn">Force Deactivate</button>
+            <button class="btn danger" id="lookupDeleteBtn">Delete Account Permanently</button>
+          </div>
+        </div>
+      </div>
+
       <div class="panel">
-        <h4 style="padding:16px 18px 0;font-size:14px;">All staff — global revoke</h4>
+        <h4 style="padding:16px 18px 0;font-size:14px;">All staff — global revoke &amp; role change</h4>
         <p style="color:var(--muted);font-size:12.5px;padding:6px 18px 14px;">Strips a person's access across Live, Studios, and Music in one action, regardless of who granted it.</p>
         <table>
           <thead><tr><th>Email</th><th>Division</th><th>Role</th><th>Actions</th></tr></thead>
@@ -487,10 +508,12 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head">
         <h2>Activity Log</h2>
         <div style="display:flex;gap:10px;">
+          <input type="text" id="logSearch" placeholder="Search by person or action..." class="search-input" style="width:220px;">
           <button class="btn" id="exportLogBtn">Export CSV</button>
           <button class="btn" id="refreshLogBtn">Refresh</button>
         </div>
       </div>
+      <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">Covers everything across Live, Studios, and Music — everyone's actions land in this one log.</p>
       <div class="panel">
         <table>
           <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
@@ -568,6 +591,25 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
     </div><!-- /eco-music -->
+
+    <!-- ================= FINANCE TAB (founder only) ================= -->
+    <div class="eco-panel" id="eco-finance">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statFinanceTotal">—</div><div class="label">Total Platform Revenue</div></div>
+        <div class="stat-card"><div class="num" id="statFinanceStripe">—</div><div class="label">Stripe Checkout Revenue</div></div>
+        <div class="stat-card"><div class="num" id="statFinanceFees">—</div><div class="label">RelvBits Fees</div></div>
+        <div class="stat-card"><div class="num" id="statFinanceCreatorPay">—</div><div class="label">Paid to Creators</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statFinancePaidOut">—</div><div class="label">Total Paid Out</div></div>
+        <div class="stat-card"><div class="num" id="statFinancePending">—</div><div class="label">Pending Payouts</div></div>
+        <div class="stat-card"><div class="num" id="statFinanceCount">—</div><div class="label">RelvBits Sent</div></div>
+      </div>
+      <p style="color:var(--muted);font-size:12.5px;">
+        Stripe Checkout revenue and RelvBits creator tipping are the two live payment flows across the ecosystem right now.
+        Studios and Music have no monetization wired up yet, so they contribute nothing here.
+      </p>
+    </div><!-- /eco-finance -->
 
   </div>
 </div>
@@ -934,6 +976,7 @@ async function gate(){
 
   if (myRole === "founder"){
     document.getElementById("founderSection").style.display = "block";
+    document.getElementById("financeTabBtn").style.display = "block";
     tasks.push(loadFounderOverview());
   }
 
@@ -949,6 +992,7 @@ async function gate(){
   document.getElementById("closeHistoryModal").addEventListener("click", () => document.getElementById("historyModal").classList.remove("open"));
   document.getElementById("addAnnouncementBtn").addEventListener("click", addAnnouncement);
   document.getElementById("addIpBanBtn").addEventListener("click", addIpBan);
+  document.getElementById("logSearch").addEventListener("input", (e) => renderLogRows(e.target.value));
 
   if (myRole === "owner" || myRole === "founder"){
     document.getElementById("addStaffBtn").addEventListener("click", addStaff);
@@ -1364,7 +1408,7 @@ async function loadLog(){
     .from("live_moderation_log")
     .select("*")
     .order("created_at", { ascending:false })
-    .limit(50);
+    .limit(100);
 
   if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load activity log.</td></tr>`; return; }
 
@@ -1377,14 +1421,43 @@ async function loadLog(){
   const actorIds = [...new Set(data.map(l => l.actor_id).filter(Boolean))];
   let actorsById = {};
   if (actorIds.length > 0){
-    const { data: actors } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", actorIds);
-    (actors || []).forEach(a => { actorsById[a.id] = a; });
+    // Live staff/creators live in live_profiles; Studios/Music
+    // creators are on the main account (profiles table) — check
+    // both so nobody shows up as "Unknown" just because they came
+    // from a different division.
+    const { data: liveActors } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", actorIds);
+    (liveActors || []).forEach(a => { actorsById[a.id] = a.display_name; });
+
+    const missingIds = actorIds.filter(id => !actorsById[id]);
+    if (missingIds.length > 0){
+      const { data: mainActors } = await supabaseClient.from("profiles").select("id, display_name").in("id", missingIds);
+      (mainActors || []).forEach(a => { actorsById[a.id] = a.display_name; });
+    }
   }
 
-  logCache = data.map(entry => ({ ...entry, actorName: actorsById[entry.actor_id]?.display_name || "Unknown" }));
+  logCache = data.map(entry => ({ ...entry, actorName: actorsById[entry.actor_id] || "Unknown" }));
+
+  renderLogRows(document.getElementById("logSearch")?.value || "");
+}
+
+function renderLogRows(filterText){
+  const tbody = document.getElementById("logTableBody");
+  const term = (filterText || "").toLowerCase().trim();
+
+  const filtered = term
+    ? logCache.filter(e =>
+        e.actorName.toLowerCase().includes(term) ||
+        e.action.toLowerCase().includes(term) ||
+        (e.target_label || "").toLowerCase().includes(term))
+    : logCache;
+
+  if (filtered.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${term ? "No matching activity." : "No activity yet."}</td></tr>`;
+    return;
+  }
 
   tbody.innerHTML = "";
-  logCache.forEach(entry => {
+  filtered.forEach(entry => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td class="log-time">${new Date(entry.created_at).toLocaleString()}</td>
@@ -1723,6 +1796,7 @@ async function saveRelvbitsFee(){
 // ==========================================================
 let studiosLoaded = false;
 let musicLoaded = false;
+let financeLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -1735,6 +1809,7 @@ function setupEcosystemTabs(){
 
       if (target === "studios" && !studiosLoaded){ studiosLoaded = true; await loadStudiosTab(); }
       if (target === "music" && !musicLoaded){ musicLoaded = true; await loadMusicTab(); }
+      if (target === "finance" && !financeLoaded){ financeLoaded = true; await loadFinanceTab(); }
     });
   });
 }
@@ -2027,7 +2102,107 @@ async function removeIpBan(ip){
 // ==========================================================
 async function loadFounderOverview(){
   document.getElementById("lockdownBtn").addEventListener("click", triggerLockdown);
+  document.getElementById("lookupBtn").addEventListener("click", lookupAccount);
   await loadFounderStaffList();
+}
+
+let lookedUpAccount = null;
+
+async function lookupAccount(){
+  const email = document.getElementById("lookupEmail").value.trim();
+  if (!email){ showToast("Enter an email"); return; }
+
+  const { data, error } = await supabaseClient.rpc("founder_lookup_account", { target_email: email });
+  if (error || !data || data.length === 0){
+    showToast(error?.message || "No account found with that email");
+    document.getElementById("lookupResult").style.display = "none";
+    return;
+  }
+
+  lookedUpAccount = data[0];
+  document.getElementById("lookupName").textContent = lookedUpAccount.display_name || "Unnamed";
+  document.getElementById("lookupMeta").textContent =
+    `@${lookedUpAccount.username || "unknown"} · ${lookedUpAccount.is_deactivated ? "Deactivated" : "Active"}${lookedUpAccount.staff_role ? ` · Staff: ${lookedUpAccount.staff_role}` : ""}`;
+  document.getElementById("lookupResult").style.display = "block";
+
+  document.getElementById("lookupForceLogoutBtn").onclick = () => forceLogoutAccount(lookedUpAccount.user_id, email);
+  document.getElementById("lookupDeactivateBtn").onclick = () => forceDeactivateAccount(lookedUpAccount.user_id, email, !lookedUpAccount.is_deactivated);
+  document.getElementById("lookupDeleteBtn").onclick = () => deleteAnyAccount(lookedUpAccount.user_id, email);
+}
+
+async function forceLogoutAccount(userId, email){
+  if (!confirm(`Force-logout ${email}? They'll be signed out on their next token refresh (not always instant — see the note on this function).`)) return;
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/force-logout-user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ targetUserId: userId }),
+    });
+    const result = await response.json();
+    if (!response.ok){ showToast(result.error || "Couldn't force logout"); return; }
+    showToast(`${email} will be logged out shortly`);
+    await logAction("force_logout", "account", email);
+  } catch (err){ console.error(err); showToast("Couldn't reach the server"); }
+}
+
+async function forceDeactivateAccount(userId, email, newValue){
+  if (!confirm(`${newValue ? "Deactivate" : "Reactivate"} ${email}'s account?`)) return;
+
+  const { error } = await supabaseClient.rpc("admin_set_deactivated", { target_user_id: userId, new_value: newValue });
+  if (error){ console.error(error); showToast(error.message || "Couldn't update account"); return; }
+
+  showToast(`${email} ${newValue ? "deactivated" : "reactivated"}`);
+  await logAction(newValue ? "force_deactivate" : "force_reactivate", "account", email);
+  await lookupAccount();
+}
+
+async function deleteAnyAccount(userId, email){
+  if (!confirm(`PERMANENTLY delete ${email}? This cannot be undone.`)) return;
+  if (!confirm(`Really sure? This deletes everything tied to ${email} across the ecosystem.`)) return;
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/admin-delete-account`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ targetUserId: userId }),
+    });
+    const result = await response.json();
+    if (!response.ok){ showToast(result.error || "Couldn't delete account"); return; }
+    showToast(`${email} permanently deleted`);
+    await logAction("delete_account", "account", email);
+    document.getElementById("lookupResult").style.display = "none";
+    document.getElementById("lookupEmail").value = "";
+  } catch (err){ console.error(err); showToast("Couldn't reach the server"); }
+}
+
+// ==========================================================
+// FINANCE TAB
+// ==========================================================
+async function loadFinanceTab(){
+  const { data, error } = await supabaseClient.rpc("get_ecosystem_finance_summary");
+  if (error || !data || data.length === 0){
+    showToast(error?.message || "Couldn't load finance summary");
+    return;
+  }
+
+  const f = data[0];
+  const fmt = (cents) => `$${((cents || 0) / 100).toFixed(2)}`;
+  const total = (f.stripe_revenue_cents || 0) + (f.relvbits_fees_cents || 0);
+
+  document.getElementById("statFinanceTotal").textContent = fmt(total);
+  document.getElementById("statFinanceStripe").textContent = fmt(f.stripe_revenue_cents);
+  document.getElementById("statFinanceFees").textContent = fmt(f.relvbits_fees_cents);
+  document.getElementById("statFinanceCreatorPay").textContent = fmt(f.relvbits_creator_cents);
+  document.getElementById("statFinancePaidOut").textContent = fmt(f.total_paid_out_cents);
+  document.getElementById("statFinancePending").textContent = fmt(f.pending_payout_cents);
+  document.getElementById("statFinanceCount").textContent = f.relvbits_count || 0;
 }
 
 async function triggerLockdown(){
@@ -2068,16 +2243,35 @@ async function loadFounderStaffList(){
   rows.forEach(person => {
     const isSelf = person.user_id === currentUser.id;
     const isFounder = person.role === "founder";
+    const isLiveStaff = person.division === "Relvia Live";
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${escapeHtml(person.email)}</td>
       <td>${escapeHtml(person.division)}</td>
       <td>${escapeHtml(person.role)}</td>
-      <td>${isSelf || isFounder ? `<span style="color:var(--muted);font-size:12px;">${isFounder ? "Founder" : "You"}</span>` : `<button class="btn danger sm" data-action="revoke">Revoke everywhere</button>`}</td>`;
+      <td>
+        ${isSelf || isFounder ? `<span style="color:var(--muted);font-size:12px;">${isFounder ? "Founder" : "You"}</span>` : `
+          ${isLiveStaff ? `<button class="btn sm" data-action="role">${person.role === "owner" ? "Make Moderator" : "Make Owner"}</button>` : ""}
+          <button class="btn danger sm" data-action="revoke">Revoke everywhere</button>
+        `}
+      </td>`;
     const revokeBtn = row.querySelector('[data-action="revoke"]');
     if (revokeBtn) revokeBtn.addEventListener("click", () => globalRevoke(person.user_id, person.email));
+    const roleBtn = row.querySelector('[data-action="role"]');
+    if (roleBtn) roleBtn.addEventListener("click", () => changeStaffRole(person.user_id, person.email, person.role === "owner" ? "moderator" : "owner"));
     tbody.appendChild(row);
   });
+}
+
+async function changeStaffRole(userId, email, newRole){
+  if (!confirm(`Change ${email}'s role to ${newRole}?`)) return;
+
+  const { error } = await supabaseClient.rpc("change_staff_role", { target_user_id: userId, new_role: newRole });
+  if (error){ console.error(error); showToast(error.message || "Couldn't change role"); return; }
+
+  showToast(`${email} is now ${newRole}`);
+  await logAction("change_staff_role", "staff", email, newRole);
+  await loadFounderStaffList();
 }
 
 async function globalRevoke(userId, email){
