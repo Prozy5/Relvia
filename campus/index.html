@@ -140,8 +140,8 @@ img, video{ max-width:100%; display:block; }
     <span class="age-pill">18+</span>
   </div>
   <div class="header-right">
-    <a class="go-live-btn" href="campus-go-live.html">Go Live</a>
-    <a class="nav-icon-btn" href="welcome.html" title="Relvia Live">◉</a>
+    <a class="go-live-btn" href="go-live.html">Go Live</a>
+    <a class="nav-icon-btn" href="../live/welcome.html" title="Relvia Live">◉</a>
     <div class="avatar" id="profileAvatar"></div>
   </div>
 </header>
@@ -232,7 +232,7 @@ function escapeHtml(str){
 async function initialize(){
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
-    if (!sessionData || !sessionData.session){ window.location.href = "campus-login.html"; return; }
+    if (!sessionData || !sessionData.session){ window.location.href = "login.html"; return; }
 
     const { data: userData, error } = await supabaseClient.auth.getUser();
     if (error || !userData.user){ window.location.href = "login.html"; return; }
@@ -255,7 +255,7 @@ async function initialize(){
     setupRelvbitsModal();
   } catch (err){
     console.error("Relvia Campus init failed:", err);
-    window.location.href = "campus-login.html";
+    window.location.href = "login.html";
   }
 }
 
