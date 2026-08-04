@@ -238,6 +238,21 @@ async function initialize(){
   const liveStreams = (streams || []).filter(s => s.is_live);
   const pastStreams = (streams || []).filter(s => !s.is_live);
 
+  let recordingByStreamId = {};
+  if (pastStreams.length > 0){
+    try {
+      const { data: recordings, error: recError } = await supabaseClient
+        .from("live_recordings")
+        .select("stream_id, status, file_url")
+        .in("stream_id", pastStreams.map(s => s.id))
+        .eq("status", "ready");
+      if (recError) console.error("live_recordings lookup failed (did you run phase21?):", recError);
+      (recordings || []).forEach(r => { recordingByStreamId[r.stream_id] = r; });
+    } catch (err){
+      console.error("live_recordings table may not exist yet:", err);
+    }
+  }
+
   const liveSection = document.getElementById("liveNowSection");
   if (liveStreams.length > 0){
     liveSection.innerHTML = `<div class="section-title">Live Now</div><div class="stream-grid" id="liveGrid"></div>`;
@@ -269,24 +284,51 @@ async function initialize(){
   const grid = document.createElement("div");
   grid.className = "stream-grid";
   pastStreams.forEach(stream => {
+    const recording = recordingByStreamId[stream.id];
     const card = document.createElement("div");
     card.className = "stream-card";
     card.innerHTML = `
       <div class="stream-thumb">
         ${stream.thumbnail_url ? `<img src="${stream.thumbnail_url}">` : ""}
+        ${recording ? `<div class="live-pill" style="background:var(--gold);color:#000;">VOD</div>` : ""}
       </div>
       <div class="stream-info">
         <div class="stream-title">${escapeHtml(stream.title)}</div>
         <div class="stream-date">${new Date(stream.created_at).toLocaleDateString()}</div>
-        <button class="chat-replay-btn" data-stream-id="${stream.id}">View chat</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          ${recording ? `<button class="chat-replay-btn" data-action="watch">Watch</button>` : ""}
+          <button class="chat-replay-btn" data-action="chat">View chat</button>
+        </div>
       </div>`;
-    card.querySelector(".chat-replay-btn").addEventListener("click", (e) => {
+
+    const watchBtn = card.querySelector('[data-action="watch"]');
+    if (watchBtn) watchBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openVodPlayer(recording.file_url, stream.title);
+    });
+    card.querySelector('[data-action="chat"]').addEventListener("click", (e) => {
       e.stopPropagation();
       openChatReplay(stream.id, stream.title);
     });
     grid.appendChild(card);
   });
   streamsContainer.appendChild(grid);
+}
+
+function openVodPlayer(fileUrl, title){
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3000;padding:24px;";
+  modal.innerHTML = `
+    <div style="width:100%;max-width:900px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-family:var(--font-display);font-size:18px;color:var(--text);">${escapeHtml(title)}</h3>
+        <button id="closeVodPlayer" style="font-size:22px;color:var(--muted);background:none;border:none;cursor:pointer;">×</button>
+      </div>
+      <video src="${fileUrl}" controls autoplay style="width:100%;border-radius:16px;border:1px solid var(--border);background:#000;"></video>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector("#closeVodPlayer").addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
 }
 
 async function openChatReplay(streamId, title){
@@ -298,7 +340,8 @@ async function openChatReplay(streamId, title){
     .limit(500);
 
   if (error){
-    alert("Couldn't load chat for this stream.");
+    console.error("openChatReplay failed:", error);
+    alert("Couldn't load chat for this stream. Check the console for the real error.");
     return;
   }
 
