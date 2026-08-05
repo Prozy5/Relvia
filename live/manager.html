@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RelvManager — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f; --ok-green:#5fae7a;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  min-height:100vh; color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+}
+button, input, select{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-family:inherit; font-size:inherit; }
+a{ text-decoration:none; color:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:960px; margin:auto; padding:34px 24px 80px; }
+
+.manager-tabs{ display:flex; gap:6px; margin-bottom:26px; background:var(--surface-light); border:1px solid var(--border); border-radius:16px; padding:6px; width:fit-content; }
+.manager-tab{ font-size:13.5px; font-weight:800; padding:11px 22px; border-radius:11px; color:var(--muted); }
+.manager-tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.manager-tab:not(.active):hover{ color:var(--text); }
+.manager-panel{ display:none; }
+.manager-panel.active{ display:block; }
+
+.setup-panel{ background:var(--glass); border:1px solid var(--border); border-radius:22px; padding:30px; }
+.setup-panel h1{ font-family:var(--font-display); font-size:24px; font-weight:600; margin-bottom:8px; }
+.setup-panel .sub{ color:var(--muted); font-size:13.5px; margin-bottom:24px; }
+.field{ margin-bottom:16px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input, .field select{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:white; font-size:14px;
+}
+.field input:focus, .field select:focus{ outline:none; border-color:var(--gold); }
+.btn{ font-size:14px; font-weight:800; padding:13px 26px; border-radius:14px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.btn:hover{ opacity:.88; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; }
+.btn.danger{ background:var(--live-red); color:white; }
+.btn.ghost{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); font-weight:700; }
+.error-box{ background:rgba(224,87,79,.1); border:1px solid rgba(224,87,79,.35); color:#f2a8a3; padding:11px 14px; border-radius:12px; font-size:13px; margin-bottom:16px; display:none; }
+.error-box.show{ display:block; }
+
+#broadcastView{ display:none; }
+.broadcast-frame{ width:100%; aspect-ratio:16/9; background:#000; border-radius:20px; overflow:hidden; border:1px solid var(--border); position:relative; margin-bottom:20px; }
+.broadcast-frame video{ width:100%; height:100%; object-fit:cover; }
+.on-air{ position:absolute; top:14px; left:14px; background:var(--live-red); color:white; font-size:11px; font-weight:800; letter-spacing:.5px; padding:5px 12px; border-radius:6px; display:flex; align-items:center; gap:6px; }
+.on-air .dot{ width:6px; height:6px; border-radius:50%; background:white; animation:pulse 1.4s infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.viewer-count-badge{ position:absolute; top:14px; right:14px; background:rgba(0,0,0,.6); color:white; font-size:12px; font-weight:600; padding:5px 12px; border-radius:6px; }
+.broadcast-title{ font-family:var(--font-display); font-size:22px; font-weight:600; margin-bottom:16px; }
+.broadcast-controls{ display:flex; gap:12px; flex-wrap:wrap; }
+.mute-btn{ background:var(--surface-light); border:1px solid var(--border); padding:12px 20px; border-radius:14px; font-weight:700; font-size:13.5px; }
+.mute-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.mute-btn.off{ border-color:var(--live-red); color:#f2a8a3; }
+
+.stats-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:26px; }
+.stat-card{ background:var(--glass); border:1px solid var(--border); border-radius:16px; padding:20px; }
+.stat-card .num{ font-size:26px; font-weight:800; font-family:var(--font-display); }
+.stat-card .label{ font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-top:4px; }
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:20px; }
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); padding:12px 16px; border-bottom:1px solid var(--border); }
+td{ padding:12px 16px; border-bottom:1px solid var(--border-soft); font-size:13px; }
+tr:last-child td{ border-bottom:none; }
+.empty-row td{ text-align:center; color:var(--muted); padding:30px; }
+.amount-cell{ font-weight:700; color:var(--gold); }
+.pill{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; }
+.pill.live{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+.pill.ended{ background:rgba(168,158,143,.15); color:var(--muted); }
+
+.connect-banner{ background:var(--glass); border:1px solid var(--gold-end); border-radius:18px; padding:20px 22px; display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; }
+.connect-banner.enabled{ border-color:var(--ok-green); }
+.connect-banner h3{ font-family:var(--font-display); font-size:18px; }
+.connect-banner p{ font-size:13px; color:var(--muted); margin-top:4px; }
+
+.section-title{ font-family:var(--font-display); font-size:18px; font-weight:600; margin:26px 0 14px; }
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--surface);
+  border:1px solid var(--gold); color:white; padding:13px 22px; border-radius:14px; font-size:13.5px; font-weight:600;
+  opacity:0; pointer-events:none; transition:.25s; z-index:3000;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">RelvManager</span>
+  </div>
+  <a class="back-link" href="index.html">← Back to Relvia Live</a>
+</header>
+
+<div class="container">
+
+  <div class="manager-tabs">
+    <button class="manager-tab active" data-tab="studio">Studio</button>
+    <button class="manager-tab" data-tab="analytics">Analytics</button>
+    <button class="manager-tab" data-tab="revenue">Revenue</button>
+  </div>
+
+  <div class="manager-panel active" id="panel-studio">
+    <div class="setup-panel" id="setupPanel">
+      <h1>Start a broadcast</h1>
+      <p class="sub">You'll be asked for camera and microphone access when you go live.</p>
+      <div class="error-box" id="setupError"></div>
+      <div class="field"><label>Stream title</label><input type="text" id="streamTitle" placeholder="What are you streaming?"></div>
+      <div class="field"><label>Category</label><select id="streamCategory"><option value="">Loading categories...</option></select></div>
+      <button class="btn" id="goLiveBtn">Go Live</button>
+    </div>
+
+    <div id="broadcastView">
+      <div class="broadcast-frame">
+        <div class="on-air"><span class="dot"></span>ON AIR</div>
+        <div class="viewer-count-badge" id="viewerCountBadge">0 watching</div>
+        <video id="localVideo" autoplay muted playsinline></video>
+      </div>
+      <div class="broadcast-title" id="liveTitleDisplay"></div>
+      <div class="broadcast-controls">
+        <button class="mute-btn" id="toggleMicBtn">Mute mic</button>
+        <button class="mute-btn" id="toggleCamBtn">Turn off camera</button>
+        <button class="mute-btn" id="toggleScreenBtn">Share screen</button>
+        <button class="btn danger" id="endStreamBtn">End Stream</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="manager-panel" id="panel-analytics">
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="statTotalStreams">—</div><div class="label">Total Streams</div></div>
+      <div class="stat-card"><div class="num" id="statPeakViewers">—</div><div class="label">Best Peak Viewers</div></div>
+      <div class="stat-card"><div class="num" id="statAvgPeak">—</div><div class="label">Avg Peak Viewers</div></div>
+    </div>
+    <div class="section-title">Stream History</div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Peak Viewers</th><th>Date</th></tr></thead>
+        <tbody id="historyTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="manager-panel" id="panel-revenue">
+    <div class="connect-banner" id="connectBanner">
+      <div><h3 id="connectTitle">Loading...</h3><p id="connectSub"></p></div>
+      <button class="btn" id="connectBtn" style="display:none;">Set up payouts</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="statTotalEarned">—</div><div class="label">Total Earned</div></div>
+      <div class="stat-card"><div class="num" id="statPendingPayout">—</div><div class="label">Pending Payout</div></div>
+      <div class="stat-card"><div class="num" id="statPaidOut">—</div><div class="label">Paid Out</div></div>
+    </div>
+    <div class="section-title">Recent RelvBits</div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Date</th><th>From</th><th>Amount</th><th>Message</th></tr></thead>
+        <tbody id="relvbitsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+      </table>
+    </div>
+    <a class="btn ghost" href="relvbits.html">Open full RelvBits dashboard →</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const BROADCAST_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-broadcast-token`;
+const START_RECORDING_ENDPOINT = `${SUPABASE_URL}/functions/v1/start-stream-recording`;
+const STOP_RECORDING_ENDPOINT = `${SUPABASE_URL}/functions/v1/stop-stream-recording`;
+const ONBOARD_ENDPOINT = `${SUPABASE_URL}/functions/v1/create-connect-onboarding-link`;
+
+const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+let currentUser = null;
+let currentRoom = null;
+let currentStreamId = null;
+let viewerPollInterval = null;
+let micOn = true;
+let camOn = true;
+let screenSharing = false;
+let analyticsLoaded = false;
+let revenueLoaded = false;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
+function formatMoney(cents){ return `$${((cents || 0) / 100).toFixed(2)}`; }
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "live-login.html"; return; }
+  currentUser = userData.user;
+
+  const { data: categories } = await supabaseClient.from("live_categories").select("*").order("sort_order", { ascending:true });
+  const select = document.getElementById("streamCategory");
+  select.innerHTML = `<option value="">Uncategorized</option>`;
+  (categories || []).forEach(cat => { select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`; });
+
+  document.getElementById("goLiveBtn").addEventListener("click", goLive);
+  document.getElementById("endStreamBtn").addEventListener("click", endStream);
+  document.getElementById("toggleMicBtn").addEventListener("click", toggleMic);
+  document.getElementById("toggleCamBtn").addEventListener("click", toggleCam);
+  document.getElementById("toggleScreenBtn").addEventListener("click", toggleScreenShare);
+
+  setupTabs();
+  window.addEventListener("beforeunload", () => { if (currentRoom) currentRoom.disconnect(); });
+}
+
+function setupTabs(){
+  document.querySelectorAll(".manager-tab").forEach(tab => {
+    tab.addEventListener("click", async () => {
+      document.querySelectorAll(".manager-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".manager-panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(`panel-${tab.dataset.tab}`).classList.add("active");
+
+      if (tab.dataset.tab === "analytics" && !analyticsLoaded){ analyticsLoaded = true; await loadAnalytics(); }
+      if (tab.dataset.tab === "revenue" && !revenueLoaded){ revenueLoaded = true; await loadRevenue(); }
+    });
+  });
+}
+
+async function goLive(){
+  const title = document.getElementById("streamTitle").value.trim();
+  const categoryId = document.getElementById("streamCategory").value || null;
+  const errorBox = document.getElementById("setupError");
+  errorBox.classList.remove("show");
+
+  if (!title){ errorBox.textContent = "Enter a stream title."; errorBox.classList.add("show"); return; }
+
+  const btn = document.getElementById("goLiveBtn");
+  btn.disabled = true; btn.textContent = "Starting...";
+
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    const response = await fetch(BROADCAST_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ title, categoryId }),
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      errorBox.textContent = result.error || "Couldn't start the stream.";
+      errorBox.classList.add("show");
+      btn.disabled = false; btn.textContent = "Go Live";
+      return;
+    }
+
+    currentStreamId = result.streamId;
+
+    const room = new LivekitClient.Room();
+    currentRoom = room;
+
+    room.on(LivekitClient.RoomEvent.LocalTrackUnpublished, (publication) => {
+      if (publication.source === LivekitClient.Track.Source.ScreenShare && screenSharing){
+        screenSharing = false;
+        updateScreenShareButton();
+        const camPub = room.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+        if (camPub?.track) camPub.track.attach(document.getElementById("localVideo"));
+      }
+    });
+
+    await room.connect(LIVEKIT_URL, result.token);
+    await room.localParticipant.setCameraEnabled(true);
+    await room.localParticipant.setMicrophoneEnabled(true);
+
+    const videoPub = room.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+    if (videoPub?.track) videoPub.track.attach(document.getElementById("localVideo"));
+
+    document.getElementById("setupPanel").style.display = "none";
+    document.getElementById("broadcastView").style.display = "block";
+    document.getElementById("liveTitleDisplay").textContent = title;
+
+    startRecording(currentStreamId, result.roomName);
+
+    viewerPollInterval = setInterval(pollViewerCount, 5000);
+    pollViewerCount();
+
+    showToast("You're live");
+  } catch (err){
+    console.error(err);
+    errorBox.textContent = "Couldn't access your camera/microphone, or couldn't connect. Check permissions and try again.";
+    errorBox.classList.add("show");
+    btn.disabled = false; btn.textContent = "Go Live";
+  }
+}
+
+async function startRecording(streamId, roomName){
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    const response = await fetch(START_RECORDING_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ streamId, roomName }),
+    });
+    const result = await response.json();
+    if (!result.success) console.warn("Recording didn't start:", result.error);
+  } catch (err){ console.warn("Couldn't reach recording service:", err); }
+}
+
+async function stopRecording(streamId){
+  try {
+    await fetch(STOP_RECORDING_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+      body: JSON.stringify({ streamId }),
+    });
+  } catch (err){ console.warn("Couldn't stop recording cleanly:", err); }
+}
+
+async function pollViewerCount(){
+  if (!currentStreamId) return;
+  const { data } = await supabaseClient.from("live_streams").select("viewer_count").eq("id", currentStreamId).maybeSingle();
+  if (data) document.getElementById("viewerCountBadge").textContent = `${data.viewer_count || 0} watching`;
+}
+
+function toggleMic(){
+  if (!currentRoom) return;
+  micOn = !micOn;
+  currentRoom.localParticipant.setMicrophoneEnabled(micOn);
+  const btn = document.getElementById("toggleMicBtn");
+  btn.textContent = micOn ? "Mute mic" : "Unmute mic";
+  btn.classList.toggle("off", !micOn);
+}
+
+function toggleCam(){
+  if (!currentRoom) return;
+  camOn = !camOn;
+  currentRoom.localParticipant.setCameraEnabled(camOn);
+  const btn = document.getElementById("toggleCamBtn");
+  btn.textContent = camOn ? "Turn off camera" : "Turn on camera";
+  btn.classList.toggle("off", !camOn);
+}
+
+function updateScreenShareButton(){
+  const btn = document.getElementById("toggleScreenBtn");
+  btn.textContent = screenSharing ? "Stop sharing screen" : "Share screen";
+  btn.classList.toggle("off", screenSharing);
+}
+
+async function toggleScreenShare(){
+  if (!currentRoom) return;
+  const video = document.getElementById("localVideo");
+  try {
+    if (!screenSharing){
+      await currentRoom.localParticipant.setScreenShareEnabled(true);
+      screenSharing = true;
+      const screenPub = currentRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShare);
+      if (screenPub?.track) screenPub.track.attach(video);
+      showToast("Now sharing your screen");
+    } else {
+      await currentRoom.localParticipant.setScreenShareEnabled(false);
+      screenSharing = false;
+      const camPub = currentRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+      if (camPub?.track) camPub.track.attach(video);
+      showToast("Back to camera");
+    }
+    updateScreenShareButton();
+  } catch (err){
+    console.error("Screen share failed:", err);
+    screenSharing = false;
+    updateScreenShareButton();
+  }
+}
+
+async function endStream(){
+  if (!confirm("End your stream?")) return;
+
+  if (viewerPollInterval) clearInterval(viewerPollInterval);
+  if (currentRoom) currentRoom.disconnect();
+
+  if (currentStreamId){
+    await stopRecording(currentStreamId);
+    await supabaseClient.from("live_streams").update({ is_live: false, viewer_count: 0 }).eq("id", currentStreamId);
+  }
+
+  showToast("Stream ended");
+  analyticsLoaded = false;
+  setTimeout(() => {
+    document.getElementById("broadcastView").style.display = "none";
+    document.getElementById("setupPanel").style.display = "block";
+    document.getElementById("goLiveBtn").disabled = false;
+    document.getElementById("goLiveBtn").textContent = "Go Live";
+    document.getElementById("streamTitle").value = "";
+  }, 800);
+}
+
+async function loadAnalytics(){
+  const { data: streams, error } = await supabaseClient
+    .from("live_streams").select("*, live_categories(name)").eq("host_id", currentUser.id).order("created_at", { ascending:false });
+
+  const tbody = document.getElementById("historyTableBody");
+
+  if (error || !streams || streams.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No streams yet — go live to start building history.</td></tr>`;
+    document.getElementById("statTotalStreams").textContent = "0";
+    document.getElementById("statPeakViewers").textContent = "0";
+    document.getElementById("statAvgPeak").textContent = "0";
+    return;
+  }
+
+  document.getElementById("statTotalStreams").textContent = streams.length;
+  const peaks = streams.map(s => s.viewer_count || 0);
+  document.getElementById("statPeakViewers").textContent = Math.max(...peaks);
+  document.getElementById("statAvgPeak").textContent = Math.round(peaks.reduce((a, b) => a + b, 0) / streams.length);
+
+  tbody.innerHTML = "";
+  streams.forEach(s => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(s.title)}</td>
+      <td>${escapeHtml(s.live_categories?.name || "Uncategorized")}</td>
+      <td><span class="pill ${s.is_live ? "live" : "ended"}">${s.is_live ? "Live" : "Ended"}</span></td>
+      <td>${s.viewer_count || 0}</td>
+      <td>${new Date(s.created_at).toLocaleDateString()}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+async function loadRevenue(){
+  const { data: earnings } = await supabaseClient
+    .from("live_creator_earnings").select("*").eq("host_id", currentUser.id).maybeSingle();
+
+  document.getElementById("statTotalEarned").textContent = formatMoney(earnings?.total_earned_cents);
+  document.getElementById("statPendingPayout").textContent = formatMoney(earnings?.pending_payout_cents);
+  document.getElementById("statPaidOut").textContent = formatMoney(earnings?.total_paid_out_cents);
+
+  const banner = document.getElementById("connectBanner");
+  const title = document.getElementById("connectTitle");
+  const sub = document.getElementById("connectSub");
+  const btn = document.getElementById("connectBtn");
+
+  if (earnings?.payouts_enabled){
+    banner.classList.add("enabled");
+    title.textContent = "Payouts are active";
+    sub.textContent = "Stripe pays out to your bank automatically on its regular schedule.";
+    btn.style.display = "none";
+  } else {
+    title.textContent = earnings?.stripe_connect_account_id ? "Finish setting up payouts" : "Set up payouts to start receiving RelvBits";
+    sub.textContent = "Takes a few minutes through Stripe.";
+    btn.textContent = earnings?.stripe_connect_account_id ? "Continue setup" : "Set up payouts";
+    btn.style.display = "inline-block";
+    btn.addEventListener("click", startOnboarding);
+  }
+
+  const { data: relvbits } = await supabaseClient
+    .from("live_relvbits").select("*").eq("creator_id", currentUser.id).order("created_at", { ascending:false }).limit(10);
+
+  const tbody = document.getElementById("relvbitsTableBody");
+  if (!relvbits || relvbits.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No RelvBits received yet.</td></tr>`;
+    return;
+  }
+
+  const tipperIds = [...new Set(relvbits.map(r => r.tipper_id).filter(Boolean))];
+  const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", tipperIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name; });
+
+  tbody.innerHTML = "";
+  relvbits.forEach(r => {
+    const row = document.createElement("tr");
+    const fromName = r.is_anonymous ? "Anonymous" : (nameById[r.tipper_id] || "Unknown");
+    row.innerHTML = `
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td>${escapeHtml(fromName)}</td>
+      <td class="amount-cell">${formatMoney(r.creator_amount_cents)}</td>
+      <td style="color:var(--muted);">${escapeHtml(r.message || "—")}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+async function startOnboarding(){
+  const btn = document.getElementById("connectBtn");
+  btn.disabled = true; btn.textContent = "Redirecting...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(ONBOARD_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({}),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.onboardingUrl){
+      showToast(result.error || "Couldn't start onboarding.");
+      btn.disabled = false; btn.textContent = "Set up payouts";
+      return;
+    }
+    window.location.href = result.onboardingUrl;
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't reach the server.");
+    btn.disabled = false; btn.textContent = "Set up payouts";
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>
