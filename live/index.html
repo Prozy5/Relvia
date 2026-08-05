@@ -889,8 +889,11 @@ async function openPlayer(stream){
     const { data: sessionData } = await supabaseClient.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
 
-    const headers = { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY };
-    if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
+    };
 
     const response = await fetch(TOKEN_ENDPOINT, {
       method: "POST",
