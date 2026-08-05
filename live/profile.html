@@ -304,7 +304,7 @@ async function initialize(){
     const watchBtn = card.querySelector('[data-action="watch"]');
     if (watchBtn) watchBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      openVodPlayer(recording.file_url, stream.title);
+      window.location.href = `watch.html?stream=${stream.id}`;
     });
     card.querySelector('[data-action="chat"]').addEventListener("click", (e) => {
       e.stopPropagation();
