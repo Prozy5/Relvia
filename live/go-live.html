@@ -161,9 +161,11 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 const BROADCAST_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-broadcast-token`;
+const START_RECORDING_ENDPOINT = `${SUPABASE_URL}/functions/v1/start-stream-recording`;
+const STOP_RECORDING_ENDPOINT = `${SUPABASE_URL}/functions/v1/stop-stream-recording`;
 
 // Same as live.html — replace with your real LiveKit Cloud WebSocket URL.
-const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud"; // <-- replace this
+const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-live-auth" }
@@ -296,6 +298,8 @@ async function goLive(){
     document.getElementById("broadcastView").style.display = "block";
     document.getElementById("liveTitleDisplay").textContent = title;
 
+    startRecording(currentStreamId, result.roomName);
+
     viewerPollInterval = setInterval(pollViewerCount, 5000);
     pollViewerCount();
 
@@ -339,6 +343,38 @@ function toggleCam(){
   btn.classList.toggle("off", !camOn);
 }
 
+async function startRecording(streamId, roomName){
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    const response = await fetch(START_RECORDING_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ streamId, roomName }),
+    });
+    const result = await response.json();
+    if (!result.success){
+      // Non-fatal — being live matters more than the recording.
+      console.warn("Recording didn't start:", result.error);
+    }
+  } catch (err){
+    console.warn("Couldn't reach recording service:", err);
+  }
+}
+
+async function stopRecording(streamId){
+  try {
+    await fetch(STOP_RECORDING_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+      body: JSON.stringify({ streamId }),
+    });
+  } catch (err){
+    console.warn("Couldn't stop recording cleanly:", err);
+  }
+}
+
 async function endStream(){
   if (!confirm("End your stream?")) return;
 
@@ -346,6 +382,7 @@ async function endStream(){
   if (currentRoom) currentRoom.disconnect();
 
   if (currentStreamId){
+    await stopRecording(currentStreamId);
     await supabaseClient
       .from("live_streams")
       .update({ is_live: false, viewer_count: 0 })
