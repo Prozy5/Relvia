@@ -88,6 +88,12 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-family
 
 .stream-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; }
 .stream-card{ background:var(--glass); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:.2s; }
+.stream-card.clickable:hover{ transform:translateY(-3px); border-color:var(--gold-end); }
+.live-now-badge{
+  font-size:10px; font-weight:800; letter-spacing:.5px; color:#f2a8a3;
+  background:rgba(224,87,79,.15); padding:3px 9px; border-radius:999px; margin-left:6px;
+}
+.section-hint{ color:var(--muted); font-size:12.5px; margin:-10px 0 16px; }
 .stream-card:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
 .stream-thumb{ aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; overflow:hidden; }
 .stream-thumb img{ width:100%; height:100%; object-fit:cover; }
@@ -197,9 +203,18 @@ async function initialize(){
     .limit(12);
 
   const streamCount = (streams || []).length;
+  const liveNowCount = (streams || []).filter(s => s.is_live).length;
   const bannerStyle = profile.banner_url
     ? `background-image:url('${profile.banner_url}');background-size:cover;background-position:center;`
     : "";
+
+  let vodCount = 0;
+  if (streams && streams.length > 0){
+    const { count } = await supabaseClient
+      .from("live_recordings").select("*", { count:"exact", head:true })
+      .in("stream_id", streams.map(s => s.id)).eq("status", "ready");
+    vodCount = count || 0;
+  }
 
   document.getElementById("container").innerHTML = `
     <div class="profile-card">
@@ -212,6 +227,7 @@ async function initialize(){
           <h1>${escapeHtml(profile.display_name)}</h1>
           ${profile.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
           ${staffBadge ? `<span class="staff-badge">${escapeHtml(staffBadge.badge_label)}</span>` : ""}
+          ${liveNowCount > 0 ? `<span class="live-now-badge">● LIVE NOW</span>` : ""}
         </div>
         <div class="profile-handle">@${escapeHtml(profile.username)}</div>
         ${profile.bio ? `<p class="profile-bio">${escapeHtml(profile.bio)}</p>` : ""}
@@ -219,11 +235,12 @@ async function initialize(){
 
         <div class="stats-row">
           <div class="stat"><b>${streamCount}</b><span>Streams</span></div>
+          <div class="stat"><b>${vodCount}</b><span>Watchable VODs</span></div>
         </div>
 
         <div class="profile-actions">
           ${isOwnProfile
-            ? `<a class="btn gold" href="account-settings.html">Edit Profile</a><a class="btn" href="go-live.html">Go Live</a>`
+            ? `<a class="btn gold" href="account-settings.html">Edit Profile</a><a class="btn" href="manager.html">RelvManager</a>`
             : ""}
         </div>
       </div>
@@ -232,6 +249,7 @@ async function initialize(){
     <div id="liveNowSection"></div>
 
     <div class="section-title">Past Streams</div>
+    <p class="section-hint">Click a stream to watch it (if a recording exists) and read the chat from when it aired.</p>
     <div id="streamsContainer"></div>
   `;
 
@@ -269,7 +287,7 @@ async function initialize(){
           <div class="stream-title">${escapeHtml(stream.title)}</div>
           <div class="stream-date">Live now</div>
         </div>`;
-      card.addEventListener("click", () => { window.location.href = "index.html"; });
+      card.addEventListener("click", () => { window.location.href = `watch.html?stream=${stream.id}`; });
       liveGrid.appendChild(card);
     });
   }
@@ -286,95 +304,20 @@ async function initialize(){
   pastStreams.forEach(stream => {
     const recording = recordingByStreamId[stream.id];
     const card = document.createElement("div");
-    card.className = "stream-card";
+    card.className = "stream-card clickable";
     card.innerHTML = `
       <div class="stream-thumb">
         ${stream.thumbnail_url ? `<img src="${stream.thumbnail_url}">` : ""}
-        ${recording ? `<div class="live-pill" style="background:var(--gold);color:#000;">VOD</div>` : ""}
+        ${recording ? `<div class="live-pill" style="background:var(--gold);color:#000;">▶ VOD</div>` : `<div class="live-pill" style="background:rgba(0,0,0,.55);color:var(--muted);">Chat only</div>`}
       </div>
       <div class="stream-info">
         <div class="stream-title">${escapeHtml(stream.title)}</div>
         <div class="stream-date">${new Date(stream.created_at).toLocaleDateString()}</div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          ${recording ? `<button class="chat-replay-btn" data-action="watch">Watch</button>` : ""}
-          <button class="chat-replay-btn" data-action="chat">View chat</button>
-        </div>
       </div>`;
-
-    const watchBtn = card.querySelector('[data-action="watch"]');
-    if (watchBtn) watchBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.location.href = `watch.html?stream=${stream.id}`;
-    });
-    card.querySelector('[data-action="chat"]').addEventListener("click", (e) => {
-      e.stopPropagation();
-      openChatReplay(stream.id, stream.title);
-    });
+    card.addEventListener("click", () => { window.location.href = `watch.html?stream=${stream.id}`; });
     grid.appendChild(card);
   });
   streamsContainer.appendChild(grid);
-}
-
-function openVodPlayer(fileUrl, title){
-  const modal = document.createElement("div");
-  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3000;padding:24px;";
-  modal.innerHTML = `
-    <div style="width:100%;max-width:900px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <h3 style="font-family:var(--font-display);font-size:18px;color:var(--text);">${escapeHtml(title)}</h3>
-        <button id="closeVodPlayer" style="font-size:22px;color:var(--muted);background:none;border:none;cursor:pointer;">×</button>
-      </div>
-      <video src="${fileUrl}" controls autoplay style="width:100%;border-radius:16px;border:1px solid var(--border);background:#000;"></video>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.querySelector("#closeVodPlayer").addEventListener("click", () => modal.remove());
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
-}
-
-async function openChatReplay(streamId, title){
-  const { data: messages, error } = await supabaseClient
-    .from("live_chat_messages")
-    .select("*")
-    .eq("stream_id", streamId)
-    .order("created_at", { ascending:true })
-    .limit(500);
-
-  if (error){
-    console.error("openChatReplay failed:", error);
-    alert("Couldn't load chat for this stream. Check the console for the real error.");
-    return;
-  }
-
-  if (!messages || messages.length === 0){
-    alert(`No chat messages were saved for "${title}".`);
-    return;
-  }
-
-  const senderIds = [...new Set(messages.map(m => m.user_id).filter(Boolean))];
-  const { data: senders } = await supabaseClient
-    .from("live_profiles").select("id, display_name").in("id", senderIds);
-  const nameById = {};
-  (senders || []).forEach(s => { nameById[s.id] = s.display_name; });
-
-  const modal = document.createElement("div");
-  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3000;padding:24px;";
-  modal.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;max-width:480px;width:100%;max-height:70vh;display:flex;flex-direction:column;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3 style="font-family:var(--font-display);font-size:18px;">Chat replay — ${escapeHtml(title)}</h3>
-        <button id="closeChatReplay" style="font-size:20px;color:var(--muted);">×</button>
-      </div>
-      <div style="overflow-y:auto;flex:1;">
-        ${messages.map(m => `
-          <div style="margin-bottom:10px;font-size:13px;">
-            <strong style="color:var(--gold);">${escapeHtml(nameById[m.user_id] || "Unknown")}</strong>
-            <span style="color:var(--muted);"> ${escapeHtml(m.message)}</span>
-          </div>`).join("")}
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.querySelector("#closeChatReplay").addEventListener("click", () => modal.remove());
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
 }
 
 initialize();
