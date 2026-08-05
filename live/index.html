@@ -817,7 +817,7 @@ function renderFeaturedCarousel(){
         <div class="title">${escapeHtml(stream.title)}</div>
         <div class="host"><a href="profile.html?user=${stream.host_id}" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;">${escapeHtml(hostName)}</a> ${verifiedBadgeHTML(host)} ${ownerBadgeHTML(stream.host_id)}</div>
       </div>`;
-    card.addEventListener("click", () => openPlayer(stream));
+    card.addEventListener("click", () => { window.location.href = `watch.html?stream=${stream.id}`; });
     strip.appendChild(card);
   });
 }
@@ -860,7 +860,7 @@ function renderStreamGrid(searchTerm){
         <div class="stream-title">${escapeHtml(stream.title)}</div>
         <div class="stream-host"><a href="profile.html?user=${stream.host_id}" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;">${escapeHtml(hostName)}</a> ${verifiedBadgeHTML(host)} ${ownerBadgeHTML(stream.host_id)}</div>
       </div>`;
-    card.addEventListener("click", () => openPlayer(stream));
+    card.addEventListener("click", () => { window.location.href = `watch.html?stream=${stream.id}`; });
     grid.appendChild(card);
   });
 }
