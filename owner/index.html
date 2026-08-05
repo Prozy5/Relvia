@@ -503,6 +503,35 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- STORAGE & RECORDINGS (owner role only) -->
+    <div class="section" id="storageSection" style="display:none;">
+      <div class="section-head"><h2>Storage &amp; Recordings</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Controls how much VOD storage the ecosystem uses. New recordings pause automatically once the cap is hit (the stream itself still works fine) — only the recording gets skipped.
+      </p>
+      <div class="panel" style="padding:20px;margin-bottom:16px;">
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:18px;">
+          <div>
+            <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;">Max storage (GB)</label>
+            <input type="number" id="maxStorageInput" min="0.1" step="0.1" style="width:110px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:14px;">
+          </div>
+          <div>
+            <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;">Keep VODs for (days)</label>
+            <input type="number" id="retentionDaysInput" min="1" step="1" style="width:110px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:14px;">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn gold" id="saveStorageConfigBtn">Save</button>
+          </div>
+        </div>
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="num" id="statStorageUsed">—</div><div class="label">Used</div></div>
+          <div class="stat-card"><div class="num" id="statStoragePercent">—</div><div class="label">Of Cap</div></div>
+          <div class="stat-card"><div class="num" id="statStorageExpired">—</div><div class="label">Expired, Ready to Clean</div></div>
+        </div>
+        <button class="btn danger" id="runCleanupBtn" style="margin-top:16px;">Run cleanup now</button>
+      </div>
+    </div>
+
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -1005,7 +1034,8 @@ async function gate(){
     document.getElementById("staffSection").style.display = "block";
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig());
+    document.getElementById("storageSection").style.display = "block";
+    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig());
   }
 
   if (myRole === "founder"){
@@ -1805,6 +1835,79 @@ async function loadRelvbitsConfig(){
   document.getElementById("statRelvbitsTotal").textContent = `$${(totalFees / 100).toFixed(2)}`;
 
   document.getElementById("saveFeeBtn").addEventListener("click", saveRelvbitsFee);
+}
+
+// ==========================================================
+// STORAGE & RECORDINGS
+// ==========================================================
+async function loadStorageConfig(){
+  const { data: config } = await supabaseClient
+    .from("live_storage_config").select("*").eq("id", 1).maybeSingle();
+
+  document.getElementById("maxStorageInput").value = config?.max_storage_gb ?? 5;
+  document.getElementById("retentionDaysInput").value = config?.retention_days ?? 3;
+
+  const { data: usage } = await supabaseClient.rpc("get_storage_usage");
+  if (usage && usage.length > 0){
+    document.getElementById("statStorageUsed").textContent = `${usage[0].used_gb} GB`;
+    document.getElementById("statStoragePercent").textContent = `${usage[0].percent_used}%`;
+  }
+
+  try {
+    const { data: expired } = await supabaseClient.rpc("get_expired_recordings");
+    document.getElementById("statStorageExpired").textContent = (expired || []).length;
+  } catch (e){
+    document.getElementById("statStorageExpired").textContent = "—";
+  }
+
+  document.getElementById("saveStorageConfigBtn").addEventListener("click", saveStorageConfig);
+  document.getElementById("runCleanupBtn").addEventListener("click", runCleanupNow);
+}
+
+async function saveStorageConfig(){
+  const maxGb = parseFloat(document.getElementById("maxStorageInput").value);
+  const retentionDays = parseInt(document.getElementById("retentionDaysInput").value, 10);
+
+  if (isNaN(maxGb) || maxGb <= 0){ showToast("Enter a valid storage cap"); return; }
+  if (isNaN(retentionDays) || retentionDays <= 0){ showToast("Enter a valid retention period"); return; }
+
+  const { error } = await supabaseClient.rpc("set_storage_config", { new_max_gb: maxGb, new_retention_days: retentionDays });
+  if (error){ console.error(error); showToast(error.message || "Couldn't save storage settings"); return; }
+
+  showToast(`Storage cap set to ${maxGb}GB, retention ${retentionDays} day(s)`);
+  await logAction("set_storage_config", "storage", `${maxGb}GB / ${retentionDays}d`);
+  await loadStorageConfig();
+}
+
+async function runCleanupNow(){
+  if (!confirm("Delete all VOD recordings past the retention window? This permanently removes the video files.")) return;
+
+  const btn = document.getElementById("runCleanupBtn");
+  btn.disabled = true; btn.textContent = "Cleaning up...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/cleanup-old-recordings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      showToast(result.error || "Cleanup failed");
+    } else {
+      showToast(`Deleted ${result.deleted || 0} expired recording(s)`);
+      await logAction("run_storage_cleanup", "storage", `${result.deleted || 0} deleted`);
+    }
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't reach the cleanup service");
+  }
+
+  btn.disabled = false; btn.textContent = "Run cleanup now";
+  await loadStorageConfig();
 }
 
 async function saveRelvbitsFee(){
