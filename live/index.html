@@ -911,10 +911,39 @@ async function openPlayer(stream){
     const room = new LivekitClient.Room();
     currentRoom = room;
 
-    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
-      if (track.kind === "video" || track.kind === "audio"){
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication) => {
+      if (track.kind === "audio"){
         track.attach(video);
-        status.classList.add("hidden");
+        return;
+      }
+      if (track.kind === "video"){
+        // Screen share always takes priority over camera if both are
+        // publishing — camera keeps running in the background on the
+        // broadcaster's side so switching back is instant, so we
+        // need to actively choose which one to actually show here.
+        const isScreenShare = publication?.source === LivekitClient.Track.Source.ScreenShare;
+        const cameraCurrentlyShowing = video.dataset.activeSource !== "screen_share";
+
+        if (isScreenShare || cameraCurrentlyShowing){
+          track.attach(video);
+          video.dataset.activeSource = isScreenShare ? "screen_share" : "camera";
+          status.classList.add("hidden");
+        }
+      }
+    });
+
+    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, publication) => {
+      // If the screen share stops, fall back to whatever camera
+      // track is still around instead of leaving a frozen frame.
+      if (publication?.source === LivekitClient.Track.Source.ScreenShare){
+        video.dataset.activeSource = "";
+        const camPub = [...room.remoteParticipants.values()]
+          .flatMap(p => [...p.videoTrackPublications.values()])
+          .find(p => p.source === LivekitClient.Track.Source.Camera && p.track);
+        if (camPub?.track){
+          camPub.track.attach(video);
+          video.dataset.activeSource = "camera";
+        }
       }
     });
 
