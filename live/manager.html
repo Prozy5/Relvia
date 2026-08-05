@@ -131,6 +131,8 @@ tr:last-child td{ border-bottom:none; }
     <button class="manager-tab active" data-tab="studio">Studio</button>
     <button class="manager-tab" data-tab="analytics">Analytics</button>
     <button class="manager-tab" data-tab="revenue">Revenue</button>
+    <button class="manager-tab" data-tab="recordings">Recordings</button>
+    <button class="manager-tab" data-tab="channel">Channel</button>
   </div>
 
   <div class="manager-panel active" id="panel-studio">
@@ -194,6 +196,36 @@ tr:last-child td{ border-bottom:none; }
     <a class="btn ghost" href="relvbits.html">Open full RelvBits dashboard →</a>
   </div>
 
+  <!-- RECORDINGS -->
+  <div class="manager-panel" id="panel-recordings">
+    <div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
+      <div class="stat-card"><div class="num" id="statVodCount">—</div><div class="label">Saved VODs</div></div>
+      <div class="stat-card"><div class="num" id="statVodStorage">—</div><div class="label">Storage Used</div></div>
+    </div>
+    <p style="color:var(--muted);font-size:12.5px;margin:-10px 0 16px;">VODs auto-delete after the ecosystem-wide retention window set by the owners — delete one early here if you want it gone sooner.</p>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Stream</th><th>Status</th><th>Size</th><th>Recorded</th><th>Actions</th></tr></thead>
+        <tbody id="recordingsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CHANNEL -->
+  <div class="manager-panel" id="panel-channel">
+    <div class="setup-panel">
+      <h1>Channel Settings</h1>
+      <p class="sub">This is how you show up across Relvia Live — your profile, streams, and chat.</p>
+      <div class="error-box" id="channelError"></div>
+      <div class="field"><label>Display name</label><input type="text" id="channelDisplayName"></div>
+      <div class="field"><label>Bio</label><input type="text" id="channelBio" placeholder="Tell people about your stream..."></div>
+      <div class="field"><label>Avatar URL</label><input type="text" id="channelAvatarUrl" placeholder="https://..."></div>
+      <div class="field"><label>Banner URL</label><input type="text" id="channelBannerUrl" placeholder="https://..."></div>
+      <button class="btn" id="saveChannelBtn">Save changes</button>
+      <a class="btn ghost" href="account-settings.html" style="margin-left:10px;">Full account settings →</a>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -222,6 +254,8 @@ let camOn = true;
 let screenSharing = false;
 let analyticsLoaded = false;
 let revenueLoaded = false;
+let recordingsLoaded = false;
+let channelLoaded = false;
 
 function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -233,6 +267,104 @@ function showToast(message){
   setTimeout(() => toast.classList.remove("show"), 2400);
 }
 function formatMoney(cents){ return `$${((cents || 0) / 100).toFixed(2)}`; }
+
+// ==========================================================
+// RECORDINGS
+// ==========================================================
+async function loadRecordings(){
+  const { data: streams } = await supabaseClient.from("live_streams").select("id, title").eq("host_id", currentUser.id);
+  const streamIds = (streams || []).map(s => s.id);
+  const titleByStreamId = {};
+  (streams || []).forEach(s => { titleByStreamId[s.id] = s.title; });
+
+  const tbody = document.getElementById("recordingsTableBody");
+
+  if (streamIds.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No streams yet.</td></tr>`;
+    document.getElementById("statVodCount").textContent = "0";
+    document.getElementById("statVodStorage").textContent = "0 MB";
+    return;
+  }
+
+  const { data: recordings, error } = await supabaseClient
+    .from("live_recordings").select("*").in("stream_id", streamIds).order("created_at", { ascending:false });
+
+  if (error || !recordings || recordings.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No recordings yet — they'll show up here after your next stream.</td></tr>`;
+    document.getElementById("statVodCount").textContent = "0";
+    document.getElementById("statVodStorage").textContent = "0 MB";
+    return;
+  }
+
+  const readyCount = recordings.filter(r => r.status === "ready").length;
+  const totalBytes = recordings.reduce((sum, r) => sum + (r.file_size_bytes || 0), 0);
+  document.getElementById("statVodCount").textContent = readyCount;
+  document.getElementById("statVodStorage").textContent = `${(totalBytes / 1073741824).toFixed(2)} GB`;
+
+  tbody.innerHTML = "";
+  recordings.forEach(r => {
+    const row = document.createElement("tr");
+    const sizeLabel = r.file_size_bytes ? `${(r.file_size_bytes / 1048576).toFixed(0)} MB` : "—";
+    row.innerHTML = `
+      <td>${escapeHtml(titleByStreamId[r.stream_id] || "Untitled stream")}</td>
+      <td><span class="pill ${r.status === "ready" ? "ended" : "live"}">${escapeHtml(r.status)}</span></td>
+      <td>${sizeLabel}</td>
+      <td>${r.completed_at ? new Date(r.completed_at).toLocaleDateString() : "—"}</td>
+      <td>
+        ${r.status === "ready" ? `<button class="btn ghost" data-action="watch" style="padding:6px 12px;font-size:11.5px;">Watch</button>` : ""}
+        <button class="btn danger" data-action="delete" style="padding:6px 12px;font-size:11.5px;">Delete</button>
+      </td>`;
+
+    const watchBtn = row.querySelector('[data-action="watch"]');
+    if (watchBtn) watchBtn.addEventListener("click", () => window.open(r.file_url, "_blank"));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteRecording(r.id));
+
+    tbody.appendChild(row);
+  });
+}
+
+async function deleteRecording(recordingId){
+  if (!confirm("Delete this recording now? (The underlying video file gets cleaned up by the retention job shortly after.)")) return;
+  const { error } = await supabaseClient.from("live_recordings").delete().eq("id", recordingId);
+  if (error){ console.error(error); showToast("Couldn't delete — you may only be able to delete your own recordings."); return; }
+  showToast("Recording removed");
+  await loadRecordings();
+}
+
+// ==========================================================
+// CHANNEL SETTINGS
+// ==========================================================
+async function loadChannelSettings(){
+  const { data: profile } = await supabaseClient.from("live_profiles").select("*").eq("id", currentUser.id).maybeSingle();
+
+  document.getElementById("channelDisplayName").value = profile?.display_name || "";
+  document.getElementById("channelBio").value = profile?.bio || "";
+  document.getElementById("channelAvatarUrl").value = profile?.avatar_url || "";
+  document.getElementById("channelBannerUrl").value = profile?.banner_url || "";
+
+  document.getElementById("saveChannelBtn").addEventListener("click", saveChannelSettings);
+}
+
+async function saveChannelSettings(){
+  const errorBox = document.getElementById("channelError");
+  errorBox.classList.remove("show");
+
+  const display_name = document.getElementById("channelDisplayName").value.trim();
+  const bio = document.getElementById("channelBio").value.trim();
+  const avatar_url = document.getElementById("channelAvatarUrl").value.trim() || null;
+  const banner_url = document.getElementById("channelBannerUrl").value.trim() || null;
+
+  if (!display_name){ errorBox.textContent = "Display name can't be empty."; errorBox.classList.add("show"); return; }
+
+  const { error } = await supabaseClient
+    .from("live_profiles")
+    .update({ display_name, bio, avatar_url, banner_url })
+    .eq("id", currentUser.id);
+
+  if (error){ console.error(error); errorBox.textContent = "Couldn't save — try again."; errorBox.classList.add("show"); return; }
+
+  showToast("Channel updated");
+}
 
 async function initialize(){
   const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -266,6 +398,8 @@ function setupTabs(){
 
       if (tab.dataset.tab === "analytics" && !analyticsLoaded){ analyticsLoaded = true; await loadAnalytics(); }
       if (tab.dataset.tab === "revenue" && !revenueLoaded){ revenueLoaded = true; await loadRevenue(); }
+      if (tab.dataset.tab === "recordings" && !recordingsLoaded){ recordingsLoaded = true; await loadRecordings(); }
+      if (tab.dataset.tab === "channel" && !channelLoaded){ channelLoaded = true; await loadChannelSettings(); }
     });
   });
 }
