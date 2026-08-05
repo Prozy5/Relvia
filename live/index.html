@@ -343,6 +343,7 @@ img{ max-width:100%; display:block; }
     <a class="settings-link" href="about.html" title="About Relvia Live">ⓘ</a>
     <a class="settings-link" href="account-settings.html" title="Account settings">⚙</a>
     <a class="avatar" id="profileAvatar" href="profile.html" title="Your profile"></a>
+    <a class="go-live-btn" id="signInPill" href="welcome.html" style="display:none;">Sign In</a>
   </div>
 </header>
 
@@ -450,7 +451,7 @@ img{ max-width:100%; display:block; }
 // endpoint, not a credential). Find it in your LiveKit Cloud
 // project settings, format: wss://your-project.livekit.cloud
 // ==========================================================
-const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud"; // <-- replace this
+const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
 
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
@@ -525,23 +526,23 @@ function escapeHtml(str){
 async function initialize(){
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
-    if (!sessionData || !sessionData.session){
-      window.location.href = "welcome.html";
-      return;
+
+    if (sessionData && sessionData.session){
+      const { data: userData, error } = await supabaseClient.auth.getUser();
+      if (!error && userData.user){
+        currentUser = userData.user;
+
+        const banned = await loadLiveProfile();
+        if (banned) return;
+
+        await checkOwnerStatus();
+      }
     }
 
-    const { data: userData, error } = await supabaseClient.auth.getUser();
-    if (error || !userData.user){
-      window.location.href = "welcome.html";
-      return;
-    }
-
-    currentUser = userData.user;
-
-    const banned = await loadLiveProfile();
-    if (banned) return;
-
-    await checkOwnerStatus();
+    // Signed-in-only UI bits — hidden/shown based on whether we
+    // actually ended up with a currentUser above.
+    document.getElementById("profileAvatar").style.display = currentUser ? "flex" : "none";
+    document.getElementById("signInPill").style.display = currentUser ? "none" : "inline-block";
 
     try { await supabaseClient.rpc("register_page_visit", { target_page_key: "live", target_label: "Relvia Live (Home)" }); } catch (e){}
 
@@ -557,7 +558,9 @@ async function initialize(){
     setupRelvbitsModal();
   } catch (err){
     console.error("Relvia Live init failed:", err);
-    window.location.href = "live-login.html";
+    // Even on an unexpected error, don't hard-lock out anonymous
+    // visitors — only bounce to login if we know they need one
+    // for something specific (handled elsewhere, e.g. chat/tipping).
   }
 }
 
@@ -877,17 +880,21 @@ async function openPlayer(stream){
   overlay.classList.add("open");
   resetChat();
 
+  const chatInputRow = document.querySelector(".chat-input-row");
+  if (chatInputRow){
+    chatInputRow.innerHTML = `<input type="text" id="chatInput" placeholder="Say something..." maxlength="240"><button id="chatSendBtn">Send</button>`;
+  }
+
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
 
+    const headers = { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY };
+    if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+
     const response = await fetch(TOKEN_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${accessToken}`,
-      },
+      headers,
       body: JSON.stringify({ streamId: stream.id }),
     });
 
@@ -916,7 +923,12 @@ async function openPlayer(stream){
     await room.connect(LIVEKIT_URL, result.token);
     await loadChatHistory(stream.id);
     subscribeToChatRealtime(stream.id);
-    setupChatSend(stream.id);
+
+    if (currentUser){
+      setupChatSend(stream.id);
+    } else {
+      showSignInToChatPrompt();
+    }
   } catch (err){
     console.error("Failed to join stream:", err);
     status.innerHTML = `<span>Couldn't connect to this stream. Try again in a moment.</span>`;
@@ -984,6 +996,10 @@ function setupRelvbitsModal(){
 
   document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
     if (!currentPlayerStream){ return; }
+    if (!currentUser){
+      window.location.href = "welcome.html";
+      return;
+    }
     document.getElementById("relvbitsError").classList.remove("show");
     modal.classList.add("open");
   });
@@ -1051,6 +1067,11 @@ function setupRelvbitsModal(){
       btn.disabled = false; btn.textContent = "Continue to payment";
     }
   });
+}
+
+function showSignInToChatPrompt(){
+  const row = document.querySelector(".chat-input-row");
+  if (row) row.innerHTML = `<a href="welcome.html" style="flex:1;text-align:center;padding:9px;color:var(--gold);font-weight:700;font-size:13px;border:1px solid var(--gold-end);border-radius:10px;">Sign in to chat</a>`;
 }
 
 function setupChatSend(streamId){
