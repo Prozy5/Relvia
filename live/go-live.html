@@ -148,6 +148,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
     <div class="broadcast-controls">
       <button class="mute-btn" id="toggleMicBtn">Mute mic</button>
       <button class="mute-btn" id="toggleCamBtn">Turn off camera</button>
+      <button class="mute-btn" id="toggleScreenBtn">Share screen</button>
       <button class="btn danger" id="endStreamBtn">End Stream</button>
     </div>
   </div>
@@ -177,6 +178,7 @@ let currentStreamId = null;
 let viewerPollInterval = null;
 let micOn = true;
 let camOn = true;
+let screenSharing = false;
 
 function showToast(message){
   const toast = document.getElementById("toast");
@@ -240,6 +242,7 @@ async function initialize(){
   document.getElementById("endStreamBtn").addEventListener("click", endStream);
   document.getElementById("toggleMicBtn").addEventListener("click", toggleMic);
   document.getElementById("toggleCamBtn").addEventListener("click", toggleCam);
+  document.getElementById("toggleScreenBtn").addEventListener("click", toggleScreenShare);
 
   window.addEventListener("beforeunload", () => {
     if (currentRoom) currentRoom.disconnect();
@@ -283,6 +286,18 @@ async function goLive(){
 
     const room = new LivekitClient.Room();
     currentRoom = room;
+
+    // Fires when the browser's own "Stop sharing" bar is used, or any
+    // local track otherwise gets unpublished outside our own buttons.
+    room.on(LivekitClient.RoomEvent.LocalTrackUnpublished, (publication) => {
+      if (publication.source === LivekitClient.Track.Source.ScreenShare && screenSharing){
+        screenSharing = false;
+        updateScreenShareButton();
+        // Switch the local preview back to camera automatically.
+        const camPub = room.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+        if (camPub?.track) camPub.track.attach(document.getElementById("localVideo"));
+      }
+    });
 
     await room.connect(LIVEKIT_URL, result.token);
     await room.localParticipant.setCameraEnabled(true);
@@ -341,6 +356,49 @@ function toggleCam(){
   const btn = document.getElementById("toggleCamBtn");
   btn.textContent = camOn ? "Turn off camera" : "Turn on camera";
   btn.classList.toggle("off", !camOn);
+}
+
+function updateScreenShareButton(){
+  const btn = document.getElementById("toggleScreenBtn");
+  btn.textContent = screenSharing ? "Stop sharing screen" : "Share screen";
+  btn.classList.toggle("off", screenSharing);
+}
+
+async function toggleScreenShare(){
+  if (!currentRoom) return;
+  const video = document.getElementById("localVideo");
+
+  try {
+    if (!screenSharing){
+      // Publishing screen share automatically triggers the browser's
+      // native "choose what to share" picker.
+      await currentRoom.localParticipant.setScreenShareEnabled(true);
+      screenSharing = true;
+
+      const screenPub = currentRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShare);
+      if (screenPub?.track) screenPub.track.attach(video);
+
+      // Camera keeps publishing in the background so switching back
+      // is instant — only the local preview and what viewers see
+      // (whichever track LiveKit prioritizes) actually changes.
+      showToast("Now sharing your screen");
+    } else {
+      await currentRoom.localParticipant.setScreenShareEnabled(false);
+      screenSharing = false;
+
+      const camPub = currentRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+      if (camPub?.track) camPub.track.attach(video);
+
+      showToast("Back to camera");
+    }
+    updateScreenShareButton();
+  } catch (err){
+    console.error("Screen share failed:", err);
+    // Most common cause: the person clicked "Cancel" on the browser's
+    // share picker — not a real error, just don't flip the state.
+    screenSharing = false;
+    updateScreenShareButton();
+  }
 }
 
 async function startRecording(streamId, roomName){
