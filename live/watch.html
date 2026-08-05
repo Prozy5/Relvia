@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch — Relvia Live</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --live-red:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{
+  color:var(--text); min-height:100vh;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
+  background-attachment:fixed;
+}
+a{ text-decoration:none; color:inherit; }
+button, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img, video{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:34px; height:34px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:17px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.layout{ max-width:1500px; margin:auto; padding:28px 24px 70px; display:grid; grid-template-columns:1fr 340px; gap:22px; align-items:start; }
+@media(max-width:1000px){ .layout{ grid-template-columns:1fr; } }
+
+.video-frame{ width:100%; aspect-ratio:16/9; background:#000; border-radius:20px; overflow:hidden; border:1px solid var(--border); position:relative; }
+.video-frame video{ width:100%; height:100%; object-fit:contain; background:#000; }
+.player-status{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; text-align:center; padding:20px; }
+.player-status.hidden{ display:none; }
+.vod-pill{ position:absolute; top:14px; left:14px; background:var(--gold); color:#000; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:.5px; }
+.live-pill{ position:absolute; top:14px; left:14px; background:var(--live-red); color:white; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:6px; display:flex; align-items:center; gap:6px; }
+.live-pill .dot{ width:6px; height:6px; border-radius:50%; background:white; animation:pulse 1.4s infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+.stream-meta{ margin-top:18px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.stream-title{ font-family:var(--font-display); font-size:24px; font-weight:600; margin-bottom:8px; }
+.stream-host-row{ display:flex; align-items:center; gap:10px; }
+.stream-host-avatar{ width:38px; height:38px; border-radius:50%; overflow:hidden; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+.stream-host-name{ font-size:14px; font-weight:700; }
+.stream-host-sub{ font-size:12px; color:var(--muted); }
+.send-relvbits-btn{ font-size:13px; font-weight:800; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; flex-shrink:0; }
+.send-relvbits-btn:hover{ opacity:.88; }
+
+.chat-panel{ background:var(--glass); border:1px solid var(--border); border-radius:20px; display:flex; flex-direction:column; height:640px; }
+.chat-header{ padding:16px 18px; border-bottom:1px solid var(--border-soft); font-family:var(--font-display); font-size:16px; font-weight:600; }
+.chat-messages{ flex:1; overflow-y:auto; padding:14px; }
+.chat-empty{ color:var(--muted-soft); font-size:12.5px; text-align:center; padding:20px 0; }
+.chat-message{ font-size:13px; margin-bottom:10px; line-height:1.4; }
+.chat-message .name{ color:var(--gold); font-weight:700; margin-right:6px; }
+.chat-input-row{ display:flex; gap:8px; padding:12px; border-top:1px solid var(--border-soft); }
+.chat-input-row input{ flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 12px; color:white; font-size:13px; }
+.chat-input-row button{ background:var(--gold); color:#000; font-weight:700; font-size:12.5px; padding:0 16px; border-radius:10px; }
+.sign-in-prompt{ flex:1; text-align:center; padding:9px; color:var(--gold); font-weight:700; font-size:13px; border:1px solid var(--gold-end); border-radius:10px; }
+
+.section-title{ font-family:var(--font-display); font-size:18px; font-weight:600; margin:30px 0 16px; }
+.related-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px; }
+.related-card{ background:var(--glass); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:transform .2s, border-color .2s; }
+.related-card:hover{ transform:translateY(-2px); border-color:var(--gold-end); }
+.related-thumb{ aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508); position:relative; }
+.related-thumb img{ width:100%; height:100%; object-fit:cover; }
+.related-info{ padding:11px 13px; }
+.related-title{ font-size:13px; font-weight:700; margin-bottom:3px; }
+.related-host{ font-size:11.5px; color:var(--muted); }
+
+.relvbits-modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2500; padding:24px; }
+.relvbits-modal-backdrop.open{ display:flex; }
+.relvbits-modal{ background:var(--surface); border:1px solid var(--gold-end); border-radius:20px; padding:26px; max-width:400px; width:100%; }
+.relvbits-modal h3{ font-family:var(--font-display); font-size:19px; margin-bottom:16px; }
+.amount-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+.amount-option{ background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px 0; font-size:13px; font-weight:700; text-align:center; }
+.amount-option.selected{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-field{ margin-bottom:12px; }
+.relvbits-field label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.relvbits-field input{ width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 12px; color:white; font-size:13px; }
+.anon-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:var(--muted); }
+.relvbits-error{ color:#f2a8a3; font-size:12px; margin-bottom:10px; display:none; }
+.relvbits-error.show{ display:block; }
+.relvbits-modal-actions{ display:flex; gap:10px; }
+.relvbits-modal-actions button{ flex:1; padding:11px; border-radius:12px; font-weight:800; font-size:13px; }
+.relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Live</span>
+  </a>
+  <a class="back-link" href="index.html">← Back to browse</a>
+</header>
+
+<div class="layout">
+  <div>
+    <div class="video-frame" id="videoFrame">
+      <video id="playerVideo" autoplay playsinline></video>
+      <div class="player-status" id="playerStatus"><span>Loading...</span></div>
+    </div>
+
+    <div class="stream-meta">
+      <div>
+        <div class="stream-title" id="streamTitle">—</div>
+        <div class="stream-host-row">
+          <a class="stream-host-avatar" id="hostAvatar" href="#"></a>
+          <div>
+            <a class="stream-host-name" id="hostName" href="#">—</a>
+            <div class="stream-host-sub" id="streamSub"></div>
+          </div>
+        </div>
+      </div>
+      <button class="send-relvbits-btn" id="sendRelvbitsBtn">✦ Send RelvBits</button>
+    </div>
+
+    <div class="section-title" id="relatedTitle" style="display:none;">More live on Relvia</div>
+    <div class="related-grid" id="relatedGrid"></div>
+  </div>
+
+  <div class="chat-panel">
+    <div class="chat-header" id="chatHeader">Chat</div>
+    <div class="chat-messages" id="chatMessages"><div class="chat-empty">Loading...</div></div>
+    <div class="chat-input-row" id="chatInputRow">
+      <input type="text" id="chatInput" placeholder="Say something..." maxlength="240">
+      <button id="chatSendBtn">Send</button>
+    </div>
+  </div>
+</div>
+
+<div class="relvbits-modal-backdrop" id="relvbitsModal">
+  <div class="relvbits-modal">
+    <h3>✦ Send RelvBits</h3>
+    <div class="relvbits-error" id="relvbitsError"></div>
+    <div class="relvbits-field">
+      <label>Amount</label>
+      <div class="amount-grid" id="amountGrid">
+        <button class="amount-option" data-amount="200">$2</button>
+        <button class="amount-option selected" data-amount="500">$5</button>
+        <button class="amount-option" data-amount="1000">$10</button>
+        <button class="amount-option" data-amount="2500">$25</button>
+      </div>
+      <input type="number" id="customAmount" placeholder="Custom amount ($1–$1000)" min="1" max="1000" step="1">
+    </div>
+    <div class="relvbits-field"><label>Message (optional)</label><input type="text" id="relvbitsMessage" maxlength="280"></div>
+    <div class="anon-row"><input type="checkbox" id="relvbitsAnon"><label for="relvbitsAnon">Send anonymously</label></div>
+    <div class="relvbits-modal-actions">
+      <button class="relvbits-cancel-btn" id="relvbitsCancelBtn">Cancel</button>
+      <button class="relvbits-confirm-btn" id="relvbitsConfirmBtn">Continue to payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const TOKEN_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-livekit-token`;
+const RELVBITS_CHECKOUT_ENDPOINT = `${SUPABASE_URL}/functions/v1/create-relvbits-checkout`;
+const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "relvia-live-auth" }
+});
+
+const params = new URLSearchParams(window.location.search);
+const streamId = params.get("stream");
+
+let currentUser = null;
+let currentRoom = null;
+let stream = null;
+let isVod = false;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function avatarInnerHTML(url, name){
+  return url ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">` : (name || "R").charAt(0).toUpperCase();
+}
+
+async function initialize(){
+  if (!streamId){
+    document.getElementById("playerStatus").innerHTML = `<span>No stream specified.</span>`;
+    return;
+  }
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (sessionData?.session){
+    const { data: userData } = await supabaseClient.auth.getUser();
+    currentUser = userData?.user || null;
+  }
+
+  const { data: streamData, error } = await supabaseClient.from("live_streams").select("*").eq("id", streamId).maybeSingle();
+  if (error || !streamData){
+    document.getElementById("playerStatus").innerHTML = `<span>This stream doesn't exist.</span>`;
+    return;
+  }
+  stream = streamData;
+
+  const { data: hostProfile } = await supabaseClient.from("live_profiles").select("display_name, username, avatar_url").eq("id", stream.host_id).maybeSingle();
+
+  document.getElementById("streamTitle").textContent = stream.title;
+  document.getElementById("hostAvatar").innerHTML = avatarInnerHTML(hostProfile?.avatar_url, hostProfile?.display_name);
+  document.getElementById("hostAvatar").href = `profile.html?user=${stream.host_id}`;
+  document.getElementById("hostName").textContent = hostProfile?.display_name || hostProfile?.username || "Unknown";
+  document.getElementById("hostName").href = `profile.html?user=${stream.host_id}`;
+
+  setupRelvbitsModal();
+
+  if (stream.is_live){
+    document.getElementById("streamSub").textContent = `${stream.viewer_count || 0} watching`;
+    await connectLiveStream();
+  } else {
+    isVod = true;
+    await loadVod();
+  }
+
+  await loadRelated();
+}
+
+async function connectLiveStream(){
+  const frame = document.getElementById("videoFrame");
+  frame.insertAdjacentHTML("afterbegin", `<div class="live-pill"><span class="dot"></span>LIVE</div>`);
+
+  const status = document.getElementById("playerStatus");
+  status.innerHTML = `<span>Connecting to stream...</span>`;
+
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    const response = await fetch(TOKEN_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken || SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ streamId: stream.id }),
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      status.innerHTML = `<span>${escapeHtml(result.error || "Couldn't join this stream.")}</span>`;
+      return;
+    }
+
+    const video = document.getElementById("playerVideo");
+    const room = new LivekitClient.Room();
+    currentRoom = room;
+
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication) => {
+      if (track.kind === "audio"){ track.attach(video); return; }
+      if (track.kind === "video"){
+        const isScreenShare = publication?.source === LivekitClient.Track.Source.ScreenShare;
+        const cameraShowing = video.dataset.activeSource !== "screen_share";
+        if (isScreenShare || cameraShowing){
+          track.attach(video);
+          video.dataset.activeSource = isScreenShare ? "screen_share" : "camera";
+          status.classList.add("hidden");
+        }
+      }
+    });
+
+    room.on(LivekitClient.RoomEvent.Disconnected, () => {
+      status.classList.remove("hidden");
+      status.innerHTML = `<span>Stream ended or connection lost.</span>`;
+    });
+
+    await room.connect(LIVEKIT_URL, result.token);
+    await loadChatHistory();
+    subscribeToChatRealtime();
+
+    if (currentUser){
+      setupChatSend();
+    } else {
+      showSignInToChatPrompt();
+    }
+  } catch (err){
+    console.error("Failed to join stream:", err);
+    status.innerHTML = `<span>Couldn't connect to this stream. Try again in a moment.</span>`;
+  }
+}
+
+async function loadVod(){
+  const frame = document.getElementById("videoFrame");
+  const status = document.getElementById("playerStatus");
+  document.getElementById("streamSub").textContent = `Streamed ${new Date(stream.created_at).toLocaleDateString()}`;
+
+  const { data: recording } = await supabaseClient
+    .from("live_recordings").select("*").eq("stream_id", stream.id).eq("status", "ready").maybeSingle();
+
+  if (!recording?.file_url){
+    status.innerHTML = `<span>No recording is available for this stream.</span>`;
+    document.getElementById("chatInputRow").style.display = "none";
+  } else {
+    frame.insertAdjacentHTML("afterbegin", `<div class="vod-pill">VOD</div>`);
+    const video = document.getElementById("playerVideo");
+    video.src = recording.file_url;
+    video.controls = true;
+    video.removeAttribute("autoplay");
+    status.classList.add("hidden");
+  }
+
+  document.getElementById("chatHeader").textContent = "Chat Replay";
+  await loadChatHistory();
+  document.getElementById("chatInputRow").innerHTML = `<div class="sign-in-prompt" style="border-color:var(--border);color:var(--muted);">Chat replay — this stream has ended</div>`;
+}
+
+async function loadChatHistory(){
+  const { data: messages } = await supabaseClient
+    .from("live_chat_messages").select("*").eq("stream_id", stream.id).order("created_at", { ascending:true }).limit(500);
+
+  const container = document.getElementById("chatMessages");
+  if (!messages || messages.length === 0){
+    container.innerHTML = `<div class="chat-empty">No messages yet.</div>`;
+    return;
+  }
+
+  const senderIds = [...new Set(messages.map(m => m.user_id).filter(Boolean))];
+  const { data: senders } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", senderIds);
+  const nameById = {};
+  (senders || []).forEach(s => { nameById[s.id] = s.display_name; });
+
+  container.innerHTML = "";
+  messages.forEach(m => appendChatMessage(nameById[m.user_id] || "Viewer", m.message));
+}
+
+function appendChatMessage(name, text){
+  const container = document.getElementById("chatMessages");
+  const empty = container.querySelector(".chat-empty");
+  if (empty) empty.remove();
+  const el = document.createElement("div");
+  el.className = "chat-message";
+  el.innerHTML = `<span class="name">${escapeHtml(name)}</span><span class="text">${escapeHtml(text)}</span>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+function subscribeToChatRealtime(){
+  supabaseClient
+    .channel(`relvia-watch-chat-${stream.id}`)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"live_chat_messages", filter:`stream_id=eq.${stream.id}` }, async (payload) => {
+      const msg = payload.new;
+      if (msg.user_id === currentUser?.id) return;
+      const { data: sender } = await supabaseClient.from("live_profiles").select("display_name").eq("id", msg.user_id).maybeSingle();
+      appendChatMessage(sender?.display_name || "Viewer", msg.message);
+    })
+    .subscribe();
+}
+
+function showSignInToChatPrompt(){
+  document.getElementById("chatInputRow").innerHTML = `<a href="welcome.html" class="sign-in-prompt">Sign in to chat</a>`;
+}
+
+function setupChatSend(){
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("chatSendBtn");
+
+  const send = async () => {
+    const text = input.value.trim();
+    if (!text || !currentUser) return;
+
+    const { data: profile } = await supabaseClient.from("live_profiles").select("display_name, username").eq("id", currentUser.id).maybeSingle();
+    const name = profile?.display_name || profile?.username || "Viewer";
+
+    const { error } = await supabaseClient.from("live_chat_messages").insert({ stream_id: stream.id, user_id: currentUser.id, message: text });
+    if (error){ console.error(error); return; }
+    appendChatMessage(name, text);
+    input.value = "";
+  };
+
+  sendBtn.onclick = send;
+  input.onkeydown = (e) => { if (e.key === "Enter") send(); };
+}
+
+async function loadRelated(){
+  const { data: others } = await supabaseClient
+    .from("live_streams").select("*").eq("is_live", true).neq("id", stream.id).limit(6);
+
+  if (!others || others.length === 0) return;
+
+  const hostIds = [...new Set(others.map(s => s.host_id))];
+  const { data: hosts } = await supabaseClient.from("live_profiles").select("id, display_name").in("id", hostIds);
+  const nameById = {};
+  (hosts || []).forEach(h => { nameById[h.id] = h.display_name; });
+
+  document.getElementById("relatedTitle").style.display = "block";
+  const grid = document.getElementById("relatedGrid");
+  grid.innerHTML = "";
+  others.forEach(s => {
+    const card = document.createElement("a");
+    card.className = "related-card";
+    card.href = `watch.html?stream=${s.id}`;
+    card.innerHTML = `
+      <div class="related-thumb">${s.thumbnail_url ? `<img src="${s.thumbnail_url}">` : ""}</div>
+      <div class="related-info">
+        <div class="related-title">${escapeHtml(s.title)}</div>
+        <div class="related-host">${escapeHtml(nameById[s.host_id] || "Unknown")}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function setupRelvbitsModal(){
+  const modal = document.getElementById("relvbitsModal");
+  const amountGrid = document.getElementById("amountGrid");
+  const customAmount = document.getElementById("customAmount");
+  let selectedAmountCents = 500;
+
+  document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
+    if (!currentUser){ window.location.href = "welcome.html"; return; }
+    document.getElementById("relvbitsError").classList.remove("show");
+    modal.classList.add("open");
+  });
+  document.getElementById("relvbitsCancelBtn").addEventListener("click", () => modal.classList.remove("open"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+
+  amountGrid.querySelectorAll(".amount-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedAmountCents = parseInt(btn.dataset.amount, 10);
+      customAmount.value = "";
+    });
+  });
+  customAmount.addEventListener("input", () => {
+    amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+    const dollars = parseFloat(customAmount.value);
+    selectedAmountCents = isFinite(dollars) ? Math.round(dollars * 100) : 0;
+  });
+
+  document.getElementById("relvbitsConfirmBtn").addEventListener("click", async () => {
+    const errorEl = document.getElementById("relvbitsError");
+    errorEl.classList.remove("show");
+
+    if (!selectedAmountCents || selectedAmountCents < 100 || selectedAmountCents > 100000){
+      errorEl.textContent = "Choose an amount between $1 and $1,000.";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("relvbitsConfirmBtn");
+    btn.disabled = true; btn.textContent = "Redirecting to payment...";
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    try {
+      const response = await fetch(RELVBITS_CHECKOUT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          creatorId: stream.host_id,
+          amountCents: selectedAmountCents,
+          message: document.getElementById("relvbitsMessage").value.trim(),
+          isAnonymous: document.getElementById("relvbitsAnon").checked,
+          streamId: stream.id,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.checkoutUrl){
+        errorEl.textContent = result.error || "Couldn't start checkout.";
+        errorEl.classList.add("show");
+        btn.disabled = false; btn.textContent = "Continue to payment";
+        return;
+      }
+      window.location.href = result.checkoutUrl;
+    } catch (err){
+      console.error(err);
+      errorEl.textContent = "Couldn't reach the server.";
+      errorEl.classList.add("show");
+      btn.disabled = false; btn.textContent = "Continue to payment";
+    }
+  });
+}
+
+window.addEventListener("beforeunload", () => { if (currentRoom) currentRoom.disconnect(); });
+
+initialize();
+</script>
+</body>
+</html>
