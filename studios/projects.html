@@ -58,7 +58,7 @@ img{ max-width:100%; display:block; }
 .project-logline{ color:#dcdcdc; font-size:15px; line-height:1.6; margin-bottom:8px; max-width:640px; }
 .project-meta{ color:var(--muted); font-size:12.5px; margin-bottom:26px; }
 
-.video-frame{ width:100%; aspect-ratio:16/9; border-radius:18px; overflow:hidden; border:1px solid var(--border); margin-bottom:26px; background:#000; }
+.video-frame{ width:100%; aspect-ratio:16/9; border-radius:18px; overflow:hidden; border:1px solid var(--border); margin-bottom:26px; background:#000; position:relative; }
 .video-frame iframe{ width:100%; height:100%; border:none; }
 
 .panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:22px; margin-bottom:20px; }
@@ -129,16 +129,29 @@ img{ max-width:100%; display:block; }
 .relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
 .relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
 .relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.ad-overlay{
+  position:absolute; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10;
+}
+.ad-overlay.open{ display:flex; }
+.ad-overlay img, .ad-overlay video{ max-width:100%; max-height:80%; border-radius:8px; }
+.ad-tag{ position:absolute; top:14px; left:14px; background:rgba(0,0,0,.7); color:var(--muted); font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; }
+.ad-skip-btn{
+  position:absolute; bottom:16px; right:16px; background:rgba(0,0,0,.75); color:white; border:1px solid var(--border);
+  font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:10px;
+}
+.ad-skip-btn:not(:disabled){ cursor:pointer; border-color:var(--gold); }
+.ad-skip-btn:not(:disabled):hover{ background:var(--gold); color:#000; }
+.ad-skip-btn:disabled{ opacity:.6; cursor:default; }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="studios.html">
+  <a class="brand" href="../studios/index.html">
     <div class="brand-badge">R</div>
     <span class="brand-name">Relvia Studios</span>
   </a>
-  <a class="back-link" href="studios.html">← Back to Studios</a>
+  <a class="back-link" href="../studios/index.html">← Back to Studios</a>
 </header>
 
 <div class="container" id="container">
@@ -256,13 +269,23 @@ async function render(){
   const container = document.getElementById("container");
 
   let filmHtml = "";
+  let pendingFilm = null;
   if (project.status === "released"){
     const { data: film } = await supabaseClient.from("studios_films").select("*").eq("project_id", project.id).maybeSingle();
     if (film){
       supabaseClient.rpc("increment_film_view_count", { target_film_id: film.id });
+      pendingFilm = film;
       filmHtml = `
-        <div class="video-frame">
-          <iframe src="https://drive.google.com/file/d/${film.drive_file_id}/preview" allow="autoplay" allowfullscreen></iframe>
+        <div class="video-frame" id="filmPlayerSlot">
+          <div class="ad-overlay" id="adOverlay">
+            <div class="ad-tag">Ad · <span id="adAdvertiserName"></span></div>
+            <img id="adImage" style="display:none;">
+            <video id="adVideo" style="display:none;" autoplay playsinline></video>
+            <button class="ad-skip-btn" id="adSkipBtn" disabled>Skip in <span id="adSkipCountdown">5</span></button>
+          </div>
+        </div>
+        <div style="text-align:right;margin-bottom:14px;">
+          <span style="font-size:10.5px;color:var(--muted-soft);letter-spacing:.5px;">Streaming powered by Google Drive</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           ${film.description ? `<p class="project-logline" style="margin-bottom:0;">${escapeHtml(film.description)}</p>` : "<span></span>"}
@@ -326,6 +349,70 @@ async function render(){
     document.getElementById("relvbitsError").classList.remove("show");
     document.getElementById("relvbitsModal").classList.add("open");
   });
+
+  if (pendingFilm){
+    await maybeShowFilmAd();
+    document.getElementById("filmPlayerSlot").innerHTML = `<iframe src="https://drive.google.com/file/d/${pendingFilm.drive_file_id}/preview" allow="autoplay" allowfullscreen></iframe>`;
+  }
+}
+
+async function maybeShowFilmAd(){
+  const { data: ads } = await supabaseClient.rpc("get_ad_to_serve");
+  if (!ads || ads.length === 0) return;
+
+  const ad = ads[0];
+  const overlay = document.getElementById("adOverlay");
+  const skipBtn = document.getElementById("adSkipBtn");
+  const countdownEl = document.getElementById("adSkipCountdown");
+
+  document.getElementById("adAdvertiserName").textContent = ad.advertiser_name;
+  overlay.classList.add("open");
+
+  let mediaEl;
+  if (ad.creative_type === "video"){
+    mediaEl = document.getElementById("adVideo");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  } else {
+    mediaEl = document.getElementById("adImage");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  }
+
+  if (ad.click_url){
+    mediaEl.style.cursor = "pointer";
+    mediaEl.addEventListener("click", async () => {
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: false, was_clicked: true });
+      window.open(ad.click_url, "_blank");
+    });
+  }
+
+  return new Promise((resolve) => {
+    let remaining = ad.skip_after_seconds;
+    countdownEl.textContent = remaining;
+
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        clearInterval(interval);
+        skipBtn.disabled = false;
+        skipBtn.innerHTML = "Skip Ad ×";
+      } else {
+        countdownEl.textContent = remaining;
+      }
+    }, 1000);
+
+    const finishAd = async (wasSkipped) => {
+      clearInterval(interval);
+      if (mediaEl.tagName === "VIDEO") mediaEl.pause();
+      overlay.classList.remove("open");
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: wasSkipped, was_clicked: false });
+      resolve();
+    };
+
+    skipBtn.addEventListener("click", () => { if (!skipBtn.disabled) finishAd(true); });
+    if (mediaEl.tagName === "VIDEO") mediaEl.addEventListener("ended", () => finishAd(false));
+  });
 }
 
 function renderStatusActions(){
@@ -352,7 +439,10 @@ function renderSubmitFilmPanel(){
   const el = document.getElementById("submitFilmPanel");
   el.innerHTML = `
     <h3>Submit the finished film</h3>
-    <div class="sub">Paste a Google Drive share link (make sure sharing is set to "Anyone with the link").</div>
+    <div style="display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:4px 10px;border-radius:999px;margin-bottom:12px;">
+      ▶ POWERED BY GOOGLE DRIVE
+    </div>
+    <div class="sub">Paste a Google Drive share link — that's what actually hosts and streams your film, so make sure sharing is set to "Anyone with the link" before submitting.</div>
     <div class="field"><label>Google Drive link</label><input type="text" id="driveLink" placeholder="https://drive.google.com/file/d/..."></div>
     <div class="field"><label>Description</label><textarea id="filmDescription" placeholder="What's this short about?"></textarea></div>
     <div class="field"><label>Cover image URL (optional)</label><input type="text" id="filmCover" placeholder="https://..."></div>
