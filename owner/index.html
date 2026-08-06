@@ -1898,7 +1898,11 @@ async function runCleanupNow(){
     if (!response.ok){
       showToast(result.error || "Cleanup failed");
     } else {
-      showToast(`Deleted ${result.deleted || 0} expired recording(s)`);
+      const total = (result.deleted || 0) + (result.deleted_for_capacity || 0);
+      const parts = [];
+      if (result.deleted) parts.push(`${result.deleted} expired`);
+      if (result.deleted_for_capacity) parts.push(`${result.deleted_for_capacity} for storage cap`);
+      showToast(total > 0 ? `Deleted ${parts.join(", ")}` : "Nothing needed cleaning up");
       await logAction("run_storage_cleanup", "storage", `${result.deleted || 0} deleted`);
     }
   } catch (err){
