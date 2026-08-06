@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor — Relvia Studios</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --danger:#e0574f;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{ color:var(--text); min-height:100vh; background:var(--background); }
+a{ color:inherit; text-decoration:none; }
+button, input, select{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img, video{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:68px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 26px; background:rgba(5,5,5,.9); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:32px; height:32px; border-radius:50%; background:#000;
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:16px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:16px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.layout{ display:grid; grid-template-columns:1fr 320px; gap:0; height:calc(100vh - 68px); }
+.main-area{ padding:24px 26px; overflow-y:auto; }
+.side-area{ border-left:1px solid var(--border-soft); padding:24px 20px; overflow-y:auto; background:var(--glass); }
+@media(max-width:920px){ .layout{ grid-template-columns:1fr; height:auto; } .side-area{ border-left:none; border-top:1px solid var(--border-soft); } }
+
+.section-title{ font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:12px; }
+.hint{ font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+
+.preview-frame{
+  width:100%; aspect-ratio:16/9; background:#000; border-radius:14px; overflow:hidden; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; margin-bottom:20px;
+}
+.preview-frame video{ width:100%; height:100%; object-fit:contain; }
+.preview-empty{ color:var(--muted-soft); font-size:13px; text-align:center; padding:20px; }
+
+.import-btn{
+  width:100%; padding:14px; border:1.5px dashed var(--border); border-radius:12px; text-align:center;
+  color:var(--muted); font-size:13px; font-weight:700; margin-bottom:18px;
+}
+.import-btn:hover{ border-color:var(--gold); color:var(--gold); }
+
+.clip-list{ margin-bottom:24px; }
+.clip-item{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px;
+}
+.clip-item-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.clip-item-name{ font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:170px; }
+.clip-item-actions{ display:flex; gap:6px; }
+.clip-item-actions button{ font-size:11px; color:var(--muted); padding:3px 8px; border-radius:6px; }
+.clip-item-actions button:hover{ background:var(--surface); color:var(--gold); }
+.trim-row{ display:flex; gap:10px; align-items:center; font-size:11.5px; color:var(--muted); }
+.trim-row input{ width:60px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 8px; color:white; font-size:12px; }
+
+.overlay-item, .music-block{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px;
+}
+.overlay-row{ display:flex; gap:8px; margin-bottom:8px; }
+.overlay-row input, .overlay-row select{
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:white; font-size:12.5px;
+}
+.overlay-row input[type="text"]{ flex:1; }
+.overlay-row input[type="number"]{ width:64px; }
+.remove-btn{ font-size:11px; color:var(--danger); }
+
+.add-btn{
+  width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:20px;
+}
+.add-btn:hover{ border-color:var(--gold); color:var(--gold); }
+
+.export-btn{
+  width:100%; padding:15px; border-radius:12px; font-weight:800; font-size:14px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; margin-top:10px;
+}
+.export-btn:hover{ opacity:.88; }
+.export-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+.progress-box{ margin-top:16px; display:none; }
+.progress-box.show{ display:block; }
+.progress-label{ font-size:12px; color:var(--muted); margin-bottom:8px; }
+.progress-bar-track{ height:8px; background:var(--surface); border-radius:999px; overflow:hidden; }
+.progress-bar-fill{ height:100%; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); width:0%; transition:width .2s; }
+
+.download-box{ display:none; margin-top:18px; text-align:center; padding:18px; border:1px solid var(--gold-end); border-radius:12px; background:rgba(217,169,75,.06); }
+.download-box.show{ display:block; }
+.download-box p{ font-size:12.5px; color:var(--muted); margin:10px 0 14px; line-height:1.6; }
+.download-link-btn{
+  display:inline-block; padding:11px 24px; border-radius:10px; font-weight:800; font-size:13px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+}
+
+.loading-ffmpeg{ text-align:center; padding:16px; color:var(--muted); font-size:12.5px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="../watch/">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Studios Editor</span>
+  </a>
+  <a class="back-link" href="index.html">← Back to Studios</a>
+</header>
+
+<div class="layout">
+  <div class="main-area">
+    <div class="section-title">Preview</div>
+    <div class="preview-frame" id="previewFrame">
+      <div class="preview-empty">Import a clip below to get started. Trim it, add more clips, drop in text and music, then render your final film.</div>
+    </div>
+
+    <div class="section-title">Clips</div>
+    <p class="hint">Import your footage in the order you want it to play. Each clip can be trimmed to just the part you want — drag the order with the arrows.</p>
+    <button class="import-btn" id="importClipBtn">+ Import a video clip</button>
+    <input type="file" id="clipFileInput" accept="video/*" style="display:none;" multiple>
+    <div class="clip-list" id="clipList"></div>
+  </div>
+
+  <div class="side-area">
+    <div class="section-title">Text Overlays</div>
+    <p class="hint">Titles or captions burned into the video at a specific time.</p>
+    <div id="overlayList"></div>
+    <button class="add-btn" id="addOverlayBtn">+ Add text overlay</button>
+
+    <div class="section-title">Background Music</div>
+    <p class="hint">One audio track, mixed under your clips' original sound.</p>
+    <div class="music-block" id="musicBlock">
+      <button class="import-btn" id="importMusicBtn" style="margin-bottom:0;">+ Import audio track</button>
+      <input type="file" id="musicFileInput" accept="audio/*" style="display:none;">
+      <div id="musicInfo" style="display:none;margin-top:10px;">
+        <div class="clip-item-head">
+          <span class="clip-item-name" id="musicFileName"></span>
+          <button class="remove-btn" id="removeMusicBtn">Remove</button>
+        </div>
+        <div class="trim-row">
+          Volume <input type="number" id="musicVolume" value="50" min="0" max="100" style="width:50px;"> %
+        </div>
+      </div>
+    </div>
+
+    <button class="export-btn" id="renderBtn" disabled>Render Final Video</button>
+    <div class="progress-box" id="progressBox">
+      <div class="progress-label" id="progressLabel">Preparing...</div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    </div>
+    <div class="download-box" id="downloadBox">
+      <div style="font-family:var(--font-display);font-size:16px;">Your film is ready</div>
+      <p>Download it, then upload that file to Google Drive (set sharing to "Anyone with the link"), and paste the share link into your project's submission form to release it.</p>
+      <a class="download-link-btn" id="downloadLink" download="relvia-film.mp4">Download MP4</a>
+    </div>
+    <div class="loading-ffmpeg" id="ffmpegLoadingMsg">Loading video engine...</div>
+  </div>
+</div>
+
+<script type="module">
+import { FFmpeg } from "https://esm.sh/@ffmpeg/ffmpeg@0.12.10";
+import { fetchFile, toBlobURL } from "https://esm.sh/@ffmpeg/util@0.12.1";
+
+const ffmpeg = new FFmpeg();
+let ffmpegReady = false;
+
+let clips = [];   // { id, file, name, trimStart, trimEnd, duration }
+let overlays = []; // { id, text, start, duration, position }
+let musicFile = null;
+let musicVolume = 50;
+
+function uid(){ return Math.random().toString(36).slice(2, 10); }
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initFfmpeg(){
+  try {
+    const baseURL = "https://esm.sh/@ffmpeg/core@0.12.6/dist/esm";
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+    });
+    ffmpegReady = true;
+    document.getElementById("ffmpegLoadingMsg").style.display = "none";
+    updateRenderButton();
+  } catch (err){
+    console.error("Failed to load ffmpeg:", err);
+    document.getElementById("ffmpegLoadingMsg").textContent = "Couldn't load the video engine. Try reloading the page.";
+  }
+}
+
+function updateRenderButton(){
+  document.getElementById("renderBtn").disabled = !ffmpegReady || clips.length === 0;
+}
+
+document.getElementById("importClipBtn").addEventListener("click", () => document.getElementById("clipFileInput").click());
+document.getElementById("clipFileInput").addEventListener("change", async (e) => {
+  for (const file of e.target.files){
+    const url = URL.createObjectURL(file);
+    const tempVideo = document.createElement("video");
+    tempVideo.src = url;
+    await new Promise(resolve => { tempVideo.onloadedmetadata = resolve; });
+
+    clips.push({
+      id: uid(), file, name: file.name, url,
+      trimStart: 0, trimEnd: Math.floor(tempVideo.duration), duration: Math.floor(tempVideo.duration),
+    });
+  }
+  e.target.value = "";
+  renderClipList();
+  if (clips.length > 0) showPreview(clips[0].url);
+  updateRenderButton();
+});
+
+function renderClipList(){
+  const list = document.getElementById("clipList");
+  if (clips.length === 0){
+    list.innerHTML = `<div class="hint">No clips imported yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  clips.forEach((clip, index) => {
+    const item = document.createElement("div");
+    item.className = "clip-item";
+    item.innerHTML = `
+      <div class="clip-item-head">
+        <span class="clip-item-name" title="${escapeHtml(clip.name)}">${index + 1}. ${escapeHtml(clip.name)}</span>
+        <div class="clip-item-actions">
+          <button data-action="preview">Preview</button>
+          <button data-action="up">↑</button>
+          <button data-action="down">↓</button>
+          <button data-action="remove" style="color:var(--danger);">✕</button>
+        </div>
+      </div>
+      <div class="trim-row">
+        Trim: <input type="number" data-field="trimStart" value="${clip.trimStart}" min="0" max="${clip.duration}"> s
+        to <input type="number" data-field="trimEnd" value="${clip.trimEnd}" min="0" max="${clip.duration}"> s
+        (of ${clip.duration}s)
+      </div>`;
+
+    item.querySelector('[data-action="preview"]').addEventListener("click", () => showPreview(clip.url));
+    item.querySelector('[data-action="up"]').addEventListener("click", () => moveClip(index, -1));
+    item.querySelector('[data-action="down"]').addEventListener("click", () => moveClip(index, 1));
+    item.querySelector('[data-action="remove"]').addEventListener("click", () => { clips.splice(index, 1); renderClipList(); updateRenderButton(); });
+    item.querySelector('[data-field="trimStart"]').addEventListener("input", (e) => { clip.trimStart = parseFloat(e.target.value) || 0; });
+    item.querySelector('[data-field="trimEnd"]').addEventListener("input", (e) => { clip.trimEnd = parseFloat(e.target.value) || clip.duration; });
+
+    list.appendChild(item);
+  });
+}
+
+function moveClip(index, direction){
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= clips.length) return;
+  [clips[index], clips[newIndex]] = [clips[newIndex], clips[index]];
+  renderClipList();
+}
+
+function showPreview(url){
+  document.getElementById("previewFrame").innerHTML = `<video src="${url}" controls></video>`;
+}
+
+document.getElementById("addOverlayBtn").addEventListener("click", () => {
+  overlays.push({ id: uid(), text: "", start: 0, duration: 3, position: "bottom" });
+  renderOverlayList();
+});
+
+function renderOverlayList(){
+  const list = document.getElementById("overlayList");
+  if (overlays.length === 0){
+    list.innerHTML = `<div class="hint">No text overlays yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  overlays.forEach((ov, index) => {
+    const item = document.createElement("div");
+    item.className = "overlay-item";
+    item.innerHTML = `
+      <div class="overlay-row">
+        <input type="text" placeholder="Overlay text" data-field="text" value="${escapeHtml(ov.text)}">
+        <button class="remove-btn" data-action="remove">✕</button>
+      </div>
+      <div class="overlay-row">
+        <input type="number" data-field="start" value="${ov.start}" min="0" title="Start (sec)">
+        <input type="number" data-field="duration" value="${ov.duration}" min="1" title="Duration (sec)">
+        <select data-field="position">
+          <option value="top" ${ov.position === "top" ? "selected" : ""}>Top</option>
+          <option value="center" ${ov.position === "center" ? "selected" : ""}>Center</option>
+          <option value="bottom" ${ov.position === "bottom" ? "selected" : ""}>Bottom</option>
+        </select>
+      </div>`;
+
+    item.querySelector('[data-field="text"]').addEventListener("input", (e) => { ov.text = e.target.value; });
+    item.querySelector('[data-field="start"]').addEventListener("input", (e) => { ov.start = parseFloat(e.target.value) || 0; });
+    item.querySelector('[data-field="duration"]').addEventListener("input", (e) => { ov.duration = parseFloat(e.target.value) || 1; });
+    item.querySelector('[data-field="position"]').addEventListener("change", (e) => { ov.position = e.target.value; });
+    item.querySelector('[data-action="remove"]').addEventListener("click", () => { overlays.splice(index, 1); renderOverlayList(); });
+
+    list.appendChild(item);
+  });
+}
+
+document.getElementById("importMusicBtn").addEventListener("click", () => document.getElementById("musicFileInput").click());
+document.getElementById("musicFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  musicFile = file;
+  document.getElementById("musicFileName").textContent = file.name;
+  document.getElementById("musicInfo").style.display = "block";
+  document.getElementById("importMusicBtn").style.display = "none";
+});
+document.getElementById("removeMusicBtn").addEventListener("click", () => {
+  musicFile = null;
+  document.getElementById("musicInfo").style.display = "none";
+  document.getElementById("importMusicBtn").style.display = "block";
+});
+document.getElementById("musicVolume").addEventListener("input", (e) => { musicVolume = parseInt(e.target.value, 10) || 0; });
+
+document.getElementById("renderBtn").addEventListener("click", renderFinalVideo);
+
+function setProgress(percent, label){
+  document.getElementById("progressBox").classList.add("show");
+  document.getElementById("progressFill").style.width = `${percent}%`;
+  document.getElementById("progressLabel").textContent = label;
+}
+
+async function renderFinalVideo(){
+  const btn = document.getElementById("renderBtn");
+  btn.disabled = true;
+  document.getElementById("downloadBox").classList.remove("show");
+  setProgress(3, "Loading your clips...");
+
+  try {
+    for (let i = 0; i < clips.length; i++){
+      const clip = clips[i];
+      await ffmpeg.writeFile(`in${i}.mp4`, await fetchFile(clip.file));
+    }
+
+    setProgress(15, "Trimming clips...");
+    for (let i = 0; i < clips.length; i++){
+      const clip = clips[i];
+      const duration = Math.max(0.5, clip.trimEnd - clip.trimStart);
+      await ffmpeg.exec([
+        "-i", `in${i}.mp4`,
+        "-ss", String(clip.trimStart), "-t", String(duration),
+        "-vf", "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1",
+        "-r", "30", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
+        `trimmed${i}.mp4`,
+      ]);
+      setProgress(15 + Math.round((i + 1) / clips.length * 25), `Trimming clip ${i + 1} of ${clips.length}...`);
+    }
+
+    setProgress(42, "Combining clips...");
+    const concatList = clips.map((_, i) => `file trimmed${i}.mp4`).join("\n");
+    await ffmpeg.writeFile("concat.txt", concatList);
+    await ffmpeg.exec(["-f", "concat", "-safe", "0", "-i", "concat.txt", "-c", "copy", "combined.mp4"]);
+
+    let currentFile = "combined.mp4";
+
+    if (overlays.length > 0){
+      setProgress(55, "Adding text overlays...");
+      for (let i = 0; i < overlays.length; i++){
+        const ov = overlays[i];
+        if (!ov.text.trim()) continue;
+
+        const yPos = ov.position === "top" ? "40" : ov.position === "center" ? "(h-text_h)/2" : "h-th-40";
+        const escapedText = ov.text.replace(/'/g, "\\'").replace(/:/g, "\\:");
+        const enableExpr = `between(t,${ov.start},${ov.start + ov.duration})`;
+
+        await ffmpeg.exec([
+          "-i", currentFile,
+          "-vf", `drawtext=text='${escapedText}':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=${yPos}:box=1:boxcolor=black@0.5:boxborderw=10:enable='${enableExpr}'`,
+          "-c:a", "copy",
+          `overlay${i}.mp4`,
+        ]);
+        currentFile = `overlay${i}.mp4`;
+        setProgress(55 + Math.round((i + 1) / overlays.length * 20), `Adding overlay ${i + 1} of ${overlays.length}...`);
+      }
+    }
+
+    if (musicFile){
+      setProgress(80, "Mixing in music...");
+      await ffmpeg.writeFile("music.mp3", await fetchFile(musicFile));
+      const volumeFactor = (musicVolume / 100).toFixed(2);
+      await ffmpeg.exec([
+        "-i", currentFile, "-i", "music.mp3",
+        "-filter_complex", `[1:a]volume=${volumeFactor}[music];[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[aout]`,
+        "-map", "0:v", "-map", "[aout]", "-c:v", "copy",
+        "final.mp4",
+      ]);
+      currentFile = "final.mp4";
+    } else {
+      await ffmpeg.exec(["-i", currentFile, "-c", "copy", "final.mp4"]);
+      currentFile = "final.mp4";
+    }
+
+    setProgress(95, "Finishing up...");
+    const outputData = await ffmpeg.readFile("final.mp4");
+    const blob = new Blob([outputData.buffer], { type: "video/mp4" });
+    const downloadUrl = URL.createObjectURL(blob);
+
+    document.getElementById("downloadLink").href = downloadUrl;
+    document.getElementById("downloadBox").classList.add("show");
+    setProgress(100, "Done!");
+  } catch (err){
+    console.error("Render failed:", err);
+    setProgress(0, "Something went wrong during rendering — check the console for details.");
+  }
+
+  btn.disabled = false;
+}
+
+renderClipList();
+renderOverlayList();
+initFfmpeg();
+</script>
+</body>
+</html>
