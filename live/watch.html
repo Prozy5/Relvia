@@ -107,6 +107,44 @@ img, video{ max-width:100%; display:block; }
 .relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
 .relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
 .relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.social-toggle-btn{
+  position:fixed; bottom:24px; right:24px; width:52px; height:52px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:20px;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:1500;
+}
+.social-toggle-btn:hover{ opacity:.9; transform:scale(1.05); }
+.social-sidebar{
+  position:fixed; top:0; right:0; bottom:0; width:380px; max-width:90vw; background:var(--surface);
+  border-left:1px solid var(--border); z-index:1600; transform:translateX(100%); transition:transform .25s; display:flex; flex-direction:column;
+}
+.social-sidebar.open{ transform:translateX(0); }
+.social-sidebar-header{
+  padding:18px 20px; border-bottom:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;
+  font-family:var(--font-display); font-size:17px; font-weight:600;
+}
+.social-feed{ flex:1; overflow-y:auto; padding:14px; }
+.social-post{ padding:14px; border:1px solid var(--border); border-radius:14px; margin-bottom:12px; background:var(--glass); }
+.social-post-header{ display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+.social-post-avatar{ width:32px; height:32px; border-radius:50%; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; overflow:hidden; flex-shrink:0; }
+.social-post-name{ font-size:12.5px; font-weight:700; }
+.social-post-text{ font-size:13px; color:#ddd; line-height:1.5; margin-bottom:8px; }
+.social-post-img{ width:100%; border-radius:10px; margin-bottom:8px; }
+.social-post-actions{ display:flex; gap:14px; font-size:11.5px; color:var(--muted); }
+.social-open-full{ display:block; text-align:center; padding:14px; border-top:1px solid var(--border-soft); font-size:12.5px; font-weight:700; color:var(--gold); }
+.social-empty{ text-align:center; color:var(--muted); padding:30px 0; font-size:12.5px; }
+.ad-overlay{
+  position:absolute; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10;
+}
+.ad-overlay.open{ display:flex; }
+.ad-overlay img, .ad-overlay video{ max-width:100%; max-height:80%; border-radius:8px; }
+.ad-tag{ position:absolute; top:14px; left:14px; background:rgba(0,0,0,.7); color:var(--muted); font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; }
+.ad-skip-btn{
+  position:absolute; bottom:16px; right:16px; background:rgba(0,0,0,.75); color:white; border:1px solid var(--border);
+  font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:10px;
+}
+.ad-skip-btn:not(:disabled){ cursor:pointer; border-color:var(--gold); }
+.ad-skip-btn:not(:disabled):hover{ background:var(--gold); color:#000; }
+.ad-skip-btn:disabled{ opacity:.6; cursor:default; }
 </style>
 </head>
 <body>
@@ -124,6 +162,12 @@ img, video{ max-width:100%; display:block; }
     <div class="video-frame" id="videoFrame">
       <video id="playerVideo" autoplay playsinline></video>
       <div class="player-status" id="playerStatus"><span>Loading...</span></div>
+      <div class="ad-overlay" id="adOverlay">
+        <div class="ad-tag">Ad · <span id="adAdvertiserName"></span></div>
+        <img id="adImage" style="display:none;">
+        <video id="adVideo" style="display:none;" autoplay playsinline></video>
+        <button class="ad-skip-btn" id="adSkipBtn" disabled>Skip in <span id="adSkipCountdown">5</span></button>
+      </div>
     </div>
 
     <div class="stream-meta">
@@ -175,6 +219,16 @@ img, video{ max-width:100%; display:block; }
       <button class="relvbits-confirm-btn" id="relvbitsConfirmBtn">Continue to payment</button>
     </div>
   </div>
+</div>
+
+<button class="social-toggle-btn" id="socialToggleBtn" title="RelviaCreators">◈</button>
+<div class="social-sidebar" id="socialSidebar">
+  <div class="social-sidebar-header">
+    <span>RelviaCreators</span>
+    <button id="closeSocialSidebar" style="font-size:20px;color:var(--muted);">×</button>
+  </div>
+  <div class="social-feed" id="socialFeed"><div class="social-empty">Loading...</div></div>
+  <a class="social-open-full" href="creators.html">Open full RelviaCreators →</a>
 </div>
 
 <script>
@@ -233,6 +287,8 @@ async function initialize(){
 
   setupRelvbitsModal();
 
+  await maybeShowPreRollAd();
+
   if (stream.is_live){
     document.getElementById("streamSub").textContent = `${stream.viewer_count || 0} watching`;
     await connectLiveStream();
@@ -242,6 +298,74 @@ async function initialize(){
   }
 
   await loadRelated();
+  setupSocialSidebar();
+}
+
+// ==========================================================
+// PRE-ROLL AD
+// ==========================================================
+async function maybeShowPreRollAd(){
+  const { data: ads } = await supabaseClient.rpc("get_ad_to_serve");
+  if (!ads || ads.length === 0) return; // no active campaign — skip straight to the stream
+
+  const ad = ads[0];
+  const overlay = document.getElementById("adOverlay");
+  const skipBtn = document.getElementById("adSkipBtn");
+  const countdownEl = document.getElementById("adSkipCountdown");
+
+  document.getElementById("adAdvertiserName").textContent = ad.advertiser_name;
+  overlay.classList.add("open");
+
+  let mediaEl;
+  if (ad.creative_type === "video"){
+    mediaEl = document.getElementById("adVideo");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  } else {
+    mediaEl = document.getElementById("adImage");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  }
+
+  if (ad.click_url){
+    mediaEl.style.cursor = "pointer";
+    mediaEl.addEventListener("click", async () => {
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: stream.id, was_skipped: false, was_clicked: true });
+      window.open(ad.click_url, "_blank");
+    });
+  }
+
+  return new Promise((resolve) => {
+    let remaining = ad.skip_after_seconds;
+    countdownEl.textContent = remaining;
+
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        clearInterval(interval);
+        skipBtn.disabled = false;
+        skipBtn.innerHTML = "Skip Ad ×";
+      } else {
+        countdownEl.textContent = remaining;
+      }
+    }, 1000);
+
+    const finishAd = async (wasSkipped) => {
+      clearInterval(interval);
+      if (mediaEl.tagName === "VIDEO") mediaEl.pause();
+      overlay.classList.remove("open");
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: stream.id, was_skipped: wasSkipped, was_clicked: false });
+      resolve();
+    };
+
+    skipBtn.addEventListener("click", () => { if (!skipBtn.disabled) finishAd(true); });
+
+    // If it's a video ad and it finishes naturally before the skip
+    // window even opens, move on automatically.
+    if (mediaEl.tagName === "VIDEO"){
+      mediaEl.addEventListener("ended", () => finishAd(false));
+    }
+  });
 }
 
 async function connectLiveStream(){
@@ -499,6 +623,58 @@ function setupRelvbitsModal(){
 }
 
 window.addEventListener("beforeunload", () => { if (currentRoom) currentRoom.disconnect(); });
+
+
+// ==========================================================
+// SOCIAL SIDEBAR (RelviaCreators feed preview)
+// ==========================================================
+function setupSocialSidebar(){
+  const toggleBtn = document.getElementById("socialToggleBtn");
+  const sidebar = document.getElementById("socialSidebar");
+  const closeBtn = document.getElementById("closeSocialSidebar");
+  let loaded = false;
+
+  toggleBtn.addEventListener("click", async () => {
+    sidebar.classList.add("open");
+    if (!loaded){ loaded = true; await loadSocialFeed(); }
+  });
+  closeBtn.addEventListener("click", () => sidebar.classList.remove("open"));
+}
+
+async function loadSocialFeed(){
+  const feed = document.getElementById("socialFeed");
+  const { data: posts, error } = await supabaseClient
+    .from("live_community_posts").select("*").order("created_at", { ascending:false }).limit(15);
+
+  if (error || !posts || posts.length === 0){
+    feed.innerHTML = `<div class="social-empty">No posts yet.</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(posts.map(p => p.user_id))];
+  const { data: profiles } = await supabaseClient.from("live_profiles").select("id, display_name, avatar_url").in("id", userIds);
+  const profileById = {};
+  (profiles || []).forEach(p => { profileById[p.id] = p; });
+
+  feed.innerHTML = "";
+  posts.forEach(post => {
+    const author = profileById[post.user_id];
+    const el = document.createElement("a");
+    el.href = "creators.html";
+    el.className = "social-post";
+    el.style.display = "block";
+    el.innerHTML = `
+      <div class="social-post-header">
+        <div class="social-post-avatar">${author?.avatar_url ? `<img src="${author.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : (author?.display_name || "R").charAt(0).toUpperCase()}</div>
+        <div class="social-post-name">${escapeHtml(author?.display_name || "Unknown")}</div>
+      </div>
+      ${post.content ? `<div class="social-post-text">${escapeHtml(post.content)}</div>` : ""}
+      ${post.image_url ? `<img class="social-post-img" src="${post.image_url}">` : ""}
+      <div class="social-post-actions"><span>View on RelviaCreators →</span></div>
+    `;
+    feed.appendChild(el);
+  });
+}
 
 initialize();
 </script>
