@@ -16,21 +16,15 @@
   --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
   --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
   --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
-  --radius-lg:24px; --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
 body{
-  color:var(--text); min-height:100vh; position:relative;
+  color:var(--text); min-height:100vh;
   background:
-    radial-gradient(ellipse 1000px 700px at 50% -10%, rgba(217,169,75,.14), transparent 60%),
-    radial-gradient(ellipse 600px 900px at -5% 40%, rgba(185,131,47,.08), transparent 55%),
-    radial-gradient(ellipse 600px 900px at 105% 60%, rgba(185,131,47,.08), transparent 55%),
-    #050403;
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
+    var(--background);
   background-attachment:fixed;
-}
-body::before{
-  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 a{ text-decoration:none; color:inherit; }
 button, input, textarea, select{ font-family:inherit; }
@@ -43,229 +37,146 @@ img{ max-width:100%; display:block; }
 }
 .brand{ display:flex; align-items:center; gap:12px; }
 .brand-badge{
-  width:38px; height:38px; border-radius:50%; background:#000;
+  width:36px; height:36px; border-radius:50%; background:#000;
   background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
   border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold-start);
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
 }
-.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
-.new-project-btn{
-  font-size:13.5px; font-weight:800; padding:10px 20px; border-radius:12px;
-  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
-}
-.new-project-btn:hover{ opacity:.88; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:18px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
 
-.container{ max-width:1200px; margin:auto; padding:34px 24px 80px; }
-.page-title{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:8px; }
-.page-sub{ color:var(--muted); font-size:14px; margin-bottom:28px; }
+.container{ max-width:900px; margin:auto; padding:34px 24px 90px; }
 
-/* CINEMA MARQUEE HEADER */
-.marquee{
-  position:relative; text-align:center; padding:64px 24px 44px; margin-bottom:8px; overflow:hidden;
-}
-.marquee::before{
-  content:""; position:absolute; top:-30%; left:50%; transform:translateX(-50%);
-  width:900px; height:500px; pointer-events:none;
-  background:radial-gradient(ellipse at center, rgba(217,169,75,.09), transparent 65%);
-}
-.marquee-eyebrow{
-  display:inline-flex; align-items:center; gap:10px; font-size:10.5px; letter-spacing:4px; color:var(--muted);
-  text-transform:uppercase; font-weight:700; margin-bottom:18px; position:relative;
-}
-.marquee-eyebrow .dash{ width:18px; height:1px; background:var(--border); }
-.marquee-title{
-  font-family:var(--font-display); font-style:italic; font-weight:600; font-size:clamp(34px,5vw,58px);
-  line-height:1.08; letter-spacing:-.01em; color:var(--text); opacity:.94; position:relative;
-}
-.marquee-title em{
-  font-style:italic;
-  background:linear-gradient(180deg,rgba(253,243,216,.85) 0%,rgba(217,169,75,.65) 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-}
-.marquee-sub{ color:var(--muted-soft); font-size:13.5px; margin-top:16px; max-width:440px; margin-left:auto; margin-right:auto; position:relative; }
-.marquee-divider{ display:none; }
+.status-pill{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:999px; margin-bottom:14px; }
+.status-pill.development{ background:rgba(217,169,75,.15); color:var(--gold); }
+.status-pill.production{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+.status-pill.post{ background:rgba(110,168,216,.15); color:#8fbde0; }
+.status-pill.released{ background:rgba(95,174,122,.15); color:#8fd1a8; }
 
-.tabs{ display:flex; gap:6px; margin-bottom:30px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:5px; max-width:340px; backdrop-filter:blur(10px); }
-.tab{ flex:1; text-align:center; padding:10px; border-radius:10px; font-size:13px; font-weight:700; color:var(--muted); }
-.tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
-.tab:not(.active):hover{ color:white; }
+.project-title{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:10px; }
+.project-logline{ color:#dcdcdc; font-size:15px; line-height:1.6; margin-bottom:8px; max-width:640px; }
+.project-meta{ color:var(--muted); font-size:12.5px; margin-bottom:26px; }
 
-.film-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
-.film-card{ cursor:pointer; position:relative; z-index:1; }
-.film-card:hover{ z-index:3; }
-.film-thumb{
-  aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
-  border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
-  transition:transform .25s ease, box-shadow .25s ease, border-radius .25s ease;
-}
-.film-card:hover .film-thumb{
-  transform:scale(1.12); box-shadow:0 24px 50px -14px rgba(0,0,0,.7), 0 0 0 1px rgba(217,169,75,.3), 0 0 30px -6px rgba(217,169,75,.15);
-  border-radius:10px 10px 0 0;
-}
-.film-thumb img{ width:100%; height:100%; object-fit:cover; }
-.film-thumb .play-icon{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px;
-  color:var(--gold); background:rgba(0,0,0,0); opacity:0; transition:opacity .2s;
-}
-.film-card:hover .play-icon{ opacity:1; background:rgba(0,0,0,.35); }
-.film-hover-panel{
-  max-height:0; overflow:hidden; opacity:0; transform:scaleX(1.12); transform-origin:top center;
-  background:rgba(15,12,8,.85); backdrop-filter:blur(16px); border:1px solid rgba(217,169,75,.25); border-top:none; border-radius:0 0 10px 10px;
-  transition:max-height .25s ease, opacity .2s ease .05s; box-shadow:0 24px 50px -14px rgba(0,0,0,.7);
-}
-.film-card:hover .film-hover-panel{ max-height:90px; opacity:1; }
-.film-hover-inner{ padding:12px 14px; }
-.film-title{ font-size:14.5px; font-weight:700; margin-bottom:3px; }
-.film-meta{ font-size:12px; color:var(--muted); }
-.film-hover-genre{ font-size:11px; color:var(--gold); font-weight:700; margin-top:6px; opacity:.85; }
+.video-frame{ width:100%; aspect-ratio:16/9; border-radius:18px; overflow:hidden; border:1px solid var(--border); margin-bottom:26px; background:#000; position:relative; }
+.video-frame iframe{ width:100%; height:100%; border:none; }
 
-.project-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
-.project-card{
-  background:rgba(255,255,255,.02); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.06);
-  border-radius:18px; padding:20px; cursor:pointer; transition:border-color .2s, background .2s;
-}
-.project-card:hover{ border-color:rgba(217,169,75,.35); background:rgba(217,169,75,.03); }
-.project-status{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:999px; margin-bottom:12px; }
-.project-status.development{ background:rgba(217,169,75,.15); color:var(--gold); }
-.project-status.production{ background:rgba(224,87,79,.15); color:#f2a8a3; }
-.project-status.post{ background:rgba(110,168,216,.15); color:#8fbde0; }
-.project-status.released{ background:rgba(95,174,122,.15); color:#8fd1a8; }
-.project-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:6px; }
-.project-logline{ font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:14px; min-height:38px; }
-.project-footer{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted-soft); }
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:22px; margin-bottom:20px; }
+.panel h3{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+.panel .sub{ color:var(--muted); font-size:12.5px; margin:-8px 0 14px; }
 
-.empty-state{ text-align:center; color:var(--muted); padding:60px 20px; grid-column:1/-1; }
-.empty-state h4{ color:#ddd; font-size:17px; margin-bottom:8px; font-family:var(--font-display); font-size:20px; }
-
-/* MODAL */
-.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }
-.modal-backdrop.open{ display:flex; }
-.modal{ background:var(--surface); border:1px solid var(--border); border-radius:22px; width:480px; max-width:100%; padding:28px; }
-.modal h3{ font-family:var(--font-display); font-size:22px; margin-bottom:18px; }
-.field{ margin-bottom:14px; }
-.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
-.field input, .field textarea, .field select{
-  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
-  padding:11px 14px; color:white; font-size:14px;
-}
-.field textarea{ resize:none; min-height:70px; }
-.field input:focus, .field textarea:focus, .field select:focus{ outline:none; border-color:var(--gold); }
-.modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
-.btn{ font-size:13px; font-weight:700; padding:10px 20px; border-radius:12px; border:1px solid var(--border); background:var(--surface-light); }
+.role-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-top:1px solid var(--border-soft); }
+.role-row:first-child{ border-top:none; }
+.role-name{ font-weight:700; font-size:14px; }
+.role-desc{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+.role-status{ font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; }
+.role-status.open{ background:rgba(217,169,75,.15); color:var(--gold); }
+.role-status.filled{ background:rgba(95,174,122,.15); color:#8fd1a8; }
+.btn{ font-size:12.5px; font-weight:700; padding:8px 16px; border-radius:10px; border:1px solid var(--border); background:var(--surface-light); }
 .btn:hover{ border-color:var(--gold); color:var(--gold); }
 .btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800; }
 .btn.gold:hover{ opacity:.88; color:#000; }
+.btn.danger:hover{ border-color:#e0574f; color:#f2a8a3; }
+.btn.sm{ padding:6px 12px; font-size:11.5px; }
 
-.loading-state{ text-align:center; color:var(--muted); padding:60px 0; grid-column:1/-1; }
+.collab-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-top:1px solid var(--border-soft); font-size:13px; }
+.collab-row:first-child{ border-top:none; }
+.collab-role{ color:var(--muted); font-size:12px; }
 
-/* DISCOVERY / SEARCH */
-.discovery-bar{ display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; align-items:center; }
-.discovery-search{
-  flex:1; min-width:220px; background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07); border-radius:12px;
-  padding:11px 16px; color:white; font-size:13.5px;
-}
-.discovery-search:focus{ outline:none; border-color:rgba(217,169,75,.4); }
-.discovery-select{
-  background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07); border-radius:12px;
-  padding:11px 14px; color:white; font-size:13px; min-width:150px;
-}
-.discovery-toggle{
-  display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07);
-  border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--muted); cursor:pointer; white-space:nowrap;
-}
-.discovery-toggle input{ accent-color:var(--gold); }
-.discovery-count{ font-size:12.5px; color:var(--muted-soft); margin-bottom:14px; }
+.request-row{ padding:12px 0; border-top:1px solid var(--border-soft); }
+.request-row:first-child{ border-top:none; }
+.request-msg{ font-size:12.5px; color:#ddd; margin:6px 0 10px; }
+.request-actions{ display:flex; gap:8px; }
 
-/* WATCH HOMEPAGE — full-bleed hero, breaks out of the container */
-.watch-hero{
-  position:relative; overflow:hidden;
-  width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
-  margin-top:-20px; margin-bottom:44px;
-  aspect-ratio:16/7; min-height:340px;
-  background:linear-gradient(135deg,#100d09,#050403 55%,#0c0a06);
+.discussion-list{ max-height:340px; overflow-y:auto; margin-bottom:14px; }
+.discussion-msg{ margin-bottom:12px; font-size:13px; }
+.discussion-msg strong{ color:var(--gold); }
+.discussion-time{ font-size:11px; color:var(--muted-soft); margin-left:6px; }
+.discussion-input-row{ display:flex; gap:8px; }
+.discussion-input-row textarea{
+  flex:1; background:var(--surface-light); border:1px solid var(--border); border-radius:10px;
+  padding:9px 12px; color:white; font-size:13px; resize:none; min-height:40px;
 }
-.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.4; filter:saturate(.85); }
-.watch-hero-overlay{
-  position:absolute; inset:0;
-  background:
-    radial-gradient(ellipse 900px 500px at 12% 100%, rgba(217,169,75,.09), transparent 62%),
-    linear-gradient(90deg, rgba(5,4,3,.97) 22%, rgba(5,4,3,.65) 58%, transparent 95%),
-    linear-gradient(0deg, var(--background) 0%, rgba(5,4,3,.85) 20%, transparent 60%);
-  display:flex; flex-direction:column; justify-content:flex-end;
-  padding:56px max(24px, calc((100vw - 1200px) / 2 + 24px)) 52px;
-}
-.watch-hero-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:14px; }
-.watch-hero-title{
-  font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.4vw,54px); line-height:1.05;
-  margin-bottom:14px; max-width:600px; text-shadow:0 4px 24px rgba(0,0,0,.5);
-}
-.watch-hero-meta{ font-size:13.5px; color:#d8d0c0; margin-bottom:22px; display:flex; align-items:center; gap:10px; }
-.watch-hero-meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--muted); }
-.watch-hero-actions{ display:flex; gap:12px; }
-.watch-hero-btn{
-  font-size:14px; font-weight:800; padding:13px 28px; border-radius:10px;
-  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; display:flex; align-items:center; gap:8px;
-}
-.watch-hero-btn:hover{ opacity:.88; }
-.watch-hero-btn.ghost{ background:rgba(255,255,255,.12); color:white; backdrop-filter:blur(6px); }
-.watch-hero-btn.ghost:hover{ background:rgba(255,255,255,.2); opacity:1; }
+.discussion-input-row button{ background:var(--gold); color:#000; font-weight:700; font-size:12.5px; padding:0 16px; border-radius:10px; }
 
-/* GENRE ROWS */
-.genre-row{ margin-bottom:38px; position:relative; }
-.genre-row-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
-.genre-row-wrap{ position:relative; }
-.genre-row-wrap::before, .genre-row-wrap::after{
-  content:""; position:absolute; top:0; bottom:6px; width:50px; z-index:2; pointer-events:none;
+.field{ margin-bottom:14px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input, .field textarea{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:10px 13px; color:white; font-size:13.5px;
 }
-.genre-row-wrap::before{ left:0; background:linear-gradient(90deg, var(--background) 0%, transparent 100%); }
-.genre-row-wrap::after{ right:0; background:linear-gradient(270deg, var(--background) 0%, transparent 100%); }
-.genre-row-scroll{ display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-behavior:smooth; }
-.genre-row-scroll::-webkit-scrollbar{ display:none; }
-.genre-row-scroll .film-card{ min-width:230px; flex-shrink:0; }
+.field textarea{ resize:none; min-height:70px; }
+.field input:focus, .field textarea:focus{ outline:none; border-color:var(--gold); }
+
+.status-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.empty-msg{ color:var(--muted); font-size:13px; padding:8px 0; }
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; }
+.relvbits-modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2500; padding:24px; }
+.relvbits-modal-backdrop.open{ display:flex; }
+.relvbits-modal{ background:var(--surface); border:1px solid var(--gold-end); border-radius:20px; padding:26px; max-width:400px; width:100%; }
+.relvbits-modal h3{ font-family:var(--font-display); font-size:19px; margin-bottom:16px; }
+.amount-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+.amount-option{ background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px 0; font-size:13px; font-weight:700; text-align:center; }
+.amount-option.selected{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-field{ margin-bottom:12px; }
+.relvbits-field label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.relvbits-field input{ width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 12px; color:white; font-size:13px; }
+.anon-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:var(--muted); }
+.relvbits-error{ color:#f2a8a3; font-size:12px; margin-bottom:10px; display:none; }
+.relvbits-error.show{ display:block; }
+.relvbits-modal-actions{ display:flex; gap:10px; }
+.relvbits-modal-actions button{ flex:1; padding:11px; border-radius:12px; font-weight:800; font-size:13px; }
+.relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.ad-overlay{
+  position:absolute; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10;
+}
+.ad-overlay.open{ display:flex; }
+.ad-overlay img, .ad-overlay video{ max-width:100%; max-height:80%; border-radius:8px; }
+.ad-tag{ position:absolute; top:14px; left:14px; background:rgba(0,0,0,.7); color:var(--muted); font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; }
+.ad-skip-btn{
+  position:absolute; bottom:16px; right:16px; background:rgba(0,0,0,.75); color:white; border:1px solid var(--border);
+  font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:10px;
+}
+.ad-skip-btn:not(:disabled){ cursor:pointer; border-color:var(--gold); }
+.ad-skip-btn:not(:disabled):hover{ background:var(--gold); color:#000; }
+.ad-skip-btn:disabled{ opacity:.6; cursor:default; }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="welcome.html">
+  <a class="brand" href="../studios/index.html">
     <div class="brand-badge">R</div>
     <span class="brand-name">Relvia Studios</span>
   </a>
-  <button class="new-project-btn" id="newProjectBtn">+ New Project</button>
+  <a class="back-link" href="../studios/index.html">← Back to Studios</a>
 </header>
 
-<div class="container">
-  <div class="marquee">
-    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
-    <div class="marquee-title">Where <em>stories</em><br>get made.</div>
-    <p class="marquee-sub">Original short films, collaborated on from first draft to premiere — made and streamed right here.</p>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="watch">Watch</div>
-    <div class="tab" data-tab="collaborate">Collaborate</div>
-  </div>
-
-  <div class="discovery-bar" id="discoveryBar" style="display:none;">
-    <input type="text" class="discovery-search" id="discoverySearch" placeholder="Search titles, loglines, genres, or roles needed...">
-    <select class="discovery-select" id="discoveryGenre"><option value="">All genres</option></select>
-    <label class="discovery-toggle"><input type="checkbox" id="discoveryOpenRolesOnly"> Open roles only</label>
-  </div>
-  <div class="discovery-count" id="discoveryCount" style="display:none;"></div>
-
-  <div id="viewContainer"><div class="loading-state">Loading...</div></div>
+<div class="container" id="container">
+  <div class="loading-state">Loading project...</div>
 </div>
 
-<!-- NEW PROJECT MODAL -->
-<div class="modal-backdrop" id="newProjectModal">
-  <div class="modal">
-    <h3>Start a new project</h3>
-    <div class="field"><label>Title</label><input type="text" id="projectTitle"></div>
-    <div class="field"><label>Logline</label><textarea id="projectLogline" placeholder="One or two sentences about the film..."></textarea></div>
-    <div class="field"><label>Genre</label><input type="text" id="projectGenre" placeholder="Drama, Comedy, Thriller..."></div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelProjectBtn">Cancel</button>
-      <button class="btn gold" id="createProjectBtn">Create project</button>
+<div class="relvbits-modal-backdrop" id="relvbitsModal">
+  <div class="relvbits-modal">
+    <h3>✦ Send RelvBits</h3>
+    <div class="relvbits-error" id="relvbitsError"></div>
+    <div class="relvbits-field">
+      <label>Amount</label>
+      <div class="amount-grid" id="amountGrid">
+        <button class="amount-option" data-amount="200">$2</button>
+        <button class="amount-option selected" data-amount="500">$5</button>
+        <button class="amount-option" data-amount="1000">$10</button>
+        <button class="amount-option" data-amount="2500">$25</button>
+      </div>
+      <input type="number" id="customAmount" placeholder="Custom amount ($1–$1000)" min="1" max="1000" step="1">
+    </div>
+    <div class="relvbits-field"><label>Message (optional)</label><input type="text" id="relvbitsMessage" maxlength="280"></div>
+    <div class="anon-row"><input type="checkbox" id="relvbitsAnon"><label for="relvbitsAnon">Send anonymously</label></div>
+    <div class="relvbits-modal-actions">
+      <button class="relvbits-cancel-btn" id="relvbitsCancelBtn">Cancel</button>
+      <button class="relvbits-confirm-btn" id="relvbitsConfirmBtn">Continue to payment</button>
     </div>
   </div>
 </div>
@@ -277,30 +188,55 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const params = new URLSearchParams(window.location.search);
+const projectId = params.get("id");
+
 let currentUser = null;
-let activeTab = "watch";
+let project = null;
+let isCreator = false;
 
 function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
+function timeAgo(dateStr){
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return new Date(dateStr).toLocaleDateString();
+}
+// Extracts a Google Drive file ID from any typical share link format.
+function extractDriveFileId(url){
+  const match = url.match(/[-\w]{25,}/);
+  return match ? match[0] : null;
+}
 
 async function initialize(){
+  if (!projectId){
+    document.getElementById("container").innerHTML = `<div class="empty-msg">No project specified.</div>`;
+    return;
+  }
+
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData || !sessionData.session){ window.location.href = "/login.html"; return; }
   const { data: userData } = await supabaseClient.auth.getUser();
   if (!userData.user){ window.location.href = "/login.html"; return; }
   currentUser = userData.user;
 
-  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "studios", target_label: "Relvia Studios (Home)" }); } catch (e){}
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "studios_project", target_label: "Studios Project Pages" }); } catch (e){}
 
   const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
-  const lock = (locks || []).find(l => l.page_key === "studios");
-  const unlockKey = "relvia-live-unlock-studios";
+  const lock = (locks || []).find(l => l.page_key === "studios_project");
+  const unlockKey = "relvia-live-unlock-studios_project";
 
   if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
-    document.querySelector(".container").innerHTML = `
+    document.getElementById("container").innerHTML = `
       <div style="text-align:center;padding:100px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
-        <h2 style="font-family:var(--font-display);font-size:24px;">Relvia Studios is temporarily closed</h2>
+        <h2 style="font-family:var(--font-display);font-size:24px;">Studios projects are temporarily closed</h2>
         <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
         <div style="display:flex;gap:8px;margin-top:6px;">
           <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
@@ -310,7 +246,7 @@ async function initialize(){
       </div>`;
     document.getElementById("unlockSubmit").addEventListener("click", async () => {
       const passcode = document.getElementById("unlockPasscode").value;
-      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "studios", passcode });
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "studios_project", passcode });
       if (isValid){ sessionStorage.setItem(unlockKey, "true"); window.location.reload(); }
       else { document.getElementById("unlockError").style.display = "block"; }
     });
@@ -318,227 +254,471 @@ async function initialize(){
   }
 
 
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-      activeTab = tab.dataset.tab;
-      document.getElementById("discoveryBar").style.display = activeTab === "collaborate" ? "flex" : "none";
-      document.getElementById("discoveryCount").style.display = activeTab === "collaborate" ? "block" : "none";
-      renderView();
-    });
-  });
-
-  document.getElementById("discoverySearch").addEventListener("input", () => filterAndRenderProjects());
-  document.getElementById("discoveryGenre").addEventListener("change", () => filterAndRenderProjects());
-  document.getElementById("discoveryOpenRolesOnly").addEventListener("change", () => filterAndRenderProjects());
-
-  document.getElementById("newProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.add("open"));
-  document.getElementById("cancelProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.remove("open"));
-  document.getElementById("createProjectBtn").addEventListener("click", createProject);
-
-  await renderView();
-}
-
-async function renderView(){
-  if (activeTab === "watch") return renderWatch();
-  return renderCollaborate();
-}
-
-async function renderWatch(){
-  const container = document.getElementById("viewContainer");
-  container.innerHTML = `<div class="loading-state">Loading films...</div>`;
-
-  const { data: films, error } = await supabaseClient
-    .from("studios_films")
-    .select("*, studios_projects(title, genre, creator_id, logline)")
-    .order("released_at", { ascending:false });
-
-  if (error || !films || films.length === 0){
-    container.innerHTML = `
-      <div class="film-grid">
-        <div class="empty-state">
-          <h4>Nothing released yet</h4>
-          <p>Start or join a project in the Collaborate tab to make the first one.</p>
-        </div>
-      </div>`;
+  const { data: proj, error } = await supabaseClient.from("studios_projects").select("*").eq("id", projectId).maybeSingle();
+  if (error || !proj){
+    document.getElementById("container").innerHTML = `<div class="empty-msg">This project doesn't exist.</div>`;
     return;
   }
+  project = proj;
+  isCreator = project.creator_id === currentUser.id;
 
-  const creatorIds = [...new Set(films.map(f => f.studios_projects?.creator_id).filter(Boolean))];
-  const { data: creators } = await supabaseClient.from("profiles").select("id, display_name").in("id", creatorIds);
-  const nameById = {};
-  (creators || []).forEach(c => { nameById[c.id] = c.display_name; });
+  await render();
+}
 
-  container.innerHTML = "";
+async function render(){
+  const container = document.getElementById("container");
 
-  // HERO — most recent release, full-bleed with Play + More Info.
-  const featured = films[0];
-  const hero = document.createElement("div");
-  hero.className = "watch-hero";
-  hero.innerHTML = `
-    ${featured.cover_url ? `<img src="${featured.cover_url}">` : ""}
-    <div class="watch-hero-overlay">
-      <div class="watch-hero-eyebrow">✦ Latest Release</div>
-      <div class="watch-hero-title">${escapeHtml(featured.title)}</div>
-      <div class="watch-hero-meta">
-        <span>${escapeHtml(featured.studios_projects?.genre || "Short Film")}</span><span class="dot"></span>
-        <span>By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")}</span><span class="dot"></span>
-        <span>${featured.view_count || 0} views</span>
-      </div>
-      <div class="watch-hero-actions">
-        <button class="watch-hero-btn" id="heroWatchBtn">▶ Play</button>
-        <button class="watch-hero-btn ghost" id="heroInfoBtn">ⓘ More Info</button>
-      </div>
-    </div>`;
-  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `studios-project.html?id=${featured.project_id}`; });
-  hero.querySelector("#heroInfoBtn").addEventListener("click", () => { window.location.href = `studios-project.html?id=${featured.project_id}`; });
-  container.appendChild(hero);
-
-  // GENRE ROWS
-  const byGenre = {};
-  films.forEach(film => {
-    const genre = film.studios_projects?.genre || "Short Film";
-    if (!byGenre[genre]) byGenre[genre] = [];
-    byGenre[genre].push(film);
-  });
-
-  Object.keys(byGenre).forEach(genre => {
-    const row = document.createElement("div");
-    row.className = "genre-row";
-    row.innerHTML = `
-      <div class="genre-row-title">${escapeHtml(genre)}</div>
-      <div class="genre-row-wrap"><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div></div>`;
-    container.appendChild(row);
-
-    const scroll = row.querySelector(".genre-row-scroll");
-    byGenre[genre].forEach(film => {
-      const card = document.createElement("div");
-      card.className = "film-card";
-      card.innerHTML = `
-        <div class="film-thumb">
-          ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
-          <div class="play-icon">&#9654;</div>
-        </div>
-        <div class="film-hover-panel">
-          <div class="film-hover-inner">
-            <div class="film-title">${escapeHtml(film.title)}</div>
-            <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>
-            <div class="film-hover-genre">${escapeHtml(film.studios_projects?.genre || "Short Film")}</div>
+  let filmHtml = "";
+  let pendingFilm = null;
+  if (project.status === "released"){
+    const { data: film } = await supabaseClient.from("studios_films").select("*").eq("project_id", project.id).maybeSingle();
+    if (film){
+      supabaseClient.rpc("increment_film_view_count", { target_film_id: film.id });
+      pendingFilm = film;
+      filmHtml = `
+        <div class="video-frame" id="filmPlayerSlot">
+          <div class="ad-overlay" id="adOverlay">
+            <div class="ad-tag">Ad · <span id="adAdvertiserName"></span></div>
+            <img id="adImage" style="display:none;">
+            <video id="adVideo" style="display:none;" autoplay playsinline></video>
+            <button class="ad-skip-btn" id="adSkipBtn" disabled>Skip in <span id="adSkipCountdown">5</span></button>
           </div>
+        </div>
+        <div style="text-align:right;margin-bottom:14px;">
+          <span style="font-size:10.5px;color:var(--muted-soft);letter-spacing:.5px;">Streaming powered by Google Drive</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          ${film.description ? `<p class="project-logline" style="margin-bottom:0;">${escapeHtml(film.description)}</p>` : "<span></span>"}
+          ${!isCreator ? `<button class="btn gold" id="sendRelvbitsBtn" style="flex-shrink:0;margin-left:14px;">✦ Send RelvBits</button>` : ""}
         </div>`;
-      card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${film.project_id}`; });
-      scroll.appendChild(card);
+    }
+  }
+
+  container.innerHTML = `
+    <span class="status-pill ${project.status}">${escapeHtml(project.status)}</span>
+    <div class="project-title">${escapeHtml(project.title)}</div>
+    <p class="project-logline">${escapeHtml(project.logline || "")}</p>
+    <div class="project-meta">${escapeHtml(project.genre || "Unspecified genre")}</div>
+
+    ${filmHtml}
+
+    ${isCreator && project.status !== "released" ? `<div class="status-actions" id="statusActions"></div>` : ""}
+    ${isCreator && project.status === "post" ? `<div class="panel" id="submitFilmPanel"></div>` : ""}
+
+    <div class="panel">
+      <h3>Roles</h3>
+      <div class="sub">${isCreator ? "Add roles you need filled." : "Request to join a role below."}</div>
+      <div id="rolesList"><div class="empty-msg">Loading...</div></div>
+      ${isCreator ? `
+        <div class="field-row" style="display:flex;gap:10px;margin-top:16px;">
+          <input type="text" id="newRoleName" placeholder="Role (e.g. Editor)" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <button class="btn gold" id="addRoleBtn">Add role</button>
+        </div>` : ""}
+    </div>
+
+    ${isCreator ? `<div class="panel"><h3>Join Requests</h3><div id="requestsList"><div class="empty-msg">Loading...</div></div></div>` : ""}
+
+    <div class="panel">
+      <h3>Collaborators</h3>
+      <div id="collabList"><div class="empty-msg">Loading...</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Discussion</h3>
+      <div class="discussion-list" id="discussionList"><div class="empty-msg">Loading...</div></div>
+      <div class="discussion-input-row">
+        <textarea id="discussionInput" placeholder="Say something to the team..."></textarea>
+        <button id="discussionSendBtn">Send</button>
+      </div>
+    </div>
+  `;
+
+  if (isCreator && project.status !== "released") renderStatusActions();
+  if (isCreator && project.status === "post") renderSubmitFilmPanel();
+
+  await loadRoles();
+  if (isCreator) await loadRequests();
+  await loadCollaborators();
+  await loadDiscussion();
+  listenForDiscussionRealtime();
+
+  document.getElementById("discussionSendBtn").addEventListener("click", sendDiscussionMessage);
+
+  const relvbitsBtn = document.getElementById("sendRelvbitsBtn");
+  if (relvbitsBtn) relvbitsBtn.addEventListener("click", () => {
+    document.getElementById("relvbitsError").classList.remove("show");
+    document.getElementById("relvbitsModal").classList.add("open");
+  });
+
+  if (pendingFilm){
+    await maybeShowFilmAd();
+    document.getElementById("filmPlayerSlot").innerHTML = `<iframe src="https://drive.google.com/file/d/${pendingFilm.drive_file_id}/preview" allow="autoplay" allowfullscreen></iframe>`;
+  }
+}
+
+async function maybeShowFilmAd(){
+  const { data: ads } = await supabaseClient.rpc("get_ad_to_serve");
+  if (!ads || ads.length === 0) return;
+
+  const ad = ads[0];
+  const overlay = document.getElementById("adOverlay");
+  const skipBtn = document.getElementById("adSkipBtn");
+  const countdownEl = document.getElementById("adSkipCountdown");
+
+  document.getElementById("adAdvertiserName").textContent = ad.advertiser_name;
+  overlay.classList.add("open");
+
+  let mediaEl;
+  if (ad.creative_type === "video"){
+    mediaEl = document.getElementById("adVideo");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  } else {
+    mediaEl = document.getElementById("adImage");
+    mediaEl.src = ad.creative_url;
+    mediaEl.style.display = "block";
+  }
+
+  if (ad.click_url){
+    mediaEl.style.cursor = "pointer";
+    mediaEl.addEventListener("click", async () => {
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: false, was_clicked: true });
+      window.open(ad.click_url, "_blank");
     });
+  }
+
+  return new Promise((resolve) => {
+    let remaining = ad.skip_after_seconds;
+    countdownEl.textContent = remaining;
+
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        clearInterval(interval);
+        skipBtn.disabled = false;
+        skipBtn.innerHTML = "Skip Ad ×";
+      } else {
+        countdownEl.textContent = remaining;
+      }
+    }, 1000);
+
+    const finishAd = async (wasSkipped) => {
+      clearInterval(interval);
+      if (mediaEl.tagName === "VIDEO") mediaEl.pause();
+      overlay.classList.remove("open");
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: wasSkipped, was_clicked: false });
+      resolve();
+    };
+
+    skipBtn.addEventListener("click", () => { if (!skipBtn.disabled) finishAd(true); });
+    if (mediaEl.tagName === "VIDEO") mediaEl.addEventListener("ended", () => finishAd(false));
   });
 }
 
-let allOpenProjects = [];
+function renderStatusActions(){
+  const stages = ["development", "production", "post", "released"];
+  const currentIndex = stages.indexOf(project.status);
+  const nextStage = stages[currentIndex + 1];
+  if (!nextStage) return;
 
-async function renderCollaborate(){
-  const container = document.getElementById("viewContainer");
-  container.innerHTML = `<div class="loading-state">Loading projects...</div>`;
-
-  const { data: projects, error } = await supabaseClient
-    .from("studios_projects")
-    .select("*, studios_roles(id, role_name, filled)")
-    .neq("status", "released")
-    .order("created_at", { ascending:false });
-
-  if (error){
-    container.innerHTML = `<div class="project-grid"><div class="empty-state"><h4>Couldn't load projects</h4></div></div>`;
-    return;
-  }
-
-  allOpenProjects = projects || [];
-  populateGenreFilter(allOpenProjects);
-  filterAndRenderProjects();
+  const el = document.getElementById("statusActions");
+  el.innerHTML = `<button class="btn gold" id="advanceStatusBtn">Move to "${nextStage}"</button>`;
+  document.getElementById("advanceStatusBtn").addEventListener("click", async () => {
+    if (nextStage === "released"){
+      alert('Submit the film below to move to "released" — it happens automatically once you submit.');
+      return;
+    }
+    const { error } = await supabaseClient.from("studios_projects").update({ status: nextStage }).eq("id", project.id);
+    if (error){ alert("Couldn't update status."); return; }
+    project.status = nextStage;
+    render();
+  });
 }
 
-function populateGenreFilter(projects){
-  const select = document.getElementById("discoveryGenre");
-  const currentValue = select.value;
-  const genres = [...new Set(projects.map(p => (p.genre || "").trim()).filter(Boolean))].sort();
+function renderSubmitFilmPanel(){
+  const el = document.getElementById("submitFilmPanel");
+  el.innerHTML = `
+    <h3>Submit the finished film</h3>
+    <div style="display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:4px 10px;border-radius:999px;margin-bottom:12px;">
+      ▶ POWERED BY GOOGLE DRIVE
+    </div>
+    <div class="sub">Paste a Google Drive share link — that's what actually hosts and streams your film, so make sure sharing is set to "Anyone with the link" before submitting.</div>
+    <div class="field"><label>Google Drive link</label><input type="text" id="driveLink" placeholder="https://drive.google.com/file/d/..."></div>
+    <div class="field"><label>Description</label><textarea id="filmDescription" placeholder="What's this short about?"></textarea></div>
+    <div class="field"><label>Cover image URL (optional)</label><input type="text" id="filmCover" placeholder="https://..."></div>
+    <button class="btn gold" id="submitFilmBtn">Submit &amp; release</button>
+    <div class="empty-msg" id="submitFilmStatus"></div>
+  `;
 
-  select.innerHTML = `<option value="">All genres</option>` + genres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
-  select.value = currentValue;
-}
+  document.getElementById("submitFilmBtn").addEventListener("click", async () => {
+    const link = document.getElementById("driveLink").value.trim();
+    const description = document.getElementById("filmDescription").value.trim();
+    const cover_url = document.getElementById("filmCover").value.trim() || null;
+    const statusEl = document.getElementById("submitFilmStatus");
 
-function filterAndRenderProjects(){
-  const container = document.getElementById("viewContainer");
-  const countEl = document.getElementById("discoveryCount");
-
-  const query = document.getElementById("discoverySearch").value.trim().toLowerCase();
-  const genreFilter = document.getElementById("discoveryGenre").value;
-  const openRolesOnly = document.getElementById("discoveryOpenRolesOnly").checked;
-
-  let filtered = allOpenProjects.filter(project => {
-    const roles = project.studios_roles || [];
-    const openRoleCount = roles.filter(r => !r.filled).length;
-
-    if (genreFilter && (project.genre || "") !== genreFilter) return false;
-    if (openRolesOnly && openRoleCount === 0) return false;
-
-    if (query){
-      const roleNames = roles.map(r => (r.role_name || "").toLowerCase()).join(" ");
-      const haystack = `${project.title || ""} ${project.logline || ""} ${project.genre || ""} ${project.looking_for || ""} ${roleNames}`.toLowerCase();
-      if (!haystack.includes(query)) return false;
+    const drive_file_id = extractDriveFileId(link);
+    if (!drive_file_id){
+      statusEl.textContent = "Couldn't read a file ID from that link — double check it's a real Drive share link.";
+      return;
     }
 
-    return true;
+    const btn = document.getElementById("submitFilmBtn");
+    btn.disabled = true; btn.textContent = "Submitting...";
+
+    const { error: filmError } = await supabaseClient.from("studios_films").insert({
+      project_id: project.id, title: project.title, description, drive_file_id, cover_url
+    });
+
+    if (filmError){
+      statusEl.textContent = "Couldn't submit film: " + filmError.message;
+      btn.disabled = false; btn.textContent = "Submit & release";
+      return;
+    }
+
+    await supabaseClient.from("studios_projects").update({ status: "released" }).eq("id", project.id);
+    project.status = "released";
+    render();
   });
+}
 
-  countEl.textContent = `${filtered.length} project${filtered.length === 1 ? "" : "s"}`;
+async function loadRoles(){
+  const list = document.getElementById("rolesList");
+  const { data: roles } = await supabaseClient.from("studios_roles").select("*").eq("project_id", project.id).order("created_at", { ascending:true });
 
-  if (filtered.length === 0){
-    container.innerHTML = `
-      <div class="project-grid">
-        <div class="empty-state">
-          <h4>${allOpenProjects.length === 0 ? "No open projects right now" : "Nothing matches your search"}</h4>
-          <p>${allOpenProjects.length === 0 ? "Be the first to start one." : "Try a different keyword, genre, or clear the open-roles filter."}</p>
-        </div>
-      </div>`;
+  if (!roles || roles.length === 0){
+    list.innerHTML = `<div class="empty-msg">No roles listed yet.</div>`;
     return;
   }
 
-  const grid = document.createElement("div");
-  grid.className = "project-grid";
-  filtered.forEach(project => {
-    const openRoles = (project.studios_roles || []).filter(r => !r.filled).length;
-    const card = document.createElement("div");
-    card.className = "project-card";
-    card.innerHTML = `
-      <span class="project-status ${project.status}">${escapeHtml(project.status)}</span>
-      <div class="project-title">${escapeHtml(project.title)}</div>
-      <div class="project-logline">${escapeHtml(project.logline || "No logline yet.")}</div>
-      <div class="project-footer">
-        <span>${escapeHtml(project.genre || "Unspecified genre")}</span>
-        <span>${openRoles} open role${openRoles === 1 ? "" : "s"}</span>
+  list.innerHTML = "";
+  roles.forEach(role => {
+    const row = document.createElement("div");
+    row.className = "role-row";
+    row.innerHTML = `
+      <div>
+        <div class="role-name">${escapeHtml(role.role_name)}</div>
+        ${role.description ? `<div class="role-desc">${escapeHtml(role.description)}</div>` : ""}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="role-status ${role.filled ? "filled" : "open"}">${role.filled ? "Filled" : "Open"}</span>
+        ${!role.filled && !isCreator ? `<button class="btn sm" data-request-role="${role.id}">Request</button>` : ""}
       </div>`;
-    card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${project.id}`; });
-    grid.appendChild(card);
+    const requestBtn = row.querySelector("[data-request-role]");
+    if (requestBtn) requestBtn.addEventListener("click", () => requestToJoin(role.id));
+    list.appendChild(row);
   });
-
-  container.innerHTML = "";
-  container.appendChild(grid);
 }
 
-async function createProject(){
-  const title = document.getElementById("projectTitle").value.trim();
-  const logline = document.getElementById("projectLogline").value.trim();
-  const genre = document.getElementById("projectGenre").value.trim();
+document.addEventListener("click", (e) => {}); // placeholder to keep structure consistent
 
-  if (!title){ alert("Enter a title."); return; }
-
-  const { data, error } = await supabaseClient
-    .from("studios_projects")
-    .insert({ creator_id: currentUser.id, title, logline, genre })
-    .select().single();
-
-  if (error){ console.error(error); alert("Couldn't create project."); return; }
-
-  window.location.href = `studios-project.html?id=${data.id}`;
+async function requestToJoin(roleId){
+  const message = prompt("Optional message to the project creator:", "");
+  const { error } = await supabaseClient.from("studios_join_requests").insert({
+    project_id: project.id, role_id: roleId, user_id: currentUser.id, message: message || null
+  });
+  if (error){ alert("Couldn't send request: " + error.message); return; }
+  alert("Request sent.");
 }
+
+async function loadRequests(){
+  const list = document.getElementById("requestsList");
+  const { data: requests } = await supabaseClient
+    .from("studios_join_requests")
+    .select("*, studios_roles(role_name)")
+    .eq("project_id", project.id).eq("status", "pending")
+    .order("created_at", { ascending:false });
+
+  if (!requests || requests.length === 0){
+    list.innerHTML = `<div class="empty-msg">No pending requests.</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(requests.map(r => r.user_id))];
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  list.innerHTML = "";
+  requests.forEach(req => {
+    const row = document.createElement("div");
+    row.className = "request-row";
+    row.innerHTML = `
+      <div><strong>${escapeHtml(nameById[req.user_id] || "Unknown")}</strong> wants to join${req.studios_roles ? ` as <strong>${escapeHtml(req.studios_roles.role_name)}</strong>` : ""}</div>
+      ${req.message ? `<div class="request-msg">"${escapeHtml(req.message)}"</div>` : ""}
+      <div class="request-actions">
+        <button class="btn sm gold" data-accept>Accept</button>
+        <button class="btn sm danger" data-decline>Decline</button>
+      </div>`;
+    row.querySelector("[data-accept]").addEventListener("click", () => respondToRequest(req, "accepted"));
+    row.querySelector("[data-decline]").addEventListener("click", () => respondToRequest(req, "declined"));
+    list.appendChild(row);
+  });
+}
+
+async function respondToRequest(req, status){
+  await supabaseClient.from("studios_join_requests").update({ status }).eq("id", req.id);
+
+  if (status === "accepted"){
+    await supabaseClient.from("studios_collaborators").insert({
+      project_id: project.id, user_id: req.user_id, role_name: req.studios_roles?.role_name || null
+    });
+    if (req.role_id){
+      await supabaseClient.from("studios_roles").update({ filled: true, filled_by: req.user_id }).eq("id", req.role_id);
+    }
+  }
+
+  await loadRequests();
+  await loadRoles();
+  await loadCollaborators();
+}
+
+async function loadCollaborators(){
+  const list = document.getElementById("collabList");
+  const { data: collabs } = await supabaseClient.from("studios_collaborators").select("*").eq("project_id", project.id);
+
+  const { data: creatorProfile } = await supabaseClient.from("profiles").select("display_name, username").eq("id", project.creator_id).maybeSingle();
+
+  list.innerHTML = "";
+
+  const creatorRow = document.createElement("div");
+  creatorRow.className = "collab-row";
+  creatorRow.innerHTML = `<span>${escapeHtml(creatorProfile?.display_name || creatorProfile?.username || "Unknown")}</span><span class="collab-role">Creator</span>`;
+  list.appendChild(creatorRow);
+
+  if (!collabs || collabs.length === 0) return;
+
+  const userIds = collabs.map(c => c.user_id);
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  collabs.forEach(c => {
+    const row = document.createElement("div");
+    row.className = "collab-row";
+    row.innerHTML = `<span>${escapeHtml(nameById[c.user_id] || "Unknown")}</span><span class="collab-role">${escapeHtml(c.role_name || "Collaborator")}</span>`;
+    list.appendChild(row);
+  });
+}
+
+document.getElementById("container").addEventListener("click", (e) => {
+  if (e.target.id === "addRoleBtn"){
+    const input = document.getElementById("newRoleName");
+    const name = input.value.trim();
+    if (!name) return;
+    supabaseClient.from("studios_roles").insert({ project_id: project.id, role_name: name }).then(() => {
+      input.value = "";
+      loadRoles();
+    });
+  }
+});
+
+async function loadDiscussion(){
+  const list = document.getElementById("discussionList");
+  const { data: messages } = await supabaseClient
+    .from("studios_comments").select("*").eq("project_id", project.id).order("created_at", { ascending:true }).limit(200);
+
+  if (!messages || messages.length === 0){
+    list.innerHTML = `<div class="empty-msg">No messages yet.</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(messages.map(m => m.user_id))];
+  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", userIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+
+  list.innerHTML = "";
+  messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "discussion-msg";
+    div.innerHTML = `<strong>${escapeHtml(nameById[m.user_id] || "Unknown")}</strong> ${escapeHtml(m.content)}<span class="discussion-time">${timeAgo(m.created_at)}</span>`;
+    list.appendChild(div);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+async function sendDiscussionMessage(){
+  const input = document.getElementById("discussionInput");
+  const content = input.value.trim();
+  if (!content) return;
+  const { error } = await supabaseClient.from("studios_comments").insert({ project_id: project.id, user_id: currentUser.id, content });
+  if (error){ alert("Couldn't send message."); return; }
+  input.value = "";
+  await loadDiscussion();
+}
+
+function listenForDiscussionRealtime(){
+  supabaseClient
+    .channel(`studios-project-${project.id}`)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"studios_comments", filter:`project_id=eq.${project.id}` }, () => loadDiscussion())
+    .subscribe();
+}
+
+// ==========================================================
+// RELVBITS (tipping filmmakers)
+// ==========================================================
+let selectedRelvbitsAmountCents = 500;
+
+document.getElementById("amountGrid").querySelectorAll(".amount-option").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedRelvbitsAmountCents = parseInt(btn.dataset.amount, 10);
+    document.getElementById("customAmount").value = "";
+  });
+});
+document.getElementById("customAmount").addEventListener("input", () => {
+  document.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+  const dollars = parseFloat(document.getElementById("customAmount").value);
+  selectedRelvbitsAmountCents = isFinite(dollars) ? Math.round(dollars * 100) : 0;
+});
+document.getElementById("relvbitsCancelBtn").addEventListener("click", () => document.getElementById("relvbitsModal").classList.remove("open"));
+document.getElementById("relvbitsModal").addEventListener("click", (e) => { if (e.target.id === "relvbitsModal") e.target.classList.remove("open"); });
+
+document.getElementById("relvbitsConfirmBtn").addEventListener("click", async () => {
+  const errorEl = document.getElementById("relvbitsError");
+  errorEl.classList.remove("show");
+
+  if (!selectedRelvbitsAmountCents || selectedRelvbitsAmountCents < 100 || selectedRelvbitsAmountCents > 100000){
+    errorEl.textContent = "Choose an amount between $1 and $1,000.";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  const btn = document.getElementById("relvbitsConfirmBtn");
+  btn.disabled = true; btn.textContent = "Redirecting to payment...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/create-studios-relvbits-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({
+        creatorId: project.creator_id,
+        amountCents: selectedRelvbitsAmountCents,
+        message: document.getElementById("relvbitsMessage").value.trim(),
+        isAnonymous: document.getElementById("relvbitsAnon").checked,
+        studiosProjectId: project.id,
+      }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.checkoutUrl){
+      errorEl.textContent = result.error || "Couldn't start checkout.";
+      errorEl.classList.add("show");
+      btn.disabled = false; btn.textContent = "Continue to payment";
+      return;
+    }
+    window.location.href = result.checkoutUrl;
+  } catch (err){
+    console.error(err);
+    errorEl.textContent = "Couldn't reach the server.";
+    errorEl.classList.add("show");
+    btn.disabled = false; btn.textContent = "Continue to payment";
+  }
+});
 
 initialize();
 </script>
