@@ -61,57 +61,70 @@ img{ max-width:100%; display:block; }
 
 /* CINEMA MARQUEE HEADER */
 .marquee{
-  position:relative; text-align:center; padding:56px 24px 40px; margin-bottom:8px; overflow:hidden;
+  position:relative; text-align:center; padding:64px 24px 44px; margin-bottom:8px; overflow:hidden;
 }
-.marquee::before, .marquee::after{
-  content:""; position:absolute; top:0; bottom:0; width:26px;
-  background-image: repeating-linear-gradient(to bottom, #000 0px, #000 14px, transparent 14px, transparent 26px);
-  background-color:#141210; opacity:.55;
+.marquee::before{
+  content:""; position:absolute; top:-30%; left:50%; transform:translateX(-50%);
+  width:900px; height:500px; pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(217,169,75,.09), transparent 65%);
 }
-.marquee::before{ left:0; border-right:1px solid var(--border); }
-.marquee::after{ right:0; border-left:1px solid var(--border); }
 .marquee-eyebrow{
-  display:inline-flex; align-items:center; gap:10px; font-size:11px; letter-spacing:4px; color:var(--gold);
-  text-transform:uppercase; font-weight:800; margin-bottom:16px;
+  display:inline-flex; align-items:center; gap:10px; font-size:10.5px; letter-spacing:4px; color:var(--muted);
+  text-transform:uppercase; font-weight:700; margin-bottom:18px; position:relative;
 }
-.marquee-eyebrow .dash{ width:22px; height:1px; background:var(--gold-end); }
+.marquee-eyebrow .dash{ width:18px; height:1px; background:var(--border); }
 .marquee-title{
-  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:clamp(38px,5.4vw,64px);
-  line-height:1.05; letter-spacing:-.01em;
-  background:linear-gradient(180deg,#fdf3d8 0%,var(--gold-start) 45%,var(--gold-end) 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  text-shadow:0 0 40px rgba(242,199,102,.25);
+  font-family:var(--font-display); font-style:italic; font-weight:600; font-size:clamp(34px,5vw,58px);
+  line-height:1.08; letter-spacing:-.01em; color:var(--text); opacity:.94; position:relative;
 }
-.marquee-sub{ color:var(--muted); font-size:14px; margin-top:14px; max-width:480px; margin-left:auto; margin-right:auto; }
-.marquee-divider{ width:140px; height:1px; background:linear-gradient(90deg,transparent,var(--gold-end),transparent); margin:26px auto 0; }
+.marquee-title em{
+  font-style:italic;
+  background:linear-gradient(180deg,rgba(253,243,216,.85) 0%,rgba(217,169,75,.65) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.marquee-sub{ color:var(--muted-soft); font-size:13.5px; margin-top:16px; max-width:440px; margin-left:auto; margin-right:auto; position:relative; }
+.marquee-divider{ display:none; }
 
-.tabs{ display:flex; gap:6px; margin-bottom:30px; background:var(--surface-light); border:1px solid var(--border); border-radius:14px; padding:5px; max-width:340px; }
+.tabs{ display:flex; gap:6px; margin-bottom:30px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:5px; max-width:340px; backdrop-filter:blur(10px); }
 .tab{ flex:1; text-align:center; padding:10px; border-radius:10px; font-size:13px; font-weight:700; color:var(--muted); }
 .tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
 .tab:not(.active):hover{ color:white; }
 
 .film-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
-.film-card{ cursor:pointer; }
+.film-card{ cursor:pointer; position:relative; z-index:1; }
+.film-card:hover{ z-index:3; }
 .film-thumb{
   aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
-  border-radius:16px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
-  transition:transform .25s, box-shadow .25s;
+  border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
+  transition:transform .25s ease, box-shadow .25s ease, border-radius .25s ease;
 }
-.film-card:hover .film-thumb{ transform:translateY(-4px); box-shadow:0 20px 40px -12px rgba(217,169,75,.3); border-color:var(--gold-end); }
+.film-card:hover .film-thumb{
+  transform:scale(1.12); box-shadow:0 24px 50px -14px rgba(0,0,0,.7), 0 0 0 1px rgba(217,169,75,.3), 0 0 30px -6px rgba(217,169,75,.15);
+  border-radius:10px 10px 0 0;
+}
 .film-thumb img{ width:100%; height:100%; object-fit:cover; }
 .film-thumb .play-icon{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px;
-  color:var(--gold); background:rgba(0,0,0,0); transition:.2s;
+  color:var(--gold); background:rgba(0,0,0,0); opacity:0; transition:opacity .2s;
 }
-.film-card:hover .play-icon{ background:rgba(0,0,0,.35); }
+.film-card:hover .play-icon{ opacity:1; background:rgba(0,0,0,.35); }
+.film-hover-panel{
+  max-height:0; overflow:hidden; opacity:0; transform:scaleX(1.12); transform-origin:top center;
+  background:rgba(15,12,8,.85); backdrop-filter:blur(16px); border:1px solid rgba(217,169,75,.25); border-top:none; border-radius:0 0 10px 10px;
+  transition:max-height .25s ease, opacity .2s ease .05s; box-shadow:0 24px 50px -14px rgba(0,0,0,.7);
+}
+.film-card:hover .film-hover-panel{ max-height:90px; opacity:1; }
+.film-hover-inner{ padding:12px 14px; }
 .film-title{ font-size:14.5px; font-weight:700; margin-bottom:3px; }
 .film-meta{ font-size:12px; color:var(--muted); }
+.film-hover-genre{ font-size:11px; color:var(--gold); font-weight:700; margin-top:6px; opacity:.85; }
 
 .project-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
 .project-card{
-  background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:20px; cursor:pointer; transition:border-color .2s;
+  background:rgba(255,255,255,.02); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.06);
+  border-radius:18px; padding:20px; cursor:pointer; transition:border-color .2s, background .2s;
 }
-.project-card:hover{ border-color:var(--gold-end); }
+.project-card:hover{ border-color:rgba(217,169,75,.35); background:rgba(217,169,75,.03); }
 .project-status{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:999px; margin-bottom:12px; }
 .project-status.development{ background:rgba(217,169,75,.15); color:var(--gold); }
 .project-status.production{ background:rgba(224,87,79,.15); color:#f2a8a3; }
@@ -148,47 +161,67 @@ img{ max-width:100%; display:block; }
 /* DISCOVERY / SEARCH */
 .discovery-bar{ display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; align-items:center; }
 .discovery-search{
-  flex:1; min-width:220px; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  flex:1; min-width:220px; background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07); border-radius:12px;
   padding:11px 16px; color:white; font-size:13.5px;
 }
-.discovery-search:focus{ outline:none; border-color:var(--gold); }
+.discovery-search:focus{ outline:none; border-color:rgba(217,169,75,.4); }
 .discovery-select{
-  background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07); border-radius:12px;
   padding:11px 14px; color:white; font-size:13px; min-width:150px;
 }
 .discovery-toggle{
-  display:flex; align-items:center; gap:8px; background:var(--surface-light); border:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.03); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.07);
   border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--muted); cursor:pointer; white-space:nowrap;
 }
 .discovery-toggle input{ accent-color:var(--gold); }
 .discovery-count{ font-size:12.5px; color:var(--muted-soft); margin-bottom:14px; }
 
-/* WATCH HOMEPAGE */
+/* WATCH HOMEPAGE — full-bleed hero, breaks out of the container */
 .watch-hero{
-  position:relative; border-radius:22px; overflow:hidden; margin-bottom:36px; border:1px solid var(--border);
-  aspect-ratio:21/8; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
-  box-shadow:0 30px 80px -20px rgba(217,169,75,.18);
+  position:relative; overflow:hidden;
+  width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
+  margin-top:-20px; margin-bottom:44px;
+  aspect-ratio:16/7; min-height:340px;
+  background:linear-gradient(135deg,#100d09,#050403 55%,#0c0a06);
 }
-.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.55; }
+.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.4; filter:saturate(.85); }
 .watch-hero-overlay{
   position:absolute; inset:0;
   background:
-    radial-gradient(ellipse 700px 400px at 20% 100%, rgba(217,169,75,.16), transparent 60%),
-    linear-gradient(0deg, rgba(5,4,3,.97) 15%, rgba(5,4,3,.3) 65%, transparent 100%);
-  display:flex; flex-direction:column; justify-content:flex-end; padding:34px;
+    radial-gradient(ellipse 900px 500px at 12% 100%, rgba(217,169,75,.09), transparent 62%),
+    linear-gradient(90deg, rgba(5,4,3,.97) 22%, rgba(5,4,3,.65) 58%, transparent 95%),
+    linear-gradient(0deg, var(--background) 0%, rgba(5,4,3,.85) 20%, transparent 60%);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:56px max(24px, calc((100vw - 1200px) / 2 + 24px)) 52px;
 }
-.watch-hero-eyebrow{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
-.watch-hero-title{ font-family:var(--font-display); font-size:clamp(26px,3.6vw,42px); font-weight:600; margin-bottom:10px; max-width:640px; }
-.watch-hero-meta{ font-size:13px; color:var(--muted); margin-bottom:18px; }
+.watch-hero-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:14px; }
+.watch-hero-title{
+  font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.4vw,54px); line-height:1.05;
+  margin-bottom:14px; max-width:600px; text-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+.watch-hero-meta{ font-size:13.5px; color:#d8d0c0; margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+.watch-hero-meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--muted); }
 .watch-hero-actions{ display:flex; gap:12px; }
-.watch-hero-btn{ font-size:13.5px; font-weight:800; padding:12px 24px; border-radius:12px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.watch-hero-btn{
+  font-size:14px; font-weight:800; padding:13px 28px; border-radius:10px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; display:flex; align-items:center; gap:8px;
+}
 .watch-hero-btn:hover{ opacity:.88; }
+.watch-hero-btn.ghost{ background:rgba(255,255,255,.12); color:white; backdrop-filter:blur(6px); }
+.watch-hero-btn.ghost:hover{ background:rgba(255,255,255,.2); opacity:1; }
 
-.genre-row{ margin-bottom:34px; }
+/* GENRE ROWS */
+.genre-row{ margin-bottom:38px; position:relative; }
 .genre-row-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
-.genre-row-scroll{ display:flex; gap:16px; overflow-x:auto; padding-bottom:6px; }
+.genre-row-wrap{ position:relative; }
+.genre-row-wrap::before, .genre-row-wrap::after{
+  content:""; position:absolute; top:0; bottom:6px; width:50px; z-index:2; pointer-events:none;
+}
+.genre-row-wrap::before{ left:0; background:linear-gradient(90deg, var(--background) 0%, transparent 100%); }
+.genre-row-wrap::after{ right:0; background:linear-gradient(270deg, var(--background) 0%, transparent 100%); }
+.genre-row-scroll{ display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-behavior:smooth; }
 .genre-row-scroll::-webkit-scrollbar{ display:none; }
-.genre-row-scroll .film-card{ min-width:220px; flex-shrink:0; }
+.genre-row-scroll .film-card{ min-width:230px; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -203,10 +236,9 @@ img{ max-width:100%; display:block; }
 
 <div class="container">
   <div class="marquee">
-    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios Presents<span class="dash"></span></div>
-    <div class="marquee-title">Where stories<br>get made.</div>
+    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
+    <div class="marquee-title">Where <em>stories</em><br>get made.</div>
     <p class="marquee-sub">Original short films, collaborated on from first draft to premiere — made and streamed right here.</p>
-    <div class="marquee-divider"></div>
   </div>
 
   <div class="tabs">
@@ -319,7 +351,7 @@ async function renderWatch(){
 
   const { data: films, error } = await supabaseClient
     .from("studios_films")
-    .select("*, studios_projects(title, genre, creator_id)")
+    .select("*, studios_projects(title, genre, creator_id, logline)")
     .order("released_at", { ascending:false });
 
   if (error || !films || films.length === 0){
@@ -340,21 +372,27 @@ async function renderWatch(){
 
   container.innerHTML = "";
 
-  // HERO — most recent release.
+  // HERO — most recent release, full-bleed with Play + More Info.
   const featured = films[0];
   const hero = document.createElement("div");
   hero.className = "watch-hero";
   hero.innerHTML = `
     ${featured.cover_url ? `<img src="${featured.cover_url}">` : ""}
     <div class="watch-hero-overlay">
-      <div class="watch-hero-eyebrow">Latest Release</div>
+      <div class="watch-hero-eyebrow">✦ Latest Release</div>
       <div class="watch-hero-title">${escapeHtml(featured.title)}</div>
-      <div class="watch-hero-meta">${escapeHtml(featured.studios_projects?.genre || "Short Film")} · By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")} · ${featured.view_count || 0} views</div>
+      <div class="watch-hero-meta">
+        <span>${escapeHtml(featured.studios_projects?.genre || "Short Film")}</span><span class="dot"></span>
+        <span>By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")}</span><span class="dot"></span>
+        <span>${featured.view_count || 0} views</span>
+      </div>
       <div class="watch-hero-actions">
-        <button class="watch-hero-btn" id="heroWatchBtn">▶ Watch Now</button>
+        <button class="watch-hero-btn" id="heroWatchBtn">▶ Play</button>
+        <button class="watch-hero-btn ghost" id="heroInfoBtn">ⓘ More Info</button>
       </div>
     </div>`;
   hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `studios-project.html?id=${featured.project_id}`; });
+  hero.querySelector("#heroInfoBtn").addEventListener("click", () => { window.location.href = `studios-project.html?id=${featured.project_id}`; });
   container.appendChild(hero);
 
   // GENRE ROWS
@@ -368,7 +406,9 @@ async function renderWatch(){
   Object.keys(byGenre).forEach(genre => {
     const row = document.createElement("div");
     row.className = "genre-row";
-    row.innerHTML = `<div class="genre-row-title">${escapeHtml(genre)}</div><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div>`;
+    row.innerHTML = `
+      <div class="genre-row-title">${escapeHtml(genre)}</div>
+      <div class="genre-row-wrap"><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div></div>`;
     container.appendChild(row);
 
     const scroll = row.querySelector(".genre-row-scroll");
@@ -380,8 +420,13 @@ async function renderWatch(){
           ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
           <div class="play-icon">&#9654;</div>
         </div>
-        <div class="film-title">${escapeHtml(film.title)}</div>
-        <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>`;
+        <div class="film-hover-panel">
+          <div class="film-hover-inner">
+            <div class="film-title">${escapeHtml(film.title)}</div>
+            <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>
+            <div class="film-hover-genre">${escapeHtml(film.studios_projects?.genre || "Short Film")}</div>
+          </div>
+        </div>`;
       card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${film.project_id}`; });
       scroll.appendChild(card);
     });
