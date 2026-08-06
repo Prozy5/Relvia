@@ -20,12 +20,17 @@
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
 body{
-  color:var(--text); min-height:100vh;
+  color:var(--text); min-height:100vh; position:relative;
   background:
-    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,169,75,.10), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(185,131,47,.06), transparent 55%),
-    var(--background);
+    radial-gradient(ellipse 1000px 700px at 50% -10%, rgba(217,169,75,.14), transparent 60%),
+    radial-gradient(ellipse 600px 900px at -5% 40%, rgba(185,131,47,.08), transparent 55%),
+    radial-gradient(ellipse 600px 900px at 105% 60%, rgba(185,131,47,.08), transparent 55%),
+    #050403;
   background-attachment:fixed;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 a{ text-decoration:none; color:inherit; }
 button, input, textarea, select{ font-family:inherit; }
@@ -54,6 +59,32 @@ img{ max-width:100%; display:block; }
 .page-title{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:8px; }
 .page-sub{ color:var(--muted); font-size:14px; margin-bottom:28px; }
 
+/* CINEMA MARQUEE HEADER */
+.marquee{
+  position:relative; text-align:center; padding:56px 24px 40px; margin-bottom:8px; overflow:hidden;
+}
+.marquee::before, .marquee::after{
+  content:""; position:absolute; top:0; bottom:0; width:26px;
+  background-image: repeating-linear-gradient(to bottom, #000 0px, #000 14px, transparent 14px, transparent 26px);
+  background-color:#141210; opacity:.55;
+}
+.marquee::before{ left:0; border-right:1px solid var(--border); }
+.marquee::after{ right:0; border-left:1px solid var(--border); }
+.marquee-eyebrow{
+  display:inline-flex; align-items:center; gap:10px; font-size:11px; letter-spacing:4px; color:var(--gold);
+  text-transform:uppercase; font-weight:800; margin-bottom:16px;
+}
+.marquee-eyebrow .dash{ width:22px; height:1px; background:var(--gold-end); }
+.marquee-title{
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:clamp(38px,5.4vw,64px);
+  line-height:1.05; letter-spacing:-.01em;
+  background:linear-gradient(180deg,#fdf3d8 0%,var(--gold-start) 45%,var(--gold-end) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:0 0 40px rgba(242,199,102,.25);
+}
+.marquee-sub{ color:var(--muted); font-size:14px; margin-top:14px; max-width:480px; margin-left:auto; margin-right:auto; }
+.marquee-divider{ width:140px; height:1px; background:linear-gradient(90deg,transparent,var(--gold-end),transparent); margin:26px auto 0; }
+
 .tabs{ display:flex; gap:6px; margin-bottom:30px; background:var(--surface-light); border:1px solid var(--border); border-radius:14px; padding:5px; max-width:340px; }
 .tab{ flex:1; text-align:center; padding:10px; border-radius:10px; font-size:13px; font-weight:700; color:var(--muted); }
 .tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
@@ -64,7 +95,9 @@ img{ max-width:100%; display:block; }
 .film-thumb{
   aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
   border-radius:16px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
+  transition:transform .25s, box-shadow .25s;
 }
+.film-card:hover .film-thumb{ transform:translateY(-4px); box-shadow:0 20px 40px -12px rgba(217,169,75,.3); border-color:var(--gold-end); }
 .film-thumb img{ width:100%; height:100%; object-fit:cover; }
 .film-thumb .play-icon{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px;
@@ -134,9 +167,16 @@ img{ max-width:100%; display:block; }
 .watch-hero{
   position:relative; border-radius:22px; overflow:hidden; margin-bottom:36px; border:1px solid var(--border);
   aspect-ratio:21/8; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+  box-shadow:0 30px 80px -20px rgba(217,169,75,.18);
 }
 .watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.55; }
-.watch-hero-overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,8,6,.95) 10%, transparent 70%); display:flex; flex-direction:column; justify-content:flex-end; padding:34px; }
+.watch-hero-overlay{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 700px 400px at 20% 100%, rgba(217,169,75,.16), transparent 60%),
+    linear-gradient(0deg, rgba(5,4,3,.97) 15%, rgba(5,4,3,.3) 65%, transparent 100%);
+  display:flex; flex-direction:column; justify-content:flex-end; padding:34px;
+}
 .watch-hero-eyebrow{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
 .watch-hero-title{ font-family:var(--font-display); font-size:clamp(26px,3.6vw,42px); font-weight:600; margin-bottom:10px; max-width:640px; }
 .watch-hero-meta{ font-size:13px; color:var(--muted); margin-bottom:18px; }
@@ -162,8 +202,12 @@ img{ max-width:100%; display:block; }
 </header>
 
 <div class="container">
-  <div class="page-title">Relvia Studios</div>
-  <div class="page-sub">Where filmmakers collaborate on short films, from first idea to premiere.</div>
+  <div class="marquee">
+    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios Presents<span class="dash"></span></div>
+    <div class="marquee-title">Where stories<br>get made.</div>
+    <p class="marquee-sub">Original short films, collaborated on from first draft to premiere — made and streamed right here.</p>
+    <div class="marquee-divider"></div>
+  </div>
 
   <div class="tabs">
     <div class="tab active" data-tab="watch">Watch</div>
