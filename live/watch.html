@@ -228,7 +228,7 @@ img, video{ max-width:100%; display:block; }
     <button id="closeSocialSidebar" style="font-size:20px;color:var(--muted);">×</button>
   </div>
   <div class="social-feed" id="socialFeed"><div class="social-empty">Loading...</div></div>
-  <a class="social-open-full" href="creators.html">Open full RelviaCreators →</a>
+  <a class="social-open-full" href="../creators/index.html">Open full RelviaCreators →</a>
 </div>
 
 <script>
@@ -660,7 +660,7 @@ async function loadSocialFeed(){
   posts.forEach(post => {
     const author = profileById[post.user_id];
     const el = document.createElement("a");
-    el.href = "creators.html";
+    el.href = "../creators/index.html";
     el.className = "social-post";
     el.style.display = "block";
     el.innerHTML = `
