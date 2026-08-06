@@ -49,6 +49,14 @@ img{ max-width:100%; display:block; }
   font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold-start);
 }
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.top-nav{ display:flex; gap:6px; }
+.top-nav-item{
+  font-size:13px; font-weight:700; color:var(--muted); padding:9px 16px; border-radius:10px; transition:.2s;
+}
+.top-nav-item:hover{ color:var(--text); background:rgba(255,255,255,.04); }
+.top-nav-item.active{ color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); }
+@media(max-width:820px){ .top-nav{ display:none; } }
+
 .new-project-btn{
   font-size:13.5px; font-weight:800; padding:10px 20px; border-radius:12px;
   background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
@@ -227,12 +235,17 @@ img{ max-width:100%; display:block; }
 <body>
 
 <header class="topbar">
-  <a class="brand" href="welcome.html">
+  <a class="brand" href="../index.html">
     <div class="brand-badge">R</div>
     <span class="brand-name">Relvia Studios</span>
   </a>
+  <nav class="top-nav" id="topNav">
+    <button class="top-nav-item active" data-nav-tab="watch">Watch</button>
+    <button class="top-nav-item" data-nav-tab="collaborate">Collaborate</button>
+    <a class="top-nav-item" href="studios-editor.html">Editor</a>
+    <a class="top-nav-item" id="myProfileNavLink" href="#">My Profile</a>
+  </nav>
   <div style="display:flex;gap:10px;align-items:center;">
-    <a href="studios-editor.html" style="border:1px solid var(--border);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);">Editor</a>
     <button class="new-project-btn" id="newProjectBtn">+ New Project</button>
   </div>
 </header>
@@ -321,16 +334,23 @@ async function initialize(){
   }
 
 
+  function switchTab(newTab){
+    activeTab = newTab;
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === newTab));
+    document.querySelectorAll("[data-nav-tab]").forEach(t => t.classList.toggle("active", t.dataset.navTab === newTab));
+    document.getElementById("discoveryBar").style.display = newTab === "collaborate" ? "flex" : "none";
+    document.getElementById("discoveryCount").style.display = newTab === "collaborate" ? "block" : "none";
+    renderView();
+  }
+
   document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-      activeTab = tab.dataset.tab;
-      document.getElementById("discoveryBar").style.display = activeTab === "collaborate" ? "flex" : "none";
-      document.getElementById("discoveryCount").style.display = activeTab === "collaborate" ? "block" : "none";
-      renderView();
-    });
+    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
   });
+  document.querySelectorAll("[data-nav-tab]").forEach(navItem => {
+    navItem.addEventListener("click", () => switchTab(navItem.dataset.navTab));
+  });
+
+  document.getElementById("myProfileNavLink").href = `studios-profile.html?user=${currentUser.id}`;
 
   document.getElementById("discoverySearch").addEventListener("input", () => filterAndRenderProjects());
   document.getElementById("discoveryGenre").addEventListener("change", () => filterAndRenderProjects());
