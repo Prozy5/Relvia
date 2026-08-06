@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relvia — Watch</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{ color:var(--text); min-height:100vh; background:var(--background); }
+a{ text-decoration:none; color:inherit; }
+button, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img, video{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:36px; height:36px; border-radius:50%; background:#000;
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:1200px; margin:auto; padding:34px 24px 80px; }
+
+/* ================= BROWSE HOMEPAGE ================= */
+.watch-hero{
+  position:relative; overflow:hidden;
+  width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
+  margin-top:-20px; margin-bottom:44px;
+  aspect-ratio:16/7; min-height:340px;
+  background:linear-gradient(135deg,#100d09,#050403 55%,#0c0a06);
+}
+.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.4; filter:saturate(.85); }
+.watch-hero-overlay{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 12% 100%, rgba(217,169,75,.09), transparent 62%),
+    linear-gradient(90deg, rgba(5,4,3,.97) 22%, rgba(5,4,3,.65) 58%, transparent 95%),
+    linear-gradient(0deg, var(--background) 0%, rgba(5,4,3,.85) 20%, transparent 60%);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:56px max(24px, calc((100vw - 1200px) / 2 + 24px)) 52px;
+}
+.watch-hero-eyebrow{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+.watch-hero-title{ font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.4vw,54px); line-height:1.05; margin-bottom:14px; max-width:600px; text-shadow:0 4px 24px rgba(0,0,0,.5); }
+.watch-hero-meta{ font-size:13.5px; color:#d8d0c0; margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+.watch-hero-meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--muted); }
+.watch-hero-actions{ display:flex; gap:12px; }
+.watch-hero-btn{ font-size:14px; font-weight:800; padding:13px 28px; border-radius:10px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; display:flex; align-items:center; gap:8px; }
+.watch-hero-btn:hover{ opacity:.88; }
+.watch-hero-btn.ghost{ background:rgba(255,255,255,.12); color:white; backdrop-filter:blur(6px); }
+.watch-hero-btn.ghost:hover{ background:rgba(255,255,255,.2); opacity:1; }
+
+.genre-row{ margin-bottom:38px; position:relative; }
+.genre-row-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+.genre-row-wrap{ position:relative; }
+.genre-row-wrap::before, .genre-row-wrap::after{ content:""; position:absolute; top:0; bottom:6px; width:50px; z-index:2; pointer-events:none; }
+.genre-row-wrap::before{ left:0; background:linear-gradient(90deg, var(--background) 0%, transparent 100%); }
+.genre-row-wrap::after{ right:0; background:linear-gradient(270deg, var(--background) 0%, transparent 100%); }
+.genre-row-scroll{ display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-behavior:smooth; }
+.genre-row-scroll::-webkit-scrollbar{ display:none; }
+
+.film-card{ cursor:pointer; position:relative; z-index:1; min-width:230px; flex-shrink:0; }
+.film-card:hover{ z-index:3; }
+.film-thumb{
+  aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+  border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
+  transition:transform .25s ease, box-shadow .25s ease, border-radius .25s ease;
+}
+.film-card:hover .film-thumb{ transform:scale(1.12); box-shadow:0 24px 50px -14px rgba(0,0,0,.7), 0 0 0 1px rgba(217,169,75,.3), 0 0 30px -6px rgba(217,169,75,.15); border-radius:10px 10px 0 0; }
+.film-thumb img{ width:100%; height:100%; object-fit:cover; }
+.film-thumb .play-icon{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--gold); opacity:0; transition:opacity .2s; }
+.film-card:hover .play-icon{ opacity:1; background:rgba(0,0,0,.35); }
+.film-hover-panel{
+  max-height:0; overflow:hidden; opacity:0; transform:scaleX(1.12); transform-origin:top center;
+  background:#161008; border:1px solid rgba(217,169,75,.4); border-top:none; border-radius:0 0 10px 10px;
+  transition:max-height .25s ease, opacity .2s ease .05s; box-shadow:0 24px 50px -14px rgba(0,0,0,.8);
+}
+.film-card:hover .film-hover-panel{ max-height:90px; opacity:1; }
+.film-hover-inner{ padding:12px 14px; }
+.film-title{ font-size:14.5px; font-weight:700; margin-bottom:3px; }
+.film-meta{ font-size:12px; color:var(--muted); }
+.film-hover-genre{ font-size:11px; color:var(--gold); font-weight:700; margin-top:6px; }
+
+.empty-state{ text-align:center; color:var(--muted); padding:80px 20px; }
+.empty-state h4{ color:#ddd; font-size:20px; margin-bottom:8px; font-family:var(--font-display); }
+.loading-state{ text-align:center; color:var(--muted); padding:80px 0; }
+
+/* ================= FILM DETAIL / PLAYER ================= */
+.video-frame{ width:100%; aspect-ratio:16/9; border-radius:18px; overflow:hidden; border:1px solid var(--border); margin-bottom:22px; background:#000; position:relative; }
+.video-frame iframe{ width:100%; height:100%; border:none; }
+.drive-credit{ text-align:right; margin-bottom:16px; font-size:10.5px; color:var(--muted-soft); letter-spacing:.5px; }
+.detail-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:8px; }
+.detail-title{ font-family:var(--font-display); font-size:26px; font-weight:600; }
+.detail-meta{ font-size:13px; color:var(--muted); margin:8px 0 16px; }
+.detail-desc{ font-size:14px; color:#ddd; line-height:1.7; max-width:680px; margin-bottom:26px; }
+.send-relvbits-btn{ font-size:13.5px; font-weight:800; padding:11px 22px; border-radius:12px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; flex-shrink:0; }
+.send-relvbits-btn:hover{ opacity:.88; }
+.creator-link{ font-size:13px; color:var(--gold); font-weight:700; }
+.creator-link:hover{ text-decoration:underline; }
+
+.ad-overlay{ position:absolute; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
+.ad-overlay.open{ display:flex; }
+.ad-overlay img, .ad-overlay video{ max-width:100%; max-height:80%; border-radius:8px; }
+.ad-tag{ position:absolute; top:14px; left:14px; background:rgba(0,0,0,.7); color:var(--muted); font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; }
+.ad-skip-btn{ position:absolute; bottom:16px; right:16px; background:rgba(0,0,0,.75); color:white; border:1px solid var(--border); font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:10px; }
+.ad-skip-btn:not(:disabled){ cursor:pointer; border-color:var(--gold); }
+.ad-skip-btn:not(:disabled):hover{ background:var(--gold); color:#000; }
+.ad-skip-btn:disabled{ opacity:.6; cursor:default; }
+
+.relvbits-modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2500; padding:24px; }
+.relvbits-modal-backdrop.open{ display:flex; }
+.relvbits-modal{ background:var(--surface); border:1px solid var(--gold-end); border-radius:20px; padding:26px; max-width:400px; width:100%; }
+.relvbits-modal h3{ font-family:var(--font-display); font-size:19px; margin-bottom:16px; }
+.amount-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+.amount-option{ background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px 0; font-size:13px; font-weight:700; text-align:center; }
+.amount-option.selected{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-field{ margin-bottom:12px; }
+.relvbits-field label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.relvbits-field input{ width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 12px; color:white; font-size:13px; }
+.anon-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:var(--muted); }
+.relvbits-error{ color:#f2a8a3; font-size:12px; margin-bottom:10px; display:none; }
+.relvbits-error.show{ display:block; }
+.relvbits-modal-actions{ display:flex; gap:10px; }
+.relvbits-modal-actions button{ flex:1; padding:11px; border-radius:12px; font-weight:800; font-size:13px; }
+.relvbits-cancel-btn{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.relvbits-confirm-btn{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="watch.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia</span>
+  </a>
+  <a class="back-link" id="backLink" href="../index.html">← Relvia Entertainment</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading...</div>
+</div>
+
+<div class="relvbits-modal-backdrop" id="relvbitsModal">
+  <div class="relvbits-modal">
+    <h3>✦ Send RelvBits</h3>
+    <div class="relvbits-error" id="relvbitsError"></div>
+    <div class="relvbits-field">
+      <label>Amount</label>
+      <div class="amount-grid" id="amountGrid">
+        <button class="amount-option" data-amount="200">$2</button>
+        <button class="amount-option selected" data-amount="500">$5</button>
+        <button class="amount-option" data-amount="1000">$10</button>
+        <button class="amount-option" data-amount="2500">$25</button>
+      </div>
+      <input type="number" id="customAmount" placeholder="Custom amount ($1–$1000)" min="1" max="1000" step="1">
+    </div>
+    <div class="relvbits-field"><label>Message (optional)</label><input type="text" id="relvbitsMessage" maxlength="280"></div>
+    <div class="anon-row"><input type="checkbox" id="relvbitsAnon"><label for="relvbitsAnon">Send anonymously</label></div>
+    <div class="relvbits-modal-actions">
+      <button class="relvbits-cancel-btn" id="relvbitsCancelBtn">Cancel</button>
+      <button class="relvbits-confirm-btn" id="relvbitsConfirmBtn">Continue to payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const filmProjectId = params.get("id");
+
+let currentUser = null;
+let currentProject = null;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (sessionData?.session){
+    const { data: userData } = await supabaseClient.auth.getUser();
+    currentUser = userData?.user || null;
+  }
+
+  if (filmProjectId){
+    document.getElementById("backLink").href = "watch.html";
+    document.getElementById("backLink").textContent = "← All films on Relvia";
+    await renderFilmDetail();
+  } else {
+    await renderBrowseHomepage();
+  }
+}
+
+// ==========================================================
+// BROWSE HOMEPAGE
+// ==========================================================
+async function renderBrowseHomepage(){
+  const container = document.getElementById("container");
+
+  const { data: films, error } = await supabaseClient
+    .from("studios_films")
+    .select("*, studios_projects(title, genre, creator_id)")
+    .order("released_at", { ascending:false });
+
+  if (error || !films || films.length === 0){
+    container.innerHTML = `<div class="empty-state"><h4>Nothing streaming yet</h4><p>Films made in Relvia Studios show up here once they're released.</p></div>`;
+    return;
+  }
+
+  const creatorIds = [...new Set(films.map(f => f.studios_projects?.creator_id).filter(Boolean))];
+  const { data: creators } = await supabaseClient.from("profiles").select("id, display_name").in("id", creatorIds);
+  const nameById = {};
+  (creators || []).forEach(c => { nameById[c.id] = c.display_name; });
+
+  container.innerHTML = "";
+
+  const featured = films[0];
+  const hero = document.createElement("div");
+  hero.className = "watch-hero";
+  hero.innerHTML = `
+    ${featured.cover_url ? `<img src="${featured.cover_url}">` : ""}
+    <div class="watch-hero-overlay">
+      <div class="watch-hero-eyebrow">✦ Latest Release</div>
+      <div class="watch-hero-title">${escapeHtml(featured.title)}</div>
+      <div class="watch-hero-meta">
+        <span>${escapeHtml(featured.studios_projects?.genre || "Short Film")}</span><span class="dot"></span>
+        <span>By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")}</span><span class="dot"></span>
+        <span>${featured.view_count || 0} views</span>
+      </div>
+      <div class="watch-hero-actions">
+        <button class="watch-hero-btn" id="heroWatchBtn">▶ Play</button>
+      </div>
+    </div>`;
+  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `watch.html?id=${featured.project_id}`; });
+  container.appendChild(hero);
+
+  const byGenre = {};
+  films.forEach(film => {
+    const genre = film.studios_projects?.genre || "Short Film";
+    if (!byGenre[genre]) byGenre[genre] = [];
+    byGenre[genre].push(film);
+  });
+
+  Object.keys(byGenre).forEach(genre => {
+    const row = document.createElement("div");
+    row.className = "genre-row";
+    row.innerHTML = `<div class="genre-row-title">${escapeHtml(genre)}</div><div class="genre-row-wrap"><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div></div>`;
+    container.appendChild(row);
+
+    const scroll = row.querySelector(".genre-row-scroll");
+    byGenre[genre].forEach(film => {
+      const card = document.createElement("div");
+      card.className = "film-card";
+      card.innerHTML = `
+        <div class="film-thumb">
+          ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
+          <div class="play-icon">&#9654;</div>
+        </div>
+        <div class="film-hover-panel">
+          <div class="film-hover-inner">
+            <div class="film-title">${escapeHtml(film.title)}</div>
+            <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>
+            <div class="film-hover-genre">${escapeHtml(film.studios_projects?.genre || "Short Film")}</div>
+          </div>
+        </div>`;
+      card.addEventListener("click", () => { window.location.href = `watch.html?id=${film.project_id}`; });
+      scroll.appendChild(card);
+    });
+  });
+}
+
+// ==========================================================
+// FILM DETAIL / PLAYER
+// ==========================================================
+async function renderFilmDetail(){
+  const container = document.getElementById("container");
+
+  const { data: project, error } = await supabaseClient.from("studios_projects").select("*").eq("id", filmProjectId).eq("status", "published").maybeSingle();
+  if (error || !project){
+    container.innerHTML = `<div class="empty-state"><h4>This film isn't available</h4><p>It may have been removed, or isn't published yet.</p></div>`;
+    return;
+  }
+  currentProject = project;
+
+  const { data: film } = await supabaseClient.from("studios_films").select("*").eq("project_id", project.id).maybeSingle();
+  if (!film){
+    container.innerHTML = `<div class="empty-state"><h4>No video found for this project.</h4></div>`;
+    return;
+  }
+
+  supabaseClient.rpc("increment_film_view_count", { target_film_id: film.id });
+
+  const { data: creator } = await supabaseClient.from("profiles").select("display_name, username").eq("id", project.creator_id).maybeSingle();
+  const isOwnFilm = currentUser && currentUser.id === project.creator_id;
+
+  container.innerHTML = `
+    <div class="video-frame" id="videoFrame">
+      <div class="ad-overlay" id="adOverlay">
+        <div class="ad-tag">Ad · <span id="adAdvertiserName"></span></div>
+        <img id="adImage" style="display:none;">
+        <video id="adVideo" style="display:none;" autoplay playsinline></video>
+        <button class="ad-skip-btn" id="adSkipBtn" disabled>Skip in <span id="adSkipCountdown">5</span></button>
+      </div>
+    </div>
+    <div class="drive-credit">Streaming powered by Google Drive</div>
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${escapeHtml(project.title)}</div>
+        <div class="detail-meta">
+          <a class="creator-link" href="../studios/profile.html?user=${project.creator_id}">${escapeHtml(creator?.display_name || creator?.username || "Unknown")}</a>
+          &nbsp;·&nbsp; ${escapeHtml(project.genre || "Short Film")} &nbsp;·&nbsp; ${film.view_count || 0} views
+        </div>
+      </div>
+      ${!isOwnFilm ? `<button class="send-relvbits-btn" id="sendRelvbitsBtn">✦ Send RelvBits</button>` : ""}
+    </div>
+    ${film.description ? `<p class="detail-desc">${escapeHtml(film.description)}</p>` : ""}
+  `;
+
+  setupRelvbitsModal();
+
+  await maybeShowAd();
+  document.getElementById("videoFrame").innerHTML += `<iframe src="https://drive.google.com/file/d/${film.drive_file_id}/preview" allow="autoplay" allowfullscreen></iframe>`;
+}
+
+async function maybeShowAd(){
+  const { data: ads } = await supabaseClient.rpc("get_ad_to_serve");
+  if (!ads || ads.length === 0) return;
+
+  const ad = ads[0];
+  const frame = document.getElementById("videoFrame");
+  frame.innerHTML = `
+    <div class="ad-overlay open" id="adOverlay">
+      <div class="ad-tag">Ad · <span id="adAdvertiserName">${escapeHtml(ad.advertiser_name)}</span></div>
+      ${ad.creative_type === "video" ? `<video id="adMedia" autoplay playsinline src="${ad.creative_url}"></video>` : `<img id="adMedia" src="${ad.creative_url}">`}
+      <button class="ad-skip-btn" id="adSkipBtn" disabled>Skip in <span id="adSkipCountdown">${ad.skip_after_seconds}</span></button>
+    </div>`;
+
+  const mediaEl = document.getElementById("adMedia");
+  const skipBtn = document.getElementById("adSkipBtn");
+  const countdownEl = document.getElementById("adSkipCountdown");
+
+  if (ad.click_url){
+    mediaEl.style.cursor = "pointer";
+    mediaEl.addEventListener("click", async () => {
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: false, was_clicked: true });
+      window.open(ad.click_url, "_blank");
+    });
+  }
+
+  return new Promise((resolve) => {
+    let remaining = ad.skip_after_seconds;
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        clearInterval(interval);
+        skipBtn.disabled = false;
+        skipBtn.innerHTML = "Skip Ad ×";
+      } else {
+        countdownEl.textContent = remaining;
+      }
+    }, 1000);
+
+    const finishAd = async (wasSkipped) => {
+      clearInterval(interval);
+      if (mediaEl.tagName === "VIDEO") mediaEl.pause();
+      frame.innerHTML = "";
+      await supabaseClient.rpc("log_ad_impression", { target_campaign_id: ad.id, target_stream_id: null, was_skipped: wasSkipped, was_clicked: false });
+      resolve();
+    };
+
+    skipBtn.addEventListener("click", () => { if (!skipBtn.disabled) finishAd(true); });
+    if (mediaEl.tagName === "VIDEO") mediaEl.addEventListener("ended", () => finishAd(false));
+  });
+}
+
+function setupRelvbitsModal(){
+  const btn = document.getElementById("sendRelvbitsBtn");
+  if (!btn) return;
+
+  const modal = document.getElementById("relvbitsModal");
+  const amountGrid = document.getElementById("amountGrid");
+  const customAmount = document.getElementById("customAmount");
+  let selectedAmountCents = 500;
+
+  btn.addEventListener("click", () => {
+    if (!currentUser){ window.location.href = "/login.html"; return; }
+    document.getElementById("relvbitsError").classList.remove("show");
+    modal.classList.add("open");
+  });
+  document.getElementById("relvbitsCancelBtn").addEventListener("click", () => modal.classList.remove("open"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+
+  amountGrid.querySelectorAll(".amount-option").forEach(optBtn => {
+    optBtn.addEventListener("click", () => {
+      amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+      optBtn.classList.add("selected");
+      selectedAmountCents = parseInt(optBtn.dataset.amount, 10);
+      customAmount.value = "";
+    });
+  });
+  customAmount.addEventListener("input", () => {
+    amountGrid.querySelectorAll(".amount-option").forEach(b => b.classList.remove("selected"));
+    const dollars = parseFloat(customAmount.value);
+    selectedAmountCents = isFinite(dollars) ? Math.round(dollars * 100) : 0;
+  });
+
+  document.getElementById("relvbitsConfirmBtn").addEventListener("click", async () => {
+    const errorEl = document.getElementById("relvbitsError");
+    errorEl.classList.remove("show");
+
+    if (!selectedAmountCents || selectedAmountCents < 100 || selectedAmountCents > 100000){
+      errorEl.textContent = "Choose an amount between $1 and $1,000.";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    const confirmBtn = document.getElementById("relvbitsConfirmBtn");
+    confirmBtn.disabled = true; confirmBtn.textContent = "Redirecting to payment...";
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-studios-relvbits-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          creatorId: currentProject.creator_id,
+          amountCents: selectedAmountCents,
+          message: document.getElementById("relvbitsMessage").value.trim(),
+          isAnonymous: document.getElementById("relvbitsAnon").checked,
+          studiosProjectId: currentProject.id,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.checkoutUrl){
+        errorEl.textContent = result.error || "Couldn't start checkout.";
+        errorEl.classList.add("show");
+        confirmBtn.disabled = false; confirmBtn.textContent = "Continue to payment";
+        return;
+      }
+      window.location.href = result.checkoutUrl;
+    } catch (err){
+      console.error(err);
+      errorEl.textContent = "Couldn't reach the server.";
+      errorEl.classList.add("show");
+      confirmBtn.disabled = false; confirmBtn.textContent = "Continue to payment";
+    }
+  });
+}
+
+initialize();
+</script>
+</body>
+</html>
