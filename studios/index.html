@@ -111,6 +111,44 @@ img{ max-width:100%; display:block; }
 .btn.gold:hover{ opacity:.88; color:#000; }
 
 .loading-state{ text-align:center; color:var(--muted); padding:60px 0; grid-column:1/-1; }
+
+/* DISCOVERY / SEARCH */
+.discovery-bar{ display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; align-items:center; }
+.discovery-search{
+  flex:1; min-width:220px; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:11px 16px; color:white; font-size:13.5px;
+}
+.discovery-search:focus{ outline:none; border-color:var(--gold); }
+.discovery-select{
+  background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:11px 14px; color:white; font-size:13px; min-width:150px;
+}
+.discovery-toggle{
+  display:flex; align-items:center; gap:8px; background:var(--surface-light); border:1px solid var(--border);
+  border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--muted); cursor:pointer; white-space:nowrap;
+}
+.discovery-toggle input{ accent-color:var(--gold); }
+.discovery-count{ font-size:12.5px; color:var(--muted-soft); margin-bottom:14px; }
+
+/* WATCH HOMEPAGE */
+.watch-hero{
+  position:relative; border-radius:22px; overflow:hidden; margin-bottom:36px; border:1px solid var(--border);
+  aspect-ratio:21/8; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+}
+.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.55; }
+.watch-hero-overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,8,6,.95) 10%, transparent 70%); display:flex; flex-direction:column; justify-content:flex-end; padding:34px; }
+.watch-hero-eyebrow{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+.watch-hero-title{ font-family:var(--font-display); font-size:clamp(26px,3.6vw,42px); font-weight:600; margin-bottom:10px; max-width:640px; }
+.watch-hero-meta{ font-size:13px; color:var(--muted); margin-bottom:18px; }
+.watch-hero-actions{ display:flex; gap:12px; }
+.watch-hero-btn{ font-size:13.5px; font-weight:800; padding:12px 24px; border-radius:12px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.watch-hero-btn:hover{ opacity:.88; }
+
+.genre-row{ margin-bottom:34px; }
+.genre-row-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+.genre-row-scroll{ display:flex; gap:16px; overflow-x:auto; padding-bottom:6px; }
+.genre-row-scroll::-webkit-scrollbar{ display:none; }
+.genre-row-scroll .film-card{ min-width:220px; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -131,6 +169,13 @@ img{ max-width:100%; display:block; }
     <div class="tab active" data-tab="watch">Watch</div>
     <div class="tab" data-tab="collaborate">Collaborate</div>
   </div>
+
+  <div class="discovery-bar" id="discoveryBar" style="display:none;">
+    <input type="text" class="discovery-search" id="discoverySearch" placeholder="Search titles, loglines, genres, or roles needed...">
+    <select class="discovery-select" id="discoveryGenre"><option value="">All genres</option></select>
+    <label class="discovery-toggle"><input type="checkbox" id="discoveryOpenRolesOnly"> Open roles only</label>
+  </div>
+  <div class="discovery-count" id="discoveryCount" style="display:none;"></div>
 
   <div id="viewContainer"><div class="loading-state">Loading...</div></div>
 </div>
@@ -170,14 +215,47 @@ async function initialize(){
   if (!userData.user){ window.location.href = "/login.html"; return; }
   currentUser = userData.user;
 
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "studios", target_label: "Relvia Studios (Home)" }); } catch (e){}
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "studios");
+  const unlockKey = "relvia-live-unlock-studios";
+
+  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
+    document.querySelector(".container").innerHTML = `
+      <div style="text-align:center;padding:100px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;">Relvia Studios is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
+          <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+        </div>
+        <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
+      </div>`;
+    document.getElementById("unlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("unlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "studios", passcode });
+      if (isValid){ sessionStorage.setItem(unlockKey, "true"); window.location.reload(); }
+      else { document.getElementById("unlockError").style.display = "block"; }
+    });
+    return;
+  }
+
+
   document.querySelectorAll(".tab").forEach(tab => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
       activeTab = tab.dataset.tab;
+      document.getElementById("discoveryBar").style.display = activeTab === "collaborate" ? "flex" : "none";
+      document.getElementById("discoveryCount").style.display = activeTab === "collaborate" ? "block" : "none";
       renderView();
     });
   });
+
+  document.getElementById("discoverySearch").addEventListener("input", () => filterAndRenderProjects());
+  document.getElementById("discoveryGenre").addEventListener("change", () => filterAndRenderProjects());
+  document.getElementById("discoveryOpenRolesOnly").addEventListener("change", () => filterAndRenderProjects());
 
   document.getElementById("newProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.add("open"));
   document.getElementById("cancelProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.remove("open"));
@@ -197,7 +275,7 @@ async function renderWatch(){
 
   const { data: films, error } = await supabaseClient
     .from("studios_films")
-    .select("*, studios_projects(title, genre)")
+    .select("*, studios_projects(title, genre, creator_id)")
     .order("released_at", { ascending:false });
 
   if (error || !films || films.length === 0){
@@ -211,25 +289,62 @@ async function renderWatch(){
     return;
   }
 
-  const grid = document.createElement("div");
-  grid.className = "film-grid";
-  films.forEach(film => {
-    const card = document.createElement("div");
-    card.className = "film-card";
-    card.innerHTML = `
-      <div class="film-thumb">
-        ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
-        <div class="play-icon">&#9654;</div>
-      </div>
-      <div class="film-title">${escapeHtml(film.title)}</div>
-      <div class="film-meta">${escapeHtml(film.studios_projects?.genre || "Short Film")} &middot; ${film.view_count} views</div>`;
-    card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${film.project_id}`; });
-    grid.appendChild(card);
-  });
+  const creatorIds = [...new Set(films.map(f => f.studios_projects?.creator_id).filter(Boolean))];
+  const { data: creators } = await supabaseClient.from("profiles").select("id, display_name").in("id", creatorIds);
+  const nameById = {};
+  (creators || []).forEach(c => { nameById[c.id] = c.display_name; });
 
   container.innerHTML = "";
-  container.appendChild(grid);
+
+  // HERO — most recent release.
+  const featured = films[0];
+  const hero = document.createElement("div");
+  hero.className = "watch-hero";
+  hero.innerHTML = `
+    ${featured.cover_url ? `<img src="${featured.cover_url}">` : ""}
+    <div class="watch-hero-overlay">
+      <div class="watch-hero-eyebrow">Latest Release</div>
+      <div class="watch-hero-title">${escapeHtml(featured.title)}</div>
+      <div class="watch-hero-meta">${escapeHtml(featured.studios_projects?.genre || "Short Film")} · By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")} · ${featured.view_count || 0} views</div>
+      <div class="watch-hero-actions">
+        <button class="watch-hero-btn" id="heroWatchBtn">▶ Watch Now</button>
+      </div>
+    </div>`;
+  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `studios-project.html?id=${featured.project_id}`; });
+  container.appendChild(hero);
+
+  // GENRE ROWS
+  const byGenre = {};
+  films.forEach(film => {
+    const genre = film.studios_projects?.genre || "Short Film";
+    if (!byGenre[genre]) byGenre[genre] = [];
+    byGenre[genre].push(film);
+  });
+
+  Object.keys(byGenre).forEach(genre => {
+    const row = document.createElement("div");
+    row.className = "genre-row";
+    row.innerHTML = `<div class="genre-row-title">${escapeHtml(genre)}</div><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div>`;
+    container.appendChild(row);
+
+    const scroll = row.querySelector(".genre-row-scroll");
+    byGenre[genre].forEach(film => {
+      const card = document.createElement("div");
+      card.className = "film-card";
+      card.innerHTML = `
+        <div class="film-thumb">
+          ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
+          <div class="play-icon">&#9654;</div>
+        </div>
+        <div class="film-title">${escapeHtml(film.title)}</div>
+        <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>`;
+      card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${film.project_id}`; });
+      scroll.appendChild(card);
+    });
+  });
 }
+
+let allOpenProjects = [];
 
 async function renderCollaborate(){
   const container = document.getElementById("viewContainer");
@@ -237,16 +352,61 @@ async function renderCollaborate(){
 
   const { data: projects, error } = await supabaseClient
     .from("studios_projects")
-    .select("*, studios_roles(id, filled)")
+    .select("*, studios_roles(id, role_name, filled)")
     .neq("status", "released")
     .order("created_at", { ascending:false });
 
-  if (error || !projects || projects.length === 0){
+  if (error){
+    container.innerHTML = `<div class="project-grid"><div class="empty-state"><h4>Couldn't load projects</h4></div></div>`;
+    return;
+  }
+
+  allOpenProjects = projects || [];
+  populateGenreFilter(allOpenProjects);
+  filterAndRenderProjects();
+}
+
+function populateGenreFilter(projects){
+  const select = document.getElementById("discoveryGenre");
+  const currentValue = select.value;
+  const genres = [...new Set(projects.map(p => (p.genre || "").trim()).filter(Boolean))].sort();
+
+  select.innerHTML = `<option value="">All genres</option>` + genres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+  select.value = currentValue;
+}
+
+function filterAndRenderProjects(){
+  const container = document.getElementById("viewContainer");
+  const countEl = document.getElementById("discoveryCount");
+
+  const query = document.getElementById("discoverySearch").value.trim().toLowerCase();
+  const genreFilter = document.getElementById("discoveryGenre").value;
+  const openRolesOnly = document.getElementById("discoveryOpenRolesOnly").checked;
+
+  let filtered = allOpenProjects.filter(project => {
+    const roles = project.studios_roles || [];
+    const openRoleCount = roles.filter(r => !r.filled).length;
+
+    if (genreFilter && (project.genre || "") !== genreFilter) return false;
+    if (openRolesOnly && openRoleCount === 0) return false;
+
+    if (query){
+      const roleNames = roles.map(r => (r.role_name || "").toLowerCase()).join(" ");
+      const haystack = `${project.title || ""} ${project.logline || ""} ${project.genre || ""} ${project.looking_for || ""} ${roleNames}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+
+    return true;
+  });
+
+  countEl.textContent = `${filtered.length} project${filtered.length === 1 ? "" : "s"}`;
+
+  if (filtered.length === 0){
     container.innerHTML = `
       <div class="project-grid">
         <div class="empty-state">
-          <h4>No open projects right now</h4>
-          <p>Be the first to start one.</p>
+          <h4>${allOpenProjects.length === 0 ? "No open projects right now" : "Nothing matches your search"}</h4>
+          <p>${allOpenProjects.length === 0 ? "Be the first to start one." : "Try a different keyword, genre, or clear the open-roles filter."}</p>
         </div>
       </div>`;
     return;
@@ -254,7 +414,7 @@ async function renderCollaborate(){
 
   const grid = document.createElement("div");
   grid.className = "project-grid";
-  projects.forEach(project => {
+  filtered.forEach(project => {
     const openRoles = (project.studios_roles || []).filter(r => !r.filled).length;
     const card = document.createElement("div");
     card.className = "project-card";
