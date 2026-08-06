@@ -111,6 +111,10 @@ async function initialize(){
     return;
   }
 
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const currentUser = sessionData?.session ? (await supabaseClient.auth.getUser()).data.user : null;
+  const isOwnProfile = currentUser && currentUser.id === targetUserId;
+
   const { data: profile, error } = await supabaseClient.from("profiles").select("*").eq("id", targetUserId).maybeSingle();
   if (error || !profile){
     document.getElementById("container").innerHTML = `<div class="empty-state">This filmmaker doesn't exist.</div>`;
@@ -144,7 +148,7 @@ async function initialize(){
   document.getElementById("container").innerHTML = `
     <div class="profile-header">
       <div class="profile-avatar">${avatarInnerHTML(profile.avatar_url, profile.display_name)}</div>
-      <div>
+      <div style="flex:1;">
         <div class="profile-name">${escapeHtml(profile.display_name || "Unknown")}</div>
         <div class="profile-handle">@${escapeHtml(profile.username || "unknown")}</div>
         <div class="profile-stats">
@@ -152,6 +156,7 @@ async function initialize(){
           <div class="profile-stat"><b>${totalViews}</b><span>TOTAL VIEWS</span></div>
         </div>
       </div>
+      ${!isOwnProfile && currentUser ? `<a href="../creators/messages.html?user=${targetUserId}" style="align-self:flex-start;background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;font-size:12.5px;padding:9px 18px;border-radius:10px;">✉ Message</a>` : ""}
     </div>
 
     <div class="section-title">Directed / Created</div>
@@ -187,7 +192,7 @@ function renderFilmGrid(containerId, projects, roleField){
       </div>
       <div class="film-title">${escapeHtml(project.title)}</div>
       <div class="film-meta">${escapeHtml(project.genre || "Short Film")} · ${film.view_count || 0} views</div>`;
-    card.addEventListener("click", () => { window.location.href = `../watch/?id=${project.id}`; });
+    card.addEventListener("click", () => { window.location.href = `projects.html?id=${project.id}`; });
     grid.appendChild(card);
   });
 }
