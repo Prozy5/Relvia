@@ -149,7 +149,7 @@ img, video{ max-width:100%; display:block; }
 <body>
 
 <header class="topbar">
-  <a class="brand" href="watch.html">
+  <a class="brand" href="index.html">
     <div class="brand-badge">R</div>
     <span class="brand-name">Relvia</span>
   </a>
@@ -208,7 +208,7 @@ async function initialize(){
   }
 
   if (filmProjectId){
-    document.getElementById("backLink").href = "watch.html";
+    document.getElementById("backLink").href = "index.html";
     document.getElementById("backLink").textContent = "← All films on Relvia";
     await renderFilmDetail();
   } else {
@@ -256,7 +256,7 @@ async function renderBrowseHomepage(){
         <button class="watch-hero-btn" id="heroWatchBtn">▶ Play</button>
       </div>
     </div>`;
-  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `watch.html?id=${featured.project_id}`; });
+  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `index.html?id=${featured.project_id}`; });
   container.appendChild(hero);
 
   const byGenre = {};
@@ -288,7 +288,7 @@ async function renderBrowseHomepage(){
             <div class="film-hover-genre">${escapeHtml(film.studios_projects?.genre || "Short Film")}</div>
           </div>
         </div>`;
-      card.addEventListener("click", () => { window.location.href = `watch.html?id=${film.project_id}`; });
+      card.addEventListener("click", () => { window.location.href = `index.html?id=${film.project_id}`; });
       scroll.appendChild(card);
     });
   });
