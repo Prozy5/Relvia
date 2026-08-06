@@ -240,10 +240,9 @@ img{ max-width:100%; display:block; }
     <span class="brand-name">Relvia Studios</span>
   </a>
   <nav class="top-nav" id="topNav">
-    <button class="top-nav-item active" data-nav-tab="watch">Watch</button>
-    <button class="top-nav-item" data-nav-tab="collaborate">Collaborate</button>
-    <a class="top-nav-item" href="studios-editor.html">Editor</a>
+    <a class="top-nav-item" href="editor.html">Editor</a>
     <a class="top-nav-item" id="myProfileNavLink" href="#">My Profile</a>
+    <a class="top-nav-item" href="../relvia/watch.html" style="color:var(--gold);">Watch on Relvia →</a>
   </nav>
   <div style="display:flex;gap:10px;align-items:center;">
     <button class="new-project-btn" id="newProjectBtn">+ New Project</button>
@@ -254,20 +253,15 @@ img{ max-width:100%; display:block; }
   <div class="marquee">
     <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
     <div class="marquee-title">Where <em>stories</em><br>get made.</div>
-    <p class="marquee-sub">Original short films, collaborated on from first draft to premiere — made and streamed right here.</p>
+    <p class="marquee-sub">Original short films, collaborated on from first draft to premiere. Once released, they stream on <a href="../relvia/watch.html" style="color:var(--gold);">Relvia</a>.</p>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="watch">Watch</div>
-    <div class="tab" data-tab="collaborate">Collaborate</div>
-  </div>
-
-  <div class="discovery-bar" id="discoveryBar" style="display:none;">
+  <div class="discovery-bar" id="discoveryBar">
     <input type="text" class="discovery-search" id="discoverySearch" placeholder="Search titles, loglines, genres, or roles needed...">
     <select class="discovery-select" id="discoveryGenre"><option value="">All genres</option></select>
     <label class="discovery-toggle"><input type="checkbox" id="discoveryOpenRolesOnly"> Open roles only</label>
   </div>
-  <div class="discovery-count" id="discoveryCount" style="display:none;"></div>
+  <div class="discovery-count" id="discoveryCount"></div>
 
   <div id="viewContainer"><div class="loading-state">Loading...</div></div>
 </div>
@@ -334,23 +328,7 @@ async function initialize(){
   }
 
 
-  function switchTab(newTab){
-    activeTab = newTab;
-    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === newTab));
-    document.querySelectorAll("[data-nav-tab]").forEach(t => t.classList.toggle("active", t.dataset.navTab === newTab));
-    document.getElementById("discoveryBar").style.display = newTab === "collaborate" ? "flex" : "none";
-    document.getElementById("discoveryCount").style.display = newTab === "collaborate" ? "block" : "none";
-    renderView();
-  }
-
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
-  });
-  document.querySelectorAll("[data-nav-tab]").forEach(navItem => {
-    navItem.addEventListener("click", () => switchTab(navItem.dataset.navTab));
-  });
-
-  document.getElementById("myProfileNavLink").href = `studios-profile.html?user=${currentUser.id}`;
+  document.getElementById("myProfileNavLink").href = `profile.html?user=${currentUser.id}`;
 
   document.getElementById("discoverySearch").addEventListener("input", () => filterAndRenderProjects());
   document.getElementById("discoveryGenre").addEventListener("change", () => filterAndRenderProjects());
@@ -360,100 +338,7 @@ async function initialize(){
   document.getElementById("cancelProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.remove("open"));
   document.getElementById("createProjectBtn").addEventListener("click", createProject);
 
-  await renderView();
-}
-
-async function renderView(){
-  if (activeTab === "watch") return renderWatch();
-  return renderCollaborate();
-}
-
-async function renderWatch(){
-  const container = document.getElementById("viewContainer");
-  container.innerHTML = `<div class="loading-state">Loading films...</div>`;
-
-  const { data: films, error } = await supabaseClient
-    .from("studios_films")
-    .select("*, studios_projects(title, genre, creator_id, logline)")
-    .order("released_at", { ascending:false });
-
-  if (error || !films || films.length === 0){
-    container.innerHTML = `
-      <div class="film-grid">
-        <div class="empty-state">
-          <h4>Nothing released yet</h4>
-          <p>Start or join a project in the Collaborate tab to make the first one.</p>
-        </div>
-      </div>`;
-    return;
-  }
-
-  const creatorIds = [...new Set(films.map(f => f.studios_projects?.creator_id).filter(Boolean))];
-  const { data: creators } = await supabaseClient.from("profiles").select("id, display_name").in("id", creatorIds);
-  const nameById = {};
-  (creators || []).forEach(c => { nameById[c.id] = c.display_name; });
-
-  container.innerHTML = "";
-
-  // HERO — most recent release, full-bleed with Play + More Info.
-  const featured = films[0];
-  const hero = document.createElement("div");
-  hero.className = "watch-hero";
-  hero.innerHTML = `
-    ${featured.cover_url ? `<img src="${featured.cover_url}">` : ""}
-    <div class="watch-hero-overlay">
-      <div class="watch-hero-eyebrow">✦ Latest Release</div>
-      <div class="watch-hero-title">${escapeHtml(featured.title)}</div>
-      <div class="watch-hero-meta">
-        <span>${escapeHtml(featured.studios_projects?.genre || "Short Film")}</span><span class="dot"></span>
-        <span>By ${escapeHtml(nameById[featured.studios_projects?.creator_id] || "Unknown")}</span><span class="dot"></span>
-        <span>${featured.view_count || 0} views</span>
-      </div>
-      <div class="watch-hero-actions">
-        <button class="watch-hero-btn" id="heroWatchBtn">▶ Play</button>
-        <button class="watch-hero-btn ghost" id="heroInfoBtn">ⓘ More Info</button>
-      </div>
-    </div>`;
-  hero.querySelector("#heroWatchBtn").addEventListener("click", () => { window.location.href = `../watch/?id=${featured.project_id}`; });
-  hero.querySelector("#heroInfoBtn").addEventListener("click", () => { window.location.href = `../watch/?id=${featured.project_id}`; });
-  container.appendChild(hero);
-
-  // GENRE ROWS
-  const byGenre = {};
-  films.forEach(film => {
-    const genre = film.studios_projects?.genre || "Short Film";
-    if (!byGenre[genre]) byGenre[genre] = [];
-    byGenre[genre].push(film);
-  });
-
-  Object.keys(byGenre).forEach(genre => {
-    const row = document.createElement("div");
-    row.className = "genre-row";
-    row.innerHTML = `
-      <div class="genre-row-title">${escapeHtml(genre)}</div>
-      <div class="genre-row-wrap"><div class="genre-row-scroll" id="row-${genre.replace(/[^a-z0-9]/gi, '')}"></div></div>`;
-    container.appendChild(row);
-
-    const scroll = row.querySelector(".genre-row-scroll");
-    byGenre[genre].forEach(film => {
-      const card = document.createElement("div");
-      card.className = "film-card";
-      card.innerHTML = `
-        <div class="film-thumb">
-          ${film.cover_url ? `<img src="${film.cover_url}">` : ""}
-          <div class="play-icon">&#9654;</div>
-        </div>
-        <div class="film-hover-panel">
-          <div class="film-hover-inner">
-            <div class="film-title">${escapeHtml(film.title)}</div>
-            <div class="film-meta">${escapeHtml(nameById[film.studios_projects?.creator_id] || "Unknown")} · ${film.view_count || 0} views</div>
-            <div class="film-hover-genre">${escapeHtml(film.studios_projects?.genre || "Short Film")}</div>
-          </div>
-        </div>`;
-      card.addEventListener("click", () => { window.location.href = `../watch/?id=${film.project_id}`; });
-      scroll.appendChild(card);
-    });
-  });
+  await renderCollaborate();
 }
 
 let allOpenProjects = [];
@@ -538,7 +423,7 @@ function filterAndRenderProjects(){
         <span>${escapeHtml(project.genre || "Unspecified genre")}</span>
         <span>${openRoles} open role${openRoles === 1 ? "" : "s"}</span>
       </div>`;
-    card.addEventListener("click", () => { window.location.href = `../watch/?id=${project.id}`; });
+    card.addEventListener("click", () => { window.location.href = `projects.html?id=${project.id}`; });
     grid.appendChild(card);
   });
 
@@ -560,7 +445,7 @@ async function createProject(){
 
   if (error){ console.error(error); alert("Couldn't create project."); return; }
 
-  window.location.href = `../watch/?id=${data.id}`;
+  window.location.href = `projects.html?id=${data.id}`;
 }
 
 initialize();
