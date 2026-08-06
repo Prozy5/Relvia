@@ -187,7 +187,7 @@ function renderFilmGrid(containerId, projects, roleField){
       </div>
       <div class="film-title">${escapeHtml(project.title)}</div>
       <div class="film-meta">${escapeHtml(project.genre || "Short Film")} · ${film.view_count || 0} views</div>`;
-    card.addEventListener("click", () => { window.location.href = `studios-project.html?id=${project.id}`; });
+    card.addEventListener("click", () => { window.location.href = `../watch/?id=${project.id}`; });
     grid.appendChild(card);
   });
 }
