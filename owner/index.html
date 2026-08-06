@@ -532,6 +532,40 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- ADS (owner role only) -->
+    <div class="section" id="adsSection" style="display:none;">
+      <div class="section-head"><h2>Ads</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Self-serve campaigns shown as a skippable pre-roll before streams and VODs. Revenue is CPM-based — you set a rate per 1,000 impressions when creating a campaign.
+      </p>
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="stat-card"><div class="num" id="statAdsCampaigns">—</div><div class="label">Total Campaigns</div></div>
+        <div class="stat-card"><div class="num" id="statAdsActive">—</div><div class="label">Active</div></div>
+        <div class="stat-card"><div class="num" id="statAdsImpressions">—</div><div class="label">Impressions</div></div>
+        <div class="stat-card"><div class="num" id="statAdsRevenue">—</div><div class="label">Revenue</div></div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Advertiser</th><th>Type</th><th>CPM</th><th>Spent / Budget</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="adsTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form" style="flex-wrap:wrap;">
+          <input type="text" id="newAdAdvertiser" placeholder="Advertiser name" style="width:160px;">
+          <select id="newAdType" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+          <input type="text" id="newAdCreativeUrl" placeholder="Creative URL (image or video file)" style="flex:1;min-width:200px;">
+          <input type="text" id="newAdClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;">
+          <input type="number" id="newAdCpm" placeholder="CPM ($)" min="0.5" step="0.5" style="width:100px;">
+          <input type="number" id="newAdBudget" placeholder="Budget ($)" min="1" step="1" style="width:110px;">
+          <input type="number" id="newAdSkipAfter" placeholder="Skip after (sec)" min="0" step="1" value="5" style="width:130px;">
+          <button class="btn gold" id="addAdCampaignBtn">Create campaign</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -1035,7 +1069,8 @@ async function gate(){
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig());
+    document.getElementById("adsSection").style.display = "block";
+    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig(), loadAdsSection());
   }
 
   if (myRole === "founder"){
@@ -1912,6 +1947,95 @@ async function runCleanupNow(){
 
   btn.disabled = false; btn.textContent = "Run cleanup now";
   await loadStorageConfig();
+}
+
+// ==========================================================
+// ADS
+// ==========================================================
+async function loadAdsSection(){
+  const { data: summary } = await supabaseClient.rpc("get_ads_summary");
+  if (summary && summary.length > 0){
+    const s = summary[0];
+    document.getElementById("statAdsCampaigns").textContent = s.total_campaigns || 0;
+    document.getElementById("statAdsActive").textContent = s.active_campaigns || 0;
+    document.getElementById("statAdsImpressions").textContent = s.total_impressions || 0;
+    document.getElementById("statAdsRevenue").textContent = `$${((s.total_revenue_cents || 0) / 100).toFixed(2)}`;
+  }
+
+  const { data: campaigns, error } = await supabaseClient.from("live_ad_campaigns").select("*").order("created_at", { ascending:false });
+  const tbody = document.getElementById("adsTableBody");
+
+  if (error){ tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Couldn't load campaigns.</td></tr>`; return; }
+  if (!campaigns || campaigns.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No campaigns yet.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  campaigns.forEach(c => {
+    const overBudget = c.spent_cents >= c.budget_cents;
+    const statusLabel = !c.is_active ? "Paused" : overBudget ? "Budget spent" : "Active";
+    const statusClass = !c.is_active ? "banned" : overBudget ? "temp" : "ok";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(c.advertiser_name)}</td>
+      <td>${escapeHtml(c.creative_type)}</td>
+      <td>$${(c.cpm_cents / 100).toFixed(2)}</td>
+      <td>$${(c.spent_cents / 100).toFixed(2)} / $${(c.budget_cents / 100).toFixed(2)}</td>
+      <td><span class="pill ${statusClass}">${statusLabel}</span></td>
+      <td>
+        <button class="btn sm" data-action="toggle">${c.is_active ? "Pause" : "Resume"}</button>
+        <button class="btn danger sm" data-action="delete">Delete</button>
+      </td>`;
+    row.querySelector('[data-action="toggle"]').addEventListener("click", () => toggleAdCampaign(c.id, !c.is_active));
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteAdCampaign(c.id, c.advertiser_name));
+    tbody.appendChild(row);
+  });
+
+  document.getElementById("addAdCampaignBtn").addEventListener("click", createAdCampaign);
+}
+
+async function createAdCampaign(){
+  const advertiser_name = document.getElementById("newAdAdvertiser").value.trim();
+  const creative_type = document.getElementById("newAdType").value;
+  const creative_url = document.getElementById("newAdCreativeUrl").value.trim();
+  const click_url = document.getElementById("newAdClickUrl").value.trim() || null;
+  const cpmDollars = parseFloat(document.getElementById("newAdCpm").value);
+  const budgetDollars = parseFloat(document.getElementById("newAdBudget").value);
+  const skip_after_seconds = parseInt(document.getElementById("newAdSkipAfter").value, 10) || 5;
+
+  if (!advertiser_name || !creative_url){ showToast("Advertiser name and creative URL are required"); return; }
+  if (isNaN(cpmDollars) || cpmDollars <= 0){ showToast("Enter a valid CPM"); return; }
+  if (isNaN(budgetDollars) || budgetDollars <= 0){ showToast("Enter a valid budget"); return; }
+
+  const { error } = await supabaseClient.from("live_ad_campaigns").insert({
+    advertiser_name, creative_type, creative_url, click_url,
+    cpm_cents: Math.round(cpmDollars * 100),
+    budget_cents: Math.round(budgetDollars * 100),
+    skip_after_seconds,
+    created_by: currentUser.id,
+  });
+
+  if (error){ console.error(error); showToast("Couldn't create campaign"); return; }
+
+  ["newAdAdvertiser", "newAdCreativeUrl", "newAdClickUrl", "newAdCpm", "newAdBudget"].forEach(id => { document.getElementById(id).value = ""; });
+  showToast(`Campaign created for ${advertiser_name}`);
+  await logAction("create_ad_campaign", "ads", advertiser_name);
+  await loadAdsSection();
+}
+
+async function toggleAdCampaign(campaignId, newActiveState){
+  const { error } = await supabaseClient.from("live_ad_campaigns").update({ is_active: newActiveState }).eq("id", campaignId);
+  if (error){ console.error(error); showToast("Couldn't update campaign"); return; }
+  showToast(newActiveState ? "Campaign resumed" : "Campaign paused");
+  await loadAdsSection();
+}
+
+async function deleteAdCampaign(campaignId, advertiserName){
+  if (!confirm(`Delete the campaign for ${advertiserName}? This can't be undone.`)) return;
+  const { error } = await supabaseClient.from("live_ad_campaigns").delete().eq("id", campaignId);
+  if (error){ console.error(error); showToast("Couldn't delete campaign"); return; }
+  showToast("Campaign deleted");
+  await logAction("delete_ad_campaign", "ads", advertiserName);
+  await loadAdsSection();
 }
 
 async function saveRelvbitsFee(){
