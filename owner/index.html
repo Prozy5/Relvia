@@ -566,6 +566,60 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- PROMOTIONS (sponsored posts) -->
+    <div class="section" id="promotionsSection" style="display:none;">
+      <div class="section-head"><h2>Promotions</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Paid, clearly-labeled sponsored posts in the RelviaCreators feed, published under the "Relvia Promotions" account. A business submits a brief, you generate a draft, edit it, then explicitly publish — nothing goes out automatically.
+      </p>
+
+      <div class="panel" style="padding:18px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <input type="text" id="promoAdvertiserName" placeholder="Business/advertiser name" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <input type="number" id="promoAmountPaid" placeholder="Amount paid ($)" min="0" step="1" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <input type="text" id="promoClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+        </div>
+        <textarea id="promoBrief" placeholder="What should the post say? Describe the business, the offer, the vibe — a sentence or two." style="width:100%;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="generateDraftBtn">Generate draft</button>
+        </div>
+        <div id="draftPreviewBlock" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Final post text (edit freely before publishing)</label>
+          <textarea id="promoFinalCaption" style="width:100%;min-height:80px;background:var(--surface-light);border:1px solid var(--gold-end);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+          <button class="btn gold" id="publishPromoBtn">Publish to RelviaCreators</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Advertiser</th><th>Paid</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="promotionsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROSPECTING (lead-finding assistant) -->
+    <div class="section" id="prospectingSection" style="display:none;">
+      <div class="section-head"><h2>Prospecting</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Describe the kind of business you're looking to partner with — the assistant searches the web for real, currently-operating businesses that fit. It only finds and suggests; nothing gets contacted automatically.
+      </p>
+
+      <div class="panel" style="padding:18px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="prospectSearchQuery" placeholder="e.g. energy drink brands that sponsor streamers, local coffee shops in Charlotte NC..." style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
+          <button class="btn gold" id="runProspectSearchBtn">Search</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Business</th><th>Why</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="prospectsTableBody"><tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -1070,7 +1124,9 @@ async function gate(){
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
     document.getElementById("adsSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig(), loadAdsSection());
+    document.getElementById("promotionsSection").style.display = "block";
+    document.getElementById("prospectingSection").style.display = "block";
+    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig(), loadAdsSection(), loadPromotionsSection(), loadProspectsSection());
   }
 
   if (myRole === "founder"){
@@ -2036,6 +2092,235 @@ async function deleteAdCampaign(campaignId, advertiserName){
   showToast("Campaign deleted");
   await logAction("delete_ad_campaign", "ads", advertiserName);
   await loadAdsSection();
+}
+
+// ==========================================================
+// PROMOTIONS (sponsored posts)
+// ==========================================================
+const RELVIA_PROMOTIONS_BOT_ID = "00000000-0000-0000-0000-000000000001";
+let currentDraftRequestId = null;
+
+async function loadPromotionsSection(){
+  const { data: requests, error } = await supabaseClient
+    .from("sponsored_post_requests").select("*").order("created_at", { ascending:false });
+
+  const tbody = document.getElementById("promotionsTableBody");
+  if (error){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load promotions.</td></tr>`; return; }
+  if (!requests || requests.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No sponsored posts yet.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  requests.forEach(r => {
+    const statusClass = r.status === "published" ? "ok" : r.status === "rejected" ? "banned" : "temp";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(r.advertiser_name)}</td>
+      <td>$${(r.amount_paid_cents / 100).toFixed(2)}</td>
+      <td><span class="pill ${statusClass}">${escapeHtml(r.status)}</span></td>
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>`;
+    tbody.appendChild(row);
+  });
+
+  document.getElementById("generateDraftBtn").addEventListener("click", generateSponsoredDraft);
+  document.getElementById("publishPromoBtn").addEventListener("click", publishSponsoredPost);
+}
+
+async function generateSponsoredDraft(){
+  const advertiserName = document.getElementById("promoAdvertiserName").value.trim();
+  const brief = document.getElementById("promoBrief").value.trim();
+  const amountDollars = parseFloat(document.getElementById("promoAmountPaid").value) || 0;
+  const clickUrl = document.getElementById("promoClickUrl").value.trim() || null;
+
+  if (!advertiserName || !brief){ showToast("Advertiser name and a brief are required"); return; }
+
+  const btn = document.getElementById("generateDraftBtn");
+  btn.disabled = true; btn.textContent = "Generating...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-sponsored-post-draft`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ advertiserName, brief }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.draft){
+      showToast(result.error || "Couldn't generate a draft");
+      btn.disabled = false; btn.textContent = "Generate draft";
+      return;
+    }
+
+    const { data: newRequest, error } = await supabaseClient
+      .from("sponsored_post_requests")
+      .insert({
+        advertiser_name: advertiserName, brief, click_url: clickUrl,
+        amount_paid_cents: Math.round(amountDollars * 100),
+        ai_generated_draft: result.draft, final_caption: result.draft,
+        status: "draft", created_by: currentUser.id,
+      })
+      .select().single();
+
+    if (error){ console.error(error); showToast("Draft generated but couldn't save it"); btn.disabled = false; btn.textContent = "Generate draft"; return; }
+
+    currentDraftRequestId = newRequest.id;
+    document.getElementById("promoFinalCaption").value = result.draft;
+    document.getElementById("draftPreviewBlock").style.display = "block";
+    showToast("Draft ready — review and edit before publishing");
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't reach the draft service");
+  }
+
+  btn.disabled = false; btn.textContent = "Generate draft";
+}
+
+async function publishSponsoredPost(){
+  if (!currentDraftRequestId){ showToast("Generate a draft first"); return; }
+
+  const finalCaption = document.getElementById("promoFinalCaption").value.trim();
+  const advertiserName = document.getElementById("promoAdvertiserName").value.trim();
+  const clickUrl = document.getElementById("promoClickUrl").value.trim() || null;
+
+  if (!finalCaption){ showToast("Post text can't be empty"); return; }
+
+  const btn = document.getElementById("publishPromoBtn");
+  btn.disabled = true; btn.textContent = "Publishing...";
+
+  const { data: newPost, error: postError } = await supabaseClient
+    .from("social_posts")
+    .insert({
+      user_id: RELVIA_PROMOTIONS_BOT_ID, caption: finalCaption,
+      is_sponsored: true, sponsor_click_url: clickUrl, sponsor_advertiser_name: advertiserName,
+    })
+    .select().single();
+
+  if (postError){ console.error(postError); showToast("Couldn't publish — check the Relvia Promotions bot profile was created"); btn.disabled = false; btn.textContent = "Publish to RelviaCreators"; return; }
+
+  await supabaseClient
+    .from("sponsored_post_requests")
+    .update({ final_caption: finalCaption, status: "published", published_post_id: newPost.id, published_at: new Date().toISOString() })
+    .eq("id", currentDraftRequestId);
+
+  showToast(`Published for ${advertiserName}`);
+  await logAction("publish_sponsored_post", "promotions", advertiserName);
+
+  currentDraftRequestId = null;
+  document.getElementById("promoAdvertiserName").value = "";
+  document.getElementById("promoAmountPaid").value = "";
+  document.getElementById("promoClickUrl").value = "";
+  document.getElementById("promoBrief").value = "";
+  document.getElementById("draftPreviewBlock").style.display = "none";
+  btn.disabled = false; btn.textContent = "Publish to RelviaCreators";
+
+  await loadPromotionsSection();
+}
+
+// ==========================================================
+// PROSPECTING (lead-finding assistant)
+// ==========================================================
+async function loadProspectsSection(){
+  const { data: leads, error } = await supabaseClient
+    .from("prospect_leads").select("*").order("created_at", { ascending:false });
+
+  const tbody = document.getElementById("prospectsTableBody");
+  if (error){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load leads.</td></tr>`; return; }
+  if (!leads || leads.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  leads.forEach(lead => {
+    const statusClass = lead.status === "closed_won" ? "ok" : lead.status === "closed_lost" ? "banned" : lead.status === "new" ? "temp" : "ok";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${lead.website ? `<a href="${lead.website}" target="_blank" style="color:var(--gold);">${escapeHtml(lead.business_name)}</a>` : escapeHtml(lead.business_name)}</td>
+      <td style="max-width:260px;font-size:12px;color:var(--muted);">${escapeHtml(lead.reasoning || "—")}</td>
+      <td style="font-size:12px;">${escapeHtml(lead.contact_info || "Not found")}</td>
+      <td>
+        <select data-lead-id="${lead.id}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:5px 8px;color:white;font-size:11.5px;">
+          <option value="new" ${lead.status === "new" ? "selected" : ""}>New</option>
+          <option value="contacted" ${lead.status === "contacted" ? "selected" : ""}>Contacted</option>
+          <option value="replied" ${lead.status === "replied" ? "selected" : ""}>Replied</option>
+          <option value="closed_won" ${lead.status === "closed_won" ? "selected" : ""}>Closed — Won</option>
+          <option value="closed_lost" ${lead.status === "closed_lost" ? "selected" : ""}>Closed — Lost</option>
+        </select>
+      </td>
+      <td><button class="btn danger sm" data-remove-lead="${lead.id}">Remove</button></td>`;
+    tbody.appendChild(row);
+  });
+
+  tbody.querySelectorAll("select[data-lead-id]").forEach(select => {
+    select.addEventListener("change", () => updateLeadStatus(select.dataset.leadId, select.value));
+  });
+  tbody.querySelectorAll("[data-remove-lead]").forEach(btn => {
+    btn.addEventListener("click", () => removeLead(btn.dataset.removeLead));
+  });
+
+  document.getElementById("runProspectSearchBtn").addEventListener("click", runProspectSearch);
+}
+
+async function runProspectSearch(){
+  const query = document.getElementById("prospectSearchQuery").value.trim();
+  if (!query){ showToast("Describe what kind of business you're looking for"); return; }
+
+  const btn = document.getElementById("runProspectSearchBtn");
+  btn.disabled = true; btn.textContent = "Searching...";
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/find-prospect-leads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ searchQuery: query }),
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      showToast(result.error || "Search failed");
+      btn.disabled = false; btn.textContent = "Search";
+      return;
+    }
+
+    if (!result.leads || result.leads.length === 0){
+      showToast("No businesses found — try a broader or different search");
+      btn.disabled = false; btn.textContent = "Search";
+      return;
+    }
+
+    const rows = result.leads.map(lead => ({
+      business_name: lead.business_name, website: lead.website || null,
+      reasoning: lead.reasoning || null, contact_info: lead.contact_info || null,
+      search_query: query, found_by: currentUser.id,
+    }));
+
+    const { error } = await supabaseClient.from("prospect_leads").insert(rows);
+    if (error){ console.error(error); showToast("Found leads but couldn't save them"); }
+    else showToast(`Found ${result.leads.length} lead(s)`);
+
+    document.getElementById("prospectSearchQuery").value = "";
+    await loadProspectsSection();
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't reach the search service");
+  }
+
+  btn.disabled = false; btn.textContent = "Search";
+}
+
+async function updateLeadStatus(leadId, newStatus){
+  const { error } = await supabaseClient.from("prospect_leads").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", leadId);
+  if (error){ console.error(error); showToast("Couldn't update status"); return; }
+  showToast("Status updated");
+}
+
+async function removeLead(leadId){
+  if (!confirm("Remove this lead?")) return;
+  const { error } = await supabaseClient.from("prospect_leads").delete().eq("id", leadId);
+  if (error){ console.error(error); showToast("Couldn't remove lead"); return; }
+  showToast("Lead removed");
+  await loadProspectsSection();
 }
 
 async function saveRelvbitsFee(){
