@@ -201,6 +201,9 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab active" data-eco-tab="live">Relvia Live</button>
       <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
+      <button class="eco-tab" data-eco-tab="campus">Relvia Campus</button>
+      <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
+      <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
     </div>
 
@@ -533,93 +536,6 @@ tr:last-child td{ border-bottom:none; }
     </div>
 
     <!-- ADS (owner role only) -->
-    <div class="section" id="adsSection" style="display:none;">
-      <div class="section-head"><h2>Ads</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Self-serve campaigns shown as a skippable pre-roll before streams and VODs. Revenue is CPM-based — you set a rate per 1,000 impressions when creating a campaign.
-      </p>
-      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
-        <div class="stat-card"><div class="num" id="statAdsCampaigns">—</div><div class="label">Total Campaigns</div></div>
-        <div class="stat-card"><div class="num" id="statAdsActive">—</div><div class="label">Active</div></div>
-        <div class="stat-card"><div class="num" id="statAdsImpressions">—</div><div class="label">Impressions</div></div>
-        <div class="stat-card"><div class="num" id="statAdsRevenue">—</div><div class="label">Revenue</div></div>
-      </div>
-
-      <div class="panel">
-        <table>
-          <thead><tr><th>Advertiser</th><th>Type</th><th>CPM</th><th>Spent / Budget</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="adsTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody>
-        </table>
-        <div class="add-form" style="flex-wrap:wrap;">
-          <input type="text" id="newAdAdvertiser" placeholder="Advertiser name" style="width:160px;">
-          <select id="newAdType" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-          </select>
-          <input type="text" id="newAdCreativeUrl" placeholder="Creative URL (image or video file)" style="flex:1;min-width:200px;">
-          <input type="text" id="newAdClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;">
-          <input type="number" id="newAdCpm" placeholder="CPM ($)" min="0.5" step="0.5" style="width:100px;">
-          <input type="number" id="newAdBudget" placeholder="Budget ($)" min="1" step="1" style="width:110px;">
-          <input type="number" id="newAdSkipAfter" placeholder="Skip after (sec)" min="0" step="1" value="5" style="width:130px;">
-          <button class="btn gold" id="addAdCampaignBtn">Create campaign</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- PROMOTIONS (sponsored posts) -->
-    <div class="section" id="promotionsSection" style="display:none;">
-      <div class="section-head"><h2>Promotions</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Paid, clearly-labeled sponsored posts in the RelviaCreators feed, published under the "Relvia Promotions" account. A business submits a brief, you generate a draft, edit it, then explicitly publish — nothing goes out automatically.
-      </p>
-
-      <div class="panel" style="padding:18px;margin-bottom:20px;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-          <input type="text" id="promoAdvertiserName" placeholder="Business/advertiser name" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-          <input type="number" id="promoAmountPaid" placeholder="Amount paid ($)" min="0" step="1" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-          <input type="text" id="promoClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-        </div>
-        <textarea id="promoBrief" placeholder="What should the post say? Describe the business, the offer, the vibe — a sentence or two." style="width:100%;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
-        <div style="display:flex;gap:10px;">
-          <button class="btn" id="generateDraftBtn">Generate draft</button>
-        </div>
-        <div id="draftPreviewBlock" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
-          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Final post text (edit freely before publishing)</label>
-          <textarea id="promoFinalCaption" style="width:100%;min-height:80px;background:var(--surface-light);border:1px solid var(--gold-end);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
-          <button class="btn gold" id="publishPromoBtn">Publish to RelviaCreators</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <table>
-          <thead><tr><th>Advertiser</th><th>Paid</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="promotionsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PROSPECTING (lead-finding assistant) -->
-    <div class="section" id="prospectingSection" style="display:none;">
-      <div class="section-head"><h2>Prospecting</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Describe the kind of business you're looking to partner with — the assistant searches the web for real, currently-operating businesses that fit. It only finds and suggests; nothing gets contacted automatically.
-      </p>
-
-      <div class="panel" style="padding:18px;margin-bottom:20px;">
-        <div style="display:flex;gap:10px;">
-          <input type="text" id="prospectSearchQuery" placeholder="e.g. energy drink brands that sponsor streamers, local coffee shops in Charlotte NC..." style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
-          <button class="btn gold" id="runProspectSearchBtn">Search</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <table>
-          <thead><tr><th>Business</th><th>Why</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="prospectsTableBody"><tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- ACTIVITY LOG -->
     <div class="section">
       <div class="section-head">
@@ -708,6 +624,147 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
     </div><!-- /eco-music -->
+
+    <!-- ================= CAMPUS TAB ================= -->
+    <div class="eco-panel" id="eco-campus">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statCampusStreams">—</div><div class="label">Total Streams</div></div>
+        <div class="stat-card"><div class="num" id="statCampusLive">—</div><div class="label">Live Now</div></div>
+        <div class="stat-card"><div class="num" id="statCampusUsers">—</div><div class="label">Registered Users</div></div>
+        <div class="stat-card"><div class="num" id="statCampusCategories">—</div><div class="label">Categories</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Recent Streams</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Viewers</th><th>Date</th></tr></thead>
+            <tbody id="campusStreamsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Campus Staff</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Email</th><th>Role</th><th>Since</th></tr></thead>
+            <tbody id="campusStaffTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-campus -->
+
+    <!-- ================= RELVIACREATORS TAB ================= -->
+    <div class="eco-panel" id="eco-creators">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statCreatorsPosts">—</div><div class="label">Total Posts</div></div>
+        <div class="stat-card"><div class="num" id="statCreatorsUsers">—</div><div class="label">Active Posters</div></div>
+        <div class="stat-card"><div class="num" id="statCreatorsStories">—</div><div class="label">Active Stories</div></div>
+        <div class="stat-card"><div class="num" id="statCreatorsMessages">—</div><div class="label">Messages Sent</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Recent Posts</h2></div>
+        <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">A moderation view — the most recent posts across the feed, newest first.</p>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Author</th><th>Content</th><th>Posted</th><th>Actions</th></tr></thead>
+            <tbody id="creatorsPostsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-creators -->
+
+    <!-- ================= GROWTH TAB ================= -->
+    <div class="eco-panel" id="eco-growth">
+<div class="section" id="adsSection">
+      <div class="section-head"><h2>Ads</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Self-serve campaigns shown as a skippable pre-roll before streams and VODs. Revenue is CPM-based — you set a rate per 1,000 impressions when creating a campaign.
+      </p>
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="stat-card"><div class="num" id="statAdsCampaigns">—</div><div class="label">Total Campaigns</div></div>
+        <div class="stat-card"><div class="num" id="statAdsActive">—</div><div class="label">Active</div></div>
+        <div class="stat-card"><div class="num" id="statAdsImpressions">—</div><div class="label">Impressions</div></div>
+        <div class="stat-card"><div class="num" id="statAdsRevenue">—</div><div class="label">Revenue</div></div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Advertiser</th><th>Type</th><th>CPM</th><th>Spent / Budget</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="adsTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form" style="flex-wrap:wrap;">
+          <input type="text" id="newAdAdvertiser" placeholder="Advertiser name" style="width:160px;">
+          <select id="newAdType" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+          <input type="text" id="newAdCreativeUrl" placeholder="Creative URL (image or video file)" style="flex:1;min-width:200px;">
+          <input type="text" id="newAdClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;">
+          <input type="number" id="newAdCpm" placeholder="CPM ($)" min="0.5" step="0.5" style="width:100px;">
+          <input type="number" id="newAdBudget" placeholder="Budget ($)" min="1" step="1" style="width:110px;">
+          <input type="number" id="newAdSkipAfter" placeholder="Skip after (sec)" min="0" step="1" value="5" style="width:130px;">
+          <button class="btn gold" id="addAdCampaignBtn">Create campaign</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROMOTIONS (sponsored posts) -->
+    <div class="section" id="promotionsSection">
+      <div class="section-head"><h2>Promotions</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Paid, clearly-labeled sponsored posts in the RelviaCreators feed, published under the "Relvia Promotions" account. A business submits a brief, you generate a draft, edit it, then explicitly publish — nothing goes out automatically.
+      </p>
+
+      <div class="panel" style="padding:18px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <input type="text" id="promoAdvertiserName" placeholder="Business/advertiser name" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <input type="number" id="promoAmountPaid" placeholder="Amount paid ($)" min="0" step="1" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <input type="text" id="promoClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+        </div>
+        <textarea id="promoBrief" placeholder="What should the post say? Describe the business, the offer, the vibe — a sentence or two." style="width:100%;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="generateDraftBtn">Generate draft</button>
+        </div>
+        <div id="draftPreviewBlock" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Final post text (edit freely before publishing)</label>
+          <textarea id="promoFinalCaption" style="width:100%;min-height:80px;background:var(--surface-light);border:1px solid var(--gold-end);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+          <button class="btn gold" id="publishPromoBtn">Publish to RelviaCreators</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Advertiser</th><th>Paid</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="promotionsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROSPECTING (lead-finding assistant) -->
+    <div class="section" id="prospectingSection">
+      <div class="section-head"><h2>Prospecting</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Describe the kind of business you're looking to partner with — the assistant searches the web for real, currently-operating businesses that fit. It only finds and suggests; nothing gets contacted automatically.
+      </p>
+
+      <div class="panel" style="padding:18px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="prospectSearchQuery" placeholder="e.g. energy drink brands that sponsor streamers, local coffee shops in Charlotte NC..." style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
+          <button class="btn gold" id="runProspectSearchBtn">Search</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead><tr><th>Business</th><th>Why</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="prospectsTableBody"><tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    </div><!-- /eco-growth -->
 
     <!-- ================= FINANCE TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-finance">
@@ -1123,10 +1180,7 @@ async function gate(){
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
-    document.getElementById("adsSection").style.display = "block";
-    document.getElementById("promotionsSection").style.display = "block";
-    document.getElementById("prospectingSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig(), loadAdsSection(), loadPromotionsSection(), loadProspectsSection());
+    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig());
   }
 
   if (myRole === "founder"){
@@ -2347,6 +2401,9 @@ async function saveRelvbitsFee(){
 let studiosLoaded = false;
 let musicLoaded = false;
 let financeLoaded = false;
+let campusLoaded = false;
+let creatorsLoaded = false;
+let growthLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -2360,6 +2417,12 @@ function setupEcosystemTabs(){
       if (target === "studios" && !studiosLoaded){ studiosLoaded = true; await loadStudiosTab(); }
       if (target === "music" && !musicLoaded){ musicLoaded = true; await loadMusicTab(); }
       if (target === "finance" && !financeLoaded){ financeLoaded = true; await loadFinanceTab(); }
+      if (target === "campus" && !campusLoaded){ campusLoaded = true; await loadCampusTab(); }
+      if (target === "creators" && !creatorsLoaded){ creatorsLoaded = true; await loadCreatorsTab(); }
+      if (target === "growth" && !growthLoaded){
+        growthLoaded = true;
+        await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
+      }
     });
   });
 }
@@ -2494,6 +2557,110 @@ async function removeStudiosAdmin(userId, email){
   showToast("Studios admin removed");
   await logAction("remove_studios_admin", "studios_staff", email);
   await loadStudiosStaff();
+}
+
+// ==========================================================
+// CAMPUS TAB
+// ==========================================================
+async function loadCampusTab(){
+  const [{ count: streamCount }, { count: liveCount }, { count: userCount }, { count: categoryCount }] = await Promise.all([
+    supabaseClient.from("campus_streams").select("*", { count:"exact", head:true }),
+    supabaseClient.from("campus_streams").select("*", { count:"exact", head:true }).eq("is_live", true),
+    supabaseClient.from("campus_profiles").select("*", { count:"exact", head:true }),
+    supabaseClient.from("campus_categories").select("*", { count:"exact", head:true }),
+  ]);
+
+  document.getElementById("statCampusStreams").textContent = streamCount || 0;
+  document.getElementById("statCampusLive").textContent = liveCount || 0;
+  document.getElementById("statCampusUsers").textContent = userCount || 0;
+  document.getElementById("statCampusCategories").textContent = categoryCount || 0;
+
+  const { data: streams, error } = await supabaseClient
+    .from("campus_streams").select("*, campus_categories(name)").order("created_at", { ascending:false }).limit(25);
+
+  const tbody = document.getElementById("campusStreamsTableBody");
+  if (error || !streams || streams.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No streams yet.</td></tr>`;
+  } else {
+    tbody.innerHTML = "";
+    streams.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${escapeHtml(s.title)}</td>
+        <td>${escapeHtml(s.campus_categories?.name || "Uncategorized")}</td>
+        <td><span class="pill ${s.is_live ? "live" : "ended"}">${s.is_live ? "Live" : "Ended"}</span></td>
+        <td>${s.viewer_count || 0}</td>
+        <td>${new Date(s.created_at).toLocaleDateString()}</td>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  const { data: staff } = await supabaseClient.from("campus_owners").select("*").order("created_at", { ascending:false });
+  const staffTbody = document.getElementById("campusStaffTableBody");
+  if (!staff || staff.length === 0){
+    staffTbody.innerHTML = `<tr class="empty-row"><td colspan="3">No Campus staff configured.</td></tr>`;
+  } else {
+    staffTbody.innerHTML = "";
+    staff.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${escapeHtml(s.email || s.user_id)}</td><td>${escapeHtml(s.role || "owner")}</td><td>${new Date(s.created_at).toLocaleDateString()}</td>`;
+      staffTbody.appendChild(row);
+    });
+  }
+}
+
+// ==========================================================
+// RELVIACREATORS TAB
+// ==========================================================
+async function loadCreatorsTab(){
+  const [{ count: postCount }, { count: storyCount }, { count: messageCount }] = await Promise.all([
+    supabaseClient.from("social_posts").select("*", { count:"exact", head:true }),
+    supabaseClient.from("social_stories").select("*", { count:"exact", head:true }).gt("expires_at", new Date().toISOString()),
+    supabaseClient.from("direct_messages").select("*", { count:"exact", head:true }),
+  ]);
+
+  const { data: distinctPosters } = await supabaseClient.from("social_posts").select("user_id");
+  const uniquePosters = new Set((distinctPosters || []).map(p => p.user_id)).size;
+
+  document.getElementById("statCreatorsPosts").textContent = postCount || 0;
+  document.getElementById("statCreatorsUsers").textContent = uniquePosters;
+  document.getElementById("statCreatorsStories").textContent = storyCount || 0;
+  document.getElementById("statCreatorsMessages").textContent = messageCount || 0;
+
+  const { data: posts, error } = await supabaseClient
+    .from("social_posts").select("*").order("created_at", { ascending:false }).limit(25);
+
+  const tbody = document.getElementById("creatorsPostsTableBody");
+  if (error || !posts || posts.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No posts yet.</td></tr>`;
+    return;
+  }
+
+  const authorIds = [...new Set(posts.map(p => p.user_id))];
+  const { data: authors } = await supabaseClient.from("profiles").select("id, display_name").in("id", authorIds);
+  const nameById = {};
+  (authors || []).forEach(a => { nameById[a.id] = a.display_name; });
+
+  tbody.innerHTML = "";
+  posts.forEach(post => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(nameById[post.user_id] || "Unknown")}${post.is_sponsored ? ' <span style="color:var(--gold);font-size:10px;font-weight:800;">SPONSORED</span>' : ""}</td>
+      <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(post.caption || "(no text)")}</td>
+      <td>${new Date(post.created_at).toLocaleDateString()}</td>
+      <td><button class="btn danger sm" data-post-id="${post.id}">Remove</button></td>`;
+    row.querySelector("[data-post-id]").addEventListener("click", () => removeCreatorsPost(post.id));
+    tbody.appendChild(row);
+  });
+}
+
+async function removeCreatorsPost(postId){
+  if (!confirm("Remove this post from RelviaCreators?")) return;
+  const { error } = await supabaseClient.from("social_posts").delete().eq("id", postId);
+  if (error){ console.error(error); showToast("Couldn't remove post"); return; }
+  showToast("Post removed");
+  await logAction("remove_creators_post", "creators", postId);
+  await loadCreatorsTab();
 }
 
 // ==========================================================
