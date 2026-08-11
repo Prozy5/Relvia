@@ -128,6 +128,7 @@ async function initialize(){
   currentUser = userData.user;
 
   await loadConversations();
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "creators-messages", target_label: "RelviaCreators (Messages)" }); } catch (e){}
 
   const startUserId = params.get("user");
   if (startUserId) await openThread(startUserId);
