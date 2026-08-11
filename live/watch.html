@@ -276,6 +276,7 @@ async function initialize(){
     return;
   }
   stream = streamData;
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "relvia-live-watch", target_label: "Relvia Live (Watch Page)" }); } catch (e){}
 
   const { data: hostProfile } = await supabaseClient.from("live_profiles").select("display_name, username, avatar_url").eq("id", stream.host_id).maybeSingle();
 
