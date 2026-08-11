@@ -109,6 +109,8 @@ footer p{ font-size:12px; color:var(--muted-soft); }
 </head>
 <body>
 
+<div id="platformBroadcastBanner" style="display:none;"></div>
+
 <header class="topbar">
   <div class="logo">Relvia</div>
   <div class="nav-links">
@@ -222,6 +224,44 @@ footer p{ font-size:12px; color:var(--muted-soft); }
   <div class="logo">Relvia</div>
   <p>Relvia Entertainment — Film · Television · Music · Live · Creators.</p>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Platform-wide broadcast banner — reference implementation.
+// Any other page can add this same block to show the same
+// broadcast: fetch active platform_announcements, show the
+// newest one in a dismissible banner at the top of the page.
+(async function loadPlatformBroadcast(){
+  const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const dismissedId = sessionStorage.getItem("dismissedBroadcastId");
+
+  const { data, error } = await client
+    .from("platform_announcements")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error || !data || data.length === 0) return;
+  const announcement = data[0];
+  if (announcement.id === dismissedId) return;
+
+  const colors = { info: "#e0b158", warning: "#e8a33d", critical: "#e0574f" };
+  const banner = document.getElementById("platformBroadcastBanner");
+  banner.style.cssText = `display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 24px;background:${colors[announcement.severity] || colors.info};color:#000;font-size:13px;font-weight:600;`;
+  banner.innerHTML = `
+    <span>${announcement.message.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}</span>
+    <button id="dismissBroadcastBtn" style="background:rgba(0,0,0,.15);border:none;color:#000;font-weight:800;padding:4px 10px;border-radius:6px;cursor:pointer;">Dismiss</button>`;
+
+  document.getElementById("dismissBroadcastBtn").addEventListener("click", () => {
+    sessionStorage.setItem("dismissedBroadcastId", announcement.id);
+    banner.style.display = "none";
+  });
+})();
+</script>
 
 </body>
 </html>
