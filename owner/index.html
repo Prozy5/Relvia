@@ -357,25 +357,6 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
-    <!-- IP BANS -->
-    <div class="section">
-      <div class="section-head"><h2>IP Bans</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Blocks an address from reaching Relvia Live's sign-in and landing pages. Heads up: IPs change and VPNs bypass this easily — treat it as a deterrent for casual abuse, not a hard wall.
-      </p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>IP Address</th><th>Reason</th><th>Banned</th><th>Actions</th></tr></thead>
-          <tbody id="ipBansTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
-        <div class="add-form">
-          <input type="text" id="newIpAddress" placeholder="IP address (e.g. 203.0.113.4)" style="width:200px;">
-          <input type="text" id="newIpReason" placeholder="Reason" style="flex:1;min-width:200px;">
-          <button class="btn danger" id="addIpBanBtn">Ban IP</button>
-        </div>
-      </div>
-    </div>
-
 
 
     <!-- ANNOUNCEMENTS -->
@@ -714,6 +695,93 @@ tr:last-child td{ border-bottom:none; }
         <div class="stat-card"><div class="num" id="statPlatformRevenue">—</div><div class="label">Total Revenue (All Sources)</div></div>
       </div>
       <p style="color:var(--muted);font-size:12px;margin:6px 0 0;">"Total content pieces" combines Studios projects, Music tracks, RelviaCreators posts, and ad campaigns.</p>
+
+    <!-- UNIVERSAL SEARCH -->
+    <div class="panel" style="padding:18px;margin:20px 0;">
+      <h4 style="margin-bottom:10px;font-size:14px;">Universal Search</h4>
+      <input type="text" id="universalSearchInput" placeholder="Search users, posts, streams, projects, tracks — everything at once..." style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:white;font-size:13.5px;">
+      <div id="universalSearchResults" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- SYSTEM HEALTH -->
+    <div class="section">
+      <div class="section-head"><h2>System Health</h2></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statHealthRateLimits">—</div><div class="label">Rate Limit Hits (24h)</div></div>
+        <div class="stat-card"><div class="num" id="statHealthPending">—</div><div class="label">RelvBits Pending</div></div>
+        <div class="stat-card"><div class="num" id="statHealthFailed">—</div><div class="label">RelvBits Failed</div></div>
+        <div class="stat-card"><div class="num" id="statHealthReports">—</div><div class="label">Open Reports</div></div>
+      </div>
+    </div>
+
+    <!-- GROWTH CHARTS -->
+    <div class="section">
+      <div class="section-head"><h2>Growth — Last 30 Days</h2></div>
+      <div class="panel" style="padding:20px;margin-bottom:14px;">
+        <h4 style="font-size:13px;color:var(--muted);margin-bottom:12px;">Daily Signups</h4>
+        <div id="signupsChart"></div>
+      </div>
+      <div class="panel" style="padding:20px;">
+        <h4 style="font-size:13px;color:var(--muted);margin-bottom:12px;">Daily Platform Revenue (RelvBits fees)</h4>
+        <div id="revenueChart"></div>
+      </div>
+    </div>
+
+    <!-- PLATFORM-WIDE BROADCAST -->
+    <div class="section">
+      <div class="section-head"><h2>Platform-Wide Broadcast</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Distinct from Live's announcement banner — this is meant to show across every division. NOTE: each page needs a small display snippet added to actually render it; currently only the homepage has this wired in as the reference example.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Message</th><th>Severity</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+          <tbody id="platformAnnouncementsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="text" id="newPlatformMessage" placeholder="Message" style="flex:1;min-width:220px;">
+          <select id="newPlatformSeverity" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <option value="info">Info</option>
+            <option value="warning">Warning</option>
+            <option value="critical">Critical</option>
+          </select>
+          <button class="btn gold" id="addPlatformAnnouncementBtn">Broadcast</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT MODERATION QUEUE -->
+    <div class="section">
+      <div class="section-head"><h2>Moderation Queue</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        User-submitted reports across the ecosystem. NOTE: this is the review side — a "Report" button needs adding to each content type's page to actually let users submit these; none exist yet as a UI element.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Type</th><th>Reason</th><th>Reported</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="reportsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- IP BANS (ecosystem-wide) -->
+    <div class="section">
+      <div class="section-head"><h2>IP Bans</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Applies platform-wide. Heads up: IPs change and VPNs bypass this easily — treat it as a deterrent for casual abuse, not a hard wall. NOTE: enforcement currently only runs on Relvia Live's sign-in page — wiring the same check into Studios/Music/Campus sign-in is a follow-up.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>IP Address</th><th>Reason</th><th>Banned</th><th>Actions</th></tr></thead>
+          <tbody id="ipBansTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="text" id="newIpAddress" placeholder="IP address (e.g. 203.0.113.4)" style="width:200px;">
+          <input type="text" id="newIpReason" placeholder="Reason" style="flex:1;min-width:200px;">
+          <button class="btn danger" id="addIpBanBtn">Ban IP</button>
+        </div>
+      </div>
+    </div>
 
 
     <!-- FOUNDER CONTROLS (founder role only) -->
@@ -2443,7 +2511,11 @@ function setupEcosystemTabs(){
         growthLoaded = true;
         await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
       }
-      if (target === "founder" && !founderTabLoaded){ founderTabLoaded = true; await loadPlatformOverview(); }
+      if (target === "founder" && !founderTabLoaded){
+        founderTabLoaded = true;
+        await Promise.all([loadPlatformOverview(), loadSystemHealth(), loadGrowthCharts(), loadPlatformAnnouncements(), loadReportsQueue()]);
+        setupUniversalSearch();
+      }
     });
   });
 }
@@ -2475,6 +2547,197 @@ async function loadPlatformOverview(){
   const { data: earningsRows } = await supabaseClient.from("live_creator_earnings").select("total_earned_cents");
   const totalRevenueCents = (earningsRows || []).reduce((sum, r) => sum + (r.total_earned_cents || 0), 0);
   document.getElementById("statPlatformRevenue").textContent = `$${(totalRevenueCents / 100).toFixed(2)}`;
+}
+
+// ==========================================================
+// UNIVERSAL SEARCH
+// ==========================================================
+function setupUniversalSearch(){
+  const input = document.getElementById("universalSearchInput");
+  let debounceTimer;
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => runUniversalSearch(input.value.trim()), 350);
+  });
+}
+
+const RESULT_TYPE_LINKS = {
+  user: id => `../studios/profile.html?user=${id}`,
+  post: id => `../creators/index.html`,
+  stream: id => `watch.html?stream=${id}`,
+  project: id => `../watch/index.html?id=${id}`,
+  track: id => `../music/index.html`,
+};
+
+async function runUniversalSearch(query){
+  const results = document.getElementById("universalSearchResults");
+  if (!query){ results.innerHTML = ""; return; }
+
+  const { data, error } = await supabaseClient.rpc("founder_universal_search", { search_query: query });
+  if (error || !data || data.length === 0){
+    results.innerHTML = `<div style="color:var(--muted);font-size:12.5px;padding:8px 0;">No matches.</div>`;
+    return;
+  }
+
+  results.innerHTML = "";
+  data.forEach(r => {
+    const link = RESULT_TYPE_LINKS[r.result_type] ? RESULT_TYPE_LINKS[r.result_type](r.result_id) : "#";
+    const item = document.createElement("a");
+    item.href = link;
+    item.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-soft);font-size:13px;";
+    item.innerHTML = `
+      <span><span style="color:var(--gold);font-size:10px;font-weight:800;text-transform:uppercase;margin-right:8px;">${escapeHtml(r.result_type)}</span>${escapeHtml(r.title || "Untitled")}</span>
+      <span style="color:var(--muted);font-size:11.5px;">${escapeHtml(r.subtitle || "")}</span>`;
+    results.appendChild(item);
+  });
+}
+
+// ==========================================================
+// SYSTEM HEALTH
+// ==========================================================
+async function loadSystemHealth(){
+  const { data, error } = await supabaseClient.rpc("get_system_health");
+  if (error || !data || data.length === 0) return;
+
+  const health = data[0];
+  document.getElementById("statHealthRateLimits").textContent = health.rate_limit_hits_24h || 0;
+  document.getElementById("statHealthPending").textContent = health.relvbits_pending || 0;
+  document.getElementById("statHealthFailed").textContent = health.relvbits_failed || 0;
+  document.getElementById("statHealthReports").textContent = health.open_reports || 0;
+}
+
+// ==========================================================
+// GROWTH CHARTS (lightweight inline SVG bar charts — no
+// external charting library needed for something this simple)
+// ==========================================================
+function renderBarChart(containerId, rows, valueKey, barColor){
+  const container = document.getElementById(containerId);
+  if (!rows || rows.length === 0){
+    container.innerHTML = `<div style="color:var(--muted);font-size:12.5px;">Not enough data yet.</div>`;
+    return;
+  }
+
+  const maxVal = Math.max(...rows.map(r => Number(r[valueKey]) || 0), 1);
+  const barWidth = 100 / rows.length;
+
+  const bars = rows.map((r, i) => {
+    const heightPct = Math.max(2, (Number(r[valueKey]) || 0) / maxVal * 100);
+    const x = i * barWidth;
+    return `<rect x="${x + barWidth * 0.15}%" y="${100 - heightPct}%" width="${barWidth * 0.7}%" height="${heightPct}%" fill="${barColor}" rx="2">
+      <title>${r.day}: ${r[valueKey]}</title>
+    </rect>`;
+  }).join("");
+
+  container.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:120px;">${bars}</svg>`;
+}
+
+async function loadGrowthCharts(){
+  const { data: signups } = await supabaseClient.rpc("get_daily_signups", { days_back: 30 });
+  renderBarChart("signupsChart", signups, "signups", "#e0b158");
+
+  const { data: revenue } = await supabaseClient.rpc("get_daily_platform_revenue", { days_back: 30 });
+  const revenueDollars = (revenue || []).map(r => ({ day: r.day, revenue: (r.revenue_cents / 100).toFixed(2) }));
+  renderBarChart("revenueChart", revenueDollars, "revenue", "#5fae7a");
+}
+
+// ==========================================================
+// PLATFORM-WIDE BROADCAST
+// ==========================================================
+async function loadPlatformAnnouncements(){
+  const { data, error } = await supabaseClient.from("platform_announcements").select("*").order("created_at", { ascending:false });
+  const tbody = document.getElementById("platformAnnouncementsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No broadcasts yet.</td></tr>`; }
+  else {
+    tbody.innerHTML = "";
+    data.forEach(a => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${escapeHtml(a.message)}</td>
+        <td style="text-transform:capitalize;">${escapeHtml(a.severity)}</td>
+        <td><span class="pill ${a.is_active ? "ok" : "banned"}">${a.is_active ? "Active" : "Inactive"}</span></td>
+        <td>${new Date(a.created_at).toLocaleDateString()}</td>
+        <td>
+          <button class="btn sm" data-toggle-id="${a.id}" data-active="${a.is_active}">${a.is_active ? "Deactivate" : "Activate"}</button>
+          <button class="btn danger sm" data-delete-id="${a.id}">Delete</button>
+        </td>`;
+      tbody.appendChild(row);
+    });
+    tbody.querySelectorAll("[data-toggle-id]").forEach(btn => {
+      btn.addEventListener("click", () => togglePlatformAnnouncement(btn.dataset.toggleId, btn.dataset.active !== "true"));
+    });
+    tbody.querySelectorAll("[data-delete-id]").forEach(btn => {
+      btn.addEventListener("click", () => deletePlatformAnnouncement(btn.dataset.deleteId));
+    });
+  }
+
+  document.getElementById("addPlatformAnnouncementBtn").addEventListener("click", addPlatformAnnouncement);
+}
+
+async function addPlatformAnnouncement(){
+  const message = document.getElementById("newPlatformMessage").value.trim();
+  const severity = document.getElementById("newPlatformSeverity").value;
+  if (!message){ showToast("Enter a message"); return; }
+
+  const { error } = await supabaseClient.from("platform_announcements").insert({ message, severity, created_by: currentUser.id });
+  if (error){ console.error(error); showToast("Couldn't post broadcast"); return; }
+
+  document.getElementById("newPlatformMessage").value = "";
+  showToast("Broadcast posted");
+  await logAction("platform_broadcast", "announcements", message);
+  await loadPlatformAnnouncements();
+}
+
+async function togglePlatformAnnouncement(id, newActiveState){
+  const { error } = await supabaseClient.from("platform_announcements").update({ is_active: newActiveState }).eq("id", id);
+  if (error){ console.error(error); showToast("Couldn't update"); return; }
+  await loadPlatformAnnouncements();
+}
+
+async function deletePlatformAnnouncement(id){
+  if (!confirm("Delete this broadcast?")) return;
+  const { error } = await supabaseClient.from("platform_announcements").delete().eq("id", id);
+  if (error){ console.error(error); showToast("Couldn't delete"); return; }
+  showToast("Broadcast deleted");
+  await loadPlatformAnnouncements();
+}
+
+// ==========================================================
+// MODERATION QUEUE
+// ==========================================================
+async function loadReportsQueue(){
+  const { data, error } = await supabaseClient.from("content_reports").select("*").order("created_at", { ascending:false }).limit(50);
+  const tbody = document.getElementById("reportsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No reports.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(r => {
+    const statusClass = r.status === "resolved" ? "ok" : r.status === "dismissed" ? "banned" : "temp";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="text-transform:capitalize;">${escapeHtml(r.content_type)}</td>
+      <td>${escapeHtml(r.reason)}</td>
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td><span class="pill ${statusClass}">${escapeHtml(r.status)}</span></td>
+      <td>
+        ${r.status === "open" ? `<button class="btn sm" data-resolve-id="${r.id}">Resolve</button><button class="btn danger sm" data-dismiss-id="${r.id}">Dismiss</button>` : "—"}
+      </td>`;
+    tbody.appendChild(row);
+  });
+
+  tbody.querySelectorAll("[data-resolve-id]").forEach(btn => btn.addEventListener("click", () => updateReportStatus(btn.dataset.resolveId, "resolved")));
+  tbody.querySelectorAll("[data-dismiss-id]").forEach(btn => btn.addEventListener("click", () => updateReportStatus(btn.dataset.dismissId, "dismissed")));
+}
+
+async function updateReportStatus(reportId, newStatus){
+  const { error } = await supabaseClient
+    .from("content_reports")
+    .update({ status: newStatus, resolved_by: currentUser.id, resolved_at: new Date().toISOString() })
+    .eq("id", reportId);
+  if (error){ console.error(error); showToast("Couldn't update report"); return; }
+  showToast(`Report marked ${newStatus}`);
+  await loadReportsQueue();
 }
 
 
