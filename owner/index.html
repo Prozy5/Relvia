@@ -205,6 +205,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
+      <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
     <div class="eco-panel active" id="eco-live">
@@ -375,52 +376,7 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
-    <!-- FOUNDER CONTROLS (founder role only) -->
-    <div class="section" id="founderSection" style="display:none;">
-      <div class="section-head"><h2>Founder Controls</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Override tools for genuine emergencies — abusive staff, a compromised account, or a full incident. Use sparingly.
-      </p>
 
-      <div class="panel" style="padding:20px;margin-bottom:16px;">
-        <h4 style="margin-bottom:10px;font-size:14px;">Emergency lockdown</h4>
-        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Closes every registered page across the entire ecosystem at once.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <input type="text" id="lockdownMessage" placeholder="Message shown to everyone" style="flex:1;min-width:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
-          <input type="text" id="lockdownPasscode" placeholder="Passcode to lift it" style="width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
-          <button class="btn danger" id="lockdownBtn">Lock Down Everything</button>
-        </div>
-      </div>
-
-      <div class="panel" style="padding:20px;margin-bottom:16px;">
-        <h4 style="margin-bottom:6px;font-size:14px;">Account Lookup &amp; Override</h4>
-        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Look up any account by email to force-logout, force-deactivate, or permanently delete it.</p>
-        <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <input type="email" id="lookupEmail" placeholder="Account email" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
-          <button class="btn gold" id="lookupBtn">Look up</button>
-        </div>
-        <div id="lookupResult" style="display:none;">
-          <div style="padding:14px;background:var(--surface-light);border-radius:12px;margin-bottom:12px;">
-            <div id="lookupName" style="font-weight:700;font-size:14px;margin-bottom:2px;"></div>
-            <div id="lookupMeta" style="font-size:12.5px;color:var(--muted);"></div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn" id="lookupForceLogoutBtn">Force Logout</button>
-            <button class="btn" id="lookupDeactivateBtn">Force Deactivate</button>
-            <button class="btn danger" id="lookupDeleteBtn">Delete Account Permanently</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h4 style="padding:16px 18px 0;font-size:14px;">All staff — global revoke &amp; role change</h4>
-        <p style="color:var(--muted);font-size:12.5px;padding:6px 18px 14px;">Strips a person's access across Live, Studios, and Music in one action, regardless of who granted it.</p>
-        <table>
-          <thead><tr><th>Email</th><th>Division</th><th>Role</th><th>Actions</th></tr></thead>
-          <tbody id="founderStaffTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
 
     <!-- ANNOUNCEMENTS -->
     <div class="section">
@@ -535,25 +491,7 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
-    <!-- ADS (owner role only) -->
-    <!-- ACTIVITY LOG -->
-    <div class="section">
-      <div class="section-head">
-        <h2>Activity Log</h2>
-        <div style="display:flex;gap:10px;">
-          <input type="text" id="logSearch" placeholder="Search by person or action..." class="search-input" style="width:220px;">
-          <button class="btn" id="exportLogBtn">Export CSV</button>
-          <button class="btn" id="refreshLogBtn">Refresh</button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">Covers everything across Live, Studios, and Music — everyone's actions land in this one log.</p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-          <tbody id="logTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+
 
     </div><!-- /eco-live -->
 
@@ -765,6 +703,86 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
     </div><!-- /eco-growth -->
+
+    <!-- ================= FOUNDER TAB (founder only) ================= -->
+    <div class="eco-panel" id="eco-founder">
+      <div class="section-head"><h2>Platform Overview</h2></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statPlatformUsers">—</div><div class="label">Total Users (Main Account)</div></div>
+        <div class="stat-card"><div class="num" id="statPlatformLiveNow">—</div><div class="label">Live Right Now (Live + Campus)</div></div>
+        <div class="stat-card"><div class="num" id="statPlatformContent">—</div><div class="label">Total Content Pieces</div></div>
+        <div class="stat-card"><div class="num" id="statPlatformRevenue">—</div><div class="label">Total Revenue (All Sources)</div></div>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin:6px 0 0;">"Total content pieces" combines Studios projects, Music tracks, RelviaCreators posts, and ad campaigns.</p>
+
+
+    <!-- FOUNDER CONTROLS (founder role only) -->
+    <div class="section" id="founderSection">
+      <div class="section-head"><h2>Founder Controls</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Override tools for genuine emergencies — abusive staff, a compromised account, or a full incident. Use sparingly.
+      </p>
+
+      <div class="panel" style="padding:20px;margin-bottom:16px;">
+        <h4 style="margin-bottom:10px;font-size:14px;">Emergency lockdown</h4>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Closes every registered page across the entire ecosystem at once.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="lockdownMessage" placeholder="Message shown to everyone" style="flex:1;min-width:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <input type="text" id="lockdownPasscode" placeholder="Passcode to lift it" style="width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <button class="btn danger" id="lockdownBtn">Lock Down Everything</button>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:20px;margin-bottom:16px;">
+        <h4 style="margin-bottom:6px;font-size:14px;">Account Lookup &amp; Override</h4>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">Look up any account by email to force-logout, force-deactivate, or permanently delete it.</p>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input type="email" id="lookupEmail" placeholder="Account email" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+          <button class="btn gold" id="lookupBtn">Look up</button>
+        </div>
+        <div id="lookupResult">
+          <div style="padding:14px;background:var(--surface-light);border-radius:12px;margin-bottom:12px;">
+            <div id="lookupName" style="font-weight:700;font-size:14px;margin-bottom:2px;"></div>
+            <div id="lookupMeta" style="font-size:12.5px;color:var(--muted);"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" id="lookupForceLogoutBtn">Force Logout</button>
+            <button class="btn" id="lookupDeactivateBtn">Force Deactivate</button>
+            <button class="btn danger" id="lookupDeleteBtn">Delete Account Permanently</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4 style="padding:16px 18px 0;font-size:14px;">All staff — global revoke &amp; role change</h4>
+        <p style="color:var(--muted);font-size:12.5px;padding:6px 18px 14px;">Strips a person's access across Live, Studios, and Music in one action, regardless of who granted it.</p>
+        <table>
+          <thead><tr><th>Email</th><th>Division</th><th>Role</th><th>Actions</th></tr></thead>
+          <tbody id="founderStaffTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADS (owner role only) -->
+    <!-- ACTIVITY LOG -->
+    <div class="section">
+      <div class="section-head">
+        <h2>Activity Log</h2>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="logSearch" placeholder="Search by person or action..." class="search-input" style="width:220px;">
+          <button class="btn" id="exportLogBtn">Export CSV</button>
+          <button class="btn" id="refreshLogBtn">Refresh</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">Covers everything across Live, Studios, and Music — everyone's actions land in this one log.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+          <tbody id="logTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    </div><!-- /eco-founder -->
 
     <!-- ================= FINANCE TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-finance">
@@ -1186,6 +1204,7 @@ async function gate(){
   if (myRole === "founder"){
     document.getElementById("founderSection").style.display = "block";
     document.getElementById("financeTabBtn").style.display = "block";
+    document.getElementById("founderTabBtn").style.display = "block";
     tasks.push(loadFounderOverview());
   }
 
@@ -2404,6 +2423,7 @@ let financeLoaded = false;
 let campusLoaded = false;
 let creatorsLoaded = false;
 let growthLoaded = false;
+let founderTabLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -2423,9 +2443,41 @@ function setupEcosystemTabs(){
         growthLoaded = true;
         await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
       }
+      if (target === "founder" && !founderTabLoaded){ founderTabLoaded = true; await loadPlatformOverview(); }
     });
   });
 }
+
+async function loadPlatformOverview(){
+  const [
+    { count: userCount },
+    { count: liveStreamsCount },
+    { count: campusStreamsCount },
+    { count: studiosProjectCount },
+    { count: musicTrackCount },
+    { count: postsCount },
+    { count: adsCampaignCount },
+  ] = await Promise.all([
+    supabaseClient.from("profiles").select("*", { count:"exact", head:true }),
+    supabaseClient.from("live_streams").select("*", { count:"exact", head:true }).eq("is_live", true),
+    supabaseClient.from("campus_streams").select("*", { count:"exact", head:true }).eq("is_live", true),
+    supabaseClient.from("studios_projects").select("*", { count:"exact", head:true }),
+    supabaseClient.from("music_tracks").select("*", { count:"exact", head:true }),
+    supabaseClient.from("social_posts").select("*", { count:"exact", head:true }),
+    supabaseClient.from("live_ad_campaigns").select("*", { count:"exact", head:true }),
+  ]);
+
+  document.getElementById("statPlatformUsers").textContent = userCount || 0;
+  document.getElementById("statPlatformLiveNow").textContent = (liveStreamsCount || 0) + (campusStreamsCount || 0);
+  document.getElementById("statPlatformContent").textContent =
+    (studiosProjectCount || 0) + (musicTrackCount || 0) + (postsCount || 0) + (adsCampaignCount || 0);
+
+  const { data: earningsRows } = await supabaseClient.from("live_creator_earnings").select("total_earned_cents");
+  const totalRevenueCents = (earningsRows || []).reduce((sum, r) => sum + (r.total_earned_cents || 0), 0);
+  document.getElementById("statPlatformRevenue").textContent = `$${(totalRevenueCents / 100).toFixed(2)}`;
+}
+
+
 
 // ==========================================================
 // STUDIOS TAB
