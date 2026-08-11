@@ -783,6 +783,73 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- FOUNDER ALERTS -->
+    <div class="section">
+      <div class="section-head">
+        <h2>Alerts <span id="unreadAlertsBadge" style="display:none;background:var(--live-red, #e0574f);color:white;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:8px;"></span></h2>
+        <button class="btn sm" id="markAllAlertsReadBtn">Mark all read</button>
+      </div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Notifications to you — new reports and large transactions trigger these automatically.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Type</th><th>Message</th><th>When</th><th></th></tr></thead>
+          <tbody id="alertsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FEATURE KILL-SWITCHES -->
+    <div class="section">
+      <div class="section-head"><h2>Feature Kill-Switches</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Turn off a specific feature without a full lockdown. NOTE: only RelvBits checkout actually enforces its flag right now (wired as the reference example) — the others toggle in the database but need the same check added to their respective Edge Functions to actually block anything.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="featureFlagsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INVESTMENT RESERVE -->
+    <div class="section">
+      <div class="section-head"><h2>Investment Reserve</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Bookkeeping only — this tracks intent, it doesn't move real money anywhere. Use it to earmark amounts against what's actually in your bank account separately.
+      </p>
+      <div class="stats-row" style="grid-template-columns:1fr;margin-bottom:16px;">
+        <div class="stat-card"><div class="num" id="statReserveBalance">—</div><div class="label">Current Reserve Balance</div></div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Type</th><th>Amount</th><th>Note</th><th>Date</th></tr></thead>
+          <tbody id="reserveTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <select id="newReserveType" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <option value="add">Add</option>
+            <option value="withdraw">Withdraw</option>
+          </select>
+          <input type="number" id="newReserveAmount" placeholder="Amount ($)" min="1" step="1" style="width:130px;">
+          <input type="text" id="newReserveNote" placeholder="Note (optional)" style="flex:1;min-width:200px;">
+          <button class="btn gold" id="addReserveEntryBtn">Log entry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSION MANAGEMENT -->
+    <div class="section">
+      <div class="section-head"><h2>Active Sessions</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Everyone currently signed in with a valid session, most recently active first.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Last Active</th><th>Actions</th></tr></thead>
+          <tbody id="sessionsTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
 
     <!-- FOUNDER CONTROLS (founder role only) -->
     <div class="section" id="founderSection">
@@ -2513,7 +2580,10 @@ function setupEcosystemTabs(){
       }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
-        await Promise.all([loadPlatformOverview(), loadSystemHealth(), loadGrowthCharts(), loadPlatformAnnouncements(), loadReportsQueue()]);
+        await Promise.all([
+          loadPlatformOverview(), loadSystemHealth(), loadGrowthCharts(), loadPlatformAnnouncements(), loadReportsQueue(),
+          loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(),
+        ]);
         setupUniversalSearch();
       }
     });
@@ -2738,6 +2808,160 @@ async function updateReportStatus(reportId, newStatus){
   if (error){ console.error(error); showToast("Couldn't update report"); return; }
   showToast(`Report marked ${newStatus}`);
   await loadReportsQueue();
+}
+
+// ==========================================================
+// FOUNDER ALERTS
+// ==========================================================
+async function loadFounderAlerts(){
+  const { data, error } = await supabaseClient.from("founder_alerts").select("*").order("created_at", { ascending:false }).limit(50);
+  const tbody = document.getElementById("alertsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No alerts yet.</td></tr>`; }
+  else {
+    const unreadCount = data.filter(a => !a.is_read).length;
+    const badge = document.getElementById("unreadAlertsBadge");
+    if (unreadCount > 0){ badge.textContent = unreadCount; badge.style.display = "inline-block"; }
+    else { badge.style.display = "none"; }
+
+    tbody.innerHTML = "";
+    data.forEach(a => {
+      const row = document.createElement("tr");
+      row.style.opacity = a.is_read ? "0.55" : "1";
+      row.innerHTML = `
+        <td style="text-transform:capitalize;">${escapeHtml(a.alert_type.replace(/_/g, " "))}</td>
+        <td>${escapeHtml(a.message)}</td>
+        <td>${new Date(a.created_at).toLocaleString()}</td>
+        <td>${a.is_read ? "" : `<button class="btn sm" data-mark-read="${a.id}">Mark read</button>`}</td>`;
+      tbody.appendChild(row);
+    });
+    tbody.querySelectorAll("[data-mark-read]").forEach(btn => {
+      btn.addEventListener("click", () => markAlertRead(btn.dataset.markRead));
+    });
+  }
+
+  document.getElementById("markAllAlertsReadBtn").addEventListener("click", markAllAlertsRead);
+}
+
+async function markAlertRead(alertId){
+  await supabaseClient.from("founder_alerts").update({ is_read: true }).eq("id", alertId);
+  await loadFounderAlerts();
+}
+
+async function markAllAlertsRead(){
+  await supabaseClient.from("founder_alerts").update({ is_read: true }).eq("is_read", false);
+  showToast("All alerts marked read");
+  await loadFounderAlerts();
+}
+
+// ==========================================================
+// FEATURE KILL-SWITCHES
+// ==========================================================
+async function loadFeatureFlags(){
+  const { data, error } = await supabaseClient.from("feature_flags").select("*").order("key");
+  const tbody = document.getElementById("featureFlagsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No flags configured.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(flag => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="font-weight:700;">${escapeHtml(flag.key)}</td>
+      <td style="font-size:12px;color:var(--muted);">${escapeHtml(flag.description || "")}</td>
+      <td><span class="pill ${flag.enabled ? "ok" : "banned"}">${flag.enabled ? "Enabled" : "Disabled"}</span></td>
+      <td><button class="btn ${flag.enabled ? "danger" : ""} sm" data-flag-key="${flag.key}" data-enabled="${flag.enabled}">${flag.enabled ? "Disable" : "Enable"}</button></td>`;
+    tbody.appendChild(row);
+  });
+
+  tbody.querySelectorAll("[data-flag-key]").forEach(btn => {
+    btn.addEventListener("click", () => toggleFeatureFlag(btn.dataset.flagKey, btn.dataset.enabled !== "true"));
+  });
+}
+
+async function toggleFeatureFlag(featureKey, newState){
+  if (!newState && !confirm(`Disable "${featureKey}"? This affects real users immediately if that feature checks this flag.`)) return;
+
+  const { error } = await supabaseClient
+    .from("feature_flags")
+    .update({ enabled: newState, updated_at: new Date().toISOString() })
+    .eq("key", featureKey);
+  if (error){ console.error(error); showToast("Couldn't update flag"); return; }
+
+  showToast(`${featureKey} ${newState ? "enabled" : "disabled"}`);
+  await logAction(newState ? "enable_feature" : "disable_feature", "feature_flags", featureKey);
+  await loadFeatureFlags();
+}
+
+// ==========================================================
+// INVESTMENT RESERVE
+// ==========================================================
+async function loadInvestmentReserve(){
+  const { data: balance } = await supabaseClient.rpc("get_reserve_balance");
+  document.getElementById("statReserveBalance").textContent = `$${((balance || 0) / 100).toFixed(2)}`;
+
+  const { data, error } = await supabaseClient.from("investment_reserve_entries").select("*").order("created_at", { ascending:false }).limit(30);
+  const tbody = document.getElementById("reserveTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No entries yet.</td></tr>`; }
+  else {
+    tbody.innerHTML = "";
+    data.forEach(entry => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="text-transform:capitalize;color:${entry.entry_type === "add" ? "var(--gold)" : "#f2a8a3"};">${escapeHtml(entry.entry_type)}</td>
+        <td>$${(entry.amount_cents / 100).toFixed(2)}</td>
+        <td style="color:var(--muted);">${escapeHtml(entry.note || "—")}</td>
+        <td>${new Date(entry.created_at).toLocaleDateString()}</td>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  document.getElementById("addReserveEntryBtn").addEventListener("click", addReserveEntry);
+}
+
+async function addReserveEntry(){
+  const entryType = document.getElementById("newReserveType").value;
+  const amountDollars = parseFloat(document.getElementById("newReserveAmount").value);
+  const note = document.getElementById("newReserveNote").value.trim();
+
+  if (isNaN(amountDollars) || amountDollars <= 0){ showToast("Enter a valid amount"); return; }
+
+  const { error } = await supabaseClient
+    .from("investment_reserve_entries")
+    .insert({ entry_type: entryType, amount_cents: Math.round(amountDollars * 100), note: note || null, created_by: currentUser.id });
+  if (error){ console.error(error); showToast("Couldn't log entry"); return; }
+
+  document.getElementById("newReserveAmount").value = "";
+  document.getElementById("newReserveNote").value = "";
+  showToast("Entry logged");
+  await logAction("reserve_entry", "investment_reserve", `${entryType} $${amountDollars}`);
+  await loadInvestmentReserve();
+}
+
+// ==========================================================
+// SESSION MANAGEMENT
+// ==========================================================
+async function loadActiveSessions(){
+  const { data, error } = await supabaseClient.rpc("get_active_sessions");
+  const tbody = document.getElementById("sessionsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No active sessions found.</td></tr>`; return; }
+
+  tbody.innerHTML = "";
+  data.forEach(s => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(s.display_name || "Unknown")}</td>
+      <td style="color:var(--muted);font-size:12px;">${escapeHtml(s.email || "")}</td>
+      <td>${new Date(s.last_active).toLocaleString()}</td>
+      <td><button class="btn sm" data-session-user="${s.user_id}">Force Logout</button></td>`;
+    tbody.appendChild(row);
+  });
+
+  tbody.querySelectorAll("[data-session-user]").forEach(btn => {
+    btn.addEventListener("click", () => forceLogoutAccount(btn.dataset.sessionUser, ""));
+  });
 }
 
 
