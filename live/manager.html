@@ -407,6 +407,7 @@ async function initialize(){
   const { data: userData } = await supabaseClient.auth.getUser();
   if (!userData.user){ window.location.href = "live-login.html"; return; }
   currentUser = userData.user;
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "relvmanager", target_label: "RelvManager" }); } catch (e){}
 
   const { data: categories } = await supabaseClient.from("live_categories").select("*").order("sort_order", { ascending:true });
   const select = document.getElementById("streamCategory");
