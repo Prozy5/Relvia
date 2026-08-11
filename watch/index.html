@@ -306,6 +306,7 @@ async function renderFilmDetail(){
     return;
   }
   currentProject = project;
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "relvia-watch", target_label: "Relvia (Flagship Watch)" }); } catch (e){}
 
   const { data: film } = await supabaseClient.from("studios_films").select("*").eq("project_id", project.id).maybeSingle();
   if (!film){
