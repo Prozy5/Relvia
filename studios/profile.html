@@ -114,6 +114,7 @@ async function initialize(){
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const currentUser = sessionData?.session ? (await supabaseClient.auth.getUser()).data.user : null;
   const isOwnProfile = currentUser && currentUser.id === targetUserId;
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "studios-profile", target_label: "Relvia Studios (Filmmaker Profile)" }); } catch (e){}
 
   const { data: profile, error } = await supabaseClient.from("profiles").select("*").eq("id", targetUserId).maybeSingle();
   if (error || !profile){
