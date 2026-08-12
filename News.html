@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>News — Relvia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{ color:var(--text); min-height:100vh; background:var(--background); }
+a{ text-decoration:none; color:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-family:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:36px; height:36px; border-radius:50%; background:#000;
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:760px; margin:auto; padding:50px 24px 90px; }
+
+.page-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:12px; text-align:center; }
+.page-title{ font-family:var(--font-display); font-size:clamp(30px,4vw,44px); font-weight:600; text-align:center; margin-bottom:44px; }
+
+.article-card{
+  display:block; padding:26px 0; border-bottom:1px solid var(--border-soft); cursor:pointer; transition:opacity .15s;
+}
+.article-card:hover{ opacity:.85; }
+.article-category{ font-size:10.5px; letter-spacing:1.5px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:8px; }
+.article-title{ font-family:var(--font-display); font-size:24px; font-weight:600; margin-bottom:8px; }
+.article-excerpt{ font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:10px; }
+.article-meta{ font-size:11.5px; color:var(--muted-soft); }
+
+.empty-state{ text-align:center; color:var(--muted); padding:60px 20px; }
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; }
+
+.article-cover{ width:100%; border-radius:16px; margin-bottom:30px; border:1px solid var(--border); }
+.reader-category{ font-size:11px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; font-weight:800; text-align:center; margin-bottom:14px; }
+.reader-title{ font-family:var(--font-display); font-size:clamp(28px,4.5vw,42px); font-weight:600; text-align:center; line-height:1.15; margin-bottom:16px; }
+.reader-meta{ text-align:center; color:var(--muted); font-size:13px; margin-bottom:44px; }
+.reader-body{ font-size:16px; line-height:1.85; color:#ddd6c8; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/index.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia</span>
+  </a>
+  <a class="back-link" id="backLink" href="/index.html">← Relvia Entertainment</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const slug = params.get("article");
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  if (slug){
+    document.getElementById("backLink").href = "news.html";
+    document.getElementById("backLink").textContent = "← All News";
+    await renderArticleReader();
+  } else {
+    await renderArticleList();
+  }
+}
+
+async function renderArticleList(){
+  const container = document.getElementById("container");
+
+  const { data: articles, error } = await supabaseClient
+    .from("news_articles").select("*").eq("is_published", true).order("published_at", { ascending:false });
+
+  if (error || !articles || articles.length === 0){
+    container.innerHTML = `
+      <div class="page-eyebrow">Relvia</div>
+      <div class="page-title">News</div>
+      <div class="empty-state">Nothing published yet — check back soon.</div>`;
+    return;
+  }
+
+  const listHtml = articles.map(a => `
+    <a class="article-card" href="news.html?article=${a.slug}">
+      <div class="article-category">${escapeHtml(a.category || "Announcement")}</div>
+      <div class="article-title">${escapeHtml(a.title)}</div>
+      ${a.excerpt ? `<div class="article-excerpt">${escapeHtml(a.excerpt)}</div>` : ""}
+      <div class="article-meta">${new Date(a.published_at || a.created_at).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" })}</div>
+    </a>`).join("");
+
+  container.innerHTML = `
+    <div class="page-eyebrow">Relvia</div>
+    <div class="page-title">News</div>
+    ${listHtml}`;
+}
+
+async function renderArticleReader(){
+  const container = document.getElementById("container");
+
+  const { data: article, error } = await supabaseClient
+    .from("news_articles").select("*").eq("slug", slug).eq("is_published", true).maybeSingle();
+
+  if (error || !article){
+    container.innerHTML = `<div class="empty-state">This article doesn't exist or isn't published yet.</div>`;
+    return;
+  }
+
+  document.title = `${article.title} — Relvia News`;
+
+  container.innerHTML = `
+    ${article.cover_image_url ? `<img class="article-cover" src="${article.cover_image_url}">` : ""}
+    <div class="reader-category">${escapeHtml(article.category || "Announcement")}</div>
+    <div class="reader-title">${escapeHtml(article.title)}</div>
+    <div class="reader-meta">${new Date(article.published_at || article.created_at).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" })}</div>
+    <div class="reader-body">${escapeHtml(article.content)}</div>
+  `;
+}
+
+initialize();
+</script>
+</body>
+</html>
