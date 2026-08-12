@@ -35,6 +35,9 @@ img{ max-width:100%; display:block; }
   font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
 }
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.page-nav{ display:flex; gap:6px; }
+.page-nav a{ font-size:13px; font-weight:700; color:var(--muted); padding:9px 16px; border-radius:10px; }
+.page-nav a.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
 .back-link{ font-size:13px; font-weight:700; color:var(--muted); }
 .back-link:hover{ color:var(--gold); }
 
@@ -69,6 +72,10 @@ img{ max-width:100%; display:block; }
     <div class="brand-badge">R</div>
     <span class="brand-name">Relvia</span>
   </a>
+  <div class="page-nav">
+    <a href="news.html" class="active">News</a>
+    <a href="devforum.html">DevForum</a>
+  </div>
   <a class="back-link" id="backLink" href="/index.html">← Relvia Entertainment</a>
 </header>
 
