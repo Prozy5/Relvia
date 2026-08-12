@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevForum — Relvia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{ color:var(--text); min-height:100vh; background:var(--background); }
+a{ text-decoration:none; color:inherit; }
+button, input, textarea, select{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+
+.topbar{
+  position:sticky; top:0; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:36px; height:36px; border-radius:50%; background:#000;
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:18px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.page-nav{ display:flex; gap:6px; }
+.page-nav a{ font-size:13px; font-weight:700; color:var(--muted); padding:9px 16px; border-radius:10px; }
+.page-nav a.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:760px; margin:auto; padding:40px 24px 90px; }
+
+.page-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:12px; text-align:center; }
+.page-title{ font-family:var(--font-display); font-size:clamp(28px,4vw,40px); font-weight:600; text-align:center; margin-bottom:30px; }
+
+.top-actions-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+.category-filters{ display:flex; gap:6px; flex-wrap:wrap; }
+.category-chip{ font-size:12px; font-weight:700; color:var(--muted); padding:7px 14px; border-radius:999px; border:1px solid var(--border); }
+.category-chip.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+.new-thread-btn{ font-size:13px; font-weight:800; padding:10px 20px; border-radius:10px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; white-space:nowrap; }
+
+.thread-card{ display:flex; gap:16px; padding:20px 0; border-bottom:1px solid var(--border-soft); cursor:pointer; }
+.thread-card:hover{ opacity:.85; }
+.vote-block{ display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; width:44px; }
+.vote-count{ font-size:15px; font-weight:800; color:var(--gold); }
+.vote-label{ font-size:9.5px; color:var(--muted-soft); text-transform:uppercase; }
+.thread-info{ flex:1; }
+.thread-category{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold-end); padding:2px 9px; border-radius:999px; margin-bottom:8px; }
+.thread-title{ font-size:16.5px; font-weight:700; margin-bottom:6px; }
+.thread-title .pin{ color:var(--gold); margin-right:6px; }
+.thread-meta{ font-size:12px; color:var(--muted); }
+
+.empty-state{ text-align:center; color:var(--muted); padding:60px 20px; }
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; }
+
+.detail-category{ text-align:center; margin-bottom:14px; }
+.detail-title{ font-family:var(--font-display); font-size:clamp(24px,3.6vw,34px); font-weight:600; text-align:center; line-height:1.2; margin-bottom:14px; }
+.detail-meta{ text-align:center; color:var(--muted); font-size:13px; margin-bottom:30px; }
+.detail-body{ font-size:15px; line-height:1.8; color:#ddd6c8; white-space:pre-wrap; margin-bottom:20px; }
+.detail-vote-row{ display:flex; justify-content:center; margin-bottom:40px; }
+.upvote-btn{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--muted); border:1px solid var(--border); padding:9px 20px; border-radius:999px; }
+.upvote-btn.voted{ color:var(--gold); border-color:var(--gold-end); }
+
+.replies-title{ font-family:var(--font-display); font-size:18px; font-weight:600; margin-bottom:18px; }
+.reply-item{ padding:16px 0; border-bottom:1px solid var(--border-soft); }
+.reply-author{ font-size:12.5px; font-weight:700; color:var(--gold); margin-bottom:6px; }
+.reply-body{ font-size:14px; line-height:1.6; color:#ddd; white-space:pre-wrap; }
+.reply-time{ font-size:11px; color:var(--muted-soft); margin-top:6px; }
+
+.composer-box{ margin-top:24px; }
+.composer-box textarea{ width:100%; min-height:90px; background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:12px 14px; color:white; font-size:13.5px; margin-bottom:10px; }
+.composer-box button{ font-size:13px; font-weight:800; padding:10px 22px; border-radius:10px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+
+.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2500; padding:24px; }
+.modal-backdrop.open{ display:flex; }
+.modal{ background:var(--surface); border:1px solid var(--gold-end); border-radius:20px; padding:26px; max-width:480px; width:100%; }
+.modal h3{ font-family:var(--font-display); font-size:19px; margin-bottom:16px; }
+.modal-field{ margin-bottom:14px; }
+.modal-field label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.modal-field input, .modal-field select, .modal-field textarea{ width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px 12px; color:white; font-size:13.5px; }
+.modal-field textarea{ min-height:120px; }
+.modal-actions{ display:flex; gap:10px; margin-top:6px; }
+.modal-actions button{ flex:1; padding:11px; border-radius:12px; font-weight:800; font-size:13px; }
+.modal-cancel{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.modal-confirm{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/index.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia</span>
+  </a>
+  <div class="page-nav">
+    <a href="news.html">News</a>
+    <a href="devforum.html" class="active">DevForum</a>
+  </div>
+  <a class="back-link" id="backLink" href="/index.html">← Relvia Entertainment</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading...</div>
+</div>
+
+<div class="modal-backdrop" id="newThreadModal">
+  <div class="modal">
+    <h3>Start a thread</h3>
+    <div class="modal-field">
+      <label>Category</label>
+      <select id="newThreadCategory">
+        <option value="general">General</option>
+        <option value="feedback">Feedback</option>
+        <option value="bug-report">Bug Report</option>
+        <option value="feature-request">Feature Request</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Title</label><input type="text" id="newThreadTitle"></div>
+    <div class="modal-field"><label>What's on your mind?</label><textarea id="newThreadBody"></textarea></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="cancelThreadBtn">Cancel</button>
+      <button class="modal-confirm" id="postThreadBtn">Post thread</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const threadId = params.get("thread");
+let currentUser = null;
+let activeCategory = "all";
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function timeAgo(dateStr){
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds/60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds/3600)}h ago`;
+  return `${Math.floor(seconds/86400)}d ago`;
+}
+function categoryLabel(cat){
+  return { general: "General", feedback: "Feedback", "bug-report": "Bug Report", "feature-request": "Feature Request", "dev-update": "Dev Update" }[cat] || cat;
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (sessionData?.session){
+    const { data: userData } = await supabaseClient.auth.getUser();
+    currentUser = userData?.user || null;
+  }
+
+  if (threadId){
+    document.getElementById("backLink").href = "devforum.html";
+    document.getElementById("backLink").textContent = "← All Threads";
+    await renderThreadDetail();
+  } else {
+    await renderThreadList();
+  }
+}
+
+async function renderThreadList(){
+  const container = document.getElementById("container");
+
+  const { data: threads, error } = await supabaseClient
+    .from("forum_threads_with_counts").select("*").order("is_pinned", { ascending:false }).order("created_at", { ascending:false });
+
+  container.innerHTML = `
+    <div class="page-eyebrow">Relvia</div>
+    <div class="page-title">DevForum</div>
+    <div class="top-actions-row">
+      <div class="category-filters" id="categoryFilters">
+        <button class="category-chip active" data-cat="all">All</button>
+        <button class="category-chip" data-cat="general">General</button>
+        <button class="category-chip" data-cat="feedback">Feedback</button>
+        <button class="category-chip" data-cat="bug-report">Bug Reports</button>
+        <button class="category-chip" data-cat="feature-request">Feature Requests</button>
+        <button class="category-chip" data-cat="dev-update">Dev Updates</button>
+      </div>
+      <button class="new-thread-btn" id="newThreadBtn">+ New Thread</button>
+    </div>
+    <div id="threadListInner"></div>
+  `;
+
+  document.getElementById("newThreadBtn").addEventListener("click", () => {
+    if (!currentUser){ window.location.href = "/login.html"; return; }
+    document.getElementById("newThreadModal").classList.add("open");
+  });
+
+  document.querySelectorAll("#categoryFilters .category-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll("#categoryFilters .category-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      activeCategory = chip.dataset.cat;
+      renderThreadListInner(threads || []);
+    });
+  });
+
+  if (error){
+    document.getElementById("threadListInner").innerHTML = `<div class="empty-state">Couldn't load threads.</div>`;
+    return;
+  }
+  renderThreadListInner(threads || []);
+  setupNewThreadModal();
+}
+
+function renderThreadListInner(threads){
+  const inner = document.getElementById("threadListInner");
+  const filtered = activeCategory === "all" ? threads : threads.filter(t => t.category === activeCategory);
+
+  if (filtered.length === 0){
+    inner.innerHTML = `<div class="empty-state">No threads here yet — be the first to post one.</div>`;
+    return;
+  }
+
+  inner.innerHTML = filtered.map(t => `
+    <div class="thread-card" data-thread-id="${t.id}">
+      <div class="vote-block">
+        <div class="vote-count">${t.vote_count || 0}</div>
+        <div class="vote-label">votes</div>
+      </div>
+      <div class="thread-info">
+        <div class="thread-category">${escapeHtml(categoryLabel(t.category))}</div>
+        <div class="thread-title">${t.is_pinned ? '<span class="pin">&#9733;</span>' : ""}${escapeHtml(t.title)}</div>
+        <div class="thread-meta">${t.reply_count || 0} replies &middot; ${timeAgo(t.created_at)}</div>
+      </div>
+    </div>`).join("");
+
+  inner.querySelectorAll("[data-thread-id]").forEach(card => {
+    card.addEventListener("click", () => { window.location.href = `devforum.html?thread=${card.dataset.threadId}`; });
+  });
+}
+
+function setupNewThreadModal(){
+  document.getElementById("cancelThreadBtn").addEventListener("click", () => document.getElementById("newThreadModal").classList.remove("open"));
+  document.getElementById("postThreadBtn").addEventListener("click", async () => {
+    const title = document.getElementById("newThreadTitle").value.trim();
+    const body = document.getElementById("newThreadBody").value.trim();
+    const category = document.getElementById("newThreadCategory").value;
+
+    if (!title || !body){ alert("Title and body are required."); return; }
+
+    const { data: newThread, error } = await supabaseClient
+      .from("forum_threads").insert({ title, body, category, author_id: currentUser.id }).select().single();
+
+    if (error){ console.error(error); alert("Couldn't post thread."); return; }
+    window.location.href = `devforum.html?thread=${newThread.id}`;
+  });
+}
+
+async function renderThreadDetail(){
+  const container = document.getElementById("container");
+
+  const { data: thread, error } = await supabaseClient.from("forum_threads").select("*").eq("id", threadId).maybeSingle();
+  if (error || !thread){
+    container.innerHTML = `<div class="empty-state">This thread doesn't exist.</div>`;
+    return;
+  }
+
+  const { data: author } = await supabaseClient.from("profiles").select("display_name").eq("id", thread.author_id).maybeSingle();
+
+  const { data: votes } = await supabaseClient.from("forum_thread_votes").select("user_id").eq("thread_id", threadId);
+  const voteCount = (votes || []).length;
+  const hasVoted = currentUser && (votes || []).some(v => v.user_id === currentUser.id);
+
+  const { data: replies } = await supabaseClient.from("forum_replies").select("*").eq("thread_id", threadId).order("created_at", { ascending:true });
+  const replyAuthorIds = [...new Set((replies || []).map(r => r.author_id))];
+  const { data: replyAuthors } = replyAuthorIds.length > 0
+    ? await supabaseClient.from("profiles").select("id, display_name").in("id", replyAuthorIds)
+    : { data: [] };
+  const nameById = {};
+  (replyAuthors || []).forEach(a => { nameById[a.id] = a.display_name; });
+
+  document.title = `${thread.title} — DevForum`;
+
+  container.innerHTML = `
+    <div class="detail-category" style="text-align:center;"><span class="thread-category">${escapeHtml(categoryLabel(thread.category))}</span></div>
+    <div class="detail-title">${escapeHtml(thread.title)}</div>
+    <div class="detail-meta">${escapeHtml(author?.display_name || "Unknown")} &middot; ${timeAgo(thread.created_at)}</div>
+    <div class="detail-body">${escapeHtml(thread.body)}</div>
+    <div class="detail-vote-row">
+      <button class="upvote-btn ${hasVoted ? "voted" : ""}" id="upvoteBtn">&#9650; <span id="voteCountLabel">${voteCount}</span> votes</button>
+    </div>
+
+    <div class="replies-title">${(replies || []).length} ${(replies || []).length === 1 ? "Reply" : "Replies"}</div>
+    <div id="repliesList">
+      ${(replies || []).length === 0 ? '<div style="color:var(--muted);font-size:13px;">No replies yet.</div>' : (replies || []).map(r => `
+        <div class="reply-item">
+          <div class="reply-author">${escapeHtml(nameById[r.author_id] || "Unknown")}</div>
+          <div class="reply-body">${escapeHtml(r.body)}</div>
+          <div class="reply-time">${timeAgo(r.created_at)}</div>
+        </div>`).join("")}
+    </div>
+
+    <div class="composer-box">
+      ${currentUser
+        ? `<textarea id="replyInput" placeholder="Write a reply..."></textarea><button id="sendReplyBtn">Reply</button>`
+        : `<a href="/login.html" style="color:var(--gold);font-weight:700;font-size:13px;">Sign in to reply →</a>`}
+    </div>
+  `;
+
+  const upvoteBtn = document.getElementById("upvoteBtn");
+  upvoteBtn.addEventListener("click", async () => {
+    if (!currentUser){ window.location.href = "/login.html"; return; }
+    await toggleUpvote(hasVoted);
+  });
+
+  const sendReplyBtn = document.getElementById("sendReplyBtn");
+  if (sendReplyBtn) sendReplyBtn.addEventListener("click", sendReply);
+}
+
+async function toggleUpvote(currentlyVoted){
+  if (currentlyVoted){
+    await supabaseClient.from("forum_thread_votes").delete().eq("thread_id", threadId).eq("user_id", currentUser.id);
+  } else {
+    await supabaseClient.from("forum_thread_votes").insert({ thread_id: threadId, user_id: currentUser.id });
+  }
+  await renderThreadDetail();
+}
+
+async function sendReply(){
+  const input = document.getElementById("replyInput");
+  const body = input.value.trim();
+  if (!body) return;
+
+  const { error } = await supabaseClient.from("forum_replies").insert({ thread_id: threadId, body, author_id: currentUser.id });
+  if (error){ console.error(error); alert("Couldn't post reply."); return; }
+
+  await renderThreadDetail();
+}
+
+initialize();
+</script>
+</body>
+</html>
