@@ -205,6 +205,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
+      <button class="eco-tab" data-eco-tab="news">News</button>
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
@@ -684,6 +685,41 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
     </div><!-- /eco-growth -->
+
+    <!-- ================= NEWS TAB ================= -->
+    <div class="eco-panel" id="eco-news">
+      <div class="section">
+        <div class="section-head"><h2>Write an Article</h2></div>
+        <div class="panel" style="padding:20px;">
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <input type="text" id="newsTitle" placeholder="Title" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+            <select id="newsCategory" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
+              <option value="announcement">Announcement</option>
+              <option value="update">Platform Update</option>
+              <option value="behind-the-scenes">Behind the Scenes</option>
+              <option value="personal">Personal Note</option>
+            </select>
+          </div>
+          <input type="text" id="newsExcerpt" placeholder="Short excerpt (shows in the article list)" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;margin-bottom:10px;">
+          <input type="text" id="newsCoverUrl" placeholder="Cover image URL (optional)" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;margin-bottom:10px;">
+          <textarea id="newsContent" placeholder="Write the full article here..." style="width:100%;min-height:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:white;font-size:14px;line-height:1.6;margin-bottom:12px;"></textarea>
+          <div style="display:flex;gap:10px;">
+            <button class="btn" id="saveNewsDraftBtn">Save as draft</button>
+            <button class="btn gold" id="publishNewsBtn">Publish now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>All Articles</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="newsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-news -->
 
     <!-- ================= FOUNDER TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-founder">
@@ -2559,6 +2595,7 @@ let campusLoaded = false;
 let creatorsLoaded = false;
 let growthLoaded = false;
 let founderTabLoaded = false;
+let newsLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -2578,6 +2615,7 @@ function setupEcosystemTabs(){
         growthLoaded = true;
         await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
       }
+      if (target === "news" && !newsLoaded){ newsLoaded = true; await loadNewsTab(); }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
         await Promise.all([
@@ -2962,6 +3000,88 @@ async function loadActiveSessions(){
   tbody.querySelectorAll("[data-session-user]").forEach(btn => {
     btn.addEventListener("click", () => forceLogoutAccount(btn.dataset.sessionUser, ""));
   });
+}
+
+// ==========================================================
+// NEWS
+// ==========================================================
+function slugify(title){
+  return title.toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+}
+
+async function loadNewsTab(){
+  const { data, error } = await supabaseClient.from("news_articles").select("*").order("created_at", { ascending:false });
+  const tbody = document.getElementById("newsTableBody");
+
+  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No articles yet.</td></tr>`; }
+  else {
+    tbody.innerHTML = "";
+    data.forEach(article => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${article.is_published ? `<a href="../news.html?article=${article.slug}" target="_blank" style="color:var(--gold);">${escapeHtml(article.title)}</a>` : escapeHtml(article.title)}</td>
+        <td style="text-transform:capitalize;">${escapeHtml((article.category || "").replace(/-/g, " "))}</td>
+        <td><span class="pill ${article.is_published ? "ok" : "temp"}">${article.is_published ? "Published" : "Draft"}</span></td>
+        <td>${new Date(article.created_at).toLocaleDateString()}</td>
+        <td>
+          ${!article.is_published ? `<button class="btn gold sm" data-publish-id="${article.id}">Publish</button>` : `<button class="btn sm" data-unpublish-id="${article.id}">Unpublish</button>`}
+          <button class="btn danger sm" data-delete-id="${article.id}">Delete</button>
+        </td>`;
+      tbody.appendChild(row);
+    });
+
+    tbody.querySelectorAll("[data-publish-id]").forEach(btn => btn.addEventListener("click", () => setArticlePublished(btn.dataset.publishId, true)));
+    tbody.querySelectorAll("[data-unpublish-id]").forEach(btn => btn.addEventListener("click", () => setArticlePublished(btn.dataset.unpublishId, false)));
+    tbody.querySelectorAll("[data-delete-id]").forEach(btn => btn.addEventListener("click", () => deleteArticle(btn.dataset.deleteId)));
+  }
+
+  document.getElementById("saveNewsDraftBtn").addEventListener("click", () => saveNewsArticle(false));
+  document.getElementById("publishNewsBtn").addEventListener("click", () => saveNewsArticle(true));
+}
+
+async function saveNewsArticle(publishNow){
+  const title = document.getElementById("newsTitle").value.trim();
+  const category = document.getElementById("newsCategory").value;
+  const excerpt = document.getElementById("newsExcerpt").value.trim();
+  const coverUrl = document.getElementById("newsCoverUrl").value.trim();
+  const content = document.getElementById("newsContent").value.trim();
+
+  if (!title || !content){ showToast("Title and article content are required"); return; }
+
+  const slug = slugify(title) + "-" + Date.now().toString(36);
+
+  const { error } = await supabaseClient.from("news_articles").insert({
+    title, slug, category, excerpt: excerpt || null, cover_image_url: coverUrl || null, content,
+    author_id: currentUser.id, is_published: publishNow, published_at: publishNow ? new Date().toISOString() : null,
+  });
+
+  if (error){ console.error(error); showToast("Couldn't save article"); return; }
+
+  ["newsTitle", "newsExcerpt", "newsCoverUrl", "newsContent"].forEach(id => { document.getElementById(id).value = ""; });
+  showToast(publishNow ? "Article published" : "Draft saved");
+  await logAction(publishNow ? "publish_article" : "save_article_draft", "news", title);
+  await loadNewsTab();
+}
+
+async function setArticlePublished(articleId, publish){
+  const { error } = await supabaseClient
+    .from("news_articles")
+    .update({ is_published: publish, published_at: publish ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+    .eq("id", articleId);
+  if (error){ console.error(error); showToast("Couldn't update article"); return; }
+  showToast(publish ? "Article published" : "Article unpublished");
+  await loadNewsTab();
+}
+
+async function deleteArticle(articleId){
+  if (!confirm("Delete this article permanently?")) return;
+  const { error } = await supabaseClient.from("news_articles").delete().eq("id", articleId);
+  if (error){ console.error(error); showToast("Couldn't delete article"); return; }
+  showToast("Article deleted");
+  await loadNewsTab();
 }
 
 
