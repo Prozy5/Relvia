@@ -732,6 +732,17 @@ tr:last-child td{ border-bottom:none; }
       </div>
       <p style="color:var(--muted);font-size:12px;margin:6px 0 0;">"Total content pieces" combines Studios projects, Music tracks, RelviaCreators posts, and ad campaigns.</p>
 
+    <!-- JARVIS -->
+    <div class="panel" style="padding:20px;margin:20px 0;border:1px solid var(--gold-end);">
+      <h4 style="margin-bottom:6px;font-size:15px;font-family:var(--font-display);">✦ Jarvis</h4>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:14px;">Ask about anything happening on the platform. Read-only — it can answer questions but can't change anything.</p>
+      <div id="jarvisMessages" style="max-height:340px;overflow-y:auto;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="jarvisInput" placeholder="How many people signed up this week?" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13.5px;">
+        <button class="btn gold" id="jarvisAskBtn">Ask</button>
+      </div>
+    </div>
+
     <!-- UNIVERSAL SEARCH -->
     <div class="panel" style="padding:18px;margin:20px 0;">
       <h4 style="margin-bottom:10px;font-size:14px;">Universal Search</h4>
@@ -2623,6 +2634,7 @@ function setupEcosystemTabs(){
           loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(),
         ]);
         setupUniversalSearch();
+        setupJarvis();
       }
     });
   });
@@ -2660,6 +2672,57 @@ async function loadPlatformOverview(){
 // ==========================================================
 // UNIVERSAL SEARCH
 // ==========================================================
+// ==========================================================
+// JARVIS
+// ==========================================================
+function setupJarvis(){
+  document.getElementById("jarvisAskBtn").addEventListener("click", askJarvis);
+  document.getElementById("jarvisInput").addEventListener("keydown", (e) => { if (e.key === "Enter") askJarvis(); });
+}
+
+function appendJarvisMessage(role, text){
+  const container = document.getElementById("jarvisMessages");
+  const bubble = document.createElement("div");
+  bubble.style.cssText = role === "user"
+    ? "align-self:flex-end;max-width:80%;background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;padding:9px 14px;border-radius:12px;font-size:13px;"
+    : "align-self:flex-start;max-width:85%;background:var(--surface-light);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;";
+  bubble.textContent = text;
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+  return bubble;
+}
+
+async function askJarvis(){
+  const input = document.getElementById("jarvisInput");
+  const question = input.value.trim();
+  if (!question) return;
+
+  appendJarvisMessage("user", question);
+  input.value = "";
+  const thinkingBubble = appendJarvisMessage("jarvis", "Thinking...");
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/founder-jarvis`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ question }),
+    });
+    const result = await response.json();
+
+    if (!response.ok){
+      thinkingBubble.textContent = result.error || "Couldn't get an answer.";
+      return;
+    }
+    thinkingBubble.textContent = result.answer;
+  } catch (err){
+    console.error(err);
+    thinkingBubble.textContent = "Couldn't reach Jarvis right now.";
+  }
+}
+
 function setupUniversalSearch(){
   const input = document.getElementById("universalSearchInput");
   let debounceTimer;
@@ -3022,7 +3085,7 @@ async function loadNewsTab(){
     data.forEach(article => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${article.is_published ? `<a href="../news.html?article=${article.slug}" target="_blank" style="color:var(--gold);">${escapeHtml(article.title)}</a>` : escapeHtml(article.title)}</td>
+        <td>${article.is_published ? `<a href="../article.html?slug=${article.slug}" target="_blank" style="color:var(--gold);">${escapeHtml(article.title)}</a>` : escapeHtml(article.title)}</td>
         <td style="text-transform:capitalize;">${escapeHtml((article.category || "").replace(/-/g, " "))}</td>
         <td><span class="pill ${article.is_published ? "ok" : "temp"}">${article.is_published ? "Published" : "Draft"}</span></td>
         <td>${new Date(article.created_at).toLocaleDateString()}</td>
