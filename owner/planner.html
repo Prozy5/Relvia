@@ -146,9 +146,36 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
   <div class="panel-view" id="insightsView">
 
     <div style="margin-bottom:36px;">
+      <h3 style="font-family:var(--font-display);font-size:19px;margin-bottom:6px;">Caption Templates</h3>
+      <p style="color:var(--muted);font-size:12.5px;margin-bottom:16px;">Starting points by post type — copy one in and fill in the specifics.</p>
+      <div id="templatesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;"></div>
+    </div>
+
+    <div style="margin-bottom:36px;">
       <h3 style="font-family:var(--font-display);font-size:19px;margin-bottom:6px;">Best Times to Post</h3>
       <p style="color:var(--muted);font-size:12.5px;margin-bottom:16px;">General industry research, not pulled from your specific account — treat this as a starting point, then let your own numbers below correct it over time.</p>
       <div id="bestTimesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;"></div>
+    </div>
+
+    <div style="margin-bottom:36px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h3 style="font-family:var(--font-display);font-size:19px;">Follower Growth</h3>
+        <button id="logFollowersBtn" style="font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold-end);padding:6px 14px;border-radius:999px;">+ Log count</button>
+      </div>
+      <p style="color:var(--muted);font-size:12.5px;margin-bottom:16px;">Manual log — check the real number on Instagram whenever, log it here to see the trend.</p>
+      <div class="content-card" style="cursor:default;margin-bottom:14px;">
+        <div id="followerChart" style="height:100px;"></div>
+      </div>
+      <div id="followerLogList"></div>
+    </div>
+
+    <div style="margin-bottom:36px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h3 style="font-family:var(--font-display);font-size:19px;">Shot List</h3>
+        <button id="addShotBtn" style="font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold-end);padding:6px 14px;border-radius:999px;">+ Add</button>
+      </div>
+      <p style="color:var(--muted);font-size:12.5px;margin-bottom:16px;">Content you still need to go capture before it can become a post.</p>
+      <div id="shotListContainer"></div>
     </div>
 
     <div style="margin-bottom:36px;">
@@ -244,6 +271,32 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
   </div>
 </div>
 
+<div class="modal-backdrop" id="followerModal">
+  <div class="modal">
+    <h3>Log Follower Count</h3>
+    <div class="modal-row">
+      <div class="modal-field"><label>Count</label><input type="number" id="followerCountInput" min="0"></div>
+      <div class="modal-field"><label>Date</label><input type="date" id="followerDateInput"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="cancelFollowerBtn">Cancel</button>
+      <button class="modal-confirm" id="saveFollowerBtn">Log it</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="shotModal">
+  <div class="modal">
+    <h3>Add to Shot List</h3>
+    <div class="modal-field"><label>What do you need to capture?</label><input type="text" id="shotTitle" placeholder="e.g. Photos from the Wednesday workshop"></div>
+    <div class="modal-field"><label>Notes (optional)</label><input type="text" id="shotNotes" placeholder="Anything specific to remember"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="cancelShotBtn">Cancel</button>
+      <button class="modal-confirm" id="saveShotBtn">Add</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
@@ -274,7 +327,7 @@ async function initialize(){
       document.querySelectorAll(".panel-view").forEach(v => v.classList.remove("active"));
       tab.classList.add("active");
       document.getElementById(`${tab.dataset.view}View`).classList.add("active");
-      if (tab.dataset.view === "insights"){ renderBestTimes(); loadHashtagSets(); renderPerformance(); }
+      if (tab.dataset.view === "insights"){ renderTemplates(); renderBestTimes(); loadHashtagSets(); renderPerformance(); loadFollowerLog(); loadShotList(); }
     });
   });
 
@@ -439,8 +492,151 @@ async function deleteItem(){
 }
 
 // ==========================================================
-// INSIGHTS — BEST TIMES
+// INSIGHTS — CAPTION TEMPLATES
 // ==========================================================
+const captionTemplates = [
+  { name: "Event Promo", text: "Mark your calendars! [EVENT NAME] is happening [DATE] at [TIME] in [LOCATION]. [Brief description of what it is and why to come.] See you there! 🔗 link in bio for more info." },
+  { name: "Student Spotlight", text: "This week's spotlight: [NAME], [YEAR/MAJOR]. [What they've accomplished or what makes them stand out.] We're proud of you, [NAME]! Drop a 🙌 if you know them." },
+  { name: "Educational", text: "Did you know? [FACT OR TIP RELEVANT TO YOUR PROGRAM]. [Brief explanation of why it matters or how to apply it.] Save this post for later!" },
+  { name: "Recap / Behind the Scenes", text: "Another great [EVENT/PROGRAM] in the books! [What happened, a highlight or two.] Thank you to everyone who came out — more to come soon." },
+];
+
+function renderTemplates(){
+  const grid = document.getElementById("templatesGrid");
+  if (grid.dataset.rendered) return;
+  grid.dataset.rendered = "true";
+  grid.innerHTML = captionTemplates.map((t, i) => `
+    <div class="content-card" style="cursor:default;">
+      <div class="content-card-top">
+        <span style="font-weight:700;font-size:13.5px;">${t.name}</span>
+        <button data-template-copy="${i}" style="font-size:11px;font-weight:700;color:var(--gold);">Copy</button>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6;">${escapeHtml(t.text)}</div>
+    </div>`).join("");
+
+  grid.querySelectorAll("[data-template-copy]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      navigator.clipboard.writeText(captionTemplates[btn.dataset.templateCopy].text);
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    });
+  });
+}
+
+// ==========================================================
+// INSIGHTS — FOLLOWER GROWTH
+// ==========================================================
+document.getElementById("logFollowersBtn").addEventListener("click", () => {
+  document.getElementById("followerCountInput").value = "";
+  document.getElementById("followerDateInput").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("followerModal").classList.add("open");
+});
+document.getElementById("cancelFollowerBtn").addEventListener("click", () => document.getElementById("followerModal").classList.remove("open"));
+document.getElementById("saveFollowerBtn").addEventListener("click", async () => {
+  const count = parseInt(document.getElementById("followerCountInput").value, 10);
+  const date = document.getElementById("followerDateInput").value;
+  if (isNaN(count) || !date) return;
+
+  const { error } = await supabaseClient.from("social_follower_log").insert({ follower_count: count, logged_date: date, created_by: currentUser.id });
+  if (error){ console.error(error); alert("Couldn't log count."); return; }
+
+  document.getElementById("followerModal").classList.remove("open");
+  await loadFollowerLog();
+});
+
+async function loadFollowerLog(){
+  const { data, error } = await supabaseClient.from("social_follower_log").select("*").order("logged_date", { ascending:true });
+  const chartContainer = document.getElementById("followerChart");
+  const listContainer = document.getElementById("followerLogList");
+
+  if (error || !data || data.length === 0){
+    chartContainer.innerHTML = `<div style="color:var(--muted);font-size:12.5px;text-align:center;padding-top:35px;">Log your first count to start the chart.</div>`;
+    listContainer.innerHTML = "";
+    return;
+  }
+
+  const counts = data.map(d => d.follower_count);
+  const minCount = Math.min(...counts);
+  const maxCount = Math.max(...counts);
+  const range = Math.max(1, maxCount - minCount);
+
+  const points = data.map((d, i) => {
+    const x = data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
+    const y = 100 - ((d.follower_count - minCount) / range) * 90 - 5;
+    return `${x},${y}`;
+  }).join(" ");
+
+  chartContainer.innerHTML = `
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%;">
+      <polyline points="${points}" fill="none" stroke="#e0b158" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+
+  listContainer.innerHTML = data.slice().reverse().slice(0, 8).map((d, i, arr) => {
+    const prev = data[data.indexOf(d) - 1];
+    const delta = prev ? d.follower_count - prev.follower_count : null;
+    return `
+      <div class="content-card" style="cursor:default;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;">${new Date(d.logged_date + "T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}</span>
+        <span style="font-weight:700;">${d.follower_count}${delta != null ? ` <span style="font-size:11px;color:${delta >= 0 ? 'var(--ok-green)' : 'var(--danger)'};">(${delta >= 0 ? '+' : ''}${delta})</span>` : ""}</span>
+      </div>`;
+  }).join("");
+}
+
+// ==========================================================
+// INSIGHTS — SHOT LIST
+// ==========================================================
+document.getElementById("addShotBtn").addEventListener("click", () => {
+  document.getElementById("shotTitle").value = "";
+  document.getElementById("shotNotes").value = "";
+  document.getElementById("shotModal").classList.add("open");
+});
+document.getElementById("cancelShotBtn").addEventListener("click", () => document.getElementById("shotModal").classList.remove("open"));
+document.getElementById("saveShotBtn").addEventListener("click", async () => {
+  const title = document.getElementById("shotTitle").value.trim();
+  const notes = document.getElementById("shotNotes").value.trim();
+  if (!title) return;
+
+  const { error } = await supabaseClient.from("social_shot_list").insert({ title, notes: notes || null, created_by: currentUser.id });
+  if (error){ console.error(error); alert("Couldn't add to shot list."); return; }
+
+  document.getElementById("shotModal").classList.remove("open");
+  await loadShotList();
+});
+
+async function loadShotList(){
+  const { data, error } = await supabaseClient.from("social_shot_list").select("*").order("is_captured", { ascending:true }).order("created_at", { ascending:false });
+  const container = document.getElementById("shotListContainer");
+
+  if (error || !data || data.length === 0){
+    container.innerHTML = `<div class="empty-state" style="padding:30px 20px;">Nothing on the shot list yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map(shot => `
+    <div class="content-card" style="cursor:default;display:flex;align-items:flex-start;gap:12px;${shot.is_captured ? 'opacity:.5;' : ''}">
+      <input type="checkbox" data-shot-id="${shot.id}" ${shot.is_captured ? "checked" : ""} style="margin-top:3px;accent-color:var(--gold);">
+      <div style="flex:1;">
+        <div style="font-size:13.5px;font-weight:700;${shot.is_captured ? 'text-decoration:line-through;' : ''}">${escapeHtml(shot.title)}</div>
+        ${shot.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;">${escapeHtml(shot.notes)}</div>` : ""}
+      </div>
+      <button data-delete-shot="${shot.id}" style="font-size:11px;color:var(--danger);">Remove</button>
+    </div>`).join("");
+
+  container.querySelectorAll("[data-shot-id]").forEach(checkbox => {
+    checkbox.addEventListener("change", async () => {
+      await supabaseClient.from("social_shot_list").update({ is_captured: checkbox.checked }).eq("id", checkbox.dataset.shotId);
+      await loadShotList();
+    });
+  });
+  container.querySelectorAll("[data-delete-shot]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await supabaseClient.from("social_shot_list").delete().eq("id", btn.dataset.deleteShot);
+      await loadShotList();
+    });
+  });
+}
+
+
 const bestTimesData = [
   { platform: "Instagram", times: "Weekdays 10am–1pm and 6–9pm. Tuesday/Wednesday tend to edge out other days." },
   { platform: "TikTok", times: "Weekdays 6–10am and 7–11pm. Late evening tends to be a strong, consistent window." },
