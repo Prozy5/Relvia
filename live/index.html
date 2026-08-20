@@ -1062,6 +1062,18 @@ function setupRelvbitsModal(){
   const customAmount = document.getElementById("customAmount");
   let selectedAmountCents = 500;
 
+  (async () => {
+    const { data: flag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
+    const relvbitsBtn = document.getElementById("sendRelvbitsBtn");
+    if (relvbitsBtn && flag && flag.enabled === false) {
+      relvbitsBtn.textContent = "RelvBits — Coming Soon";
+      relvbitsBtn.disabled = true;
+      relvbitsBtn.style.opacity = "0.5";
+      relvbitsBtn.style.cursor = "default";
+      relvbitsBtn.onclick = null;
+    }
+  })();
+
   document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
     if (!currentPlayerStream){ return; }
     if (!currentUser){
