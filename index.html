@@ -112,7 +112,10 @@ footer p{ font-size:12px; color:var(--muted-soft); }
 <div id="platformBroadcastBanner" style="display:none;"></div>
 
 <header class="topbar">
-  <div class="logo">Relvia</div>
+  <div class="logo" style="display:flex;align-items:center;gap:10px;">
+    Relvia
+    <span id="betaBadge" style="display:none;font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#000;background:linear-gradient(135deg,var(--gold-start),var(--gold-end));padding:2px 9px;border-radius:999px;vertical-align:middle;">BETA</span>
+  </div>
   <div class="nav-links">
     <a href="studios/index.html">Studios</a>
     <a href="music/index.html">Music</a>
@@ -219,6 +222,7 @@ footer p{ font-size:12px; color:var(--muted-soft); }
   <p class="account-note" style="margin-bottom:34px;">It takes about a minute to sign up, and every division above is already live — not a waitlist, not a "coming soon."</p>
   <a class="hero-btn gold" href="/login.html">Join Relvia</a>
   <a href="/news.html" style="display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted);">Read the latest news →</a>
+  <a href="/whats-next.html" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--muted);">What's next for Relvia →</a>
 </div>
 
 <footer>
@@ -261,6 +265,20 @@ footer p{ font-size:12px; color:var(--muted-soft); }
     sessionStorage.setItem("dismissedBroadcastId", announcement.id);
     banner.style.display = "none";
   });
+})();
+
+// Beta badge — reference implementation. Any other page can add
+// this same block to show the same badge, checking the real
+// beta_mode flag from the owner panel's Kill-Switches.
+(async function checkBetaMode(){
+  const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const { data } = await client.from("feature_flags").select("enabled").eq("key", "beta_mode").maybeSingle();
+  if (data && data.enabled){
+    document.getElementById("betaBadge").style.display = "inline-block";
+  }
 })();
 </script>
 
