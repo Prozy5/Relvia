@@ -256,7 +256,7 @@ const TOKEN_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-campus-token`;
 const RELVBITS_CHECKOUT_ENDPOINT = `${SUPABASE_URL}/functions/v1/create-campus-relvbits-checkout`;
 
 // Same LiveKit project as Relvia Live — replace with your real URL.
-const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
+const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-campus-auth" }
@@ -277,10 +277,10 @@ function escapeHtml(str){
 async function initialize(){
   try {
     const { data: sessionData } = await supabaseClient.auth.getSession();
-    if (!sessionData || !sessionData.session){ window.location.href = "login.html"; return; }
+    if (!sessionData || !sessionData.session){ window.location.href = "welcome.html"; return; }
 
     const { data: userData, error } = await supabaseClient.auth.getUser();
-    if (error || !userData.user){ window.location.href = "login.html"; return; }
+    if (error || !userData.user){ window.location.href = "welcome.html"; return; }
     currentUser = userData.user;
 
     await loadProfile();
@@ -514,6 +514,18 @@ function setupRelvbitsModal(){
   const amountGrid = document.getElementById("amountGrid");
   const customAmount = document.getElementById("customAmount");
   let selectedAmountCents = 500;
+
+  (async () => {
+    const { data: flag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
+    const relvbitsBtn = document.getElementById("sendRelvbitsBtn");
+    if (relvbitsBtn && flag && flag.enabled === false) {
+      relvbitsBtn.textContent = "RelvBits — Coming Soon";
+      relvbitsBtn.disabled = true;
+      relvbitsBtn.style.opacity = "0.5";
+      relvbitsBtn.style.cursor = "default";
+      relvbitsBtn.onclick = null;
+    }
+  })();
 
   document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
     if (!currentPlayerStream) return;
