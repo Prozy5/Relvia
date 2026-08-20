@@ -732,6 +732,26 @@ tr:last-child td{ border-bottom:none; }
       </div>
       <p style="color:var(--muted);font-size:12px;margin:6px 0 0;">"Total content pieces" combines Studios projects, Music tracks, RelviaCreators posts, and ad campaigns.</p>
 
+    <!-- BETA DASHBOARD -->
+    <div class="section">
+      <div class="section-head"><h2>Beta Dashboard</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Beta mode and RelvBits checkout are controlled from the Kill-Switches below — this panel is the at-a-glance view.
+      </p>
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="statBetaDays">—</div><div class="label">Days in Beta</div></div>
+        <div class="stat-card"><div class="num" id="statBetaSignups">—</div><div class="label">Signups Since Beta Started</div></div>
+        <div class="stat-card"><div class="num" id="statBetaBugs">—</div><div class="label">Open Bug Reports</div></div>
+        <div class="stat-card"><div class="num" id="statBetaFeatureRequests">—</div><div class="label">Feature Requests</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;margin-top:16px;">
+        <span style="font-size:12.5px;color:var(--muted);">Monetization (RelvBits checkout):</span>
+        <span class="pill" id="betaRelvbitsStatusPill">—</span>
+        <span style="font-size:12.5px;color:var(--muted);margin-left:14px;">Beta badge:</span>
+        <span class="pill" id="betaModeStatusPill">—</span>
+      </div>
+    </div>
+
     <!-- JARVIS -->
     <div class="panel" style="padding:20px;margin:20px 0;border:1px solid var(--gold-end);">
       <h4 style="margin-bottom:6px;font-size:15px;font-family:var(--font-display);">✦ Jarvis</h4>
@@ -2631,7 +2651,7 @@ function setupEcosystemTabs(){
         founderTabLoaded = true;
         await Promise.all([
           loadPlatformOverview(), loadSystemHealth(), loadGrowthCharts(), loadPlatformAnnouncements(), loadReportsQueue(),
-          loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(),
+          loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(), loadBetaDashboard(),
         ]);
         setupUniversalSearch();
         setupJarvis();
@@ -2672,6 +2692,41 @@ async function loadPlatformOverview(){
 // ==========================================================
 // UNIVERSAL SEARCH
 // ==========================================================
+// ==========================================================
+// BETA DASHBOARD
+// ==========================================================
+async function loadBetaDashboard(){
+  const { data: betaMeta } = await supabaseClient.from("beta_metadata").select("beta_started_at").eq("id", 1).maybeSingle();
+  const daysInBeta = betaMeta?.beta_started_at
+    ? Math.floor((Date.now() - new Date(betaMeta.beta_started_at).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+  document.getElementById("statBetaDays").textContent = daysInBeta ?? "—";
+
+  if (betaMeta?.beta_started_at){
+    const { count: signupsSinceBeta } = await supabaseClient
+      .from("profiles").select("*", { count: "exact", head: true }).gte("created_at", betaMeta.beta_started_at);
+    document.getElementById("statBetaSignups").textContent = signupsSinceBeta || 0;
+  }
+
+  const { count: bugCount } = await supabaseClient
+    .from("forum_threads").select("*", { count: "exact", head: true }).eq("category", "bug-report");
+  document.getElementById("statBetaBugs").textContent = bugCount || 0;
+
+  const { count: featureCount } = await supabaseClient
+    .from("forum_threads").select("*", { count: "exact", head: true }).eq("category", "feature-request");
+  document.getElementById("statBetaFeatureRequests").textContent = featureCount || 0;
+
+  const { data: relvbitsFlag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
+  const relvbitsPill = document.getElementById("betaRelvbitsStatusPill");
+  relvbitsPill.textContent = relvbitsFlag?.enabled === false ? "Off (beta launch)" : "On";
+  relvbitsPill.className = `pill ${relvbitsFlag?.enabled === false ? "temp" : "ok"}`;
+
+  const { data: betaFlag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "beta_mode").maybeSingle();
+  const betaPill = document.getElementById("betaModeStatusPill");
+  betaPill.textContent = betaFlag?.enabled ? "Showing" : "Hidden";
+  betaPill.className = `pill ${betaFlag?.enabled ? "ok" : "banned"}`;
+}
+
 // ==========================================================
 // JARVIS
 // ==========================================================
