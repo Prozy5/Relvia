@@ -318,6 +318,8 @@ async function renderFilmDetail(){
 
   const { data: creator } = await supabaseClient.from("profiles").select("display_name, username").eq("id", project.creator_id).maybeSingle();
   const isOwnFilm = currentUser && currentUser.id === project.creator_id;
+  const { data: relvbitsFlag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
+  const relvbitsEnabled = !(relvbitsFlag && relvbitsFlag.enabled === false);
 
   container.innerHTML = `
     <div class="video-frame" id="videoFrame">
@@ -337,7 +339,8 @@ async function renderFilmDetail(){
           &nbsp;·&nbsp; ${escapeHtml(project.genre || "Short Film")} &nbsp;·&nbsp; ${film.view_count || 0} views
         </div>
       </div>
-      ${!isOwnFilm ? `<button class="send-relvbits-btn" id="sendRelvbitsBtn">✦ Send RelvBits</button>` : ""}
+      ${!isOwnFilm && relvbitsEnabled ? `<button class="send-relvbits-btn" id="sendRelvbitsBtn">✦ Send RelvBits</button>` : ""}
+      ${!isOwnFilm && !relvbitsEnabled ? `<button class="send-relvbits-btn" style="opacity:.5;cursor:default;" disabled>RelvBits — Coming Soon</button>` : ""}
     </div>
     ${film.description ? `<p class="detail-desc">${escapeHtml(film.description)}</p>` : ""}
   `;
