@@ -744,11 +744,13 @@ tr:last-child td{ border-bottom:none; }
         <div class="stat-card"><div class="num" id="statBetaBugs">—</div><div class="label">Open Bug Reports</div></div>
         <div class="stat-card"><div class="num" id="statBetaFeatureRequests">—</div><div class="label">Feature Requests</div></div>
       </div>
-      <div style="display:flex;gap:14px;align-items:center;margin-top:16px;">
+      <div style="display:flex;gap:14px;align-items:center;margin-top:16px;flex-wrap:wrap;">
         <span style="font-size:12.5px;color:var(--muted);">Monetization (RelvBits checkout):</span>
         <span class="pill" id="betaRelvbitsStatusPill">—</span>
-        <span style="font-size:12.5px;color:var(--muted);margin-left:14px;">Beta badge:</span>
+        <span style="font-size:12.5px;color:var(--muted);margin-left:14px;">Beta info/feedback:</span>
         <span class="pill" id="betaModeStatusPill">—</span>
+        <span style="font-size:12.5px;color:var(--muted);margin-left:14px;">Beta badge:</span>
+        <span class="pill" id="betaBadgeStatusPill">—</span>
       </div>
     </div>
 
@@ -2725,6 +2727,11 @@ async function loadBetaDashboard(){
   const betaPill = document.getElementById("betaModeStatusPill");
   betaPill.textContent = betaFlag?.enabled ? "Showing" : "Hidden";
   betaPill.className = `pill ${betaFlag?.enabled ? "ok" : "banned"}`;
+
+  const { data: badgeFlag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "beta_badge").maybeSingle();
+  const badgePill = document.getElementById("betaBadgeStatusPill");
+  badgePill.textContent = badgeFlag?.enabled ? "Showing" : "Hidden";
+  badgePill.className = `pill ${badgeFlag?.enabled ? "ok" : "banned"}`;
 }
 
 // ==========================================================
