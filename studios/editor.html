@@ -134,6 +134,35 @@ img, video{ max-width:100%; display:block; }
 }
 
 .loading-ffmpeg{ text-align:center; padding:16px; color:var(--muted); font-size:12.5px; }
+
+.timeline{
+  background:#0d0a07; border:1px solid var(--border); border-radius:12px; padding:14px 16px 18px; margin-bottom:24px;
+  overflow-x:auto;
+}
+.timeline-track-row{ display:flex; align-items:stretch; margin-bottom:6px; min-width:600px; }
+.timeline-track-label{
+  width:52px; flex-shrink:0; display:flex; align-items:center; font-family:var(--font-mono); font-size:9.5px;
+  color:var(--muted-soft); letter-spacing:.5px; font-weight:700;
+}
+.timeline-track{ flex:1; height:38px; background:var(--surface); border-radius:6px; position:relative; display:flex; gap:2px; padding:2px; overflow:hidden; }
+.timeline-clip-block{
+  height:100%; background:linear-gradient(180deg,var(--gold-end),#8a611f); border-radius:4px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; min-width:24px;
+  font-family:var(--font-mono); font-size:9.5px; color:#000; font-weight:700; border:1px solid rgba(0,0,0,.3);
+}
+.timeline-clip-block:hover{ filter:brightness(1.15); }
+.timeline-clip-block.empty-track{ background:none; border:1px dashed var(--border); color:var(--muted-soft); font-weight:400; width:100%; }
+.timeline-overlay-marker{
+  position:absolute; top:2px; height:calc(100% - 4px); background:rgba(217,169,75,.35); border:1px solid var(--gold-end);
+  border-radius:3px; font-family:var(--font-mono); font-size:8.5px; color:var(--gold); display:flex; align-items:center;
+  justify-content:center; overflow:hidden; padding:0 3px; white-space:nowrap;
+}
+.timeline-audio-block{
+  height:100%; width:100%; background:linear-gradient(180deg,#3d5a4a,#233b2f); border-radius:4px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:9.5px; color:#cfe8db;
+}
+.timeline-ruler{ margin-left:52px; margin-top:4px; font-family:var(--font-mono); font-size:9px; color:var(--muted-soft); display:flex; justify-content:space-between; }
+
 </style>
 </head>
 <body>
@@ -154,6 +183,23 @@ img, video{ max-width:100%; display:block; }
       <div class="preview-letterbox-top"></div>
       <div class="preview-empty">Import a clip below to get started. Trim it, add more clips, drop in text and music, then render your final cut — works for a film or a single TV episode.</div>
       <div class="preview-letterbox-bottom"></div>
+    </div>
+
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>TIMELINE</span>
+    <div class="timeline" id="timeline">
+      <div class="timeline-track-row">
+        <div class="timeline-track-label">TEXT</div>
+        <div class="timeline-track" id="overlayTrack"></div>
+      </div>
+      <div class="timeline-track-row">
+        <div class="timeline-track-label">VIDEO</div>
+        <div class="timeline-track" id="videoTrack"></div>
+      </div>
+      <div class="timeline-track-row">
+        <div class="timeline-track-label">AUDIO</div>
+        <div class="timeline-track" id="audioTrack"></div>
+      </div>
+      <div class="timeline-ruler" id="timelineRuler"></div>
     </div>
 
     <span class="slate-tag"><span class="slate-icon">&#9636;</span>CLIPS</span>
@@ -221,9 +267,11 @@ function escapeHtml(str){
 async function initFfmpeg(){
   try {
     const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
+    const ffmpegBaseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
       wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+      classWorkerURL: await toBlobURL(`${ffmpegBaseURL}/worker.js`, "text/javascript"),
     });
     ffmpegReady = true;
     document.getElementById("ffmpegLoadingMsg").style.display = "none";
@@ -261,6 +309,7 @@ function renderClipList(){
   const list = document.getElementById("clipList");
   if (clips.length === 0){
     list.innerHTML = `<div class="hint">No clips imported yet.</div>`;
+    renderTimeline();
     return;
   }
 
@@ -288,11 +337,63 @@ function renderClipList(){
     item.querySelector('[data-action="up"]').addEventListener("click", () => moveClip(index, -1));
     item.querySelector('[data-action="down"]').addEventListener("click", () => moveClip(index, 1));
     item.querySelector('[data-action="remove"]').addEventListener("click", () => { clips.splice(index, 1); renderClipList(); updateRenderButton(); });
-    item.querySelector('[data-field="trimStart"]').addEventListener("input", (e) => { clip.trimStart = parseFloat(e.target.value) || 0; });
-    item.querySelector('[data-field="trimEnd"]').addEventListener("input", (e) => { clip.trimEnd = parseFloat(e.target.value) || clip.duration; });
+    item.querySelector('[data-field="trimStart"]').addEventListener("input", (e) => { clip.trimStart = parseFloat(e.target.value) || 0; renderTimeline(); });
+    item.querySelector('[data-field="trimEnd"]').addEventListener("input", (e) => { clip.trimEnd = parseFloat(e.target.value) || clip.duration; renderTimeline(); });
 
     list.appendChild(item);
   });
+
+  renderTimeline();
+}
+
+function renderTimeline(){
+  const videoTrack = document.getElementById("videoTrack");
+  const overlayTrack = document.getElementById("overlayTrack");
+  const audioTrack = document.getElementById("audioTrack");
+  const ruler = document.getElementById("timelineRuler");
+
+  if (clips.length === 0){
+    videoTrack.innerHTML = `<div class="timeline-clip-block empty-track">No clips yet</div>`;
+    overlayTrack.innerHTML = "";
+    audioTrack.innerHTML = musicFile ? `<div class="timeline-audio-block">${escapeHtml(musicFile.name)}</div>` : "";
+    ruler.innerHTML = "";
+    return;
+  }
+
+  const clipDurations = clips.map(c => Math.max(0.5, c.trimEnd - c.trimStart));
+  const totalDuration = clipDurations.reduce((sum, d) => sum + d, 0);
+
+  videoTrack.innerHTML = "";
+  clips.forEach((clip, i) => {
+    const block = document.createElement("div");
+    block.className = "timeline-clip-block";
+    const widthPercent = (clipDurations[i] / totalDuration) * 100;
+    block.style.width = `${widthPercent}%`;
+    block.textContent = `T${i + 1}`;
+    block.title = `${clip.name} (${clipDurations[i].toFixed(1)}s)`;
+    block.addEventListener("click", () => showPreview(clip.url));
+    videoTrack.appendChild(block);
+  });
+
+  overlayTrack.innerHTML = "";
+  overlays.forEach(ov => {
+    const marker = document.createElement("div");
+    marker.className = "timeline-overlay-marker";
+    const leftPercent = Math.min(97, (ov.start / totalDuration) * 100);
+    const widthPercent = Math.max(3, (ov.duration / totalDuration) * 100);
+    marker.style.left = `${leftPercent}%`;
+    marker.style.width = `${widthPercent}%`;
+    marker.textContent = ov.text ? ov.text.slice(0, 10) : "text";
+    overlayTrack.appendChild(marker);
+  });
+
+  audioTrack.innerHTML = musicFile
+    ? `<div class="timeline-audio-block">${escapeHtml(musicFile.name)} · ${musicVolume}%</div>`
+    : `<div class="timeline-clip-block empty-track">No music</div>`;
+
+  const totalMin = Math.floor(totalDuration / 60);
+  const totalSec = Math.floor(totalDuration % 60);
+  ruler.innerHTML = `<span>00:00</span><span>Total: ${totalMin}:${String(totalSec).padStart(2, "0")}</span>`;
 }
 
 function moveClip(index, direction){
@@ -330,6 +431,7 @@ function renderOverlayList(){
   const list = document.getElementById("overlayList");
   if (overlays.length === 0){
     list.innerHTML = `<div class="hint">No text overlays yet.</div>`;
+    renderTimeline();
     return;
   }
 
@@ -352,14 +454,15 @@ function renderOverlayList(){
         </select>
       </div>`;
 
-    item.querySelector('[data-field="text"]').addEventListener("input", (e) => { ov.text = e.target.value; });
-    item.querySelector('[data-field="start"]').addEventListener("input", (e) => { ov.start = parseFloat(e.target.value) || 0; });
-    item.querySelector('[data-field="duration"]').addEventListener("input", (e) => { ov.duration = parseFloat(e.target.value) || 1; });
+    item.querySelector('[data-field="text"]').addEventListener("input", (e) => { ov.text = e.target.value; renderTimeline(); });
+    item.querySelector('[data-field="start"]').addEventListener("input", (e) => { ov.start = parseFloat(e.target.value) || 0; renderTimeline(); });
+    item.querySelector('[data-field="duration"]').addEventListener("input", (e) => { ov.duration = parseFloat(e.target.value) || 1; renderTimeline(); });
     item.querySelector('[data-field="position"]').addEventListener("change", (e) => { ov.position = e.target.value; });
     item.querySelector('[data-action="remove"]').addEventListener("click", () => { overlays.splice(index, 1); renderOverlayList(); });
 
     list.appendChild(item);
   });
+  renderTimeline();
 }
 
 document.getElementById("importMusicBtn").addEventListener("click", () => document.getElementById("musicFileInput").click());
@@ -370,13 +473,15 @@ document.getElementById("musicFileInput").addEventListener("change", (e) => {
   document.getElementById("musicFileName").textContent = file.name;
   document.getElementById("musicInfo").style.display = "block";
   document.getElementById("importMusicBtn").style.display = "none";
+  renderTimeline();
 });
 document.getElementById("removeMusicBtn").addEventListener("click", () => {
   musicFile = null;
   document.getElementById("musicInfo").style.display = "none";
   document.getElementById("importMusicBtn").style.display = "block";
+  renderTimeline();
 });
-document.getElementById("musicVolume").addEventListener("input", (e) => { musicVolume = parseInt(e.target.value, 10) || 0; });
+document.getElementById("musicVolume").addEventListener("input", (e) => { musicVolume = parseInt(e.target.value, 10) || 0; renderTimeline(); });
 
 document.getElementById("renderBtn").addEventListener("click", renderFinalVideo);
 
