@@ -7,21 +7,38 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
   --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
   --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255; --danger:#e0574f;
-  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif; --font-mono:"JetBrains Mono",monospace;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
-body{ color:var(--text); min-height:100vh; background:var(--background); }
+body{ color:var(--text); min-height:100vh; background:var(--background); position:relative; }
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:2;
+  background:radial-gradient(ellipse 90% 80% at 50% 45%, transparent 45%, rgba(0,0,0,.5) 100%);
+}
 a{ color:inherit; text-decoration:none; }
 button, input, select{ font-family:inherit; }
 button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
 img, video{ max-width:100%; display:block; }
+
+.film-strip{
+  height:18px; display:flex; align-items:center; justify-content:space-evenly;
+  background:#050403; border-bottom:1px solid var(--border-soft); position:relative; z-index:51;
+}
+.film-strip span{ width:8px; height:8px; border-radius:2px; background:#1c150d; border:1px solid var(--border); }
+.timecode{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; letter-spacing:1px; }
+.slate-tag{
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:10.5px; font-weight:700;
+  letter-spacing:.5px; color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  padding:3px 10px 3px 4px; border-radius:4px; margin-bottom:12px;
+}
+.slate-tag .slate-icon{ width:14px; height:14px; display:flex; align-items:center; justify-content:center; background:#000; border-radius:2px; color:var(--gold); font-size:9px; }
 
 .topbar{
   position:sticky; top:0; height:68px; display:flex; align-items:center; justify-content:space-between;
@@ -46,11 +63,19 @@ img, video{ max-width:100%; display:block; }
 .hint{ font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
 
 .preview-frame{
-  width:100%; aspect-ratio:16/9; background:#000; border-radius:14px; overflow:hidden; border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center; margin-bottom:20px;
+  width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; margin-bottom:20px; position:relative;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
 }
 .preview-frame video{ width:100%; height:100%; object-fit:contain; }
-.preview-empty{ color:var(--muted-soft); font-size:13px; text-align:center; padding:20px; }
+.preview-empty{ color:var(--muted-soft); font-size:13px; text-align:center; padding:20px; font-family:var(--font-mono); }
+.preview-letterbox-top, .preview-letterbox-bottom{ position:absolute; left:0; right:0; height:9%; background:#000; z-index:2; pointer-events:none; }
+.preview-letterbox-top{ top:0; }
+.preview-letterbox-bottom{ bottom:0; }
+.preview-timecode{
+  position:absolute; bottom:8px; right:12px; z-index:3; font-family:var(--font-mono); font-size:11px; color:var(--gold);
+  background:rgba(0,0,0,.6); padding:2px 8px; border-radius:4px; letter-spacing:1px; pointer-events:none;
+}
 
 .import-btn{
   width:100%; padding:14px; border:1.5px dashed var(--border); border-radius:12px; text-align:center;
@@ -60,15 +85,16 @@ img, video{ max-width:100%; display:block; }
 
 .clip-list{ margin-bottom:24px; }
 .clip-item{
-  background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px;
+  background:var(--surface-light); border:1px solid var(--border); border-left:3px solid var(--gold-end); border-radius:10px; padding:12px 14px; margin-bottom:10px;
 }
 .clip-item-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.clip-item-name{ font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:170px; }
+.clip-item-take{ font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:.5px; margin-right:8px; }
+.clip-item-name{ font-size:12.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px; }
 .clip-item-actions{ display:flex; gap:6px; }
 .clip-item-actions button{ font-size:11px; color:var(--muted); padding:3px 8px; border-radius:6px; }
 .clip-item-actions button:hover{ background:var(--surface); color:var(--gold); }
-.trim-row{ display:flex; gap:10px; align-items:center; font-size:11.5px; color:var(--muted); }
-.trim-row input{ width:60px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 8px; color:white; font-size:12px; }
+.trim-row{ display:flex; gap:10px; align-items:center; font-size:11.5px; color:var(--muted); font-family:var(--font-mono); }
+.trim-row input{ width:60px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 8px; color:white; font-size:12px; font-family:var(--font-mono); }
 
 .overlay-item, .music-block{
   background:var(--surface-light); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px;
@@ -119,28 +145,31 @@ img, video{ max-width:100%; display:block; }
   </a>
   <a class="back-link" href="index.html">← Back to Studios</a>
 </header>
+<div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
 <div class="layout">
   <div class="main-area">
-    <div class="section-title">Preview</div>
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>PREVIEW</span>
     <div class="preview-frame" id="previewFrame">
-      <div class="preview-empty">Import a clip below to get started. Trim it, add more clips, drop in text and music, then render your final film.</div>
+      <div class="preview-letterbox-top"></div>
+      <div class="preview-empty">Import a clip below to get started. Trim it, add more clips, drop in text and music, then render your final cut — works for a film or a single TV episode.</div>
+      <div class="preview-letterbox-bottom"></div>
     </div>
 
-    <div class="section-title">Clips</div>
-    <p class="hint">Import your footage in the order you want it to play. Each clip can be trimmed to just the part you want — drag the order with the arrows.</p>
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>CLIPS</span>
+    <p class="hint">Import your footage in the order you want it to play. Each clip can be trimmed to just the part you want — reorder with the arrows.</p>
     <button class="import-btn" id="importClipBtn">+ Import a video clip</button>
     <input type="file" id="clipFileInput" accept="video/*" style="display:none;" multiple>
     <div class="clip-list" id="clipList"></div>
   </div>
 
   <div class="side-area">
-    <div class="section-title">Text Overlays</div>
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>TEXT</span>
     <p class="hint">Titles or captions burned into the video at a specific time.</p>
     <div id="overlayList"></div>
     <button class="add-btn" id="addOverlayBtn">+ Add text overlay</button>
 
-    <div class="section-title">Background Music</div>
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>SCORE</span>
     <p class="hint">One audio track, mixed under your clips' original sound.</p>
     <div class="music-block" id="musicBlock">
       <button class="import-btn" id="importMusicBtn" style="margin-bottom:0;">+ Import audio track</button>
@@ -156,13 +185,13 @@ img, video{ max-width:100%; display:block; }
       </div>
     </div>
 
-    <button class="export-btn" id="renderBtn" disabled>Render Final Video</button>
+    <button class="export-btn" id="renderBtn" disabled>Render Final Cut</button>
     <div class="progress-box" id="progressBox">
       <div class="progress-label" id="progressLabel">Preparing...</div>
       <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
     </div>
     <div class="download-box" id="downloadBox">
-      <div style="font-family:var(--font-display);font-size:16px;">Your film is ready</div>
+      <div style="font-family:var(--font-display);font-size:16px;">Your cut is ready</div>
       <p>Download it, then upload that file to Google Drive (set sharing to "Anyone with the link"), and paste the share link into your project's submission form to release it.</p>
       <a class="download-link-btn" id="downloadLink" download="relvia-film.mp4">Download MP4</a>
     </div>
@@ -170,9 +199,11 @@ img, video{ max-width:100%; display:block; }
   </div>
 </div>
 
+<div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
 <script type="module">
-import { FFmpeg } from "https://esm.sh/@ffmpeg/ffmpeg@0.12.10";
-import { fetchFile, toBlobURL } from "https://esm.sh/@ffmpeg/util@0.12.1";
+import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm";
+import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm";
 
 const ffmpeg = new FFmpeg();
 let ffmpegReady = false;
@@ -189,7 +220,7 @@ function escapeHtml(str){
 
 async function initFfmpeg(){
   try {
-    const baseURL = "https://esm.sh/@ffmpeg/core@0.12.6/dist/esm";
+    const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
       wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
@@ -199,7 +230,7 @@ async function initFfmpeg(){
     updateRenderButton();
   } catch (err){
     console.error("Failed to load ffmpeg:", err);
-    document.getElementById("ffmpegLoadingMsg").textContent = "Couldn't load the video engine. Try reloading the page.";
+    document.getElementById("ffmpegLoadingMsg").textContent = `Couldn't load the video engine (${err.message || "unknown error"}). Try reloading the page.`;
   }
 }
 
@@ -239,7 +270,7 @@ function renderClipList(){
     item.className = "clip-item";
     item.innerHTML = `
       <div class="clip-item-head">
-        <span class="clip-item-name" title="${escapeHtml(clip.name)}">${index + 1}. ${escapeHtml(clip.name)}</span>
+        <span class="clip-item-name" title="${escapeHtml(clip.name)}"><span class="clip-item-take">TAKE ${String(index + 1).padStart(2, "0")}</span>${escapeHtml(clip.name)}</span>
         <div class="clip-item-actions">
           <button data-action="preview">Preview</button>
           <button data-action="up">↑</button>
@@ -272,7 +303,22 @@ function moveClip(index, direction){
 }
 
 function showPreview(url){
-  document.getElementById("previewFrame").innerHTML = `<video src="${url}" controls></video>`;
+  const frame = document.getElementById("previewFrame");
+  frame.innerHTML = `
+    <div class="preview-letterbox-top"></div>
+    <video src="${url}" controls></video>
+    <div class="preview-letterbox-bottom"></div>
+    <div class="preview-timecode timecode" id="previewTimecode">00:00:00</div>
+  `;
+  const video = frame.querySelector("video");
+  const tc = document.getElementById("previewTimecode");
+  video.addEventListener("timeupdate", () => {
+    const t = video.currentTime;
+    const h = String(Math.floor(t / 3600)).padStart(2, "0");
+    const m = String(Math.floor((t % 3600) / 60)).padStart(2, "0");
+    const s = String(Math.floor(t % 60)).padStart(2, "0");
+    tc.textContent = `${h}:${m}:${s}`;
+  });
 }
 
 document.getElementById("addOverlayBtn").addEventListener("click", () => {
@@ -430,5 +476,6 @@ renderClipList();
 renderOverlayList();
 initFfmpeg();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
