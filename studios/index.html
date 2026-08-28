@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -16,7 +16,7 @@
   --background:#0a0806; --glass:rgba(18,14,10,.6); --surface-light:#1c150d; --surface:rgba(20,16,11,.78);
   --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
   --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
-  --radius-lg:24px; --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+  --radius-lg:24px; --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif; --font-mono:"JetBrains Mono",monospace;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
 body{
@@ -32,9 +32,549 @@ body::before{
   content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035; mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+/* Vignette — darkens the corners for a screening-room feel. */
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:2;
+  background:radial-gradient(ellipse 90% 80% at 50% 45%, transparent 45%, rgba(0,0,0,.55) 100%);
+}
+
+/* FILM STRIP — sprocket-hole decorative border, used to frame
+   the hero and other key sections like a real film reel. */
+.film-strip{
+  height:22px; display:flex; align-items:center; justify-content:space-evenly;
+  background:#050403; border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft);
+}
+.film-strip span{ width:10px; height:10px; border-radius:2px; background:#1c150d; border:1px solid var(--border); }
+
+/* TIMECODE — monospace styling for numeric displays, matching
+   real editing-software readouts. */
+.timecode{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; letter-spacing:1px; }
+
+/* SLATE TAG — small clapperboard-style label. */
+.slate-tag{
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:10.5px; font-weight:700;
+  letter-spacing:.5px; color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end));
+  padding:3px 10px 3px 4px; border-radius:4px;
+}
+.slate-tag .slate-icon{ width:14px; height:14px; display:flex; align-items:center; justify-content:center; background:#000; border-radius:2px; color:var(--gold); font-size:9px; }
 a{ text-decoration:none; color:inherit; }
 button, input, textarea, select{ font-family:inherit; }
 button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:76px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; background:rgba(5,5,5,.82); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{
+  width:38px; height:38px; border-radius:50%; background:#000;
+  background-image:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%);
+  border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:19px; color:var(--gold-start);
+}
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.top-nav{ display:flex; gap:6px; }
+.top-nav-item{
+  font-size:13px; font-weight:700; color:var(--muted); padding:9px 16px; border-radius:10px; transition:.2s;
+}
+.top-nav-item:hover{ color:var(--text); background:rgba(255,255,255,.04); }
+.top-nav-item.active{ color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); }
+@media(max-width:820px){ .top-nav{ display:none; } }
+
+.new-project-btn{
+  font-size:13.5px; font-weight:800; padding:10px 20px; border-radius:12px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000;
+}
+.new-project-btn:hover{ opacity:.88; }
+
+.container{ max-width:1200px; margin:auto; padding:34px 24px 80px; }
+.page-title{ font-family:var(--font-display); font-size:36px; font-weight:600; margin-bottom:8px; }
+.page-sub{ color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+/* CINEMA MARQUEE HEADER */
+.marquee{
+  position:relative; text-align:center; padding:64px 24px 44px; margin-bottom:8px; overflow:hidden;
+}
+.marquee::before{
+  content:""; position:absolute; top:-30%; left:50%; transform:translateX(-50%);
+  width:900px; height:500px; pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(217,169,75,.09), transparent 65%);
+}
+.marquee-eyebrow{
+  display:inline-flex; align-items:center; gap:10px; font-size:10.5px; letter-spacing:4px; color:var(--muted);
+  text-transform:uppercase; font-weight:700; margin-bottom:18px; position:relative;
+}
+.marquee-eyebrow .dash{ width:18px; height:1px; background:var(--border); }
+.marquee-title{
+  font-family:var(--font-display); font-style:italic; font-weight:600; font-size:clamp(34px,5vw,58px);
+  line-height:1.08; letter-spacing:-.01em; color:var(--text); position:relative;
+}
+.marquee-title em{
+  font-style:italic;
+  background:linear-gradient(180deg,var(--gold-start) 0%,var(--gold-end) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.marquee-sub{ color:var(--muted-soft); font-size:13.5px; margin-top:16px; max-width:440px; margin-left:auto; margin-right:auto; position:relative; }
+.marquee-divider{ display:none; }
+
+.tabs{ display:flex; gap:6px; margin-bottom:30px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:5px; max-width:340px; backdrop-filter:blur(10px); }
+.tab{ flex:1; text-align:center; padding:10px; border-radius:10px; font-size:13px; font-weight:700; color:var(--muted); }
+.tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.tab:not(.active):hover{ color:white; }
+
+.film-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
+.film-card{ cursor:pointer; position:relative; z-index:1; }
+.film-card:hover{ z-index:3; }
+.film-thumb{
+  aspect-ratio:16/9; background:linear-gradient(135deg,#1c1a15,#0d0d0d 55%,#1a1508);
+  border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--border); margin-bottom:10px;
+  transition:transform .25s ease, box-shadow .25s ease, border-radius .25s ease;
+}
+.film-card:hover .film-thumb{
+  transform:scale(1.12); box-shadow:0 24px 50px -14px rgba(0,0,0,.7), 0 0 0 1px rgba(217,169,75,.3), 0 0 30px -6px rgba(217,169,75,.15);
+  border-radius:10px 10px 0 0;
+}
+.film-thumb img{ width:100%; height:100%; object-fit:cover; }
+.film-thumb .play-icon{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px;
+  color:var(--gold); background:rgba(0,0,0,0); opacity:0; transition:opacity .2s;
+}
+.film-card:hover .play-icon{ opacity:1; background:rgba(0,0,0,.35); }
+.film-hover-panel{
+  max-height:0; overflow:hidden; opacity:0; transform:scaleX(1.12); transform-origin:top center;
+  background:#161008; border:1px solid rgba(217,169,75,.4); border-top:none; border-radius:0 0 10px 10px;
+  transition:max-height .25s ease, opacity .2s ease .05s; box-shadow:0 24px 50px -14px rgba(0,0,0,.8);
+}
+.film-card:hover .film-hover-panel{ max-height:90px; opacity:1; }
+.film-hover-inner{ padding:12px 14px; }
+.film-title{ font-size:14.5px; font-weight:700; margin-bottom:3px; color:var(--text); }
+.film-meta{ font-size:12px; color:var(--muted); }
+.film-hover-genre{ font-size:11px; color:var(--gold); font-weight:700; margin-top:6px; }
+
+.project-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
+.project-card{
+  background:#120e09; border:1px solid var(--border);
+  border-radius:18px; padding:20px; cursor:pointer; transition:border-color .2s, transform .2s;
+}
+.project-card:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
+.project-status{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:999px; margin-bottom:12px; }
+.project-status.development{ background:rgba(217,169,75,.15); color:var(--gold); }
+.project-status.production{ background:rgba(224,87,79,.15); color:#f2a8a3; }
+.project-status.post{ background:rgba(110,168,216,.15); color:#8fbde0; }
+.project-status.released{ background:rgba(95,174,122,.15); color:#8fd1a8; }
+.project-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:6px; }
+.project-logline{ font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:14px; min-height:38px; }
+.project-footer{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted-soft); }
+
+.empty-state{ text-align:center; color:var(--muted); padding:60px 20px; grid-column:1/-1; }
+.empty-state h4{ color:#ddd; font-size:17px; margin-bottom:8px; font-family:var(--font-display); font-size:20px; }
+
+/* MODAL */
+.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }
+.modal-backdrop.open{ display:flex; }
+.modal{ background:var(--surface); border:1px solid var(--border); border-radius:22px; width:480px; max-width:100%; padding:28px; }
+.modal h3{ font-family:var(--font-display); font-size:22px; margin-bottom:18px; }
+.field{ margin-bottom:14px; }
+.field label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+.field input, .field textarea, .field select{
+  width:100%; background:var(--surface-light); border:1px solid var(--border); border-radius:12px;
+  padding:11px 14px; color:white; font-size:14px;
+}
+.field textarea{ resize:none; min-height:70px; }
+.field input:focus, .field textarea:focus, .field select:focus{ outline:none; border-color:var(--gold); }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+.btn{ font-size:13px; font-weight:700; padding:10px 20px; border-radius:12px; border:1px solid var(--border); background:var(--surface-light); }
+.btn:hover{ border-color:var(--gold); color:var(--gold); }
+.btn.gold{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; font-weight:800; }
+.btn.gold:hover{ opacity:.88; color:#000; }
+
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; grid-column:1/-1; }
+
+/* DISCOVERY / SEARCH */
+.discovery-bar{ display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; align-items:center; }
+.discovery-search{
+  flex:1; min-width:220px; background:#161008; border:1px solid var(--border); border-radius:12px;
+  padding:11px 16px; color:white; font-size:13.5px;
+}
+.discovery-search:focus{ outline:none; border-color:var(--gold); }
+.discovery-select{
+  background:#161008; border:1px solid var(--border); border-radius:12px;
+  padding:11px 14px; color:white; font-size:13px; min-width:150px;
+}
+.discovery-toggle{
+  display:flex; align-items:center; gap:8px; background:#161008; border:1px solid var(--border);
+  border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--muted); cursor:pointer; white-space:nowrap;
+}
+.discovery-toggle input{ accent-color:var(--gold); }
+.discovery-count{ font-size:12.5px; color:var(--muted-soft); margin-bottom:14px; }
+
+/* WATCH HOMEPAGE — full-bleed hero, breaks out of the container */
+.watch-hero{
+  position:relative; overflow:hidden;
+  width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%);
+  margin-top:-20px; margin-bottom:44px;
+  aspect-ratio:16/7; min-height:340px;
+  background:linear-gradient(135deg,#100d09,#050403 55%,#0c0a06);
+}
+.watch-hero img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:.4; filter:saturate(.85); }
+.watch-hero-overlay{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 12% 100%, rgba(217,169,75,.09), transparent 62%),
+    linear-gradient(90deg, rgba(5,4,3,.97) 22%, rgba(5,4,3,.65) 58%, transparent 95%),
+    linear-gradient(0deg, var(--background) 0%, rgba(5,4,3,.85) 20%, transparent 60%);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:56px max(24px, calc((100vw - 1200px) / 2 + 24px)) 52px;
+}
+.watch-hero-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:14px; }
+.watch-hero-title{
+  font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.4vw,54px); line-height:1.05;
+  margin-bottom:14px; max-width:600px; text-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+.watch-hero-meta{ font-size:13.5px; color:#d8d0c0; margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+.watch-hero-meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--muted); }
+.watch-hero-actions{ display:flex; gap:12px; }
+.watch-hero-btn{
+  font-size:14px; font-weight:800; padding:13px 28px; border-radius:10px;
+  background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; display:flex; align-items:center; gap:8px;
+}
+.watch-hero-btn:hover{ opacity:.88; }
+.watch-hero-btn.ghost{ background:rgba(255,255,255,.12); color:white; backdrop-filter:blur(6px); }
+.watch-hero-btn.ghost:hover{ background:rgba(255,255,255,.2); opacity:1; }
+
+/* GENRE ROWS */
+.genre-row{ margin-bottom:38px; position:relative; }
+.genre-row-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:14px; }
+.genre-row-wrap{ position:relative; }
+.genre-row-wrap::before, .genre-row-wrap::after{
+  content:""; position:absolute; top:0; bottom:6px; width:50px; z-index:2; pointer-events:none;
+}
+.genre-row-wrap::before{ left:0; background:linear-gradient(90deg, var(--background) 0%, transparent 100%); }
+.genre-row-wrap::after{ right:0; background:linear-gradient(270deg, var(--background) 0%, transparent 100%); }
+.genre-row-scroll{ display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-behavior:smooth; }
+.genre-row-scroll::-webkit-scrollbar{ display:none; }
+.genre-row-scroll .film-card{ min-width:230px; flex-shrink:0; }
+.studio-stats-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:40px; }
+.studio-stat{ background:#120e09; border:1px solid var(--border); border-radius:16px; padding:22px; text-align:center; }
+.studio-stat-num{ font-family:var(--font-display); font-size:32px; font-weight:700; color:var(--gold); margin-bottom:4px; }
+.studio-stat-label{ font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); font-weight:700; }
+
+.section-title{ font-family:var(--font-display); font-size:19px; font-weight:600; margin-bottom:16px; }
+.now-filming-row{ display:flex; gap:16px; overflow-x:auto; padding-bottom:10px; margin-bottom:36px; }
+.now-filming-card{
+  min-width:260px; flex-shrink:0; background:#120e09; border:1px solid var(--border); border-left:3px solid var(--gold-end); border-radius:16px;
+  padding:18px; cursor:pointer; transition:.2s;
+}
+.now-filming-card:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
+.now-filming-status{ display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; font-family:var(--font-mono); }
+.now-filming-status .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); animation:pulse 1.6s infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.now-filming-title{ font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:6px; }
+.now-filming-meta{ font-size:12px; color:var(--muted); font-family:var(--font-mono); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="../index.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">Relvia Studios</span>
+  </a>
+  <nav class="top-nav" id="topNav">
+    <a class="top-nav-item" href="editor.html">Editor</a>
+    <a class="top-nav-item" id="myProfileNavLink" href="#">My Profile</a>
+    <a class="top-nav-item" href="../watch/index.html" style="color:var(--gold);">Watch on Relvia →</a>
+  </nav>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="new-project-btn" id="newProjectBtn">+ New Project</button>
+  </div>
+</header>
+
+<div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<div class="container">
+  <div class="marquee">
+    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
+    <div class="marquee-title">Where <em>stories</em><br>get made.</div>
+    <p class="marquee-sub">Original films and series, collaborated on from first draft to premiere. Once released, they stream on <a href="../watch/index.html" style="color:var(--gold);">Relvia</a>.</p>
+  </div>
+
+  <div class="studio-stats-row" id="studioStatsRow">
+    <div class="studio-stat"><div class="studio-stat-num timecode" id="statInProduction">—</div><div class="studio-stat-label">In Production</div></div>
+    <div class="studio-stat"><div class="studio-stat-num timecode" id="statReleased">—</div><div class="studio-stat-label">Released</div></div>
+    <div class="studio-stat"><div class="studio-stat-num timecode" id="statCollaborators">—</div><div class="studio-stat-label">Active Collaborators</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;" id="nowFilmingTitleRow">
+    <span class="slate-tag" id="nowFilmingTitle" style="display:none;"><span class="slate-icon">&#9636;</span>NOW FILMING</span>
+  </div>
+  <div class="now-filming-row" id="nowFilmingRow"></div>
+
+  <div class="discovery-bar" id="discoveryBar">
+    <input type="text" class="discovery-search" id="discoverySearch" placeholder="Search titles, loglines, genres, or roles needed...">
+    <select class="discovery-select" id="discoveryGenre"><option value="">All genres</option></select>
+    <label class="discovery-toggle"><input type="checkbox" id="discoveryOpenRolesOnly"> Open roles only</label>
+  </div>
+  <div class="discovery-count" id="discoveryCount"></div>
+
+  <div id="viewContainer"><div class="loading-state">Loading...</div></div>
+</div>
+
+<div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<!-- NEW PROJECT MODAL -->
+<div class="modal-backdrop" id="newProjectModal">
+  <div class="modal">
+    <h3>Start a new project</h3>
+    <div class="field">
+      <label>Type</label>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="content-type-toggle active" data-type="movie" id="typeMovieBtn" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--gold-end);background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;font-size:13px;">Movie</button>
+        <button type="button" class="content-type-toggle" data-type="series" id="typeSeriesBtn" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--surface-light);color:var(--text);font-weight:700;font-size:13px;">Series</button>
+      </div>
+    </div>
+    <div class="field"><label>Title</label><input type="text" id="projectTitle"></div>
+    <div class="field"><label>Logline</label><textarea id="projectLogline" placeholder="One or two sentences about the film..."></textarea></div>
+    <div class="field"><label>Genre</label><input type="text" id="projectGenre" placeholder="Drama, Comedy, Thriller..."></div>
+    <div class="modal-actions">
+      <button class="btn" id="cancelProjectBtn">Cancel</button>
+      <button class="btn gold" id="createProjectBtn">Create project</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let activeTab = "watch";
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+async function initialize(){
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData || !sessionData.session){ window.location.href = "/login.html"; return; }
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user){ window.location.href = "/login.html"; return; }
+  currentUser = userData.user;
+
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "studios", target_label: "Relvia Studios (Home)" }); } catch (e){}
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "studios");
+  const unlockKey = "relvia-live-unlock-studios";
+
+  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
+    document.querySelector(".container").innerHTML = `
+      <div style="text-align:center;padding:100px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <h2 style="font-family:var(--font-display);font-size:24px;">Relvia Studios is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:var(--surface-light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">
+          <button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+        </div>
+        <p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p>
+      </div>`;
+    document.getElementById("unlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("unlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "studios", passcode });
+      if (isValid){ sessionStorage.setItem(unlockKey, "true"); window.location.reload(); }
+      else { document.getElementById("unlockError").style.display = "block"; }
+    });
+    return;
+  }
+
+
+  document.getElementById("myProfileNavLink").href = `profile.html?user=${currentUser.id}`;
+
+  document.getElementById("discoverySearch").addEventListener("input", () => filterAndRenderProjects());
+  document.getElementById("discoveryGenre").addEventListener("change", () => filterAndRenderProjects());
+  document.getElementById("discoveryOpenRolesOnly").addEventListener("change", () => filterAndRenderProjects());
+
+  document.getElementById("newProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.add("open"));
+  document.getElementById("cancelProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.remove("open"));
+  document.getElementById("createProjectBtn").addEventListener("click", createProject);
+
+  await Promise.all([loadStudioStats(), loadNowFilming(), renderCollaborate()]);
+}
+
+async function loadStudioStats(){
+  const [{ count: inProduction }, { count: released }, { data: distinctCreators }] = await Promise.all([
+    supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).neq("status", "released"),
+    supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "released"),
+    supabaseClient.from("studios_projects").select("creator_id"),
+  ]);
+
+  document.getElementById("statInProduction").textContent = inProduction || 0;
+  document.getElementById("statReleased").textContent = released || 0;
+
+  const uniqueCreators = new Set((distinctCreators || []).map(p => p.creator_id)).size;
+  document.getElementById("statCollaborators").textContent = uniqueCreators;
+}
+
+async function loadNowFilming(){
+  const { data: inProgress } = await supabaseClient
+    .from("studios_projects").select("*").neq("status", "released").order("created_at", { ascending:false }).limit(8);
+
+  const title = document.getElementById("nowFilmingTitle");
+  const row = document.getElementById("nowFilmingRow");
+
+  if (!inProgress || inProgress.length === 0){
+    title.style.display = "none";
+    row.innerHTML = "";
+    return;
+  }
+
+  title.style.display = "inline-flex";
+  row.innerHTML = "";
+  inProgress.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "now-filming-card";
+    card.innerHTML = `
+      <div class="now-filming-status"><span class="dot"></span>${escapeHtml((p.status || "development").toUpperCase())}</div>
+      <div class="now-filming-title">${escapeHtml(p.title)}</div>
+      <div class="now-filming-meta">${escapeHtml(p.genre || (p.content_type === "series" ? "Series" : "Film"))}</div>
+    `;
+    card.addEventListener("click", () => { window.location.href = `projects.html?id=${p.id}`; });
+    row.appendChild(card);
+  });
+}
+
+let allOpenProjects = [];
+
+async function renderCollaborate(){
+  const container = document.getElementById("viewContainer");
+  container.innerHTML = `<div class="loading-state">Loading projects...</div>`;
+
+  const { data: projects, error } = await supabaseClient
+    .from("studios_projects")
+    .select("*, studios_roles(id, role_name, filled)")
+    .neq("status", "released")
+    .order("created_at", { ascending:false });
+
+  if (error){
+    container.innerHTML = `<div class="project-grid"><div class="empty-state"><h4>Couldn't load projects</h4></div></div>`;
+    return;
+  }
+
+  allOpenProjects = projects || [];
+  populateGenreFilter(allOpenProjects);
+  filterAndRenderProjects();
+}
+
+function populateGenreFilter(projects){
+  const select = document.getElementById("discoveryGenre");
+  const currentValue = select.value;
+  const genres = [...new Set(projects.map(p => (p.genre || "").trim()).filter(Boolean))].sort();
+
+  select.innerHTML = `<option value="">All genres</option>` + genres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+  select.value = currentValue;
+}
+
+function filterAndRenderProjects(){
+  const container = document.getElementById("viewContainer");
+  const countEl = document.getElementById("discoveryCount");
+
+  const query = document.getElementById("discoverySearch").value.trim().toLowerCase();
+  const genreFilter = document.getElementById("discoveryGenre").value;
+  const openRolesOnly = document.getElementById("discoveryOpenRolesOnly").checked;
+
+  let filtered = allOpenProjects.filter(project => {
+    const roles = project.studios_roles || [];
+    const openRoleCount = roles.filter(r => !r.filled).length;
+
+    if (genreFilter && (project.genre || "") !== genreFilter) return false;
+    if (openRolesOnly && openRoleCount === 0) return false;
+
+    if (query){
+      const roleNames = roles.map(r => (r.role_name || "").toLowerCase()).join(" ");
+      const haystack = `${project.title || ""} ${project.logline || ""} ${project.genre || ""} ${project.looking_for || ""} ${roleNames}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+
+    return true;
+  });
+
+  countEl.textContent = `${filtered.length} project${filtered.length === 1 ? "" : "s"}`;
+
+  if (filtered.length === 0){
+    container.innerHTML = `
+      <div class="project-grid">
+        <div class="empty-state">
+          <h4>${allOpenProjects.length === 0 ? "No open projects right now" : "Nothing matches your search"}</h4>
+          <p>${allOpenProjects.length === 0 ? "Be the first to start one." : "Try a different keyword, genre, or clear the open-roles filter."}</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "project-grid";
+  filtered.forEach((project, idx) => {
+    const openRoles = (project.studios_roles || []).filter(r => !r.filled).length;
+    const card = document.createElement("div");
+    card.className = "project-card";
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <span class="timecode" style="font-size:10px;color:var(--muted-soft);">TAKE ${String(idx + 1).padStart(2, "0")} · ${project.content_type === "series" ? "SERIES" : "FILM"}</span>
+        <span class="project-status ${project.status}">${escapeHtml(project.status)}</span>
+      </div>
+      <div class="project-title">${escapeHtml(project.title)}</div>
+      <div class="project-logline">${escapeHtml(project.logline || "No logline yet.")}</div>
+      <div class="project-footer">
+        <span>${escapeHtml(project.genre || "Unspecified genre")}</span>
+        <span>${openRoles} open role${openRoles === 1 ? "" : "s"}</span>
+      </div>`;
+    card.addEventListener("click", () => { window.location.href = `projects.html?id=${project.id}`; });
+    grid.appendChild(card);
+  });
+
+  container.innerHTML = "";
+  container.appendChild(grid);
+}
+
+let selectedContentType = "movie";
+document.getElementById("typeMovieBtn").addEventListener("click", () => setContentType("movie"));
+document.getElementById("typeSeriesBtn").addEventListener("click", () => setContentType("series"));
+
+function setContentType(type){
+  selectedContentType = type;
+  document.querySelectorAll(".content-type-toggle").forEach(btn => {
+    const isActive = btn.dataset.type === type;
+    btn.style.background = isActive ? "linear-gradient(135deg,var(--gold-start),var(--gold-end))" : "var(--surface-light)";
+    btn.style.color = isActive ? "#000" : "var(--text)";
+    btn.style.borderColor = isActive ? "var(--gold-end)" : "var(--border)";
+  });
+}
+
+async function createProject(){
+  const title = document.getElementById("projectTitle").value.trim();
+  const logline = document.getElementById("projectLogline").value.trim();
+  const genre = document.getElementById("projectGenre").value.trim();
+
+  if (!title){ alert("Enter a title."); return; }
+
+  const { data, error } = await supabaseClient
+    .from("studios_projects")
+    .insert({ creator_id: currentUser.id, title, logline, genre, content_type: selectedContentType })
+    .select().single();
+
+  if (error){ console.error(error); alert("Couldn't create project."); return; }
+
+  window.location.href = `projects.html?id=${data.id}`;
+}
+
+initialize();
+</script>
+</body>
+</html>button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
 img{ max-width:100%; display:block; }
 
 .topbar{
