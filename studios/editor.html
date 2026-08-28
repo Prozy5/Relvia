@@ -228,8 +228,35 @@ img, video{ max-width:100%; display:block; }
         <div class="trim-row">
           Volume <input type="number" id="musicVolume" value="50" min="0" max="100" style="width:50px;"> %
         </div>
+        <div class="trim-row" style="margin-top:8px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="musicFade" checked style="width:auto;"> Fade in/out (2s)
+          </label>
+        </div>
       </div>
     </div>
+
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>TRANSITIONS</span>
+    <p class="hint">How clips cut into each other.</p>
+    <div class="overlay-item">
+      <div class="overlay-row">
+        <select id="transitionType" style="flex:1;">
+          <option value="cut">Hard Cut</option>
+          <option value="crossfade">Crossfade</option>
+        </select>
+        <input type="number" id="transitionDuration" value="0.6" min="0.2" max="3" step="0.1" style="width:64px;" title="Duration (sec)">
+      </div>
+    </div>
+
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>COLOR GRADE</span>
+    <p class="hint">Applied to the whole cut, after clips are combined.</p>
+    <select id="colorGrade" style="width:100%;background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px; color:white; font-size:12.5px; margin-bottom:20px;">
+      <option value="normal">Normal</option>
+      <option value="warm">Warm</option>
+      <option value="cool">Cool</option>
+      <option value="bw">Black & White</option>
+      <option value="cinematic">Cinematic</option>
+    </select>
 
     <button class="export-btn" id="renderBtn" disabled>Render Final Cut</button>
     <div class="progress-box" id="progressBox">
@@ -296,7 +323,7 @@ document.getElementById("clipFileInput").addEventListener("change", async (e) =>
 
     clips.push({
       id: uid(), file, name: file.name, url,
-      trimStart: 0, trimEnd: Math.floor(tempVideo.duration), duration: Math.floor(tempVideo.duration),
+      trimStart: 0, trimEnd: Math.floor(tempVideo.duration), duration: Math.floor(tempVideo.duration), speed: 1,
     });
   }
   e.target.value = "";
@@ -322,6 +349,7 @@ function renderClipList(){
         <span class="clip-item-name" title="${escapeHtml(clip.name)}"><span class="clip-item-take">TAKE ${String(index + 1).padStart(2, "0")}</span>${escapeHtml(clip.name)}</span>
         <div class="clip-item-actions">
           <button data-action="preview">Preview</button>
+          <button data-action="split">Split</button>
           <button data-action="up">↑</button>
           <button data-action="down">↓</button>
           <button data-action="remove" style="color:var(--danger);">✕</button>
@@ -331,19 +359,44 @@ function renderClipList(){
         Trim: <input type="number" data-field="trimStart" value="${clip.trimStart}" min="0" max="${clip.duration}"> s
         to <input type="number" data-field="trimEnd" value="${clip.trimEnd}" min="0" max="${clip.duration}"> s
         (of ${clip.duration}s)
+      </div>
+      <div class="trim-row" style="margin-top:8px;">
+        Speed:
+        <select data-field="speed" style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:4px 6px; color:white; font-size:11.5px; font-family:var(--font-mono);">
+          <option value="0.5" ${clip.speed === 0.5 ? "selected" : ""}>0.5x</option>
+          <option value="1" ${clip.speed === 1 ? "selected" : ""}>1x</option>
+          <option value="1.5" ${clip.speed === 1.5 ? "selected" : ""}>1.5x</option>
+          <option value="2" ${clip.speed === 2 ? "selected" : ""}>2x</option>
+        </select>
       </div>`;
 
     item.querySelector('[data-action="preview"]').addEventListener("click", () => showPreview(clip.url));
+    item.querySelector('[data-action="split"]').addEventListener("click", () => splitClip(index));
     item.querySelector('[data-action="up"]').addEventListener("click", () => moveClip(index, -1));
     item.querySelector('[data-action="down"]').addEventListener("click", () => moveClip(index, 1));
     item.querySelector('[data-action="remove"]').addEventListener("click", () => { clips.splice(index, 1); renderClipList(); updateRenderButton(); });
     item.querySelector('[data-field="trimStart"]').addEventListener("input", (e) => { clip.trimStart = parseFloat(e.target.value) || 0; renderTimeline(); });
     item.querySelector('[data-field="trimEnd"]').addEventListener("input", (e) => { clip.trimEnd = parseFloat(e.target.value) || clip.duration; renderTimeline(); });
+    item.querySelector('[data-field="speed"]').addEventListener("change", (e) => { clip.speed = parseFloat(e.target.value); renderTimeline(); });
 
     list.appendChild(item);
   });
 
   renderTimeline();
+}
+
+function splitClip(index){
+  const clip = clips[index];
+  const midpoint = (clip.trimStart + clip.trimEnd) / 2;
+  if (midpoint - clip.trimStart < 0.5 || clip.trimEnd - midpoint < 0.5){
+    alert("This clip is too short to split further.");
+    return;
+  }
+
+  const secondHalf = { ...clip, id: uid(), trimStart: midpoint };
+  clip.trimEnd = midpoint;
+  clips.splice(index + 1, 0, secondHalf);
+  renderClipList();
 }
 
 function renderTimeline(){
@@ -360,7 +413,7 @@ function renderTimeline(){
     return;
   }
 
-  const clipDurations = clips.map(c => Math.max(0.5, c.trimEnd - c.trimStart));
+  const clipDurations = clips.map(c => Math.max(0.5, c.trimEnd - c.trimStart) / (c.speed || 1));
   const totalDuration = clipDurations.reduce((sum, d) => sum + d, 0);
 
   videoTrack.innerHTML = "";
@@ -369,7 +422,7 @@ function renderTimeline(){
     block.className = "timeline-clip-block";
     const widthPercent = (clipDurations[i] / totalDuration) * 100;
     block.style.width = `${widthPercent}%`;
-    block.textContent = `T${i + 1}`;
+    block.textContent = clip.speed && clip.speed !== 1 ? `T${i + 1} ${clip.speed}x` : `T${i + 1}`;
     block.title = `${clip.name} (${clipDurations[i].toFixed(1)}s)`;
     block.addEventListener("click", () => showPreview(clip.url));
     videoTrack.appendChild(block);
@@ -497,35 +550,101 @@ async function renderFinalVideo(){
   document.getElementById("downloadBox").classList.remove("show");
   setProgress(3, "Loading your clips...");
 
+  const transitionType = document.getElementById("transitionType").value;
+  const transitionDuration = parseFloat(document.getElementById("transitionDuration").value) || 0.6;
+  const colorGrade = document.getElementById("colorGrade").value;
+  const musicFade = document.getElementById("musicFade").checked;
+
   try {
     for (let i = 0; i < clips.length; i++){
       const clip = clips[i];
       await ffmpeg.writeFile(`in${i}.mp4`, await fetchFile(clip.file));
     }
 
-    setProgress(15, "Trimming clips...");
+    // Trim each clip, apply speed change, normalize to the same
+    // resolution/framerate so clips can be combined or crossfaded cleanly.
+    setProgress(15, "Trimming and adjusting clips...");
+    const clipFinalDurations = [];
     for (let i = 0; i < clips.length; i++){
       const clip = clips[i];
-      const duration = Math.max(0.5, clip.trimEnd - clip.trimStart);
-      await ffmpeg.exec([
+      const rawDuration = Math.max(0.5, clip.trimEnd - clip.trimStart);
+      const speed = clip.speed || 1;
+      const finalDuration = rawDuration / speed;
+      clipFinalDurations.push(finalDuration);
+
+      const videoFilters = [
+        "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1",
+        speed !== 1 ? `setpts=PTS/${speed}` : null,
+      ].filter(Boolean).join(",");
+
+      const audioFilters = speed !== 1 ? [`atempo=${Math.min(2, Math.max(0.5, speed))}`] : [];
+
+      const args = [
         "-i", `in${i}.mp4`,
-        "-ss", String(clip.trimStart), "-t", String(duration),
-        "-vf", "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1",
-        "-r", "30", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
-        `trimmed${i}.mp4`,
-      ]);
-      setProgress(15 + Math.round((i + 1) / clips.length * 25), `Trimming clip ${i + 1} of ${clips.length}...`);
+        "-ss", String(clip.trimStart), "-t", String(rawDuration),
+        "-vf", videoFilters,
+        "-r", "30", "-c:v", "libx264", "-preset", "ultrafast",
+      ];
+      if (audioFilters.length > 0) args.push("-af", audioFilters.join(","));
+      args.push("-c:a", "aac", `trimmed${i}.mp4`);
+
+      await ffmpeg.exec(args);
+      setProgress(15 + Math.round((i + 1) / clips.length * 25), `Processing clip ${i + 1} of ${clips.length}...`);
     }
 
+    // Combine clips — either a hard cut (concat demuxer, fast) or
+    // a real crossfade chain (xfade/acrossfade, one pair at a time).
     setProgress(42, "Combining clips...");
-    const concatList = clips.map((_, i) => `file trimmed${i}.mp4`).join("\n");
-    await ffmpeg.writeFile("concat.txt", concatList);
-    await ffmpeg.exec(["-f", "concat", "-safe", "0", "-i", "concat.txt", "-c", "copy", "combined.mp4"]);
+    let currentFile;
 
-    let currentFile = "combined.mp4";
+    if (transitionType === "cut" || clips.length === 1){
+      const concatList = clips.map((_, i) => `file trimmed${i}.mp4`).join("\n");
+      await ffmpeg.writeFile("concat.txt", concatList);
+      await ffmpeg.exec(["-f", "concat", "-safe", "0", "-i", "concat.txt", "-c", "copy", "combined.mp4"]);
+      currentFile = "combined.mp4";
+    } else {
+      currentFile = "trimmed0.mp4";
+      let cumulativeDuration = clipFinalDurations[0];
+
+      for (let i = 1; i < clips.length; i++){
+        const offset = Math.max(0.1, cumulativeDuration - transitionDuration);
+        const outputName = `xfade${i}.mp4`;
+
+        await ffmpeg.exec([
+          "-i", currentFile, "-i", `trimmed${i}.mp4`,
+          "-filter_complex",
+          `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=${offset.toFixed(2)}[v];[0:a][1:a]acrossfade=d=${transitionDuration}[a]`,
+          "-map", "[v]", "-map", "[a]",
+          "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
+          outputName,
+        ]);
+
+        currentFile = outputName;
+        cumulativeDuration = cumulativeDuration + clipFinalDurations[i] - transitionDuration;
+        setProgress(42 + Math.round((i / (clips.length - 1)) * 15), `Crossfading clip ${i + 1} of ${clips.length}...`);
+      }
+    }
+
+    // Color grade — applied once, to the whole combined cut.
+    if (colorGrade !== "normal"){
+      setProgress(58, "Applying color grade...");
+      const gradeFilters = {
+        warm: "colorbalance=rs=.12:gs=.02:bs=-.12",
+        cool: "colorbalance=rs=-.12:gs=.0:bs=.12",
+        bw: "hue=s=0",
+        cinematic: "eq=contrast=1.18:saturation=0.82:brightness=-0.02",
+      };
+      await ffmpeg.exec([
+        "-i", currentFile,
+        "-vf", gradeFilters[colorGrade],
+        "-c:a", "copy",
+        "graded.mp4",
+      ]);
+      currentFile = "graded.mp4";
+    }
 
     if (overlays.length > 0){
-      setProgress(55, "Adding text overlays...");
+      setProgress(65, "Adding text overlays...");
       for (let i = 0; i < overlays.length; i++){
         const ov = overlays[i];
         if (!ov.text.trim()) continue;
@@ -541,17 +660,20 @@ async function renderFinalVideo(){
           `overlay${i}.mp4`,
         ]);
         currentFile = `overlay${i}.mp4`;
-        setProgress(55 + Math.round((i + 1) / overlays.length * 20), `Adding overlay ${i + 1} of ${overlays.length}...`);
+        setProgress(65 + Math.round((i + 1) / overlays.length * 15), `Adding overlay ${i + 1} of ${overlays.length}...`);
       }
     }
 
     if (musicFile){
-      setProgress(80, "Mixing in music...");
+      setProgress(85, "Mixing in music...");
       await ffmpeg.writeFile("music.mp3", await fetchFile(musicFile));
       const volumeFactor = (musicVolume / 100).toFixed(2);
+      const musicFilter = musicFade
+        ? `[1:a]volume=${volumeFactor},afade=t=in:d=2,areverse,afade=t=in:d=2,areverse[music]`
+        : `[1:a]volume=${volumeFactor}[music]`;
       await ffmpeg.exec([
         "-i", currentFile, "-i", "music.mp3",
-        "-filter_complex", `[1:a]volume=${volumeFactor}[music];[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[aout]`,
+        "-filter_complex", `${musicFilter};[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[aout]`,
         "-map", "0:v", "-map", "[aout]", "-c:v", "copy",
         "final.mp4",
       ]);
