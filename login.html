@@ -133,8 +133,8 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 
   <div class="brand">
     <div class="brand-badge">R</div>
-    <div class="brand-name">Relvia</div>
-    <div class="brand-tagline">One Account · Every Stage of Relvia</div>
+    <div class="brand-name">Relvia&trade;</div>
+    <div class="brand-tagline">One Account · Social, Music &amp; Studios</div>
   </div>
 
   <div class="card">
@@ -199,7 +199,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 
   <div class="ecosystem-note">
     <strong>Film · Television · Music · Live · Creators.</strong><br>
-    One ecosystem, one login, endless possibilities.
+    One ecosystem, endless possibilities. (Relvia Live uses its own separate sign-in.)
   </div>
 
 </div>
@@ -211,7 +211,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const FEED_URL = "/social/social.html";
+const FEED_URL = "/creators/index.html";
 
 // ==========================================
 // IF ALREADY LOGGED IN, SKIP STRAIGHT TO SOCIAL
@@ -357,5 +357,6 @@ signupSubmit.addEventListener("click", async () => {
 });
 
 </script>
+<script src="beta-toolkit.js"></script>
 </body>
 </html>
