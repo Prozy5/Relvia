@@ -833,6 +833,20 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- RATE LIMITS -->
+    <div class="section">
+      <div class="section-head"><h2>Rate Limits</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Change any number here and it takes effect immediately — no redeploy needed. These override whatever's hardcoded in the actual function.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Action</th><th>Description</th><th>Max Requests</th><th>Window (sec)</th><th></th></tr></thead>
+          <tbody id="rateLimitsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- IP BANS (ecosystem-wide) -->
     <div class="section">
       <div class="section-head"><h2>IP Bans</h2></div>
@@ -2653,7 +2667,7 @@ function setupEcosystemTabs(){
         founderTabLoaded = true;
         await Promise.all([
           loadPlatformOverview(), loadSystemHealth(), loadGrowthCharts(), loadPlatformAnnouncements(), loadReportsQueue(),
-          loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(), loadBetaDashboard(),
+          loadFounderAlerts(), loadFeatureFlags(), loadInvestmentReserve(), loadActiveSessions(), loadBetaDashboard(), loadRateLimits(),
         ]);
         setupUniversalSearch();
         setupJarvis();
@@ -2697,6 +2711,57 @@ async function loadPlatformOverview(){
 // ==========================================================
 // BETA DASHBOARD
 // ==========================================================
+// ==========================================================
+// RATE LIMITS
+// ==========================================================
+async function loadRateLimits(){
+  const { data, error } = await supabaseClient.from("rate_limit_configs").select("*").order("action");
+  const tbody = document.getElementById("rateLimitsTableBody");
+
+  if (error || !data || data.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No rate limit configs found — run relvia-rate-limit-config-schema.sql.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  data.forEach(cfg => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="font-family:monospace;font-size:12px;font-weight:700;">${escapeHtml(cfg.action)}</td>
+      <td style="font-size:12px;color:var(--muted);">${escapeHtml(cfg.description || "")}</td>
+      <td><input type="number" min="1" value="${cfg.max_requests}" data-field="max_requests" data-action="${cfg.action}" style="width:80px;background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 8px;color:white;font-size:13px;"></td>
+      <td><input type="number" min="10" value="${cfg.window_seconds}" data-field="window_seconds" data-action="${cfg.action}" style="width:90px;background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 8px;color:white;font-size:13px;"></td>
+      <td><button class="btn gold sm" data-save-action="${cfg.action}">Save</button></td>`;
+    tbody.appendChild(row);
+  });
+
+  tbody.querySelectorAll("[data-save-action]").forEach(btn => {
+    btn.addEventListener("click", () => saveRateLimit(btn.dataset.saveAction));
+  });
+}
+
+async function saveRateLimit(action){
+  const maxInput = document.querySelector(`[data-field="max_requests"][data-action="${action}"]`);
+  const windowInput = document.querySelector(`[data-field="window_seconds"][data-action="${action}"]`);
+  const max_requests = parseInt(maxInput.value, 10);
+  const window_seconds = parseInt(windowInput.value, 10);
+
+  if (isNaN(max_requests) || isNaN(window_seconds) || max_requests < 1 || window_seconds < 10){
+    showToast("Enter valid numbers — max requests \u2265 1, window \u2265 10 seconds");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("rate_limit_configs")
+    .update({ max_requests, window_seconds, updated_by: currentUser.id, updated_at: new Date().toISOString() })
+    .eq("action", action);
+
+  if (error){ console.error(error); showToast("Couldn't save"); return; }
+
+  showToast(`${action} updated \u2014 live immediately, no redeploy needed`);
+  await logAction("update_rate_limit", "rate_limit_configs", `${action}: ${max_requests}/${window_seconds}s`);
+}
+
 async function loadBetaDashboard(){
   const { data: betaMeta } = await supabaseClient.from("beta_metadata").select("beta_started_at").eq("id", 1).maybeSingle();
   const daysInBeta = betaMeta?.beta_started_at
