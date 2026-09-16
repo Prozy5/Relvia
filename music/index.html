@@ -92,7 +92,7 @@
 <body>
   <div class="app">
     <aside class="sidebar">
-      <a class="logo" href="welcome.html"><span class="logo-rel">Relvia</span><span class="logo-music">Music</span></a>
+      <a class="logo" href="welcome.html"><span class="logo-rel">Relvia&trade;</span><span class="logo-music">Music</span></a>
       <div class="nav">
         <button class="active" data-view="home"><span>&#9673;</span>Listen now</button>
         <button data-view="browse"><span>&#9714;</span>Browse</button>
@@ -208,6 +208,33 @@ async function initialize(){
   const { data: userData } = await supabaseClient.auth.getUser();
   if (!userData.user){ window.location.href = "/login.html"; return; }
   currentUser = userData.user;
+
+  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "music", target_label: "Relvia Music (Home)" }); } catch (e){}
+
+  const { data: locks } = await supabaseClient.rpc("get_page_locks_public");
+  const lock = (locks || []).find(l => l.page_key === "music");
+  const unlockKey = "relvia-live-unlock-music";
+
+  if (lock?.is_closed && sessionStorage.getItem(unlockKey) !== "true"){
+    document.querySelector(".app").innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:100px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:24px;">Relvia Music is temporarily closed</h2>
+        <p style="color:var(--muted);font-size:14px;">${escapeHtml(lock.message || "Check back soon.")}</p>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="unlockPasscode" type="password" placeholder="Passcode" style="background:#1d1812;border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--cream);font-size:14px;">
+          <button id="unlockSubmit" style="background:var(--gold);color:#17120a;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>
+        </div>
+        <p id="unlockError" style="color:#e0574f;font-size:12.5px;display:none;">Incorrect passcode.</p>
+      </div>`;
+    document.getElementById("unlockSubmit").addEventListener("click", async () => {
+      const passcode = document.getElementById("unlockPasscode").value;
+      const { data: isValid } = await supabaseClient.rpc("verify_page_passcode", { target_page_key: "music", passcode });
+      if (isValid){ sessionStorage.setItem(unlockKey, "true"); window.location.reload(); }
+      else { document.getElementById("unlockError").style.display = "block"; }
+    });
+    return;
+  }
+
 
   const { data: profile } = await supabaseClient.from("profiles").select("display_name, avatar_url").eq("id", currentUser.id).maybeSingle();
   document.getElementById("sidebarName").textContent = profile?.display_name || "My Relvia";
@@ -347,12 +374,123 @@ async function renderPlaylists(container){
     list.innerHTML = `<div class="empty-msg">No playlists yet.</div>`;
     return;
   }
+
+  const { data: counts } = await supabaseClient
+    .from("music_playlist_tracks").select("playlist_id")
+    .in("playlist_id", playlists.map(p => p.id));
+  const countByPlaylist = {};
+  (counts || []).forEach(c => { countByPlaylist[c.playlist_id] = (countByPlaylist[c.playlist_id] || 0) + 1; });
+
   playlists.forEach(p => {
+    const n = countByPlaylist[p.id] || 0;
     const row = document.createElement("div");
-    row.style.cssText = "padding:14px 0;border-top:1px solid var(--line);font-size:13px;";
-    row.textContent = p.name;
+    row.style.cssText = "padding:14px 0;border-top:1px solid var(--line);font-size:13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;";
+    row.innerHTML = `
+      <span>${escapeHtml(p.name)} <span style="color:var(--muted);font-size:11.5px;">· ${n} track${n === 1 ? "" : "s"}</span></span>
+      <button data-delete-playlist style="font-size:11px;color:#e0574f;background:none;border:none;cursor:pointer;">Delete</button>`;
+    row.addEventListener("click", (e) => {
+      if (e.target.closest("[data-delete-playlist]")) return;
+      renderPlaylistDetail(container, p);
+    });
+    row.querySelector("[data-delete-playlist]").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Delete "${p.name}"? This can't be undone.`)) return;
+      await supabaseClient.from("music_playlists").delete().eq("id", p.id);
+      renderPlaylists(container);
+    });
     list.appendChild(row);
   });
+}
+
+async function renderPlaylistDetail(container, playlist){
+  const { data: rows } = await supabaseClient
+    .from("music_playlist_tracks")
+    .select("position, music_tracks(*, music_artists(name), music_releases(cover_url))")
+    .eq("playlist_id", playlist.id)
+    .order("position", { ascending:true });
+
+  const tracks = (rows || []).map(r => r.music_tracks).filter(Boolean);
+
+  container.innerHTML = `
+    <div class="section-head">
+      <h2>${escapeHtml(playlist.name)}</h2>
+      <a href="#" id="backToPlaylists">&#8592; All playlists</a>
+    </div>
+    <div id="playlistTracks"></div>`;
+
+  document.getElementById("backToPlaylists").addEventListener("click", (e) => {
+    e.preventDefault();
+    renderPlaylists(container);
+  });
+
+  const wrap = document.getElementById("playlistTracks");
+  if (tracks.length === 0){
+    wrap.innerHTML = `<div class="empty-msg">Nothing here yet — use the + on any track to add it.</div>`;
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "recent";
+  tracks.forEach((t, i) => {
+    const tr = buildTrackRow(t, i, tracks);
+    const removeCell = document.createElement("td");
+    removeCell.style.cssText = "color:#e0574f;cursor:pointer;font-size:12px;";
+    removeCell.textContent = "\u2715";
+    removeCell.title = "Remove from playlist";
+    removeCell.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      await supabaseClient.from("music_playlist_tracks").delete()
+        .eq("playlist_id", playlist.id).eq("track_id", t.id);
+      renderPlaylistDetail(container, playlist);
+    });
+    tr.appendChild(removeCell);
+    table.appendChild(tr);
+  });
+  wrap.appendChild(table);
+}
+
+// Adds a track to a playlist the user picks from their own list.
+async function addTrackToPlaylist(trackId){
+  const { data: playlists } = await supabaseClient
+    .from("music_playlists").select("*").eq("user_id", currentUser.id).order("created_at", { ascending:false });
+
+  if (!playlists || playlists.length === 0){
+    const name = prompt("No playlists yet. Name your first one:");
+    if (!name || !name.trim()) return;
+    const { data: created } = await supabaseClient
+      .from("music_playlists").insert({ user_id: currentUser.id, name: name.trim() }).select().single();
+    if (!created) return;
+    await insertIntoPlaylist(created.id, trackId);
+    return;
+  }
+
+  const menu = playlists.map((p, i) => `${i + 1}. ${p.name}`).join("\n");
+  const choice = prompt(`Add to which playlist?\n\n${menu}\n\nEnter a number (or type a new playlist name):`);
+  if (!choice || !choice.trim()) return;
+
+  const index = parseInt(choice.trim(), 10);
+  if (!isNaN(index) && playlists[index - 1]){
+    await insertIntoPlaylist(playlists[index - 1].id, trackId);
+  } else {
+    const { data: created } = await supabaseClient
+      .from("music_playlists").insert({ user_id: currentUser.id, name: choice.trim() }).select().single();
+    if (created) await insertIntoPlaylist(created.id, trackId);
+  }
+}
+
+async function insertIntoPlaylist(playlistId, trackId){
+  const { data: existing } = await supabaseClient
+    .from("music_playlist_tracks").select("track_id")
+    .eq("playlist_id", playlistId).eq("track_id", trackId).maybeSingle();
+  if (existing){ alert("That track is already in this playlist."); return; }
+
+  const { count } = await supabaseClient
+    .from("music_playlist_tracks").select("*", { count:"exact", head:true }).eq("playlist_id", playlistId);
+
+  const { error } = await supabaseClient
+    .from("music_playlist_tracks").insert({ playlist_id: playlistId, track_id: trackId, position: count || 0 });
+  if (error){ console.error(error); alert("Couldn't add to playlist."); return; }
+  alert("Added to playlist.");
 }
 
 async function appendRecentSection(container){
