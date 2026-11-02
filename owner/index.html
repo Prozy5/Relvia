@@ -3511,7 +3511,7 @@ async function loadStudiosStats(){
   const { count: totalProjects } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true });
   const { count: published } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "released");
   const { count: openCollabs } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).neq("status", "released");
-  const { data: viewsData } = await supabaseClient.from("studios_projects").select("view_count");
+  const { data: viewsData } = await supabaseClient.from("studios_films").select("view_count");
   const totalViews = (viewsData || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
 
   document.getElementById("statStudiosProjects").textContent = totalProjects ?? 0;
