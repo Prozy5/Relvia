@@ -206,6 +206,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
       <button class="eco-tab" data-eco-tab="news">News</button>
+      <button class="eco-tab" data-eco-tab="offices">Offices</button>
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
@@ -720,6 +721,35 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
     </div><!-- /eco-news -->
+
+    <!-- ================= OFFICES TAB ================= -->
+    <div class="eco-panel" id="eco-offices">
+      <div class="section">
+        <div class="section-head"><h2>My Office</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Visitors can only walk into your office while it's open. You only see conversations from people who message you.</p>
+        <div class="panel" style="padding:20px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <input type="text" id="officeNameInput" placeholder="Office name (e.g. Deondre's Office)" style="flex:1;min-width:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13.5px;">
+            <input type="text" id="officeTitleInput" placeholder="Title (e.g. Founder)" style="width:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13.5px;">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn gold" id="saveOfficeBtn">Save office</button>
+            <button class="btn" id="toggleOfficeBtn" disabled>Open office</button>
+            <span class="pill banned" id="officeStatusPill">Closed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Conversations</h2></div>
+        <div class="panel" style="display:grid;grid-template-columns:minmax(200px,260px) 1fr;min-height:420px;padding:0;overflow:hidden;">
+          <div id="officeInbox" style="border-right:1px solid var(--border-soft);overflow-y:auto;max-height:560px;"></div>
+          <div id="officeThread" style="display:flex;flex-direction:column;">
+            <div style="padding:16px;font-size:12.5px;color:var(--muted);">Select a conversation.</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /eco-offices -->
 
     <!-- ================= FOUNDER TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-founder">
@@ -2643,6 +2673,7 @@ let creatorsLoaded = false;
 let growthLoaded = false;
 let founderTabLoaded = false;
 let newsLoaded = false;
+let officesLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -2663,6 +2694,7 @@ function setupEcosystemTabs(){
         await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
       }
       if (target === "news" && !newsLoaded){ newsLoaded = true; await loadNewsTab(); }
+      if (target === "offices" && !officesLoaded){ officesLoaded = true; await loadOfficesTab(); }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
         await Promise.all([
@@ -3195,6 +3227,197 @@ async function loadActiveSessions(){
 // ==========================================================
 // NEWS
 // ==========================================================
+// ==========================================================
+// OFFICES (staff chat with visitors)
+// ==========================================================
+let myOffice = null;
+let officeChannel = null;
+let activeVisitorId = null;
+const officeRenderedIds = new Set();
+
+async function loadOfficesTab(){
+  document.getElementById("saveOfficeBtn").addEventListener("click", saveOffice);
+  document.getElementById("toggleOfficeBtn").addEventListener("click", toggleOffice);
+  await loadMyOffice();
+  await loadOfficeInbox();
+  subscribeOfficeRealtime();
+}
+
+async function loadMyOffice(){
+  const { data } = await supabaseClient.from("staff_offices").select("*").eq("staff_id", currentUser.id).maybeSingle();
+  myOffice = data || null;
+  document.getElementById("officeNameInput").value = myOffice?.office_name || "";
+  document.getElementById("officeTitleInput").value = myOffice?.title || "";
+  updateOfficeStatusUI();
+}
+
+function updateOfficeStatusUI(){
+  const pill = document.getElementById("officeStatusPill");
+  const toggleBtn = document.getElementById("toggleOfficeBtn");
+  const isOpen = !!(myOffice && myOffice.is_open);
+  pill.textContent = isOpen ? "Open" : "Closed";
+  pill.className = `pill ${isOpen ? "ok" : "banned"}`;
+  toggleBtn.textContent = isOpen ? "Close office" : "Open office";
+  toggleBtn.disabled = !myOffice;
+}
+
+async function saveOffice(){
+  const office_name = document.getElementById("officeNameInput").value.trim();
+  const title = document.getElementById("officeTitleInput").value.trim();
+  if (!office_name){ showToast("Give your office a name"); return; }
+
+  if (myOffice){
+    const { data, error } = await supabaseClient.from("staff_offices")
+      .update({ office_name, title: title || null, updated_at: new Date().toISOString() })
+      .eq("id", myOffice.id).select().single();
+    if (error){ console.error(error); showToast("Couldn't save office"); return; }
+    myOffice = data;
+  } else {
+    const { data, error } = await supabaseClient.from("staff_offices")
+      .insert({ staff_id: currentUser.id, office_name, title: title || null })
+      .select().single();
+    if (error){ console.error(error); showToast("Couldn't create office"); return; }
+    myOffice = data;
+    subscribeOfficeRealtime();
+  }
+  updateOfficeStatusUI();
+  showToast("Office saved");
+}
+
+async function toggleOffice(){
+  if (!myOffice){ showToast("Save your office first"); return; }
+  const next = !myOffice.is_open;
+  const { data, error } = await supabaseClient.from("staff_offices")
+    .update({ is_open: next, updated_at: new Date().toISOString() })
+    .eq("id", myOffice.id).select().single();
+  if (error){ console.error(error); showToast("Couldn't update office"); return; }
+  myOffice = data;
+  updateOfficeStatusUI();
+  showToast(next ? "Your office is open" : "Your office is closed");
+  await logAction(next ? "open_office" : "close_office", "offices", myOffice.office_name);
+}
+
+async function loadOfficeInbox(){
+  const list = document.getElementById("officeInbox");
+  const { data, error } = await supabaseClient.rpc("get_office_inbox");
+  if (error){
+    console.error(error);
+    list.innerHTML = `<div style="padding:16px;font-size:12.5px;color:var(--muted);">Couldn't load conversations.</div>`;
+    return;
+  }
+  if (!data || data.length === 0){
+    list.innerHTML = `<div style="padding:16px;font-size:12.5px;color:var(--muted);">${myOffice ? "No conversations yet." : "Create your office to start receiving visitors."}</div>`;
+    return;
+  }
+  list.innerHTML = "";
+  data.forEach(t => {
+    const row = document.createElement("div");
+    const selected = t.visitor_id === activeVisitorId;
+    row.style.cssText = `padding:12px 14px;border-bottom:1px solid var(--border-soft);cursor:pointer;${selected ? "background:var(--surface-light);" : ""}`;
+    row.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span style="font-weight:700;font-size:13px;">${escapeHtml(t.display_name || "Unknown")}</span>
+        ${t.unread_count > 0 ? `<span style="background:var(--gold);color:#000;font-size:10px;font-weight:800;padding:1px 8px;border-radius:999px;">${t.unread_count}</span>` : ""}
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.last_body || "")}</div>`;
+    row.addEventListener("click", () => openOfficeThread(t.visitor_id));
+    list.appendChild(row);
+  });
+}
+
+async function openOfficeThread(visitorId){
+  activeVisitorId = visitorId;
+  officeRenderedIds.clear();
+  const pane = document.getElementById("officeThread");
+  pane.innerHTML = `<div style="padding:16px;font-size:12.5px;color:var(--muted);">Loading...</div>`;
+
+  const [cardRes, msgRes] = await Promise.all([
+    supabaseClient.rpc("get_visitor_card", { p_visitor: visitorId }),
+    supabaseClient.from("office_messages").select("*")
+      .eq("office_id", myOffice.id).eq("visitor_id", visitorId).order("created_at", { ascending:true }),
+  ]);
+  const card = (cardRes.data || [])[0];
+
+  pane.innerHTML = `
+    <div id="visitorCard" style="padding:14px 16px;border-bottom:1px solid var(--border-soft);background:var(--surface-light);"></div>
+    <div id="officeMessages" style="flex:1;overflow-y:auto;max-height:330px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border-soft);">
+      <input type="text" id="officeReplyInput" placeholder="Reply..." maxlength="2000" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:white;font-size:13px;">
+      <button class="btn gold" id="officeReplyBtn">Send</button>
+    </div>`;
+
+  renderVisitorCard(card);
+  (msgRes.data || []).forEach(appendOfficeMessage);
+
+  const send = async () => {
+    const input = document.getElementById("officeReplyInput");
+    const body = input.value.trim();
+    if (!body) return;
+    const { data: sent, error } = await supabaseClient.from("office_messages")
+      .insert({ office_id: myOffice.id, visitor_id: activeVisitorId, sender_id: currentUser.id, body })
+      .select().single();
+    if (error){ console.error(error); showToast(error.message || "Couldn't send"); return; }
+    input.value = "";
+    appendOfficeMessage(sent);
+    loadOfficeInbox();
+  };
+  document.getElementById("officeReplyBtn").addEventListener("click", send);
+  document.getElementById("officeReplyInput").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+
+  await supabaseClient.rpc("mark_thread_read", { p_visitor: visitorId });
+  await loadOfficeInbox();
+}
+
+function renderVisitorCard(card){
+  const el = document.getElementById("visitorCard");
+  if (!card){ el.innerHTML = `<div style="font-size:12.5px;color:var(--muted);">Visitor info unavailable.</div>`; return; }
+  const joined = card.joined_at ? new Date(card.joined_at).toLocaleDateString() : "—";
+  const stat = (label, value, warn) => `<div style="text-align:center;"><div style="font-weight:800;font-size:15px;${warn ? "color:var(--danger);" : "color:var(--gold);"}">${value}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">${label}</div></div>`;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;">
+      <div>
+        <div style="font-weight:800;font-size:14px;">${escapeHtml(card.display_name || "Unknown")} <span style="font-weight:500;color:var(--muted);font-size:12px;">@${escapeHtml(card.username || "unknown")}</span></div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Joined ${joined}${card.email ? ` · ${escapeHtml(card.email)}` : ""}</div>
+      </div>
+      <div style="display:flex;gap:18px;">
+        ${stat("Posts", card.post_count)}
+        ${stat("Projects", card.project_count)}
+        ${stat("Open reports", card.open_reports, card.open_reports > 0)}
+        ${stat("Msgs to staff", card.prior_staff_messages)}
+      </div>
+    </div>`;
+}
+
+function appendOfficeMessage(m){
+  if (officeRenderedIds.has(m.id)) return;
+  officeRenderedIds.add(m.id);
+  const box = document.getElementById("officeMessages");
+  if (!box) return;
+  const mine = m.sender_id === currentUser.id;
+  const bubble = document.createElement("div");
+  bubble.style.cssText = `max-width:80%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;${mine ? "align-self:flex-end;background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;" : "align-self:flex-start;background:var(--surface);border:1px solid var(--border);"}`;
+  bubble.textContent = m.body;
+  box.appendChild(bubble);
+  box.scrollTop = box.scrollHeight;
+}
+
+function subscribeOfficeRealtime(){
+  if (officeChannel || !myOffice) return;
+  officeChannel = supabaseClient
+    .channel(`office-staff-${myOffice.id}`)
+    .on("postgres_changes",
+      { event: "INSERT", schema: "public", table: "office_messages", filter: `office_id=eq.${myOffice.id}` },
+      (payload) => {
+        const m = payload.new;
+        if (m.visitor_id === activeVisitorId){
+          appendOfficeMessage(m);
+          if (m.sender_id === m.visitor_id) supabaseClient.rpc("mark_thread_read", { p_visitor: activeVisitorId });
+        }
+        loadOfficeInbox();
+      })
+    .subscribe();
+}
+
 function slugify(title){
   return title.toLowerCase().trim()
     .replace(/[^a-z0-9\s-]/g, "")
@@ -3286,8 +3509,8 @@ async function loadStudiosTab(){
 
 async function loadStudiosStats(){
   const { count: totalProjects } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true });
-  const { count: published } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "published");
-  const { count: openCollabs } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "collab");
+  const { count: published } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "released");
+  const { count: openCollabs } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).neq("status", "released");
   const { data: viewsData } = await supabaseClient.from("studios_projects").select("view_count");
   const totalViews = (viewsData || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
 
@@ -3324,36 +3547,13 @@ async function loadStudiosProjects(){
       <td><span class="pill ${project.status === "published" ? "ok" : project.status === "rejected" ? "banned" : "temp"}">${escapeHtml(project.status)}</span></td>
       <td>${project.view_count || 0}</td>
       <td>
-        ${project.status === "in_review" ? `<button class="btn gold sm" data-action="approve">Approve</button><button class="btn danger sm" data-action="reject">Reject</button>` : ""}
         <button class="btn danger sm" data-action="delete">Delete</button>
       </td>`;
 
-    const approveBtn = row.querySelector('[data-action="approve"]');
-    if (approveBtn) approveBtn.addEventListener("click", () => approveStudiosProject(project.id, project.title));
-    const rejectBtn = row.querySelector('[data-action="reject"]');
-    if (rejectBtn) rejectBtn.addEventListener("click", () => rejectStudiosProject(project.id, project.title));
     row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteStudiosProject(project.id, project.title));
 
     tbody.appendChild(row);
   });
-}
-
-async function approveStudiosProject(projectId, title){
-  const { error } = await supabaseClient.rpc("approve_project", { target_project_id: projectId });
-  if (error){ console.error(error); showToast("Couldn't approve project"); return; }
-  showToast(`"${title}" published`);
-  await logAction("approve_studios_project", "studios_project", title);
-  await Promise.all([loadStudiosProjects(), loadStudiosStats()]);
-}
-
-async function rejectStudiosProject(projectId, title){
-  const reason = prompt(`Reason for rejecting "${title}" (shown to the creator):`, "");
-  if (reason === null) return;
-  const { error } = await supabaseClient.rpc("reject_project", { target_project_id: projectId, reason });
-  if (error){ console.error(error); showToast("Couldn't reject project"); return; }
-  showToast(`"${title}" rejected`);
-  await logAction("reject_studios_project", "studios_project", title, reason);
-  await Promise.all([loadStudiosProjects(), loadStudiosStats()]);
 }
 
 async function deleteStudiosProject(projectId, title){
