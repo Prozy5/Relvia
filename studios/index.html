@@ -272,6 +272,30 @@ img{ max-width:100%; display:block; }
 @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 .now-filming-title{ font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:6px; }
 .now-filming-meta{ font-size:12px; color:var(--muted); font-family:var(--font-mono); }
+
+.studio-hero{ text-align:center; padding:56px 0 40px; }
+.studio-hero .marquee-title{ margin-bottom:18px; }
+.studio-hero-actions{ display:flex; gap:12px; justify-content:center; margin-top:26px; flex-wrap:wrap; }
+.studio-ghost-btn{
+  font-size:13.5px; font-weight:700; padding:10px 20px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface-light); color:var(--text);
+}
+.studio-ghost-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.studio-section-label{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:18px; }
+.studio-steps, .studio-features, .studio-about{ margin-bottom:52px; }
+.studio-step-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+.studio-step{ background:#120e09; border:1px solid var(--border); border-radius:18px; padding:26px; }
+.studio-step-num{ font-family:var(--font-mono); font-size:12px; color:var(--gold); margin-bottom:12px; letter-spacing:1px; }
+.studio-step-title{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:10px; }
+.studio-step p{ font-size:14px; color:#d8d0c0; line-height:1.7; }
+.studio-feature-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+.studio-feature{ border-left:2px solid var(--gold-end); padding:4px 0 4px 18px; }
+.studio-feature-title{ font-size:15px; font-weight:700; margin-bottom:6px; }
+.studio-feature p{ font-size:13.5px; color:var(--muted); line-height:1.7; }
+.studio-about-card{ background:#120e09; border:1px solid var(--border); border-radius:18px; padding:24px 26px; }
+.studio-about-card p{ font-size:14px; color:#d8d0c0; line-height:1.75; }
+.studio-divider{ height:1px; background:var(--border-soft); margin:0 0 44px; }
+#discover{ scroll-margin-top:100px; }
 </style>
 </head>
 <body>
@@ -294,11 +318,76 @@ img{ max-width:100%; display:block; }
 <div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
 <div class="container">
-  <div class="marquee">
+
+  <section class="studio-hero">
     <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
-    <div class="marquee-title">Where <em>stories</em><br>get made.</div>
-    <p class="marquee-sub">Original films and series, collaborated on from first draft to premiere. Once released, they stream on <a href="../watch/index.html" style="color:var(--gold);">Relvia</a>.</p>
-  </div>
+    <h1 class="marquee-title">Make films and series<br><em>with other people.</em></h1>
+    <p class="marquee-sub">Relvia Studios is where creators find a crew, cut their footage into a finished film or episode, and release it to viewers on Relvia. Everything happens in your browser, from the first draft to the last title card.</p>
+    <div class="studio-hero-actions">
+      <button class="new-project-btn" id="heroStartBtn">Start a project</button>
+      <a class="studio-ghost-btn" href="#discover">Find a project to join</a>
+    </div>
+  </section>
+
+  <section class="studio-steps">
+    <div class="studio-section-label">How it works</div>
+    <div class="studio-step-grid">
+      <div class="studio-step">
+        <div class="studio-step-num">01</div>
+        <div class="studio-step-title">Start a project</div>
+        <p>Pick a film or a series, write a logline, and list the roles you need: editor, camera, actors, writers, anyone.</p>
+      </div>
+      <div class="studio-step">
+        <div class="studio-step-num">02</div>
+        <div class="studio-step-title">Build it with your crew</div>
+        <p>Cut your footage in the studio editor. Trim, reorder, change speed, add effects, use transitions, and fade in your titles and music.</p>
+      </div>
+      <div class="studio-step">
+        <div class="studio-step-num">03</div>
+        <div class="studio-step-title">Release it on Relvia</div>
+        <p>Upload the finished cut and it goes live on Relvia for viewers. Series add episodes one at a time, and new ones can follow later.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="studio-features">
+    <div class="studio-section-label">What you get</div>
+    <div class="studio-feature-grid">
+      <div class="studio-feature">
+        <div class="studio-feature-title">A studio editor in your browser</div>
+        <p>Import clips, trim them, and see effects on the monitor as you adjust them. No software to install.</p>
+      </div>
+      <div class="studio-feature">
+        <div class="studio-feature-title">Effects and transitions</div>
+        <p>Brightness, contrast, saturation, blur, and vignette per clip, plus crossfades, dissolves, and wipes between shots.</p>
+      </div>
+      <div class="studio-feature">
+        <div class="studio-feature-title">Crew and roles</div>
+        <p>List the roles a project still needs and see who's already on board. Your project page keeps the crew in one place.</p>
+      </div>
+      <div class="studio-feature">
+        <div class="studio-feature-title">Discussion on every project</div>
+        <p>Talk through scripts, cuts, and schedules with the people working on the same project.</p>
+      </div>
+      <div class="studio-feature">
+        <div class="studio-feature-title">Series, not just one-offs</div>
+        <p>Release a show episode by episode. Viewers can follow a series from the first episode onward.</p>
+      </div>
+      <div class="studio-feature">
+        <div class="studio-feature-title">Viewer support</div>
+        <p>Viewers can send RelvBits tips to the people who made a film. Tipping turns on when the platform opens.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="studio-about">
+    <div class="studio-section-label">Good to know</div>
+    <div class="studio-about-card">
+      <p>Relvia Studios is for working on real projects, not a sandbox. Final cuts are rendered in your browser, so longer films with many effects take a while to finish. Footage you upload should be yours to use, and the Google Drive file you link has to be shared as "Anyone with the link" so it can play on Relvia.</p>
+    </div>
+  </section>
+
+  <div class="studio-divider"></div>
 
   <div class="studio-stats-row" id="studioStatsRow">
     <div class="studio-stat"><div class="studio-stat-num timecode" id="statInProduction">—</div><div class="studio-stat-label">In Production</div></div>
@@ -311,6 +400,7 @@ img{ max-width:100%; display:block; }
   </div>
   <div class="now-filming-row" id="nowFilmingRow"></div>
 
+  <div id="discover"></div>
   <div class="discovery-bar" id="discoveryBar">
     <input type="text" class="discovery-search" id="discoverySearch" placeholder="Search titles, loglines, genres, or roles needed...">
     <select class="discovery-select" id="discoveryGenre"><option value="">All genres</option></select>
@@ -399,6 +489,7 @@ async function initialize(){
   document.getElementById("discoveryOpenRolesOnly").addEventListener("change", () => filterAndRenderProjects());
 
   document.getElementById("newProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.add("open"));
+  document.getElementById("heroStartBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.add("open"));
   document.getElementById("cancelProjectBtn").addEventListener("click", () => document.getElementById("newProjectModal").classList.remove("open"));
   document.getElementById("createProjectBtn").addEventListener("click", createProject);
 
