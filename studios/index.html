@@ -296,6 +296,55 @@ img{ max-width:100%; display:block; }
 .studio-about-card p{ font-size:14px; color:#d8d0c0; line-height:1.75; }
 .studio-divider{ height:1px; background:var(--border-soft); margin:0 0 44px; }
 #discover{ scroll-margin-top:100px; }
+
+.studio-intro{ padding:40px 0 36px; max-width:640px; }
+.studio-intro-title{ font-family:var(--font-display); font-size:40px; font-weight:600; margin-bottom:14px; }
+.studio-intro-text{ font-size:16px; color:#d8d0c0; line-height:1.7; margin-bottom:24px; }
+.studio-intro .studio-hero-actions{ justify-content:flex-start; margin-top:0; }
+
+.sl-hero{ display:grid; grid-template-columns:1.1fr 1fr; gap:56px; align-items:center; padding:48px 0 64px; }
+.sl-kicker{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:18px; }
+.sl-title{ font-family:var(--font-display); font-size:clamp(40px,5.4vw,64px); line-height:1.06; font-weight:600; margin-bottom:22px; }
+.sl-lede{ font-size:16.5px; color:#d8d0c0; line-height:1.7; max-width:520px; margin-bottom:30px; }
+.sl-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:22px; }
+.sl-btn-primary{ font-size:14px; font-weight:800; padding:13px 26px; border-radius:12px; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; cursor:pointer; }
+.sl-btn-primary:hover{ opacity:.9; }
+.sl-btn-ghost{ font-size:14px; font-weight:700; padding:13px 22px; border-radius:12px; border:1px solid var(--border); color:var(--text); }
+.sl-btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+.sl-meta{ font-size:12px; color:var(--muted-soft); letter-spacing:.3px; }
+
+.sl-monitor{ background:#0d0a07; border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow:0 30px 60px -30px rgba(0,0,0,.8); }
+.sl-screen{ position:relative; aspect-ratio:16/9; background:linear-gradient(135deg,#1a140c,#070504 70%); border-radius:10px; overflow:hidden; border:1px solid var(--border-soft); }
+.sl-slate{ position:absolute; top:12px; left:14px; font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:1px; z-index:2; }
+.sl-timecode{ position:absolute; bottom:14px; right:16px; font-family:var(--font-mono); font-size:12px; color:var(--gold); z-index:2; letter-spacing:1px; }
+.sl-letterbox{ position:absolute; left:0; right:0; height:9%; background:#000; z-index:1; }
+.sl-letterbox-top{ top:0; } .sl-letterbox-bottom{ bottom:0; }
+.sl-timeline{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.sl-track{ display:flex; gap:3px; height:30px; background:#161008; border-radius:6px; padding:3px; }
+.sl-clip{ background:linear-gradient(180deg,var(--gold-end),#8a611f); border-radius:4px; font-family:var(--font-mono); font-size:9.5px; color:#000; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.sl-clip-alt{ background:linear-gradient(180deg,#8b7a5c,#5c4f3a); color:#f5f1ea; }
+.sl-track-audio{ height:22px; }
+.sl-audio{ display:block; height:100%; border-radius:4px; background:linear-gradient(180deg,#3d5a4a,#233b2f); }
+
+.sl-section{ padding:0 0 56px; }
+.sl-section-label{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:800; margin-bottom:22px; padding-top:44px; border-top:1px solid var(--border-soft); }
+.sl-steps{ list-style:none; display:grid; gap:0; }
+.sl-step{ display:grid; grid-template-columns:70px 1fr; gap:14px; padding:22px 0; border-bottom:1px solid var(--border-soft); }
+.sl-step:last-child{ border-bottom:none; }
+.sl-step-num{ font-family:var(--font-mono); font-size:13px; color:var(--gold); padding-top:4px; }
+.sl-step h3{ font-family:var(--font-display); font-size:21px; font-weight:600; margin-bottom:6px; }
+.sl-step p{ font-size:14.5px; color:var(--muted); line-height:1.65; max-width:620px; }
+.sl-features{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0 36px; }
+.sl-feature{ font-size:15px; color:#e6dfd2; padding:14px 0 14px 16px; border-left:2px solid var(--gold-end); line-height:1.5; }
+.sl-note-section{ padding-bottom:20px; }
+.sl-note{ font-size:13.5px; color:var(--muted); line-height:1.7; max-width:680px; }
+.sl-footer{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:30px 0 10px; border-top:1px solid var(--border-soft); font-size:12.5px; color:var(--muted-soft); margin-top:24px; }
+.sl-footer a{ color:var(--muted); } .sl-footer a:hover{ color:var(--gold); }
+
+@media(max-width:860px){
+  .sl-hero{ grid-template-columns:1fr; gap:36px; padding:28px 0 40px; }
+  .sl-title{ font-size:40px; }
+}
 </style>
 </head>
 <body>
@@ -319,75 +368,71 @@ img{ max-width:100%; display:block; }
 
 <div class="container">
 
-  <section class="studio-hero">
-    <div class="marquee-eyebrow"><span class="dash"></span>Relvia Studios<span class="dash"></span></div>
-    <h1 class="marquee-title">Make films and series<br><em>with other people.</em></h1>
-    <p class="marquee-sub">Relvia Studios is where creators find a crew, cut their footage into a finished film or episode, and release it to viewers on Relvia. Everything happens in your browser, from the first draft to the last title card.</p>
-    <div class="studio-hero-actions">
-      <button class="new-project-btn" id="heroStartBtn">Start a project</button>
-      <a class="studio-ghost-btn" href="#discover">Find a project to join</a>
+  <section class="sl-hero">
+    <div class="sl-hero-copy">
+      <div class="sl-kicker">Relvia Studios</div>
+      <h1 class="sl-title">Make the film.<br>Find the crew.<br>Release it.</h1>
+      <p class="sl-lede">Relvia Studios is where films and series get made. Post a project, fill its roles with people who want to work on it, cut the footage in a browser editor, and publish the finished cut to Relvia.</p>
+      <div class="sl-actions">
+        <button class="sl-btn-primary" id="heroStartBtn">Start a project</button>
+        <a class="sl-btn-ghost" href="#projects">Browse open projects</a>
+      </div>
+      <div class="sl-meta">Films and series &middot; Editing in your browser &middot; Released on Relvia</div>
     </div>
-  </section>
-
-  <section class="studio-steps">
-    <div class="studio-section-label">How it works</div>
-    <div class="studio-step-grid">
-      <div class="studio-step">
-        <div class="studio-step-num">01</div>
-        <div class="studio-step-title">Start a project</div>
-        <p>Pick a film or a series, write a logline, and list the roles you need: editor, camera, actors, writers, anyone.</p>
-      </div>
-      <div class="studio-step">
-        <div class="studio-step-num">02</div>
-        <div class="studio-step-title">Build it with your crew</div>
-        <p>Cut your footage in the studio editor. Trim, reorder, change speed, add effects, use transitions, and fade in your titles and music.</p>
-      </div>
-      <div class="studio-step">
-        <div class="studio-step-num">03</div>
-        <div class="studio-step-title">Release it on Relvia</div>
-        <p>Upload the finished cut and it goes live on Relvia for viewers. Series add episodes one at a time, and new ones can follow later.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="studio-features">
-    <div class="studio-section-label">What you get</div>
-    <div class="studio-feature-grid">
-      <div class="studio-feature">
-        <div class="studio-feature-title">A studio editor in your browser</div>
-        <p>Import clips, trim them, and see effects on the monitor as you adjust them. No software to install.</p>
-      </div>
-      <div class="studio-feature">
-        <div class="studio-feature-title">Effects and transitions</div>
-        <p>Brightness, contrast, saturation, blur, and vignette per clip, plus crossfades, dissolves, and wipes between shots.</p>
-      </div>
-      <div class="studio-feature">
-        <div class="studio-feature-title">Crew and roles</div>
-        <p>List the roles a project still needs and see who's already on board. Your project page keeps the crew in one place.</p>
-      </div>
-      <div class="studio-feature">
-        <div class="studio-feature-title">Discussion on every project</div>
-        <p>Talk through scripts, cuts, and schedules with the people working on the same project.</p>
-      </div>
-      <div class="studio-feature">
-        <div class="studio-feature-title">Series, not just one-offs</div>
-        <p>Release a show episode by episode. Viewers can follow a series from the first episode onward.</p>
-      </div>
-      <div class="studio-feature">
-        <div class="studio-feature-title">Viewer support</div>
-        <p>Viewers can send RelvBits tips to the people who made a film. Tipping turns on when the platform opens.</p>
+    <div class="sl-hero-visual" aria-hidden="true">
+      <div class="sl-monitor">
+        <div class="sl-screen">
+          <span class="sl-slate">MONITOR &middot; TAKE 03</span>
+          <span class="sl-timecode">00:01:42:08</span>
+          <div class="sl-letterbox sl-letterbox-top"></div>
+          <div class="sl-letterbox sl-letterbox-bottom"></div>
+        </div>
+        <div class="sl-timeline">
+          <div class="sl-track">
+            <span class="sl-clip" style="width:34%">T1</span><span class="sl-clip sl-clip-alt" style="width:22%">T2</span><span class="sl-clip" style="width:28%">T3</span><span class="sl-clip sl-clip-alt" style="width:16%">T4</span>
+          </div>
+          <div class="sl-track sl-track-audio"><span class="sl-audio" style="width:88%"></span></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="studio-about">
-    <div class="studio-section-label">Good to know</div>
-    <div class="studio-about-card">
-      <p>Relvia Studios is for working on real projects, not a sandbox. Final cuts are rendered in your browser, so longer films with many effects take a while to finish. Footage you upload should be yours to use, and the Google Drive file you link has to be shared as "Anyone with the link" so it can play on Relvia.</p>
+  <section class="sl-section">
+    <div class="sl-section-label">How it works</div>
+    <ol class="sl-steps">
+      <li class="sl-step">
+        <span class="sl-step-num">01</span>
+        <div><h3>Post a project</h3><p>Give it a title and a logline, and list the roles you need: editor, camera, actors, writers.</p></div>
+      </li>
+      <li class="sl-step">
+        <span class="sl-step-num">02</span>
+        <div><h3>Build it with your crew</h3><p>Cut footage in the studio editor, with effects, transitions, titles, and music. Work from the same project page.</p></div>
+      </li>
+      <li class="sl-step">
+        <span class="sl-step-num">03</span>
+        <div><h3>Release it on Relvia</h3><p>Publish the finished cut so viewers can watch it. Series add episodes one at a time.</p></div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="sl-section">
+    <div class="sl-section-label">The editor</div>
+    <div class="sl-features">
+      <div class="sl-feature">Trim, reorder, and change the speed of each clip</div>
+      <div class="sl-feature">Brightness, contrast, saturation, blur, and vignette, shown live on the monitor</div>
+      <div class="sl-feature">Crossfades, dissolves, wipes, and slides between shots</div>
+      <div class="sl-feature">Titles that fade in and out, plus a background track</div>
+      <div class="sl-feature">Export a finished MP4 you can upload anywhere</div>
     </div>
   </section>
 
-  <div class="studio-divider"></div>
+  <section class="sl-section sl-note-section">
+    <p class="sl-note">Finished cuts are rendered in your browser, so long films with many effects take a while. Footage you upload should be yours to use. Google Drive files must be shared as &ldquo;Anyone with the link&rdquo; to play on Relvia.</p>
+  </section>
+
+  <section class="sl-section" id="projects">
+    <div class="sl-section-label">Open projects</div>
+
 
   <div class="studio-stats-row" id="studioStatsRow">
     <div class="studio-stat"><div class="studio-stat-num timecode" id="statInProduction">—</div><div class="studio-stat-label">In Production</div></div>
@@ -412,6 +457,11 @@ img{ max-width:100%; display:block; }
 </div>
 
 <div class="film-strip"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<footer class="sl-footer">
+  <span>Relvia Studios &middot; part of Relvia Entertainment</span>
+  <span><a href="../watch/index.html">Watch on Relvia</a> &middot; <a href="../creators/index.html">RelviaCreators</a> &middot; <a href="../news.html">News</a></span>
+</footer>
 
 <!-- NEW PROJECT MODAL -->
 <div class="modal-backdrop" id="newProjectModal">
