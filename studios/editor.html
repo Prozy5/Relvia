@@ -72,6 +72,14 @@ img, video{ max-width:100%; display:block; }
 .preview-letterbox-top, .preview-letterbox-bottom{ position:absolute; left:0; right:0; height:9%; background:#000; z-index:2; pointer-events:none; }
 .preview-letterbox-top{ top:0; }
 .preview-letterbox-bottom{ bottom:0; }
+.preview-slate{
+  position:absolute; top:12px; left:12px; z-index:4; font-family:var(--font-mono); font-size:10px;
+  color:var(--gold); background:rgba(0,0,0,.6); padding:3px 9px; border-radius:4px; letter-spacing:1px; pointer-events:none;
+}
+.preview-vignette{
+  position:absolute; inset:0; z-index:3; pointer-events:none; display:none;
+  background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.7) 100%);
+}
 .preview-timecode{
   position:absolute; bottom:8px; right:12px; z-index:3; font-family:var(--font-mono); font-size:11px; color:var(--gold);
   background:rgba(0,0,0,.6); padding:2px 8px; border-radius:4px; letter-spacing:1px; pointer-events:none;
@@ -393,6 +401,7 @@ function renderClipList(){
       input.addEventListener("input", () => {
         const key = input.dataset.fx;
         clip.effects[key] = input.type === "checkbox" ? input.checked : parseFloat(input.value);
+        applyPreviewEffects(clip);
       });
     });
 
@@ -475,9 +484,13 @@ function moveClip(index, direction){
 
 function showPreview(url){
   const frame = document.getElementById("previewFrame");
+  const clip = clips.find(c => c.url === url);
+  frame.dataset.clipUrl = url;
   frame.innerHTML = `
     <div class="preview-letterbox-top"></div>
+    <div class="preview-slate">MONITOR${clip ? " · " + escapeHtml(clip.name) : ""}</div>
     <video src="${url}" controls></video>
+    <div class="preview-vignette" id="previewVignette"></div>
     <div class="preview-letterbox-bottom"></div>
     <div class="preview-timecode timecode" id="previewTimecode">00:00:00</div>
   `;
@@ -490,6 +503,18 @@ function showPreview(url){
     const s = String(Math.floor(t % 60)).padStart(2, "0");
     tc.textContent = `${h}:${m}:${s}`;
   });
+  applyPreviewEffects(clip);
+}
+
+// Shows the clip's effects on the monitor, so sliders update the picture live.
+function applyPreviewEffects(clip){
+  const frame = document.getElementById("previewFrame");
+  const video = frame.querySelector("video");
+  if (!video || !clip || frame.dataset.clipUrl !== clip.url) return;
+  const fx = clip.effects || {};
+  video.style.filter = `brightness(${1 + (fx.brightness || 0)}) contrast(${fx.contrast ?? 1}) saturate(${fx.saturation ?? 1}) blur(${fx.blur || 0}px)`;
+  const vig = document.getElementById("previewVignette");
+  if (vig) vig.style.display = fx.vignette ? "block" : "none";
 }
 
 document.getElementById("addOverlayBtn").addEventListener("click", () => {
