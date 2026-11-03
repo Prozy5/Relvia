@@ -287,7 +287,7 @@ async function render(){
     ${filmHtml}
 
     ${isCreator && project.status !== "released" ? `<div class="status-actions" id="statusActions"></div>` : ""}
-    ${isCreator && project.status === "post" ? `<div class="panel" id="submitFilmPanel"></div>` : ""}
+    ${isCreator && (project.status === "post" || project.content_type === "series") ? `<div class="panel" id="submitFilmPanel"></div>` : ""}
 
     <div class="panel">
       <h3>Roles</h3>
@@ -318,7 +318,7 @@ async function render(){
   `;
 
   if (isCreator && project.status !== "released") renderStatusActions();
-  if (isCreator && project.status === "post") renderSubmitFilmPanel();
+  if (isCreator && (project.status === "post" || project.content_type === "series")) renderSubmitFilmPanel();
 
   await loadRoles();
   if (isCreator) await loadRequests();
@@ -351,6 +351,11 @@ function renderStatusActions(){
 }
 
 function renderSubmitFilmPanel(){
+  if (project.content_type === "series"){
+    renderEpisodeSubmitPanel();
+    return;
+  }
+
   const el = document.getElementById("submitFilmPanel");
   el.innerHTML = `
     <h3>Submit the finished film</h3>
@@ -394,6 +399,90 @@ function renderSubmitFilmPanel(){
     project.status = "released";
     render();
   });
+}
+
+async function renderEpisodeSubmitPanel(){
+  const el = document.getElementById("submitFilmPanel");
+  el.innerHTML = `
+    <h3>Episodes</h3>
+    <div style="display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:4px 10px;border-radius:999px;margin-bottom:12px;">
+      ▶ POWERED BY GOOGLE DRIVE
+    </div>
+    <div class="sub">Add episodes one at a time — the show goes live on Relvia after your first episode, and you can keep adding more anytime, even after release.</div>
+    <div id="existingEpisodesList" style="margin-bottom:20px;"></div>
+    <div style="border-top:1px solid var(--border-soft);padding-top:16px;">
+      <h4 style="font-size:14px;margin-bottom:12px;">Add a new episode</h4>
+      <div style="display:flex;gap:10px;">
+        <div class="field" style="flex:1;"><label>Season</label><input type="number" id="epSeason" min="1" value="1"></div>
+        <div class="field" style="flex:1;"><label>Episode</label><input type="number" id="epNumber" min="1"></div>
+      </div>
+      <div class="field"><label>Episode title</label><input type="text" id="epTitle" placeholder="e.g. Pilot"></div>
+      <div class="field"><label>Google Drive link</label><input type="text" id="epDriveLink" placeholder="https://drive.google.com/file/d/..."></div>
+      <div class="field"><label>Description (optional)</label><textarea id="epDescription"></textarea></div>
+      <div class="field"><label>Cover image URL (optional)</label><input type="text" id="epCover" placeholder="https://..."></div>
+      <button class="btn gold" id="submitEpisodeBtn">Add episode</button>
+      <div class="empty-msg" id="submitEpisodeStatus"></div>
+    </div>
+  `;
+
+  await loadExistingEpisodes();
+
+  document.getElementById("submitEpisodeBtn").addEventListener("click", async () => {
+    const season_number = parseInt(document.getElementById("epSeason").value, 10) || 1;
+    const episode_number = parseInt(document.getElementById("epNumber").value, 10);
+    const title = document.getElementById("epTitle").value.trim();
+    const link = document.getElementById("epDriveLink").value.trim();
+    const description = document.getElementById("epDescription").value.trim() || null;
+    const cover_url = document.getElementById("epCover").value.trim() || null;
+    const statusEl = document.getElementById("submitEpisodeStatus");
+
+    if (!title || !episode_number){ statusEl.textContent = "Episode number and title are required."; return; }
+
+    const drive_file_id = extractDriveFileId(link);
+    if (!drive_file_id){ statusEl.textContent = "Couldn't read a file ID from that link — double check it's a real Drive share link."; return; }
+
+    const btn = document.getElementById("submitEpisodeBtn");
+    btn.disabled = true; btn.textContent = "Adding...";
+
+    const { error } = await supabaseClient.from("studios_episodes").insert({
+      project_id: project.id, season_number, episode_number, title, description, drive_file_id, cover_url
+    });
+
+    if (error){
+      statusEl.textContent = "Couldn't add episode: " + error.message;
+      btn.disabled = false; btn.textContent = "Add episode";
+      return;
+    }
+
+    // First episode ever added is what actually releases the show.
+    if (project.status !== "released"){
+      await supabaseClient.from("studios_projects").update({ status: "released" }).eq("id", project.id);
+      project.status = "released";
+    }
+
+    ["epNumber", "epTitle", "epDriveLink", "epDescription", "epCover"].forEach(id => { document.getElementById(id).value = ""; });
+    btn.disabled = false; btn.textContent = "Add episode";
+    statusEl.textContent = "";
+    await loadExistingEpisodes();
+  });
+}
+
+async function loadExistingEpisodes(){
+  const { data: episodes } = await supabaseClient
+    .from("studios_episodes").select("*").eq("project_id", project.id)
+    .order("season_number", { ascending:true }).order("episode_number", { ascending:true });
+
+  const list = document.getElementById("existingEpisodesList");
+  if (!episodes || episodes.length === 0){
+    list.innerHTML = `<div class="empty-msg">No episodes added yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = episodes.map(ep => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px;">
+      <span>S${ep.season_number}E${ep.episode_number} — ${escapeHtml(ep.title)}</span>
+      <span style="color:var(--muted);font-size:11.5px;">${ep.view_count || 0} views</span>
+    </div>`).join("");
 }
 
 async function loadRoles(){
@@ -562,8 +651,12 @@ async function sendDiscussionMessage(){
   await loadDiscussion();
 }
 
+let discussionChannel = null;
 function listenForDiscussionRealtime(){
-  supabaseClient
+  // Subscribe once per page. Re-rendering would otherwise reuse the
+  // already-subscribed channel and try to add a listener after subscribe().
+  if (discussionChannel) return;
+  discussionChannel = supabaseClient
     .channel(`studios-project-${project.id}`)
     .on("postgres_changes", { event:"INSERT", schema:"public", table:"studios_comments", filter:`project_id=eq.${project.id}` }, () => loadDiscussion())
     .subscribe();
@@ -637,5 +730,6 @@ document.getElementById("relvbitsConfirmBtn").addEventListener("click", async ()
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
