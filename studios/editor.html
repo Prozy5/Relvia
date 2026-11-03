@@ -243,6 +243,9 @@ img, video{ max-width:100%; display:block; }
         <select id="transitionType" style="flex:1;">
           <option value="cut">Hard Cut</option>
           <option value="crossfade">Crossfade</option>
+          <option value="dissolve">Dissolve</option>
+          <option value="wipeleft">Wipe Left</option>
+          <option value="slideleft">Slide Left</option>
         </select>
         <input type="number" id="transitionDuration" value="0.6" min="0.2" max="3" step="0.1" style="width:64px;" title="Duration (sec)">
       </div>
@@ -324,6 +327,7 @@ document.getElementById("clipFileInput").addEventListener("change", async (e) =>
     clips.push({
       id: uid(), file, name: file.name, url,
       trimStart: 0, trimEnd: Math.floor(tempVideo.duration), duration: Math.floor(tempVideo.duration), speed: 1,
+      effects: { brightness: 0, contrast: 1, saturation: 1, blur: 0, vignette: false },
     });
   }
   e.target.value = "";
@@ -368,6 +372,13 @@ function renderClipList(){
           <option value="1.5" ${clip.speed === 1.5 ? "selected" : ""}>1.5x</option>
           <option value="2" ${clip.speed === 2 ? "selected" : ""}>2x</option>
         </select>
+      </div>
+      <div class="trim-row" style="margin-top:8px;flex-wrap:wrap;gap:10px;">
+        <label>Brightness <input type="range" data-fx="brightness" min="-0.5" max="0.5" step="0.05" value="${clip.effects.brightness}"></label>
+        <label>Contrast <input type="range" data-fx="contrast" min="0.5" max="2" step="0.05" value="${clip.effects.contrast}"></label>
+        <label>Saturation <input type="range" data-fx="saturation" min="0" max="2" step="0.05" value="${clip.effects.saturation}"></label>
+        <label>Blur <input type="range" data-fx="blur" min="0" max="10" step="0.5" value="${clip.effects.blur}"></label>
+        <label><input type="checkbox" data-fx="vignette" ${clip.effects.vignette ? "checked" : ""}> Vignette</label>
       </div>`;
 
     item.querySelector('[data-action="preview"]').addEventListener("click", () => showPreview(clip.url));
@@ -378,6 +389,12 @@ function renderClipList(){
     item.querySelector('[data-field="trimStart"]').addEventListener("input", (e) => { clip.trimStart = parseFloat(e.target.value) || 0; renderTimeline(); });
     item.querySelector('[data-field="trimEnd"]').addEventListener("input", (e) => { clip.trimEnd = parseFloat(e.target.value) || clip.duration; renderTimeline(); });
     item.querySelector('[data-field="speed"]').addEventListener("change", (e) => { clip.speed = parseFloat(e.target.value); renderTimeline(); });
+    item.querySelectorAll("[data-fx]").forEach(input => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.fx;
+        clip.effects[key] = input.type === "checkbox" ? input.checked : parseFloat(input.value);
+      });
+    });
 
     list.appendChild(item);
   });
@@ -551,6 +568,7 @@ async function renderFinalVideo(){
   setProgress(3, "Loading your clips...");
 
   const transitionType = document.getElementById("transitionType").value;
+  const xfadeName = transitionType === "crossfade" ? "fade" : transitionType;
   const transitionDuration = parseFloat(document.getElementById("transitionDuration").value) || 0.6;
   const colorGrade = document.getElementById("colorGrade").value;
   const musicFade = document.getElementById("musicFade").checked;
@@ -572,9 +590,17 @@ async function renderFinalVideo(){
       const finalDuration = rawDuration / speed;
       clipFinalDurations.push(finalDuration);
 
+      const fx = clip.effects || {};
+      const effectFilters = [
+        (fx.brightness || fx.contrast !== 1 || fx.saturation !== 1)
+          ? `eq=brightness=${fx.brightness || 0}:contrast=${fx.contrast ?? 1}:saturation=${fx.saturation ?? 1}` : null,
+        fx.blur > 0 ? `gblur=sigma=${fx.blur}` : null,
+        fx.vignette ? "vignette=PI/4" : null,
+      ].filter(Boolean);
       const videoFilters = [
         "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1",
         speed !== 1 ? `setpts=PTS/${speed}` : null,
+        ...effectFilters,
       ].filter(Boolean).join(",");
 
       const audioFilters = speed !== 1 ? [`atempo=${Math.min(2, Math.max(0.5, speed))}`] : [];
@@ -613,7 +639,7 @@ async function renderFinalVideo(){
         await ffmpeg.exec([
           "-i", currentFile, "-i", `trimmed${i}.mp4`,
           "-filter_complex",
-          `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=${offset.toFixed(2)}[v];[0:a][1:a]acrossfade=d=${transitionDuration}[a]`,
+          `[0:v][1:v]xfade=transition=${xfadeName}:duration=${transitionDuration}:offset=${offset.toFixed(2)}[v];[0:a][1:a]acrossfade=d=${transitionDuration}[a]`,
           "-map", "[v]", "-map", "[a]",
           "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
           outputName,
@@ -652,10 +678,12 @@ async function renderFinalVideo(){
         const yPos = ov.position === "top" ? "40" : ov.position === "center" ? "(h-text_h)/2" : "h-th-40";
         const escapedText = ov.text.replace(/'/g, "\\'").replace(/:/g, "\\:");
         const enableExpr = `between(t,${ov.start},${ov.start + ov.duration})`;
+        const end = ov.start + ov.duration;
+        const fadeExpr = `if(lt(t,${ov.start}+0.5),(t-${ov.start})/0.5,if(gt(t,${end}-0.5),(${end}-t)/0.5,1))`;
 
         await ffmpeg.exec([
           "-i", currentFile,
-          "-vf", `drawtext=text='${escapedText}':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=${yPos}:box=1:boxcolor=black@0.5:boxborderw=10:enable='${enableExpr}'`,
+          "-vf", `drawtext=text='${escapedText}':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=${yPos}:box=1:boxcolor=black@0.5:boxborderw=10:alpha='${fadeExpr}':enable='${enableExpr}'`,
           "-c:a", "copy",
           `overlay${i}.mp4`,
         ]);
