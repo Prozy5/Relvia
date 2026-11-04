@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relvia Records</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#070504; --surface:#0f0b08; --surface-2:#171210; --ink:#f5f1ea; --ink-2:#cfc7b8; --muted:#8f8577;
+  --line:#2a2018; --gold:#e0b158; --gold-1:#f2c766; --gold-2:#b9832f; --gold-soft:rgba(224,177,88,.14);
+  --body:"Inter",system-ui,sans-serif; --display:"Playfair Display",Georgia,serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{ background:var(--bg); color:var(--ink); font-family:var(--body); line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+a{ color:inherit; text-decoration:none; }
+.wrap{ max-width:1200px; margin:0 auto; padding:0 36px; }
+
+/* NAV */
+.nav{ position:sticky; top:0; z-index:40; background:rgba(7,5,4,.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+.nav-inner{ display:flex; align-items:center; justify-content:space-between; height:70px; }
+.brand{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:15px; letter-spacing:.5px; }
+.rr{ width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--gold-1),var(--gold-2)); color:#000; display:flex; align-items:center; justify-content:center; font-family:var(--display); font-weight:700; font-size:14px; letter-spacing:-.02em; }
+.nav-links{ display:flex; gap:28px; }
+.nav-links a{ font-size:13px; font-weight:600; color:var(--muted); letter-spacing:.4px; text-transform:uppercase; }
+.nav-links a:hover{ color:var(--gold); }
+.btn{ font-size:13px; font-weight:700; padding:11px 22px; border-radius:999px; display:inline-flex; align-items:center; gap:8px; letter-spacing:.3px; }
+.btn-gold{ background:linear-gradient(135deg,var(--gold-1),var(--gold-2)); color:#000; }
+.btn-gold:hover{ opacity:.9; }
+.btn-line{ border:1px solid var(--line); color:var(--ink); }
+.btn-line:hover{ border-color:var(--gold); color:var(--gold); }
+@media(max-width:860px){ .nav-links{ display:none; } }
+
+/* HERO: featured release */
+.hero{ position:relative; padding:70px 0 80px; overflow:hidden; }
+.hero::before{ content:""; position:absolute; inset:-20% -10% auto 30%; height:900px; background:radial-gradient(ellipse at center, rgba(242,199,102,.16), transparent 60%); pointer-events:none; }
+.hero-grid{ position:relative; display:grid; grid-template-columns:1.1fr 1fr; gap:64px; align-items:center; }
+.label-tag{ font-size:11px; letter-spacing:4px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:22px; }
+.hero-title{ font-family:var(--display); font-size:clamp(56px,8vw,118px); font-weight:700; line-height:.92; letter-spacing:-.03em; }
+.hero-title em{ font-style:italic; font-weight:600; background:linear-gradient(100deg,var(--gold-1),var(--gold-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero-sub{ font-size:17px; color:var(--ink-2); margin-top:26px; max-width:460px; }
+.hero-actions{ display:flex; gap:12px; margin-top:34px; flex-wrap:wrap; }
+
+.feature{ position:relative; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:22px; box-shadow:0 40px 80px -40px rgba(0,0,0,.9); }
+.feature-art{ aspect-ratio:1/1; border-radius:14px; overflow:hidden; background:radial-gradient(circle at 30% 25%, rgba(242,199,102,.35), transparent 55%), linear-gradient(160deg,#2a2014,#070504 75%); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-style:italic; font-size:110px; color:rgba(224,177,88,.5); }
+.feature-art img{ width:100%; height:100%; object-fit:cover; }
+.feature-meta{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:20px; gap:16px; }
+.feature-kicker{ font-size:11px; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:6px; }
+.feature-title{ font-family:var(--display); font-size:28px; font-weight:700; line-height:1.1; }
+.feature-artist{ font-size:14px; color:var(--muted); margin-top:4px; }
+.play{ width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg,var(--gold-1),var(--gold-2)); color:#000; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+@media(max-width:900px){ .hero-grid{ grid-template-columns:1fr; gap:44px; } .hero{ padding:50px 0 60px; } }
+
+/* MARQUEE of artist names */
+.strip{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--surface-2); overflow:hidden; white-space:nowrap; padding:18px 0; }
+.strip-track{ display:inline-flex; animation:slide 40s linear infinite; }
+.strip-track span{ font-family:var(--display); font-style:italic; font-size:30px; padding:0 30px; color:var(--ink); }
+.strip-track span.sep{ color:var(--gold); font-style:normal; padding:0 6px; font-size:20px; }
+@keyframes slide{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+/* SECTIONS */
+.section{ padding:110px 0 0; }
+.section-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:44px; flex-wrap:wrap; }
+.section-head h2{ font-family:var(--display); font-size:clamp(36px,4.4vw,56px); font-weight:700; letter-spacing:-.02em; line-height:1; }
+.section-head .count{ font-size:11px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+
+/* ARTISTS */
+.artists{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:26px; }
+.artist{ text-align:left; }
+.artist-img{ aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:radial-gradient(circle at 35% 25%, rgba(242,199,102,.28), transparent 55%), #140f0b; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-style:italic; font-size:64px; color:var(--gold); transition:transform .4s ease, border-color .3s; }
+.artist:hover .artist-img{ transform:translateY(-4px); border-color:var(--gold-2); }
+.artist-img img{ width:100%; height:100%; object-fit:cover; }
+.artist-name{ font-size:17px; font-weight:700; margin-top:14px; display:flex; align-items:center; gap:6px; }
+.verified{ color:var(--gold); font-size:13px; }
+.artist-bio{ font-size:13px; color:var(--muted); margin-top:4px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* RELEASES */
+.releases{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:28px; }
+.release{ }
+.release-art{ position:relative; aspect-ratio:1/1; border-radius:14px; overflow:hidden; background:radial-gradient(circle at 70% 20%, rgba(185,131,47,.32), transparent 55%), #120d09; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-style:italic; font-size:72px; color:rgba(224,177,88,.55); transition:transform .4s ease; }
+.release:hover .release-art{ transform:translateY(-4px); }
+.release-art img{ width:100%; height:100%; object-fit:cover; }
+.release-type{ position:absolute; top:12px; left:12px; font-size:10px; font-weight:800; letter-spacing:1.5px; background:rgba(0,0,0,.7); color:var(--gold); padding:5px 10px; border-radius:999px; border:1px solid var(--line); }
+.release-title{ font-size:16px; font-weight:700; margin-top:14px; }
+.release-artist{ font-size:13px; color:var(--muted); margin-top:3px; }
+.release-date{ font-size:11px; letter-spacing:1.5px; color:var(--muted); margin-top:8px; text-transform:uppercase; }
+
+.empty{ color:var(--muted); font-size:14px; padding:40px 0; grid-column:1/-1; }
+
+/* CLOSING */
+.closing{ margin-top:130px; padding:110px 0; text-align:center; border-top:1px solid var(--line); position:relative; overflow:hidden; }
+.closing::before{ content:""; position:absolute; inset:0; background:radial-gradient(ellipse 60% 70% at 50% 110%, rgba(242,199,102,.14), transparent 70%); pointer-events:none; }
+.closing h2{ position:relative; font-family:var(--display); font-style:italic; font-weight:600; font-size:clamp(44px,7vw,96px); line-height:1; letter-spacing:-.02em; margin-bottom:34px; }
+.closing .btn{ position:relative; }
+
+footer{ border-top:1px solid var(--line); padding:34px 0; font-size:12.5px; color:var(--muted); }
+footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+footer a:hover{ color:var(--gold); }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="../index.html"><span class="rr">RR</span>RELVIA RECORDS</a>
+    <nav class="nav-links">
+      <a href="#featured">Latest</a>
+      <a href="#artists">Artists</a>
+      <a href="#releases">Releases</a>
+      <a href="music.html">Listen</a>
+    </nav>
+    <a class="btn btn-line" href="../login.html">Sign in</a>
+  </div>
+</header>
+
+<section class="wrap hero" id="featured">
+  <div class="hero-grid">
+    <div>
+      <div class="label-tag">Independent label &middot; Relvia</div>
+      <h1 class="hero-title">Relvia<br><em>Records</em></h1>
+      <p class="hero-sub">Artists, albums, and new drops from the people who make the sound on Relvia.</p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="#releases">Latest releases</a>
+        <a class="btn btn-line" href="#artists">Meet the artists</a>
+      </div>
+    </div>
+    <div class="feature" id="feature-card">
+      <div class="feature-art" id="feature-art">R</div>
+      <div class="feature-meta">
+        <div>
+          <div class="feature-kicker" id="feature-kicker">Latest release</div>
+          <div class="feature-title" id="feature-title">Coming soon</div>
+          <div class="feature-artist" id="feature-artist"></div>
+        </div>
+        <a class="play" id="feature-play" href="music.html" aria-label="Listen">&#9654;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true">
+  <div class="strip-track" id="strip-track"><span>Relvia Records</span><span class="sep">&#10022;</span></div>
+</div>
+
+<section class="wrap section" id="artists">
+  <div class="section-head">
+    <h2>Artists</h2>
+    <div class="count" id="artist-count"></div>
+  </div>
+  <div class="artists" id="artist-grid"><div class="empty">Loading artists...</div></div>
+</section>
+
+<section class="wrap section" id="releases">
+  <div class="section-head">
+    <h2>Releases</h2>
+    <div class="count" id="release-count"></div>
+  </div>
+  <div class="releases" id="release-grid"><div class="empty">Loading releases...</div></div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <h2>Your sound,<br>on the label.</h2>
+    <a class="btn btn-gold" href="../login.html">Sign in to Relvia</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; Relvia Records</span>
+    <span><a href="../index.html">Relvia</a> &middot; <a href="music.html">Music</a> &middot; <a href="../creators/index.html">Creators</a></span>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const LABEL = "Relvia Records";
+
+function esc(s){ return (s || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function initial(s){ return esc((s || "?").trim().charAt(0).toUpperCase()); }
+function fmtDate(d){ return new Date(d).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" }); }
+function typeLabel(t){ return (t || "single").toUpperCase(); }
+
+async function loadArtists(){
+  const { data, error } = await supabaseClient
+    .from("music_artists").select("id, name, bio, avatar_url, verified")
+    .eq("label", LABEL).order("name", { ascending: true });
+  return error ? [] : (data || []);
+}
+
+async function loadReleases(artistIds){
+  if (artistIds.length === 0) return [];
+  const { data, error } = await supabaseClient
+    .from("music_releases").select("id, artist_id, title, release_type, cover_url, released_at")
+    .in("artist_id", artistIds).order("released_at", { ascending: false }).limit(40);
+  return error ? [] : (data || []);
+}
+
+function renderArtists(artists){
+  const grid = document.getElementById("artist-grid");
+  document.getElementById("artist-count").textContent = `${artists.length} artist${artists.length === 1 ? "" : "s"}`;
+  if (artists.length === 0){ grid.innerHTML = `<div class="empty">No artists on the roster yet.</div>`; return; }
+  grid.innerHTML = artists.map(a => `
+    <div class="artist">
+      <div class="artist-img">${a.avatar_url ? `<img src="${esc(a.avatar_url)}" alt="">` : initial(a.name)}</div>
+      <div class="artist-name">${esc(a.name)}${a.verified ? ` <span class="verified" title="Verified">&#10003;</span>` : ""}</div>
+      <div class="artist-bio">${esc(a.bio || "")}</div>
+    </div>`).join("");
+}
+
+function renderReleases(releases, nameById){
+  const grid = document.getElementById("release-grid");
+  document.getElementById("release-count").textContent = `${releases.length} release${releases.length === 1 ? "" : "s"}`;
+  if (releases.length === 0){ grid.innerHTML = `<div class="empty">No releases yet.</div>`; return; }
+  grid.innerHTML = releases.map(r => `
+    <div class="release">
+      <div class="release-art">${r.cover_url ? `<img src="${esc(r.cover_url)}" alt="">` : initial(r.title)}
+        <span class="release-type">${typeLabel(r.release_type)}</span>
+      </div>
+      <div class="release-title">${esc(r.title)}</div>
+      <div class="release-artist">${esc(nameById[r.artist_id] || "")}</div>
+      <div class="release-date">${fmtDate(r.released_at)}</div>
+    </div>`).join("");
+}
+
+function renderFeature(latest, nameById){
+  if (!latest) return;
+  document.getElementById("feature-title").textContent = latest.title;
+  document.getElementById("feature-artist").textContent = nameById[latest.artist_id] || "";
+  document.getElementById("feature-kicker").textContent = `Latest ${typeLabel(latest.release_type).toLowerCase()} · ${fmtDate(latest.released_at)}`;
+  if (latest.cover_url){
+    document.getElementById("feature-art").innerHTML = `<img src="${esc(latest.cover_url)}" alt="">`;
+  } else {
+    document.getElementById("feature-art").textContent = initial(latest.title);
+  }
+}
+
+function renderStrip(artists){
+  const names = artists.map(a => a.name);
+  const items = names.length ? names : ["Relvia Records"];
+  const html = items.map(n => `<span>${esc(n)}</span><span class="sep">&#10022;</span>`).join("");
+  document.getElementById("strip-track").innerHTML = html + html;
+}
+
+(async () => {
+  const artists = await loadArtists();
+  const nameById = Object.fromEntries(artists.map(a => [a.id, a.name]));
+  const releases = await loadReleases(artists.map(a => a.id));
+
+  renderStrip(artists);
+  renderArtists(artists);
+  renderReleases(releases, nameById);
+  renderFeature(releases[0], nameById);
+})();
+</script>
+<script src="../beta-toolkit.js"></script>
+</body>
+</html>
