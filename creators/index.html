@@ -129,9 +129,58 @@ img, video{ max-width:100%; display:block; }
 
 .toast{ position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--surface); border:1px solid var(--gold); color:white; padding:12px 20px; border-radius:14px; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:4000; }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.feed-tabs{ display:flex; gap:8px; margin:16px 0 4px; }
+.feed-tab{ font-size:13px; font-weight:700; color:var(--muted); padding:9px 18px; border-radius:10px; background:var(--surface-light); border:1px solid var(--border); cursor:pointer; }
+.feed-tab.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+
+.trending-tags-row{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
+.trending-tag-chip{ font-size:12px; font-weight:700; color:var(--gold); border:1px solid var(--gold-end); padding:6px 14px; border-radius:999px; cursor:pointer; }
+.trending-tag-chip:hover{ background:rgba(217,169,75,.1); }
+.trending-tag-chip.active{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; border:none; }
+
+.hashtag-link{ color:var(--gold); font-weight:600; }
+
+.composer-poll-block{ margin-top:10px; padding:12px; background:var(--surface-light); border:1px solid var(--border); border-radius:12px; }
+.composer-poll-block input[type="text"]{ background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:white; font-size:13px; }
+.poll-option-row{ display:flex; gap:6px; margin-bottom:6px; align-items:center; }
+.poll-option-row input{ flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 10px; color:white; font-size:13px; }
+.poll-option-row button{ font-size:11px; color:var(--danger); }
+
+.poll-display{ margin:10px 0; }
+.poll-question{ font-weight:700; font-size:14px; margin-bottom:10px; }
+.poll-option-bar{ position:relative; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:9px 12px; margin-bottom:8px; cursor:pointer; overflow:hidden; }
+.poll-option-fill{ position:absolute; inset:0; background:rgba(217,169,75,.18); z-index:0; transition:width .3s; }
+.poll-option-content{ position:relative; z-index:1; display:flex; justify-content:space-between; font-size:13px; }
+.poll-total-votes{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+
+.reaction-btn-wrap{ position:relative; display:inline-block; }
+.reaction-picker{
+  position:absolute; bottom:100%; left:0; margin-bottom:8px; background:var(--surface); border:1px solid var(--gold-end);
+  border-radius:999px; padding:6px 8px; display:none; gap:6px; box-shadow:0 10px 30px -8px rgba(0,0,0,.6); z-index:10;
+}
+.reaction-btn-wrap:hover .reaction-picker{ display:flex; }
+.reaction-option{ font-size:17px; padding:4px; border-radius:50%; cursor:pointer; transition:.15s; }
+.reaction-option:hover{ transform:scale(1.3); }
 </style>
 </head>
 <body>
+<script>
+(async () => {
+  try {
+    const r = await fetch("https://nqcbhpqzzwjgkusfbexo.supabase.co/rest/v1/feature_flags?select=enabled&key=eq.social_enabled", {
+      headers: { apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU", Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU" }
+    });
+    const rows = await r.json();
+    if (rows && rows[0] && rows[0].enabled === false) {
+      const d = document.createElement("div");
+      d.style.cssText = "position:fixed;inset:0;z-index:99999;background:#070504;color:#f5f1ea;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Inter,system-ui,sans-serif;";
+      d.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:36px;margin-bottom:12px;">RelviaCreators is paused</div><div style="color:#8f8577;font-size:15px;">The feed is closed for now. Check back soon.</div>';
+      document.body.appendChild(d);
+    }
+  } catch (e) {}
+})();
+</script>
+
 
 <header class="topbar">
   <a class="brand" href="index.html">
@@ -156,12 +205,25 @@ img, video{ max-width:100%; display:block; }
       <textarea id="composerInput" placeholder="Share something with the ecosystem..." rows="1"></textarea>
     </div>
     <div class="composer-preview" id="composerPreview"><img id="composerPreviewImg"><button class="composer-preview-remove" id="removePreviewBtn">×</button></div>
+    <div class="composer-poll-block" id="composerPollBlock" style="display:none;">
+      <input type="text" id="pollQuestion" placeholder="Ask a question..." style="width:100%;margin-bottom:8px;">
+      <div id="pollOptionsList"></div>
+      <button type="button" id="addPollOptionBtn" style="font-size:12px;color:var(--gold);font-weight:700;">+ Add option</button>
+      <button type="button" id="removePollBtn" style="font-size:12px;color:var(--danger);font-weight:700;margin-left:14px;">Remove poll</button>
+    </div>
     <div class="composer-actions">
       <button class="composer-attach-btn" id="attachImageBtn">+ Add image</button>
+      <button class="composer-attach-btn" id="attachPollBtn">+ Add poll</button>
       <input type="file" id="composerFileInput" accept="image/*" style="display:none;">
       <button class="composer-post-btn" id="composerPostBtn" disabled>Post</button>
     </div>
   </div>
+
+  <div class="feed-tabs">
+    <button class="feed-tab active" data-feed="following">Following</button>
+    <button class="feed-tab" data-feed="discover">Discover</button>
+  </div>
+  <div class="trending-tags-row" id="trendingTagsRow"></div>
 
   <div id="feedContainer"><div class="loading-state">Loading feed...</div></div>
 </div>
@@ -237,7 +299,7 @@ async function initialize(){
   currentProfile = profile;
   try { await supabaseClient.rpc("register_page_visit", { target_page_key: "creators", target_label: "RelviaCreators (Feed)" }); } catch (e){}
 
-  document.getElementById("myAvatarLink").href = `../studios/profile.html?user=${currentUser.id}`;
+  document.getElementById("myAvatarLink").href = `profile.html?user=${currentUser.id}`;
   document.getElementById("myAvatarLink").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
   document.getElementById("composerAvatar").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
 
@@ -247,10 +309,36 @@ async function initialize(){
   setupComposer();
   setupStoryViewer();
   setupAddStoryModal();
+  setupFeedTabs();
 
   await loadStories();
+  await loadTrendingTags();
   await loadFeed();
   await loadUnreadCount();
+}
+
+function setupFeedTabs(){
+  document.querySelectorAll(".feed-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".feed-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeFeedMode = tab.dataset.feed;
+      activeHashtagFilter = null;
+      document.querySelectorAll(".trending-tag-chip").forEach(c => c.classList.remove("active"));
+      loadFeed();
+    });
+  });
+}
+
+async function loadTrendingTags(){
+  const { data: tags } = await supabaseClient.rpc("get_trending_hashtags", { days_back: 7, tag_limit: 8 });
+  const row = document.getElementById("trendingTagsRow");
+  if (!tags || tags.length === 0){ row.innerHTML = ""; return; }
+
+  row.innerHTML = tags.map(t => `<span class="trending-tag-chip" data-tag="${t.hashtag}">#${t.hashtag} · ${t.post_count}</span>`).join("");
+  row.querySelectorAll(".trending-tag-chip").forEach(chip => {
+    chip.addEventListener("click", () => setHashtagFilter(chip.dataset.tag));
+  });
 }
 
 async function loadStories(){
@@ -388,13 +476,42 @@ function setupComposer(){
     if (!input.value.trim()) postBtn.disabled = true;
   });
 
+  document.getElementById("attachPollBtn").addEventListener("click", () => {
+    document.getElementById("composerPollBlock").style.display = "block";
+    if (document.getElementById("pollOptionsList").children.length === 0){
+      addPollOptionField(); addPollOptionField();
+    }
+    postBtn.disabled = false;
+  });
+  document.getElementById("removePollBtn").addEventListener("click", () => {
+    document.getElementById("composerPollBlock").style.display = "none";
+    document.getElementById("pollOptionsList").innerHTML = "";
+    document.getElementById("pollQuestion").value = "";
+    if (!input.value.trim() && !composerImageUrl) postBtn.disabled = true;
+  });
+  document.getElementById("addPollOptionBtn").addEventListener("click", addPollOptionField);
+
   postBtn.addEventListener("click", publishPost);
+}
+
+function addPollOptionField(){
+  const list = document.getElementById("pollOptionsList");
+  if (list.children.length >= 4) return;
+  const row = document.createElement("div");
+  row.className = "poll-option-row";
+  row.innerHTML = `<input type="text" placeholder="Option ${list.children.length + 1}"><button type="button">✕</button>`;
+  row.querySelector("button").addEventListener("click", () => row.remove());
+  list.appendChild(row);
 }
 
 async function publishPost(){
   const input = document.getElementById("composerInput");
   const caption = input.value.trim();
-  if (!caption && !composerImageUrl) return;
+  const pollQuestion = document.getElementById("pollQuestion").value.trim();
+  const pollOptionInputs = [...document.querySelectorAll("#pollOptionsList input")].map(i => i.value.trim()).filter(Boolean);
+  const hasPoll = document.getElementById("composerPollBlock").style.display !== "none" && pollQuestion && pollOptionInputs.length >= 2;
+
+  if (!caption && !composerImageUrl && !hasPoll) return;
 
   const { data: newPost, error } = await supabaseClient
     .from("social_posts").insert({ user_id: currentUser.id, caption }).select().single();
@@ -405,23 +522,61 @@ async function publishPost(){
     await supabaseClient.from("social_post_media").insert({ post_id: newPost.id, media_type: "image", storage_path: composerImageUrl, position: 0 });
   }
 
+  if (hasPoll && newPost){
+    const { data: newPoll } = await supabaseClient.from("social_polls").insert({ post_id: newPost.id, question: pollQuestion }).select().single();
+    if (newPoll){
+      const optionRows = pollOptionInputs.map((text, i) => ({ poll_id: newPoll.id, option_text: text, position: i }));
+      await supabaseClient.from("social_poll_options").insert(optionRows);
+    }
+  }
+
   input.value = "";
   composerImageUrl = null;
   document.getElementById("composerPreview").classList.remove("show");
+  document.getElementById("composerPollBlock").style.display = "none";
+  document.getElementById("pollOptionsList").innerHTML = "";
+  document.getElementById("pollQuestion").value = "";
   document.getElementById("composerPostBtn").disabled = true;
   showToast("Posted to RelviaCreators");
   await loadFeed();
 }
 
+let activeFeedMode = "following";
+let activeHashtagFilter = null;
+
+const REACTION_ICONS = { like: "♥", fire: "✦", respect: "▲", funny: "✳" };
+
+function linkifyHashtags(text){
+  return escapeHtml(text).replace(/#(\w+)/g, (match, tag) => `<span class="hashtag-link" data-hashtag="${tag.toLowerCase()}">#${tag}</span>`);
+}
+
 async function loadFeed(){
   const container = document.getElementById("feedContainer");
 
-  const { data: posts, error } = await supabaseClient
-    .from("social_posts").select("*").order("created_at", { ascending:false }).limit(40);
+  let posts, error;
+
+  if (activeFeedMode === "discover"){
+    const { data: trending } = await supabaseClient.rpc("get_trending_posts", { days_back: 7, post_limit: 20 });
+    const trendingIds = (trending || []).map(t => t.post_id);
+    if (trendingIds.length === 0){
+      container.innerHTML = `<div class="empty-state"><h4>Nothing trending yet</h4><p>Check back once there's more activity.</p></div>`;
+      return;
+    }
+    const result = await supabaseClient.from("social_posts").select("*").in("id", trendingIds);
+    // Preserve the trending order, since .in() doesn't guarantee it.
+    posts = trendingIds.map(id => result.data?.find(p => p.id === id)).filter(Boolean);
+    error = result.error;
+  } else {
+    let query = supabaseClient.from("social_posts").select("*").order("created_at", { ascending:false }).limit(40);
+    if (activeHashtagFilter) query = query.ilike("caption", `%#${activeHashtagFilter}%`);
+    const result = await query;
+    posts = result.data;
+    error = result.error;
+  }
 
   if (error){ container.innerHTML = `<div class="empty-state"><h4>Couldn't load the feed</h4></div>`; return; }
   if (!posts || posts.length === 0){
-    container.innerHTML = `<div class="empty-state"><h4>No posts yet</h4><p>Be the first to share something across the ecosystem.</p></div>`;
+    container.innerHTML = `<div class="empty-state"><h4>No posts yet</h4><p>${activeHashtagFilter ? `Nothing tagged #${activeHashtagFilter}.` : "Be the first to share something across the ecosystem."}</p></div>`;
     return;
   }
 
@@ -431,32 +586,42 @@ async function loadFeed(){
   (authors || []).forEach(a => { authorById[a.id] = a; });
 
   const postIds = posts.map(p => p.id);
-  const { data: likes } = await supabaseClient.from("post_likes").select("post_id, user_id").in("post_id", postIds);
-  const likeCountByPost = {};
-  const likedByMe = new Set();
-  (likes || []).forEach(l => {
-    likeCountByPost[l.post_id] = (likeCountByPost[l.post_id] || 0) + 1;
-    if (l.user_id === currentUser.id) likedByMe.add(l.post_id);
+  const { data: reactions } = await supabaseClient.from("post_likes").select("post_id, user_id, reaction_type").in("post_id", postIds);
+  const reactionsByPost = {};
+  const myReactionByPost = {};
+  (reactions || []).forEach(r => {
+    if (!reactionsByPost[r.post_id]) reactionsByPost[r.post_id] = {};
+    reactionsByPost[r.post_id][r.reaction_type] = (reactionsByPost[r.post_id][r.reaction_type] || 0) + 1;
+    if (r.user_id === currentUser.id) myReactionByPost[r.post_id] = r.reaction_type;
   });
 
   const { data: allComments } = await supabaseClient.from("social_comments").select("post_id").in("post_id", postIds);
   const commentCountByPost = {};
   (allComments || []).forEach(c => { commentCountByPost[c.post_id] = (commentCountByPost[c.post_id] || 0) + 1; });
 
+  const { data: polls } = await supabaseClient.from("social_polls").select("*, social_poll_options(*)").in("post_id", postIds);
+  const pollByPost = {};
+  (polls || []).forEach(p => { pollByPost[p.post_id] = p; });
+  const { data: myVotes } = await supabaseClient.from("social_poll_votes").select("poll_id, option_id").eq("user_id", currentUser.id);
+  const myVoteByPoll = {};
+  (myVotes || []).forEach(v => { myVoteByPoll[v.poll_id] = v.option_id; });
+
   container.innerHTML = "";
   for (const post of posts){
     const author = authorById[post.user_id];
     const isMe = post.user_id === currentUser.id;
     const isFollowing = followingIds.has(post.user_id);
+    const totalReactions = Object.values(reactionsByPost[post.id] || {}).reduce((sum, n) => sum + n, 0);
+    const myReaction = myReactionByPost[post.id];
 
     const card = document.createElement("div");
     card.className = "post-card";
     card.innerHTML = `
       <div class="post-header">
-        <a class="avatar-sm" href="../studios/profile.html?user=${post.user_id}">${avatarInnerHTML(author?.avatar_url, author?.display_name)}</a>
+        <a class="avatar-sm" href="profile.html?user=${post.user_id}">${avatarInnerHTML(author?.avatar_url, author?.display_name)}</a>
         <div class="post-header-info">
           <div class="post-author-row">
-            <a class="post-author" href="../studios/profile.html?user=${post.user_id}">${escapeHtml(author?.display_name || "Unknown")}</a>
+            <a class="post-author" href="profile.html?user=${post.user_id}">${escapeHtml(author?.display_name || "Unknown")}</a>
             ${author?.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
             ${post.is_sponsored ? `<span style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:2px 8px;border-radius:999px;">SPONSORED</span>` : ""}
           </div>
@@ -464,13 +629,19 @@ async function loadFeed(){
         </div>
         ${!isMe && !post.is_sponsored ? `<button class="follow-btn ${isFollowing ? "following" : ""}" data-follow-user="${post.user_id}">${isFollowing ? "Following" : "Follow"}</button>` : ""}
       </div>
-      ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ""}
+      ${post.caption ? `<div class="post-caption">${linkifyHashtags(post.caption)}</div>` : ""}
       ${post.is_sponsored && post.sponsor_click_url ? `<a href="${post.sponsor_click_url}" target="_blank" style="display:inline-block;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:10px;">Learn more →</a>` : ""}
       <div class="post-media" id="media-${post.id}"></div>
+      ${pollByPost[post.id] ? renderPollHtml(pollByPost[post.id], myVoteByPoll[pollByPost[post.id].id]) : ""}
       <div class="post-actions">
-        <button class="post-action-btn ${likedByMe.has(post.id) ? "liked" : ""}" data-action="like" data-post-id="${post.id}">
-          ♥ <span data-like-count>${likeCountByPost[post.id] || 0}</span>
-        </button>
+        <div class="reaction-btn-wrap">
+          <button class="post-action-btn ${myReaction ? "liked" : ""}" data-action="react-default" data-post-id="${post.id}">
+            ${REACTION_ICONS[myReaction || "like"]} <span data-like-count>${totalReactions}</span>
+          </button>
+          <div class="reaction-picker">
+            ${Object.entries(REACTION_ICONS).map(([type, icon]) => `<span class="reaction-option" data-action="react" data-reaction="${type}" data-post-id="${post.id}" title="${type}">${icon}</span>`).join("")}
+          </div>
+        </div>
         <button class="post-action-btn" data-action="toggle-comments" data-post-id="${post.id}">
           ✎ ${commentCountByPost[post.id] || 0}
         </button>
@@ -486,8 +657,14 @@ async function loadFeed(){
     loadPostMedia(post.id);
   }
 
-  container.querySelectorAll('[data-action="like"]').forEach(btn => {
-    btn.addEventListener("click", () => toggleLike(btn.dataset.postId, btn));
+  container.querySelectorAll('[data-action="react-default"]').forEach(btn => {
+    btn.addEventListener("click", () => setReaction(btn.dataset.postId, "like"));
+  });
+  container.querySelectorAll('[data-action="react"]').forEach(el => {
+    el.addEventListener("click", () => setReaction(el.dataset.postId, el.dataset.reaction));
+  });
+  container.querySelectorAll('.hashtag-link').forEach(el => {
+    el.addEventListener("click", () => setHashtagFilter(el.dataset.hashtag));
   });
   container.querySelectorAll('[data-action="toggle-comments"]').forEach(btn => {
     btn.addEventListener("click", () => toggleComments(btn.dataset.postId));
@@ -498,6 +675,61 @@ async function loadFeed(){
   container.querySelectorAll('[data-follow-user]').forEach(btn => {
     btn.addEventListener("click", () => toggleFollow(btn.dataset.followUser, btn));
   });
+  container.querySelectorAll('[data-poll-option]').forEach(el => {
+    el.addEventListener("click", () => votePoll(el.dataset.pollId, el.dataset.pollOption));
+  });
+}
+
+function renderPollHtml(poll, myVoteOptionId){
+  const options = (poll.social_poll_options || []).sort((a, b) => a.position - b.position);
+  return `
+    <div class="poll-display">
+      <div class="poll-question">${escapeHtml(poll.question)}</div>
+      <div id="poll-${poll.id}">${renderPollOptionsHtml(poll, options, myVoteOptionId)}</div>
+    </div>`;
+}
+
+function renderPollOptionsHtml(poll, options, myVoteOptionId){
+  // Vote counts get fetched fresh each time votePoll runs; for the
+  // initial render we just show the options — real counts populate
+  // once someone actually votes and the poll re-renders.
+  return options.map(opt => `
+    <div class="poll-option-bar" data-poll-option="${opt.id}" data-poll-id="${poll.id}">
+      <div class="poll-option-content">
+        <span>${escapeHtml(opt.option_text)}</span>
+        ${myVoteOptionId === opt.id ? '<span style="color:var(--gold);">✓</span>' : ""}
+      </div>
+    </div>`).join("");
+}
+
+async function votePoll(pollId, optionId){
+  const { error } = await supabaseClient.from("social_poll_votes").upsert(
+    { poll_id: pollId, option_id: optionId, user_id: currentUser.id },
+    { onConflict: "poll_id,user_id" }
+  );
+  if (error){ showToast("Couldn't vote"); return; }
+  await loadFeed();
+}
+
+function setHashtagFilter(tag){
+  activeHashtagFilter = tag;
+  activeFeedMode = "following";
+  document.querySelectorAll(".feed-tab").forEach(t => t.classList.toggle("active", t.dataset.feed === "following"));
+  document.querySelectorAll(".trending-tag-chip").forEach(c => c.classList.toggle("active", c.dataset.tag === tag));
+  loadFeed();
+}
+
+async function setReaction(postId, reactionType){
+  const { data: existing } = await supabaseClient.from("post_likes").select("*").eq("post_id", postId).eq("user_id", currentUser.id).maybeSingle();
+
+  if (existing && existing.reaction_type === reactionType){
+    await supabaseClient.from("post_likes").delete().eq("post_id", postId).eq("user_id", currentUser.id);
+  } else if (existing){
+    await supabaseClient.from("post_likes").update({ reaction_type: reactionType }).eq("post_id", postId).eq("user_id", currentUser.id);
+  } else {
+    await supabaseClient.from("post_likes").insert({ post_id: postId, user_id: currentUser.id, reaction_type: reactionType });
+  }
+  await loadFeed();
 }
 
 async function loadPostMedia(postId){
@@ -517,22 +749,6 @@ async function loadPostMedia(postId){
       container.innerHTML += `<img src="${url}" loading="lazy">`;
     }
   });
-}
-
-async function toggleLike(postId, btn){
-  const { data: existing } = await supabaseClient.from("post_likes").select("id").eq("post_id", postId).eq("user_id", currentUser.id).maybeSingle();
-  const countEl = btn.querySelector("[data-like-count]");
-  let count = parseInt(countEl.textContent, 10);
-
-  if (existing){
-    await supabaseClient.from("post_likes").delete().eq("id", existing.id);
-    btn.classList.remove("liked");
-    countEl.textContent = Math.max(0, count - 1);
-  } else {
-    await supabaseClient.from("post_likes").insert({ post_id: postId, user_id: currentUser.id });
-    btn.classList.add("liked");
-    countEl.textContent = count + 1;
-  }
 }
 
 async function toggleFollow(userId, btn){
@@ -610,5 +826,6 @@ async function loadUnreadCount(){
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
