@@ -569,6 +569,11 @@ function setupRelvbitsModal(){
   (async () => {
     const { data: flag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
     const relvbitsBtn = document.getElementById("sendRelvbitsBtn");
+    // You can't tip your own stream, so don't show the button to the host.
+    if (relvbitsBtn && currentUser && stream.host_id === currentUser.id) {
+      relvbitsBtn.style.display = "none";
+      return;
+    }
     if (relvbitsBtn && flag && flag.enabled === false) {
       relvbitsBtn.textContent = "RelvBits — Coming Soon";
       relvbitsBtn.disabled = true;
