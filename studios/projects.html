@@ -145,6 +145,23 @@ img{ max-width:100%; display:block; }
 </style>
 </head>
 <body>
+<script>
+(async () => {
+  try {
+    const r = await fetch("https://nqcbhpqzzwjgkusfbexo.supabase.co/rest/v1/feature_flags?select=enabled&key=eq.studios_enabled", {
+      headers: { apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU", Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU" }
+    });
+    const rows = await r.json();
+    if (rows && rows[0] && rows[0].enabled === false) {
+      const d = document.createElement("div");
+      d.style.cssText = "position:fixed;inset:0;z-index:99999;background:#070504;color:#f5f1ea;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Inter,system-ui,sans-serif;";
+      d.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:36px;margin-bottom:12px;">Relvia Studios is paused</div><div style="color:#8f8577;font-size:15px;">Studios is closed for now. Check back soon.</div>';
+      document.body.appendChild(d);
+    }
+  } catch (e) {}
+})();
+</script>
+
 
 <header class="topbar">
   <a class="brand" href="index.html">
