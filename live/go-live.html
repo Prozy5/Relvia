@@ -425,7 +425,7 @@ async function stopRecording(streamId){
   try {
     await fetch(STOP_RECORDING_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + ((await supabaseClient.auth.getSession()).data.session?.access_token || SUPABASE_ANON_KEY) },
       body: JSON.stringify({ streamId }),
     });
   } catch (err){
@@ -453,5 +453,6 @@ async function endStream(){
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
