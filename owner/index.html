@@ -3121,7 +3121,12 @@ async function loadFeatureFlags(){
   const { data, error } = await supabaseClient.from("feature_flags").select("*").order("key");
   const tbody = document.getElementById("featureFlagsTableBody");
 
-  if (error || !data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No flags configured.</td></tr>`; return; }
+  if (error){
+    console.error("feature_flags read failed:", error);
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load flags: ${escapeHtml(error.message || "unknown error")}</td></tr>`;
+    return;
+  }
+  if (!data || data.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No flags configured. Run relvia-check-schema.sql.</td></tr>`; return; }
 
   tbody.innerHTML = "";
   data.forEach(flag => {
