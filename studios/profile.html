@@ -128,7 +128,7 @@ async function initialize(){
 
   // Projects they collaborated on but didn't create.
   const { data: collabRows } = await supabaseClient
-    .from("studios_project_members").select("project_id, role_name").eq("user_id", targetUserId);
+    .from("studios_collaborators").select("project_id, role_name").eq("user_id", targetUserId);
 
   let collaboratedFilms = [];
   if (collabRows && collabRows.length > 0){
@@ -200,5 +200,6 @@ function renderFilmGrid(containerId, projects, roleField){
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
