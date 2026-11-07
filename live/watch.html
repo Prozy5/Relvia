@@ -415,6 +415,17 @@ async function connectLiveStream(){
     });
 
     await room.connect(LIVEKIT_URL, result.token);
+
+    // If the host isn't publishing (the room is empty or they dropped
+    // without ending the stream), say so instead of spinning forever.
+    setTimeout(() => {
+      const hasVideo = video.srcObject || video.dataset.activeSource;
+      if (!hasVideo && room.state === "connected"){
+        status.classList.remove("hidden");
+        status.innerHTML = `<span>The host isn't broadcasting right now.</span>`;
+      }
+    }, 10000);
+
     await loadChatHistory();
     subscribeToChatRealtime();
 
@@ -691,5 +702,6 @@ async function loadSocialFeed(){
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
