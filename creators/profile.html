@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — RelviaCreators</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface-light:#161008; --surface:#1c150d;
+  --border:#2a2018; --border-soft:#1c1610; --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f; --muted-soft:#6b6255;
+  --font-display:"Playfair Display",serif; --font-body:"Inter",sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+body{ color:var(--text); min-height:100vh; background:var(--background); }
+a{ text-decoration:none; color:inherit; }
+button, textarea, input{ font-family:inherit; }
+button{ cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+img{ max-width:100%; display:block; }
+
+.topbar{
+  position:sticky; top:0; height:68px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; background:rgba(5,5,5,.9); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-soft); z-index:50;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-badge{ width:32px; height:32px; border-radius:50%; background:#000; border:1.5px solid var(--gold-end); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-style:italic; font-weight:700; font-size:16px; color:var(--gold-start); }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:16px; }
+.back-link{ font-size:13px; font-weight:700; color:var(--muted); }
+.back-link:hover{ color:var(--gold); }
+
+.container{ max-width:680px; margin:auto; padding:36px 20px 90px; }
+
+.profile-header{ display:flex; gap:20px; align-items:flex-start; margin-bottom:22px; }
+.profile-avatar{ width:96px; height:96px; border-radius:50%; border:2px solid var(--gold-end); overflow:hidden; flex-shrink:0; background:var(--surface-light); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:34px; color:var(--gold); }
+.profile-avatar img{ width:100%; height:100%; object-fit:cover; }
+.profile-info{ flex:1; }
+.profile-name-row{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.profile-name{ font-family:var(--font-display); font-size:24px; font-weight:700; }
+.verified-badge{ color:var(--gold); font-size:15px; }
+.profile-username{ color:var(--muted); font-size:13.5px; margin-bottom:10px; }
+.profile-bio{ font-size:13.5px; color:#ddd6c8; line-height:1.6; margin-bottom:14px; }
+.profile-bio-edit{ width:100%; min-height:60px; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px; color:white; font-size:13px; margin-bottom:8px; }
+
+.profile-stats{ display:flex; gap:22px; margin-bottom:14px; }
+.profile-stat{ text-align:center; }
+.profile-stat-num{ font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--gold); }
+.profile-stat-label{ font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+
+.profile-actions{ display:flex; gap:10px; }
+.profile-actions button, .profile-actions a{ font-size:12.5px; font-weight:700; padding:8px 18px; border-radius:10px; }
+.btn-follow{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+.btn-follow.following{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.btn-message{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.btn-edit{ background:var(--surface-light); border:1px solid var(--border); color:var(--text); }
+.btn-save{ background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; }
+
+.divider{ height:1px; background:var(--border-soft); margin:22px 0; }
+
+.section-title{ font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:14px; }
+.post-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+.post-grid-item{ aspect-ratio:1; background:var(--surface-light); border-radius:6px; overflow:hidden; cursor:default; position:relative; }
+.post-grid-item img{ width:100%; height:100%; object-fit:cover; }
+.post-grid-item .caption-only{ padding:8px; font-size:10.5px; color:var(--muted); line-height:1.4; overflow:hidden; }
+
+.empty-state{ text-align:center; color:var(--muted); padding:50px 20px; font-size:13px; }
+.loading-state{ text-align:center; color:var(--muted); padding:60px 0; }
+</style>
+</head>
+<body>
+<script>
+(async () => {
+  try {
+    const r = await fetch("https://nqcbhpqzzwjgkusfbexo.supabase.co/rest/v1/feature_flags?select=enabled&key=eq.social_enabled", {
+      headers: { apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU", Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU" }
+    });
+    const rows = await r.json();
+    if (rows && rows[0] && rows[0].enabled === false) {
+      const d = document.createElement("div");
+      d.style.cssText = "position:fixed;inset:0;z-index:99999;background:#070504;color:#f5f1ea;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Inter,system-ui,sans-serif;";
+      d.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:36px;margin-bottom:12px;">RelviaCreators is paused</div><div style="color:#8f8577;font-size:15px;">The feed is closed for now. Check back soon.</div>';
+      document.body.appendChild(d);
+    }
+  } catch (e) {}
+})();
+</script>
+
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <div class="brand-badge">R</div>
+    <span class="brand-name">RelviaCreators</span>
+  </a>
+  <a class="back-link" href="index.html">← Feed</a>
+</header>
+
+<div class="container" id="container">
+  <div class="loading-state">Loading...</div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const targetUserId = params.get("user");
+let currentUser = null;
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function avatarInner(url, name){
+  if (url) return `<img src="${url}">`;
+  return escapeHtml((name || "?").charAt(0).toUpperCase());
+}
+
+async function initialize(){
+  if (!targetUserId){
+    document.getElementById("container").innerHTML = `<div class="empty-state">No profile specified.</div>`;
+    return;
+  }
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (sessionData?.session){
+    const { data: userData } = await supabaseClient.auth.getUser();
+    currentUser = userData?.user || null;
+  }
+
+  const { data: profile, error } = await supabaseClient.from("profiles").select("*").eq("id", targetUserId).maybeSingle();
+  if (error || !profile){
+    document.getElementById("container").innerHTML = `<div class="empty-state">This profile doesn't exist.</div>`;
+    return;
+  }
+
+  const [{ count: followerCount }, { count: followingCount }, { count: postCount }] = await Promise.all([
+    supabaseClient.from("social_follows").select("*", { count:"exact", head:true }).eq("followed_id", targetUserId),
+    supabaseClient.from("social_follows").select("*", { count:"exact", head:true }).eq("follower_id", targetUserId),
+    supabaseClient.from("social_posts").select("*", { count:"exact", head:true }).eq("user_id", targetUserId),
+  ]);
+
+  const isOwnProfile = currentUser && currentUser.id === targetUserId;
+  let isFollowing = false;
+  if (currentUser && !isOwnProfile){
+    const { data: followRow } = await supabaseClient.from("social_follows").select("*").eq("follower_id", currentUser.id).eq("followed_id", targetUserId).maybeSingle();
+    isFollowing = !!followRow;
+  }
+
+  document.title = `${profile.display_name || "Profile"} — RelviaCreators`;
+
+  const container = document.getElementById("container");
+  container.innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar">${avatarInner(profile.avatar_url, profile.display_name)}</div>
+      <div class="profile-info">
+        <div class="profile-name-row">
+          <div class="profile-name">${escapeHtml(profile.display_name || "Unknown")}</div>
+          ${profile.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
+        </div>
+        <div class="profile-username">@${escapeHtml(profile.username || "unknown")}</div>
+        <div id="bioDisplay">
+          ${profile.bio ? `<div class="profile-bio">${escapeHtml(profile.bio)}</div>` : (isOwnProfile ? `<div class="profile-bio" style="color:var(--muted-soft);">No bio yet.</div>` : "")}
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat"><div class="profile-stat-num">${postCount || 0}</div><div class="profile-stat-label">Posts</div></div>
+          <div class="profile-stat"><div class="profile-stat-num">${followerCount || 0}</div><div class="profile-stat-label">Followers</div></div>
+          <div class="profile-stat"><div class="profile-stat-num">${followingCount || 0}</div><div class="profile-stat-label">Following</div></div>
+        </div>
+        <div class="profile-actions" id="profileActions">
+          ${isOwnProfile
+            ? `<button class="btn-edit" id="editBioBtn">Edit bio</button>`
+            : currentUser
+            ? `<button class="btn-follow ${isFollowing ? "following" : ""}" id="followBtn">${isFollowing ? "Following" : "Follow"}</button><a class="btn-message" href="messages.html?user=${targetUserId}">Message</a>`
+            : `<a class="btn-follow" href="/login.html">Sign in to follow</a>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Posts</div>
+    <div class="post-grid" id="postGrid"></div>
+  `;
+
+  if (isOwnProfile){
+    document.getElementById("editBioBtn").addEventListener("click", () => showBioEditor(profile.bio || ""));
+  }
+  const followBtn = document.getElementById("followBtn");
+  if (followBtn){
+    followBtn.addEventListener("click", () => toggleFollow(followBtn, isFollowing));
+  }
+
+  await loadPostGrid();
+}
+
+function showBioEditor(currentBio){
+  const bioDisplay = document.getElementById("bioDisplay");
+  bioDisplay.innerHTML = `
+    <textarea class="profile-bio-edit" id="bioTextarea" maxlength="200" placeholder="Tell people about yourself...">${escapeHtml(currentBio)}</textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-save" id="saveBioBtn">Save</button>
+      <button class="btn-edit" id="cancelBioBtn">Cancel</button>
+    </div>`;
+
+  document.getElementById("saveBioBtn").addEventListener("click", async () => {
+    const newBio = document.getElementById("bioTextarea").value.trim();
+    const { error } = await supabaseClient.from("profiles").update({ bio: newBio }).eq("id", currentUser.id);
+    if (error){ alert("Couldn't save bio."); return; }
+    window.location.reload();
+  });
+  document.getElementById("cancelBioBtn").addEventListener("click", () => window.location.reload());
+}
+
+async function toggleFollow(btn, wasFollowing){
+  if (!currentUser){ window.location.href = "/login.html"; return; }
+
+  if (wasFollowing){
+    await supabaseClient.from("social_follows").delete().eq("follower_id", currentUser.id).eq("followed_id", targetUserId);
+    btn.textContent = "Follow";
+    btn.classList.remove("following");
+  } else {
+    await supabaseClient.from("social_follows").insert({ follower_id: currentUser.id, followed_id: targetUserId });
+    btn.textContent = "Following";
+    btn.classList.add("following");
+  }
+  btn.onclick = () => toggleFollow(btn, !wasFollowing);
+}
+
+async function loadPostGrid(){
+  const { data: posts } = await supabaseClient
+    .from("social_posts").select("*, social_post_media(*)").eq("user_id", targetUserId).order("created_at", { ascending:false }).limit(30);
+
+  const grid = document.getElementById("postGrid");
+  if (!posts || posts.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No posts yet.</div>`;
+    return;
+  }
+
+  grid.innerHTML = posts.map(post => {
+    const media = (post.social_post_media || [])[0];
+    if (media){
+      let url = media.storage_path;
+      if (url && !url.startsWith("http")){
+        const { data: urlData } = supabaseClient.storage.from("post-media").getPublicUrl(url);
+        url = urlData.publicUrl;
+      }
+      return `<a class="post-grid-item" href="index.html"><img src="${url}" loading="lazy"></a>`;
+    }
+    return `<a class="post-grid-item" href="index.html"><div class="caption-only">${escapeHtml((post.caption || "").slice(0, 80))}</div></a>`;
+  }).join("");
+}
+
+initialize();
+</script>
+<script src="../beta-toolkit.js"></script>
+</body>
+</html>
