@@ -235,6 +235,16 @@ body{
   .side-col{ display:none; }
   .top-nav{ display:none; }
 }
+
+/* badges in every place a name shows */
+.verified-badge{ display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:linear-gradient(135deg,#f6d27a,#b9832f); color:#000; font-size:10px; font-weight:900; flex-shrink:0; }
+.role-badge{ font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#000; background:linear-gradient(135deg,#f6d27a,#b9832f); padding:3px 9px; border-radius:999px; white-space:nowrap; }
+.comment-item .verified-badge{ margin-left:4px; vertical-align:middle; width:14px; height:14px; font-size:9px; }
+.comment-item .role-badge{ margin:0 6px 0 5px; font-size:9px; padding:2px 7px; vertical-align:middle; }
+.story-name .verified-badge{ width:11px; height:11px; font-size:7px; margin-left:3px; vertical-align:middle; }
+.suggest-name-row{ display:flex; align-items:center; gap:6px; min-width:0; }
+.conv-name-wrap{ display:flex; align-items:center; gap:6px; min-width:0; }
+#storyViewerName{ display:inline-flex; align-items:center; gap:6px; }
 </style>
 </head>
 <body>
@@ -409,6 +419,23 @@ async function uploadImage(file, opts){
   return supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+// ---------- badges: verified check + Official / Founder labels, everywhere a name appears ----------
+const badgeCache = {};
+async function loadBadges(ids){
+  const missing = [...new Set(ids)].filter(id => id && !(id in badgeCache));
+  if (!missing.length) return;
+  missing.forEach(id => { badgeCache[id] = null; });
+  try {
+    const { data } = await supabaseClient.rpc("get_user_badges", { p_ids: missing });
+    (data || []).forEach(b => { badgeCache[b.user_id] = b.label; });
+  } catch (e) {}
+}
+function badgesHtml(userId){
+  const label = badgeCache[userId];
+  if (!label) return "";
+  return `<span class="verified-badge" title="Verified">✓</span><span class="role-badge">${escapeHtml(label)}</span>`;
+}
+
 function avatarInnerHTML(url, name){
   return url ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml((name || "R").charAt(0).toUpperCase());
 }
@@ -463,6 +490,7 @@ async function loadSuggestions(){
   const picks = (people || []).filter(p => !followingIds.has(p.id) && p.display_name).slice(0, 5);
   const box = document.getElementById("suggestBox");
   if (picks.length === 0){ box.hidden = true; return; }
+  await loadBadges(picks.map(p => p.id));
 
   const list = document.getElementById("suggestList");
   list.innerHTML = "";
@@ -472,7 +500,7 @@ async function loadSuggestions(){
     row.innerHTML = `
       <a class="avatar-sm" href="profile.html?user=${p.id}">${avatarInnerHTML(p.avatar_url, p.display_name)}</a>
       <a class="suggest-info" href="profile.html?user=${p.id}">
-        <span class="suggest-name">${escapeHtml(p.display_name)}</span>
+        <span class="suggest-name-row"><span class="suggest-name">${escapeHtml(p.display_name)}</span>${badgesHtml(p.id)}</span>
         <span class="suggest-user">${p.username ? "@" + escapeHtml(p.username) : ""}</span>
       </a>
       <button class="follow-btn" type="button">Follow</button>`;
@@ -531,6 +559,7 @@ async function loadStories(){
   const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, avatar_url").in("id", userIds);
   const profileById = {};
   (profiles || []).forEach(p => { profileById[p.id] = p; });
+  await loadBadges(userIds);
 
   userIds.forEach(userId => {
     const userStories = byUser[userId];
@@ -543,7 +572,7 @@ async function loadStories(){
       <div class="story-ring ${hasUnseen ? "unseen" : ""}">
         <div class="story-ring-inner"><div class="story-avatar">${avatarInnerHTML(profile?.avatar_url, profile?.display_name)}</div></div>
       </div>
-      <div class="story-name">${escapeHtml(profile?.display_name || "Unknown")}</div>`;
+      <div class="story-name">${escapeHtml(profile?.display_name || "Unknown")}${badgeCache[userId] ? `<span class="verified-badge" title="Verified">✓</span>` : ""}</div>`;
     item.addEventListener("click", () => openStoryViewer(userStories, profile));
     row.appendChild(item);
   });
@@ -607,7 +636,7 @@ function openStoryViewer(stories, profile){
   storyIndex = 0;
   document.getElementById("storyViewerBackdrop").classList.add("open");
   document.getElementById("storyViewerAvatar").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
-  document.getElementById("storyViewerName").textContent = profile?.display_name || "Unknown";
+  document.getElementById("storyViewerName").innerHTML = escapeHtml(profile?.display_name || "Unknown") + badgesHtml(profile?.id);
   showStoryFrame();
 }
 
@@ -1009,12 +1038,13 @@ async function loadComments(postId){
   const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name").in("id", userIds);
   const nameById = {};
   (profiles || []).forEach(p => { nameById[p.id] = p.display_name; });
+  await loadBadges(userIds);
 
   list.innerHTML = "";
   comments.forEach(c => {
     const el = document.createElement("div");
     el.className = "comment-item";
-    el.innerHTML = `<span><span class="comment-author">${escapeHtml(nameById[c.user_id] || "Unknown")}</span>${escapeHtml(c.content)}</span>`;
+    el.innerHTML = `<span><span class="comment-author">${escapeHtml(nameById[c.user_id] || "Unknown")}</span>${badgesHtml(c.user_id)}${escapeHtml(c.content)}</span>`;
     list.appendChild(el);
   });
 }
