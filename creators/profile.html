@@ -43,7 +43,8 @@ img{ max-width:100%; display:block; }
 .profile-info{ flex:1; }
 .profile-name-row{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
 .profile-name{ font-family:var(--font-display); font-size:24px; font-weight:700; }
-.verified-badge{ color:var(--gold); font-size:15px; }
+.verified-badge{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:12px; font-weight:900; }
+.role-badge{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); padding:4px 11px; border-radius:999px; }
 .profile-username{ color:var(--muted); font-size:13.5px; margin-bottom:10px; }
 .profile-bio{ font-size:13.5px; color:#ddd6c8; line-height:1.6; margin-bottom:14px; }
 .profile-bio-edit{ width:100%; min-height:60px; background:var(--surface-light); border:1px solid var(--border); border-radius:10px; padding:10px; color:white; font-size:13px; margin-bottom:8px; }
@@ -141,6 +142,12 @@ async function initialize(){
     return;
   }
 
+  let roleLabel = null;
+  try {
+    const { data: badgeRows } = await supabaseClient.rpc("get_user_badges", { p_ids: [targetUserId] });
+    roleLabel = badgeRows && badgeRows[0] ? badgeRows[0].label : null;
+  } catch (e) {}
+
   const [{ count: followerCount }, { count: followingCount }, { count: postCount }] = await Promise.all([
     supabaseClient.from("social_follows").select("*", { count:"exact", head:true }).eq("followed_id", targetUserId),
     supabaseClient.from("social_follows").select("*", { count:"exact", head:true }).eq("follower_id", targetUserId),
@@ -163,7 +170,7 @@ async function initialize(){
       <div class="profile-info">
         <div class="profile-name-row">
           <div class="profile-name">${escapeHtml(profile.display_name || "Unknown")}</div>
-          ${profile.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
+          ${(profile.creator_plus || roleLabel) ? `<span class="verified-badge" title="Verified">✓</span>` : ""}${roleLabel ? `<span class="role-badge">${escapeHtml(roleLabel)}</span>` : ""}
         </div>
         <div class="profile-username">@${escapeHtml(profile.username || "unknown")}</div>
         <div id="bioDisplay">
