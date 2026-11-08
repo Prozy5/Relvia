@@ -290,7 +290,7 @@ body{
       <button type="button" id="removePollBtn" style="font-size:12px;color:var(--danger);font-weight:700;margin-left:14px;">Remove poll</button>
     </div>
     <div class="composer-actions">
-      <button class="composer-attach-btn" id="attachImageBtn">+ Add image</button>
+      <button class="composer-attach-btn" id="attachImageBtn">+ Add photo</button>
       <button class="composer-attach-btn" id="attachPollBtn">+ Add poll</button>
       <input type="file" id="composerFileInput" accept="image/*" style="display:none;">
       <button class="composer-post-btn" id="composerPostBtn" disabled>Post</button>
@@ -343,7 +343,7 @@ body{
 <div class="modal-backdrop" id="addStoryModal">
   <div class="modal">
     <h3>Add to your story</h3>
-    <div class="modal-field"><label>Image URL</label><input type="text" id="storyImageUrl" placeholder="https://..."></div>
+    <div class="modal-field"><label for="storyFile">Photo</label><input type="file" id="storyFile" accept="image/*"><img id="storyPreview" alt="" style="display:none;max-height:180px;border-radius:10px;margin-top:10px;"></div>
     <div class="modal-field"><label>Caption (optional)</label><input type="text" id="storyCaption" maxlength="120"></div>
     <div class="modal-actions">
       <button class="modal-cancel" id="cancelStoryBtn">Cancel</button>
@@ -368,6 +368,47 @@ let followingIds = new Set();
 function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
+// ---------- photo upload (shrinks the photo, then stores it) ----------
+const MEDIA_BUCKET = "creators-media";
+function resizeImage(file, maxEdge, quality, square){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let sx = 0, sy = 0, sw = img.width, sh = img.height, w, h;
+      if (square){
+        const side = Math.min(img.width, img.height);
+        sx = (img.width - side) / 2; sy = (img.height - side) / 2; sw = side; sh = side;
+        w = h = Math.min(maxEdge, side);
+      } else {
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        w = Math.round(img.width * scale); h = Math.round(img.height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#0f0b08"; ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("Couldn't process that photo.")), "image/jpeg", quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That file isn't a photo we can read. Try a JPG or PNG.")); };
+    img.src = url;
+  });
+}
+async function uploadImage(file, opts){
+  opts = opts || {};
+  if (!file || !file.type.startsWith("image/")) throw new Error("Choose a photo.");
+  if (file.size > 15 * 1024 * 1024) throw new Error("That photo is over 15 MB. Try a smaller one.");
+  const blob = await resizeImage(file, opts.maxEdge || 1600, 0.86, !!opts.square);
+  const { data: auth } = await supabaseClient.auth.getUser();
+  if (!auth || !auth.user) throw new Error("Sign in to upload.");
+  const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const { error } = await supabaseClient.storage.from(MEDIA_BUCKET).upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+  if (error) throw new Error(error.message || "Upload failed.");
+  return supabaseClient.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
 function avatarInnerHTML(url, name){
   return url ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml((name || "R").charAt(0).toUpperCase());
 }
@@ -509,20 +550,45 @@ async function loadStories(){
 }
 
 function setupAddStoryModal(){
-  document.getElementById("cancelStoryBtn").addEventListener("click", () => document.getElementById("addStoryModal").classList.remove("open"));
-  document.getElementById("postStoryBtn").addEventListener("click", async () => {
-    const imageUrl = document.getElementById("storyImageUrl").value.trim();
-    const caption = document.getElementById("storyCaption").value.trim();
-    if (!imageUrl){ showToast("Add an image URL first"); return; }
-
-    const { error } = await supabaseClient.from("social_stories").insert({ user_id: currentUser.id, media_url: imageUrl, caption });
-    if (error){ console.error(error); showToast("Couldn't post story"); return; }
-
-    document.getElementById("storyImageUrl").value = "";
+  const fileInput = document.getElementById("storyFile");
+  const preview = document.getElementById("storyPreview");
+  const postBtn = document.getElementById("postStoryBtn");
+  const resetForm = () => {
+    fileInput.value = "";
+    preview.style.display = "none";
+    preview.removeAttribute("src");
     document.getElementById("storyCaption").value = "";
+  };
+
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files[0];
+    if (!f){ preview.style.display = "none"; return; }
+    preview.src = URL.createObjectURL(f);
+    preview.style.display = "block";
+  });
+  document.getElementById("cancelStoryBtn").addEventListener("click", () => {
     document.getElementById("addStoryModal").classList.remove("open");
-    showToast("Story posted");
-    await loadStories();
+    resetForm();
+  });
+  postBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    const caption = document.getElementById("storyCaption").value.trim();
+    if (!file){ showToast("Choose a photo first"); return; }
+
+    const label = postBtn.textContent;
+    postBtn.disabled = true; postBtn.textContent = "Posting...";
+    try {
+      const imageUrl = await uploadImage(file, { maxEdge: 1400 });
+      const { error } = await supabaseClient.from("social_stories").insert({ user_id: currentUser.id, media_url: imageUrl, caption });
+      if (error) throw new Error(error.message || "Couldn't post story");
+      document.getElementById("addStoryModal").classList.remove("open");
+      resetForm();
+      showToast("Story posted");
+      await loadStories();
+    } catch (err){
+      showToast(err.message || "Couldn't post story");
+    }
+    postBtn.disabled = false; postBtn.textContent = label;
   });
 }
 
@@ -587,13 +653,24 @@ function setupComposer(){
 
   input.addEventListener("input", () => { postBtn.disabled = input.value.trim().length === 0; });
 
-  document.getElementById("attachImageBtn").addEventListener("click", () => {
-    const url = prompt("Paste an image URL:");
-    if (!url) return;
-    composerImageUrl = url;
-    document.getElementById("composerPreviewImg").src = url;
-    document.getElementById("composerPreview").classList.add("show");
-    postBtn.disabled = false;
+  const composerFile = document.getElementById("composerFileInput");
+  document.getElementById("attachImageBtn").addEventListener("click", () => composerFile.click());
+  composerFile.addEventListener("change", async () => {
+    const file = composerFile.files[0];
+    composerFile.value = "";
+    if (!file) return;
+    postBtn.disabled = true;
+    showToast("Uploading photo...");
+    try {
+      const url = await uploadImage(file, { maxEdge: 1600 });
+      composerImageUrl = url;
+      document.getElementById("composerPreviewImg").src = url;
+      document.getElementById("composerPreview").classList.add("show");
+      showToast("Photo added");
+    } catch (err){
+      showToast(err.message || "Couldn't upload that photo");
+    }
+    postBtn.disabled = !(input.value.trim() || composerImageUrl);
   });
   document.getElementById("removePreviewBtn").addEventListener("click", () => {
     composerImageUrl = null;
