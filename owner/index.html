@@ -2377,6 +2377,20 @@ async function runCleanupNow(){
 // ==========================================================
 // ADS
 // ==========================================================
+// Wire the Growth buttons once, before any list loads, so they work even when a list is empty.
+function bindOnce(id, handler){
+  const el = document.getElementById(id);
+  if (!el || el.dataset.bound) return;
+  el.dataset.bound = "1";
+  el.addEventListener("click", handler);
+}
+function wireGrowthButtons(){
+  bindOnce("addAdCampaignBtn", createAdCampaign);
+  bindOnce("generateDraftBtn", generateSponsoredDraft);
+  bindOnce("publishPromoBtn", publishSponsoredPost);
+  bindOnce("runProspectSearchBtn", runProspectSearch);
+}
+
 async function loadAdsSection(){
   const { data: summary } = await supabaseClient.rpc("get_ads_summary");
   if (summary && summary.length > 0){
@@ -2415,7 +2429,6 @@ async function loadAdsSection(){
     tbody.appendChild(row);
   });
 
-  document.getElementById("addAdCampaignBtn").addEventListener("click", createAdCampaign);
 }
 
 async function createAdCampaign(){
@@ -2489,8 +2502,6 @@ async function loadPromotionsSection(){
     tbody.appendChild(row);
   });
 
-  document.getElementById("generateDraftBtn").addEventListener("click", generateSponsoredDraft);
-  document.getElementById("publishPromoBtn").addEventListener("click", publishSponsoredPost);
 }
 
 async function generateSponsoredDraft(){
@@ -2513,7 +2524,8 @@ async function generateSponsoredDraft(){
       headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
       body: JSON.stringify({ advertiserName, brief }),
     });
-    const result = await response.json();
+    let result = {};
+    try { result = await response.json(); } catch (parseErr){ result = { error: `The draft service returned ${response.status}` }; }
 
     if (!response.ok || !result.draft){
       showToast(result.error || "Couldn't generate a draft");
@@ -2531,7 +2543,7 @@ async function generateSponsoredDraft(){
       })
       .select().single();
 
-    if (error){ console.error(error); showToast("Draft generated but couldn't save it"); btn.disabled = false; btn.textContent = "Generate draft"; return; }
+    if (error){ console.error(error); showToast("Draft generated but couldn't save: " + (error.message || "unknown error")); btn.disabled = false; btn.textContent = "Generate draft"; return; }
 
     currentDraftRequestId = newRequest.id;
     document.getElementById("promoFinalCaption").value = result.draft;
@@ -2565,7 +2577,7 @@ async function publishSponsoredPost(){
     })
     .select().single();
 
-  if (postError){ console.error(postError); showToast("Couldn't publish — check the Relvia Promotions bot profile was created"); btn.disabled = false; btn.textContent = "Publish to RelviaCreators"; return; }
+  if (postError){ console.error(postError); showToast("Couldn't publish: " + (postError.message || "unknown error")); btn.disabled = false; btn.textContent = "Publish to RelviaCreators"; return; }
 
   await supabaseClient
     .from("sponsored_post_requests")
@@ -2625,7 +2637,6 @@ async function loadProspectsSection(){
     btn.addEventListener("click", () => removeLead(btn.dataset.removeLead));
   });
 
-  document.getElementById("runProspectSearchBtn").addEventListener("click", runProspectSearch);
 }
 
 async function runProspectSearch(){
@@ -2740,6 +2751,7 @@ function setupEcosystemTabs(){
       if (target === "creators" && !creatorsLoaded){ creatorsLoaded = true; await loadCreatorsTab(); }
       if (target === "growth" && !growthLoaded){
         growthLoaded = true;
+        wireGrowthButtons();
         await Promise.all([loadAdsSection(), loadPromotionsSection(), loadProspectsSection()]);
       }
       if (target === "news" && !newsLoaded){ newsLoaded = true; await loadNewsTab(); }
