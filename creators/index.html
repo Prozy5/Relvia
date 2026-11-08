@@ -80,7 +80,8 @@ img, video{ max-width:100%; display:block; }
 .post-header-info{ flex:1; }
 .post-author-row{ display:flex; align-items:center; gap:6px; }
 .post-author{ font-size:13.5px; font-weight:700; }
-.verified-badge{ color:var(--gold); font-size:12px; }
+.verified-badge{ display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); color:#000; font-size:10px; font-weight:900; }
+.role-badge{ font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#000; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); padding:3px 9px; border-radius:999px; }
 .post-time{ font-size:11px; color:var(--muted-soft); }
 .follow-btn{ font-size:11.5px; font-weight:700; color:var(--gold); border:1px solid var(--gold-end); padding:5px 12px; border-radius:999px; }
 .follow-btn.following{ color:var(--muted); border-color:var(--border); }
@@ -640,7 +641,7 @@ async function publishPost(){
   const { data: newPost, error } = await supabaseClient
     .from("social_posts").insert({ user_id: currentUser.id, caption }).select().single();
 
-  if (error){ console.error(error); showToast("Couldn't publish post"); return; }
+  if (error){ console.error(error); showToast("Couldn't publish: " + (error.message || "unknown error")); return; }
 
   if (composerImageUrl && newPost){
     await supabaseClient.from("social_post_media").insert({ post_id: newPost.id, media_type: "image", storage_path: composerImageUrl, position: 0 });
@@ -700,7 +701,7 @@ async function loadFeed(){
     error = result.error;
   }
 
-  if (error){ container.innerHTML = `<div class="empty-state"><h4>Couldn't load the feed</h4></div>`; return; }
+  if (error){ console.error(error); container.innerHTML = `<div class="empty-state"><h4>Couldn't load the feed</h4><p>${escapeHtml(error.message || "")}</p></div>`; return; }
   if (!posts || posts.length === 0){
     container.innerHTML = `<div class="empty-state"><h4>No posts yet</h4><p>${activeHashtagFilter ? `Nothing tagged #${activeHashtagFilter}.` : "Be the first to share something across the ecosystem."}</p></div>`;
     return;
@@ -710,6 +711,13 @@ async function loadFeed(){
   const { data: authors } = await supabaseClient.from("profiles").select("id, display_name, username, avatar_url, creator_plus").in("id", authorIds);
   const authorById = {};
   (authors || []).forEach(a => { authorById[a.id] = a; });
+
+  // Founder and staff badges.
+  const badgeByUser = {};
+  try {
+    const { data: badgeRows } = await supabaseClient.rpc("get_user_badges", { p_ids: authorIds });
+    (badgeRows || []).forEach(b => { badgeByUser[b.user_id] = b.label; });
+  } catch (e) {}
 
   const postIds = posts.map(p => p.id);
   const { data: reactions } = await supabaseClient.from("post_likes").select("post_id, user_id, reaction_type").in("post_id", postIds);
@@ -757,7 +765,7 @@ async function loadFeed(){
         <div class="post-header-info">
           <div class="post-author-row">
             <a class="post-author" href="profile.html?user=${post.user_id}">${escapeHtml(author?.display_name || "Unknown")}</a>
-            ${author?.creator_plus ? `<span class="verified-badge" title="Creator+">✓</span>` : ""}
+            ${(author?.creator_plus || badgeByUser[post.user_id]) ? `<span class="verified-badge" title="Verified">✓</span>` : ""}${badgeByUser[post.user_id] ? `<span class="role-badge">${escapeHtml(badgeByUser[post.user_id])}</span>` : ""}
             ${post.is_sponsored ? `<span style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:2px 8px;border-radius:999px;">SPONSORED</span>` : ""}
           </div>
           <div class="post-time">${timeAgo(post.created_at)}</div>
