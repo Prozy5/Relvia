@@ -161,6 +161,79 @@ img, video{ max-width:100%; display:block; }
 .reaction-btn-wrap:hover .reaction-picker{ display:flex; }
 .reaction-option{ font-size:17px; padding:4px; border-radius:50%; cursor:pointer; transition:.15s; }
 .reaction-option:hover{ transform:scale(1.3); }
+
+/* ===== RelviaCreators refresh ===== */
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 12% -8%, rgba(224,177,88,.10), transparent 60%),
+    radial-gradient(ellipse 700px 460px at 100% 20%, rgba(185,131,47,.06), transparent 60%),
+    #070504;
+  background-attachment:fixed;
+}
+.topbar{ height:72px; padding:0 clamp(16px,3vw,36px); background:rgba(7,5,4,.88); border-bottom:1px solid rgba(224,177,88,.28); box-shadow:0 12px 40px -24px rgba(224,177,88,.35); gap:20px; }
+.brand{ gap:12px; }
+.crest{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-style:italic; font-weight:800; font-size:21px; color:var(--gold-start); border:1.5px solid var(--gold-end); background:radial-gradient(circle at 32% 24%,rgba(246,210,122,.28),transparent 68%),#000; box-shadow:0 0 20px -4px rgba(224,177,88,.45); }
+.brand-text{ display:flex; flex-direction:column; line-height:1; }
+.brand-text .brand-name{ font-family:var(--font-display); font-weight:800; font-size:24px; letter-spacing:-.02em; background:linear-gradient(100deg,var(--gold-start),var(--gold-end) 55%,var(--gold-start)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.brand-sub{ margin-top:5px; font-size:9.5px; font-weight:700; letter-spacing:.4em; color:var(--gold-end); }
+.top-nav{ display:flex; gap:clamp(14px,2.2vw,28px); margin-left:auto; }
+.top-nav a{ font-size:13px; font-weight:600; color:#cfc2a3; transition:color .2s; }
+.top-nav a:hover{ color:var(--gold-start); }
+.top-actions{ gap:16px; }
+.msg-link{ position:relative; font-size:13px; font-weight:700; color:var(--gold); border:1px solid rgba(224,177,88,.35); padding:8px 16px; border-radius:999px; transition:background .2s, color .2s; }
+.msg-link:hover{ background:var(--gold); color:#000; }
+.msg-link .unread-badge{ top:-6px; right:-6px; }
+.avatar-sm{ border:1px solid rgba(224,177,88,.3); }
+
+.layout{ max-width:1120px; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:36px; padding:30px clamp(16px,3vw,32px) 90px; align-items:start; }
+.feed-col{ min-width:0; max-width:680px; width:100%; margin:0 auto; }
+
+.stories-row{ gap:16px; padding-bottom:18px; margin-bottom:22px; }
+.story-ring{ width:64px; height:64px; }
+.story-item{ width:70px; }
+
+.composer{ border-radius:18px; padding:18px; background:linear-gradient(180deg,#130e09,#0f0b08); transition:border-color .25s, box-shadow .25s; }
+.composer:focus-within{ border-color:rgba(224,177,88,.55); box-shadow:0 0 0 4px rgba(224,177,88,.07); }
+.composer textarea{ font-size:15.5px; min-height:52px; }
+.composer-poll-block{ margin-top:12px; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-light); }
+
+.feed-tabs{ gap:26px; margin:22px 0 14px; border-bottom:1px solid var(--border-soft); }
+.feed-tab{ background:none; border:none; border-radius:0; padding:12px 2px; font-size:14px; color:var(--muted); position:relative; }
+.feed-tab.active{ background:none; color:var(--gold-start); }
+.feed-tab.active::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:linear-gradient(90deg,var(--gold-start),var(--gold-end)); }
+
+.post-card{ border-radius:18px; padding:20px; margin-bottom:18px; background:linear-gradient(180deg,#130e09,#0f0b08); transition:border-color .25s; }
+.post-card:hover{ border-color:#3a2d1f; }
+.post-header .avatar-sm{ width:42px; height:42px; font-size:15px; }
+.post-author{ font-size:14.5px; }
+.post-caption{ font-size:15px; line-height:1.65; }
+.post-media img, .post-media video{ border-radius:14px; }
+.post-actions{ gap:24px; padding-top:12px; }
+.post-action-btn{ font-size:13px; }
+
+.side-col{ position:sticky; top:96px; display:flex; flex-direction:column; gap:18px; }
+.side-box{ border:1px solid var(--border); border-radius:18px; padding:20px; background:linear-gradient(180deg,#130e09,#0f0b08); }
+.side-box[hidden]{ display:none; }
+.side-box h3{ font-family:var(--font-display); font-weight:700; font-size:18px; margin-bottom:14px; }
+.side-box .trending-tags-row{ margin:0; }
+.side-link{ display:flex; flex-direction:column; gap:2px; padding:11px 0; border-top:1px solid var(--border-soft); transition:padding .25s; }
+.side-link:first-of-type{ border-top:none; padding-top:0; }
+.side-link span:first-child{ font-weight:700; font-size:14.5px; }
+.side-link span:last-child{ font-size:12.5px; color:var(--muted); }
+.side-link:hover{ padding-left:8px; }
+.side-link:hover span:first-child{ color:var(--gold); }
+.suggest-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--border-soft); }
+.suggest-row:first-child{ border-top:none; padding-top:0; }
+.suggest-row .avatar-sm{ width:38px; height:38px; flex-shrink:0; }
+.suggest-info{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.suggest-name{ font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.suggest-user{ font-size:12px; color:var(--muted); }
+
+@media (max-width:980px){
+  .layout{ grid-template-columns:minmax(0,1fr); }
+  .side-col{ display:none; }
+  .top-nav{ display:none; }
+}
 </style>
 </head>
 <body>
@@ -183,20 +256,24 @@ img, video{ max-width:100%; display:block; }
 
 
 <header class="topbar">
-  <a class="brand" href="index.html">
-    <div class="brand-badge">R</div>
-    <span class="brand-name">RelviaCreators</span>
+  <a class="brand" href="index.html" aria-label="RelviaCreators home">
+    <span class="crest" aria-hidden="true">R</span>
+    <span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">CREATORS</span></span>
   </a>
+  <nav class="top-nav" aria-label="Relvia divisions">
+    <a href="../studios/index.html">Studios</a>
+    <a href="../music/index.html">Music</a>
+    <a href="../live/live.html">Live</a>
+    <a href="../index.html">Relvia</a>
+  </nav>
   <div class="top-actions">
-    <a class="icon-btn" href="messages.html" title="Messages">
-      ✉
-      <span class="unread-badge" id="unreadBadge" style="display:none;">0</span>
-    </a>
-    <a class="avatar-sm" id="myAvatarLink" href="#"></a>
+    <a class="msg-link" href="messages.html">Messages<span class="unread-badge" id="unreadBadge" style="display:none;">0</span></a>
+    <a class="avatar-sm" id="myAvatarLink" href="#" aria-label="Your profile"></a>
   </div>
 </header>
 
 <div class="layout">
+  <div class="feed-col">
   <div class="stories-row" id="storiesRow"></div>
 
   <div class="composer">
@@ -223,9 +300,28 @@ img, video{ max-width:100%; display:block; }
     <button class="feed-tab active" data-feed="following">Following</button>
     <button class="feed-tab" data-feed="discover">Discover</button>
   </div>
-  <div class="trending-tags-row" id="trendingTagsRow"></div>
 
   <div id="feedContainer"><div class="loading-state">Loading feed...</div></div>
+  </div>
+
+  <aside class="side-col" aria-label="Sidebar">
+    <section class="side-box" id="trendBox" hidden>
+      <h3>Trending</h3>
+      <div class="trending-tags-row" id="trendingTagsRow"></div>
+    </section>
+
+    <section class="side-box" id="suggestBox" hidden>
+      <h3>Who to follow</h3>
+      <div id="suggestList"></div>
+    </section>
+
+    <section class="side-box">
+      <h3>Elsewhere on Relvia</h3>
+      <a class="side-link" href="../studios/index.html"><span>Studios</span><span>Films and series</span></a>
+      <a class="side-link" href="../music/index.html"><span>Music</span><span>Releases and artists</span></a>
+      <a class="side-link" href="../live/live.html"><span>Live</span><span>Streams and chat</span></a>
+    </section>
+  </aside>
 </div>
 
 <div class="story-viewer-backdrop" id="storyViewerBackdrop">
@@ -313,8 +409,35 @@ async function initialize(){
 
   await loadStories();
   await loadTrendingTags();
+  loadSuggestions();
   await loadFeed();
   await loadUnreadCount();
+}
+
+async function loadSuggestions(){
+  const { data: people } = await supabaseClient
+    .from("profiles").select("id, display_name, username, avatar_url")
+    .neq("id", currentUser.id).order("created_at", { ascending: false }).limit(25);
+  const picks = (people || []).filter(p => !followingIds.has(p.id) && p.display_name).slice(0, 5);
+  const box = document.getElementById("suggestBox");
+  if (picks.length === 0){ box.hidden = true; return; }
+
+  const list = document.getElementById("suggestList");
+  list.innerHTML = "";
+  picks.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "suggest-row";
+    row.innerHTML = `
+      <a class="avatar-sm" href="profile.html?user=${p.id}">${avatarInnerHTML(p.avatar_url, p.display_name)}</a>
+      <a class="suggest-info" href="profile.html?user=${p.id}">
+        <span class="suggest-name">${escapeHtml(p.display_name)}</span>
+        <span class="suggest-user">${p.username ? "@" + escapeHtml(p.username) : ""}</span>
+      </a>
+      <button class="follow-btn" type="button">Follow</button>`;
+    row.querySelector(".follow-btn").addEventListener("click", (e) => toggleFollow(p.id, e.currentTarget));
+    list.appendChild(row);
+  });
+  box.hidden = false;
 }
 
 function setupFeedTabs(){
@@ -333,6 +456,7 @@ function setupFeedTabs(){
 async function loadTrendingTags(){
   const { data: tags } = await supabaseClient.rpc("get_trending_hashtags", { days_back: 7, tag_limit: 8 });
   const row = document.getElementById("trendingTagsRow");
+  document.getElementById("trendBox").hidden = !(tags && tags.length);
   if (!tags || tags.length === 0){ row.innerHTML = ""; return; }
 
   row.innerHTML = tags.map(t => `<span class="trending-tag-chip" data-tag="${t.hashtag}">#${t.hashtag} · ${t.post_count}</span>`).join("");
@@ -542,6 +666,8 @@ async function publishPost(){
 }
 
 let activeFeedMode = "following";
+let pollVoteCounts = {};
+let pollVoteTotals = {};
 let activeHashtagFilter = null;
 
 const REACTION_ICONS = { like: "♥", fire: "✦", respect: "▲", funny: "✳" };
@@ -605,6 +731,15 @@ async function loadFeed(){
   const { data: myVotes } = await supabaseClient.from("social_poll_votes").select("poll_id, option_id").eq("user_id", currentUser.id);
   const myVoteByPoll = {};
   (myVotes || []).forEach(v => { myVoteByPoll[v.poll_id] = v.option_id; });
+  const { data: allVotes } = await supabaseClient
+    .from("social_poll_votes").select("poll_id, option_id")
+    .in("poll_id", (polls || []).map(p => p.id));
+  pollVoteCounts = {};
+  pollVoteTotals = {};
+  (allVotes || []).forEach(v => {
+    pollVoteCounts[v.option_id] = (pollVoteCounts[v.option_id] || 0) + 1;
+    pollVoteTotals[v.poll_id] = (pollVoteTotals[v.poll_id] || 0) + 1;
+  });
 
   container.innerHTML = "";
   for (const post of posts){
@@ -690,16 +825,20 @@ function renderPollHtml(poll, myVoteOptionId){
 }
 
 function renderPollOptionsHtml(poll, options, myVoteOptionId){
-  // Vote counts get fetched fresh each time votePoll runs; for the
-  // initial render we just show the options — real counts populate
-  // once someone actually votes and the poll re-renders.
-  return options.map(opt => `
+  const total = pollVoteTotals[poll.id] || 0;
+  const rows = options.map(opt => {
+    const count = pollVoteCounts[opt.id] || 0;
+    const pct = total ? Math.round((count / total) * 100) : 0;
+    return `
     <div class="poll-option-bar" data-poll-option="${opt.id}" data-poll-id="${poll.id}">
+      <div class="poll-option-fill" style="width:${pct}%;"></div>
       <div class="poll-option-content">
-        <span>${escapeHtml(opt.option_text)}</span>
-        ${myVoteOptionId === opt.id ? '<span style="color:var(--gold);">✓</span>' : ""}
+        <span>${escapeHtml(opt.option_text)}${myVoteOptionId === opt.id ? ' <span style="color:var(--gold);">✓</span>' : ""}</span>
+        <span style="color:var(--muted);font-size:12px;">${pct}%</span>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
+  return rows + `<div class="poll-total-votes">${total} vote${total === 1 ? "" : "s"}</div>`;
 }
 
 async function votePoll(pollId, optionId){
