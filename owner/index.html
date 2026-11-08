@@ -207,6 +207,8 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
       <button class="eco-tab" data-eco-tab="news">News</button>
       <button class="eco-tab" data-eco-tab="offices">Offices</button>
+      <button class="eco-tab" data-eco-tab="beta">Beta</button>
+      <button class="eco-tab" data-eco-tab="test">Test</button>
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
@@ -750,6 +752,52 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
     </div><!-- /eco-offices -->
+
+    <!-- ================= BETA TAB ================= -->
+    <div class="eco-panel" id="eco-beta">
+      <div class="section">
+        <div class="section-head"><h2>Beta Controls</h2></div>
+        <div class="panel" style="padding:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-soft);">
+            <div><div style="font-weight:700;">Beta badge</div><div style="font-size:12px;color:var(--muted);">The floating BETA badge on every page</div></div>
+            <button class="btn" id="betaBadgeToggle">Loading...</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-soft);">
+            <div><div style="font-weight:700;">Feedback button</div><div style="font-size:12px;color:var(--muted);">The Feedback button linking to DevForum</div></div>
+            <button class="btn" id="betaModeToggle">Loading...</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap;">
+            <div><div style="font-weight:700;">Beta start date</div><div style="font-size:12px;color:var(--muted);">Used for the days-in-beta count</div></div>
+            <div style="display:flex;gap:8px;">
+              <input type="date" id="betaStartInput" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:8px 10px;color:white;">
+              <button class="btn gold sm" id="betaStartSave">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><h2>Beta at a glance</h2></div>
+        <div class="stat-grid" id="betaStats"></div>
+      </div>
+    </div><!-- /eco-beta -->
+
+    <!-- ================= TEST TAB ================= -->
+    <div class="eco-panel" id="eco-test">
+      <div class="section">
+        <div class="section-head"><h2>Platform Checks</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Checks every public page loads, every key database table and function responds, and the switches read correctly. Read-only: nothing is written.</p>
+        <div class="panel" style="padding:20px;">
+          <button class="btn gold" id="runChecksBtn">Run all checks</button>
+          <span id="checkSummary" style="margin-left:14px;font-size:13px;color:var(--muted);"></span>
+        </div>
+        <div class="panel" style="margin-top:14px;">
+          <table>
+            <thead><tr><th>Check</th><th>Area</th><th>Result</th><th>Detail</th></tr></thead>
+            <tbody id="checkResults"><tr class="empty-row"><td colspan="4">Press "Run all checks".</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-test -->
 
     <!-- ================= FOUNDER TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-founder">
@@ -2674,6 +2722,7 @@ let growthLoaded = false;
 let founderTabLoaded = false;
 let newsLoaded = false;
 let officesLoaded = false;
+let betaTabLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -2695,6 +2744,8 @@ function setupEcosystemTabs(){
       }
       if (target === "news" && !newsLoaded){ newsLoaded = true; await loadNewsTab(); }
       if (target === "offices" && !officesLoaded){ officesLoaded = true; await loadOfficesTab(); }
+      if (target === "beta" && !betaTabLoaded){ betaTabLoaded = true; await loadBetaTab(); }
+      if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
         await Promise.all([
@@ -2792,6 +2843,124 @@ async function saveRateLimit(action){
 
   showToast(`${action} updated \u2014 live immediately, no redeploy needed`);
   await logAction("update_rate_limit", "rate_limit_configs", `${action}: ${max_requests}/${window_seconds}s`);
+}
+
+// ==========================================================
+// BETA TAB
+// ==========================================================
+async function loadBetaTab(){
+  document.getElementById("betaBadgeToggle").addEventListener("click", () => toggleBetaFlag("beta_badge"));
+  document.getElementById("betaModeToggle").addEventListener("click", () => toggleBetaFlag("beta_mode"));
+  document.getElementById("betaStartSave").addEventListener("click", saveBetaStart);
+  await refreshBetaTab();
+}
+
+async function refreshBetaTab(){
+  const { data: flags } = await supabaseClient.from("feature_flags").select("key, enabled").in("key", ["beta_badge", "beta_mode"]);
+  const state = Object.fromEntries((flags || []).map(f => [f.key, f.enabled === true]));
+  paintBetaToggle("betaBadgeToggle", state.beta_badge);
+  paintBetaToggle("betaModeToggle", state.beta_mode);
+
+  const { data: meta } = await supabaseClient.from("beta_metadata").select("beta_started_at").eq("id", 1).maybeSingle();
+  const startDate = meta?.beta_started_at ? meta.beta_started_at.slice(0, 10) : "";
+  document.getElementById("betaStartInput").value = startDate;
+
+  const { count: signups } = await supabaseClient.from("profiles").select("*", { count: "exact", head: true });
+  const { count: openReports } = await supabaseClient.from("content_reports").select("*", { count: "exact", head: true }).eq("status", "open");
+  const days = startDate ? Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000) : null;
+
+  document.getElementById("betaStats").innerHTML = [
+    ["Days in beta", days === null ? "Not set" : days],
+    ["Accounts", signups ?? 0],
+    ["Open reports", openReports ?? 0],
+  ].map(([label, value]) => `
+    <div class="stat-card"><div class="stat-value">${escapeHtml(String(value))}</div><div class="stat-label">${label}</div></div>`).join("");
+}
+
+function paintBetaToggle(id, isOn){
+  const el = document.getElementById(id);
+  el.textContent = isOn ? "On — click to turn off" : "Off — click to turn on";
+  el.style.borderColor = isOn ? "var(--gold)" : "var(--border)";
+  el.style.color = isOn ? "var(--gold)" : "var(--muted)";
+}
+
+async function toggleBetaFlag(key){
+  const { data: current } = await supabaseClient.from("feature_flags").select("enabled").eq("key", key).maybeSingle();
+  const next = !(current && current.enabled === true);
+  const { error } = await supabaseClient.from("feature_flags").update({ enabled: next }).eq("key", key);
+  if (error){ console.error(error); showToast("Couldn't change " + key); return; }
+  await logAction(next ? "enable_flag" : "disable_flag", "feature_flags", key);
+  showToast(`${key} ${next ? "on" : "off"}`);
+  await refreshBetaTab();
+}
+
+async function saveBetaStart(){
+  const value = document.getElementById("betaStartInput").value;
+  if (!value){ showToast("Pick a date first"); return; }
+  const { error } = await supabaseClient.from("beta_metadata").update({ beta_started_at: new Date(value).toISOString() }).eq("id", 1);
+  if (error){ console.error(error); showToast("Couldn't save the date"); return; }
+  await logAction("set_beta_start", "beta_metadata", value);
+  showToast("Beta start date saved");
+  await refreshBetaTab();
+}
+
+// ==========================================================
+// TEST TAB: read-only platform checks
+// ==========================================================
+const CHECK_PAGES = [
+  ["Homepage", "/"], ["Studios", "/studios/index.html"], ["Music", "/music/index.html"],
+  ["Records", "/music/records.html"], ["Live", "/live/live.html"], ["Watch", "/watch/index.html"],
+  ["Creators", "/creators/index.html"], ["Offices", "/offices.html"], ["News", "/news.html"],
+  ["What's next", "/whats-next.html"], ["DevForum", "/devforum.html"], ["Sign in", "/login.html"],
+];
+const CHECK_TABLES = [
+  "profiles", "studios_projects", "studios_films", "music_artists", "music_tracks",
+  "social_posts", "social_comments", "direct_messages", "feature_flags", "live_streams",
+  "live_owners", "staff_offices", "rate_limit_configs", "platform_announcements",
+  "content_reports", "live_relvbits", "live_creator_earnings",
+];
+const CHECK_FUNCTIONS = [
+  "get_system_health", "get_live_staff", "get_ecosystem_finance_summary",
+  "get_investment_summary", "get_trending_posts", "get_trending_creator_posts", "get_ad_to_serve",
+];
+
+async function runAllChecks(){
+  const btn = document.getElementById("runChecksBtn");
+  btn.disabled = true;
+  const rows = [];
+
+  for (const [name, path] of CHECK_PAGES){
+    try {
+      const res = await fetch(path, { cache: "no-store" });
+      rows.push([name, "Page", res.ok, `HTTP ${res.status}`]);
+    } catch (err){
+      rows.push([name, "Page", false, "Couldn't load"]);
+    }
+  }
+
+  for (const table of CHECK_TABLES){
+    const { error } = await supabaseClient.from(table).select("*", { count: "exact", head: true });
+    rows.push([table, "Table", !error, error ? error.message : "Responds"]);
+  }
+
+  for (const fn of CHECK_FUNCTIONS){
+    const { error } = await supabaseClient.rpc(fn);
+    rows.push([fn, "Function", !error, error ? error.message : "Responds"]);
+  }
+
+  const { data: flags, error: flagError } = await supabaseClient.from("feature_flags").select("key");
+  rows.push(["Feature switches", "Switches", !flagError && (flags || []).length >= 20, flagError ? flagError.message : `${(flags || []).length} switches found`]);
+
+  const failed = rows.filter(r => !r[2]).length;
+  document.getElementById("checkSummary").textContent = `${rows.length - failed} passed, ${failed} failed`;
+  document.getElementById("checkResults").innerHTML = rows.map(([name, area, ok, detail]) => `
+    <tr>
+      <td>${escapeHtml(name)}</td>
+      <td>${area}</td>
+      <td><span class="pill ${ok ? "ok" : "banned"}">${ok ? "Pass" : "Fail"}</span></td>
+      <td style="font-size:12px;color:var(--muted);">${escapeHtml(detail)}</td>
+    </tr>`).join("");
+  btn.disabled = false;
 }
 
 async function loadBetaDashboard(){
@@ -4150,5 +4319,6 @@ async function globalRevoke(userId, email){
 
 gate();
 </script>
+<script src="../beta-toolkit.js"></script>
 </body>
 </html>
