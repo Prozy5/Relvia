@@ -683,7 +683,7 @@ async function loadFeed(){
   let posts, error;
 
   if (activeFeedMode === "discover"){
-    const { data: trending } = await supabaseClient.rpc("get_trending_posts", { days_back: 7, post_limit: 20 });
+    const { data: trending } = await supabaseClient.rpc("get_trending_creator_posts", { days_back: 7, post_limit: 20 });
     const trendingIds = (trending || []).map(t => t.post_id);
     if (trendingIds.length === 0){
       container.innerHTML = `<div class="empty-state"><h4>Nothing trending yet</h4><p>Check back once there's more activity.</p></div>`;
