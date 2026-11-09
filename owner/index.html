@@ -204,6 +204,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="campus">Relvia Campus</button>
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
+      <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
       <button class="eco-tab" data-eco-tab="news">News</button>
       <button class="eco-tab" data-eco-tab="offices">Offices</button>
@@ -768,6 +769,41 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div><!-- /eco-offices -->
 
+    <!-- ================= RELVBOT TAB ================= -->
+    <div class="eco-panel" id="eco-relvbot">
+      <div class="section">
+        <div class="section-head"><h2>RelvBOT</h2><button class="btn sm" id="relvbotRefresh" type="button">Refresh</button></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Automations that keep the site tidy and tell you when something needs you. Each one runs on its own schedule. Turn any of them off, change how often it runs, or run it right now.</p>
+
+        <div class="panel" style="padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;font-size:16px;" id="relvbotStatusTitle">Loading...</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:4px;" id="relvbotStatusSub"></div>
+          </div>
+          <button class="btn" id="relvbotMasterBtn" type="button">...</button>
+        </div>
+
+        <div class="stats-row" id="relvbotStats" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;"></div>
+
+        <div class="panel">
+          <table>
+            <thead><tr><th>Automation</th><th>Runs every</th><th>Last result</th><th>Actions</th></tr></thead>
+            <tbody id="relvbotJobs"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Recent activity</h2></div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>When</th><th>Automation</th><th>Result</th><th>Details</th></tr></thead>
+            <tbody id="relvbotRuns"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-relvbot -->
+
     <!-- ================= BETA TAB ================= -->
     <div class="eco-panel" id="eco-beta">
       <div class="section">
@@ -792,7 +828,7 @@ tr:last-child td{ border-bottom:none; }
       </div>
       <div class="section">
         <div class="section-head"><h2>Beta at a glance</h2></div>
-        <div class="stat-grid" id="betaStats"></div>
+        <div class="stats-row" id="betaStats" style="grid-template-columns:repeat(3,1fr);"></div>
       </div>
     </div><!-- /eco-beta -->
 
@@ -3111,6 +3147,7 @@ let founderTabLoaded = false;
 let newsLoaded = false;
 let officesLoaded = false;
 let betaTabLoaded = false;
+let relvbotLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -3134,6 +3171,7 @@ function setupEcosystemTabs(){
       if (target === "news" && !newsLoaded){ newsLoaded = true; await loadNewsTab(); }
       if (target === "offices" && !officesLoaded){ officesLoaded = true; await loadOfficesTab(); }
       if (target === "beta" && !betaTabLoaded){ betaTabLoaded = true; await loadBetaTab(); }
+      if (target === "relvbot" && !relvbotLoaded){ relvbotLoaded = true; await loadRelvbotTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
@@ -3235,6 +3273,121 @@ async function saveRateLimit(action){
 }
 
 // ==========================================================
+// RELVBOT: automations control center
+// ==========================================================
+const RELVBOT_INTERVALS = [[5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "Hour"], [360, "6 hours"], [1440, "Day"]];
+let relvbotJobsCache = [];
+let relvbotMasterOn = true;
+
+function relvbotAgo(iso){
+  if (!iso) return "Never";
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+async function loadRelvbotTab(){
+  document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbot);
+  document.getElementById("relvbotMasterBtn").addEventListener("click", toggleRelvbotMaster);
+  await renderRelvbot();
+}
+
+async function renderRelvbot(){
+  const [jobsRes, runsRes, flagRes] = await Promise.all([
+    supabaseClient.from("relvbot_jobs").select("*").order("name"),
+    supabaseClient.from("relvbot_runs").select("*").order("started_at", { ascending:false }).limit(40),
+    supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbot_enabled").maybeSingle(),
+  ]);
+
+  const jobsBody = document.getElementById("relvbotJobs");
+  if (jobsRes.error){
+    console.error(jobsRes.error);
+    document.getElementById("relvbotStatusTitle").textContent = "RelvBOT isn't set up yet";
+    document.getElementById("relvbotStatusSub").textContent = "Run relvia-relvbot-schema.sql in Supabase, then refresh.";
+    jobsBody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load automations: ${escapeHtml(jobsRes.error.message || "")}</td></tr>`;
+    return;
+  }
+
+  relvbotJobsCache = jobsRes.data || [];
+  const runs = runsRes.data || [];
+  relvbotMasterOn = !(flagRes.data && flagRes.data.enabled === false);
+
+  const lastTick = relvbotJobsCache.map(j => j.last_run_at).filter(Boolean).sort().pop();
+  document.getElementById("relvbotStatusTitle").innerHTML =
+    `<span class="pill ${relvbotMasterOn ? "ok" : "banned"}">${relvbotMasterOn ? "Running" : "Paused"}</span> &nbsp;RelvBOT is ${relvbotMasterOn ? "running" : "paused"}`;
+  document.getElementById("relvbotStatusSub").textContent = lastTick ? `Last automation ran ${relvbotAgo(lastTick)}. It checks for work every 5 minutes.` : "No automation has run yet. It checks for work every 5 minutes.";
+  const masterBtn = document.getElementById("relvbotMasterBtn");
+  masterBtn.textContent = relvbotMasterOn ? "Pause all" : "Resume all";
+  masterBtn.className = relvbotMasterOn ? "btn danger" : "btn gold";
+
+  const dayAgo = Date.now() - 86400000;
+  const recent = runs.filter(r => new Date(r.started_at).getTime() > dayAgo);
+  document.getElementById("relvbotStats").innerHTML = [
+    [relvbotJobsCache.filter(j => j.enabled).length + " / " + relvbotJobsCache.length, "Automations on"],
+    [recent.length, "Runs in the last 24 hours"],
+    [recent.filter(r => r.status === "error").length, "Failures in the last 24 hours"],
+  ].map(([value, label]) => `<div class="stat-card"><div class="num">${escapeHtml(String(value))}</div><div class="label">${label}</div></div>`).join("");
+
+  jobsBody.innerHTML = "";
+  relvbotJobsCache.forEach(job => {
+    const statusClass = job.last_status === "error" ? "banned" : job.last_status === "ok" ? "ok" : "temp";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><div style="font-weight:700;">${escapeHtml(job.name)}</div><div style="font-size:12px;color:var(--muted);max-width:340px;">${escapeHtml(job.description)}</div></td>
+      <td><select data-interval>${RELVBOT_INTERVALS.map(([m, l]) => `<option value="${m}" ${m === job.interval_minutes ? "selected" : ""}>${l}</option>`).join("")}${RELVBOT_INTERVALS.some(([m]) => m === job.interval_minutes) ? "" : `<option value="${job.interval_minutes}" selected>${job.interval_minutes} min</option>`}</select></td>
+      <td>
+        ${job.last_status ? `<span class="pill ${statusClass}">${escapeHtml(job.last_status)}</span>` : `<span class="pill temp">not run yet</span>`}
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(job.last_message || "")}${job.last_run_at ? ` · ${relvbotAgo(job.last_run_at)}` : ""}</div>
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="btn sm ${job.enabled ? "" : "gold"}" data-toggle>${job.enabled ? "Turn off" : "Turn on"}</button>
+        <button class="btn sm" data-run>Run now</button>
+      </td>`;
+    row.querySelector("[data-interval]").addEventListener("change", e => saveRelvbotJob(job.key, job.enabled, Number(e.target.value)));
+    row.querySelector("[data-toggle]").addEventListener("click", () => saveRelvbotJob(job.key, !job.enabled, job.interval_minutes));
+    row.querySelector("[data-run]").addEventListener("click", e => runRelvbotNow(job.key, e.currentTarget));
+    jobsBody.appendChild(row);
+  });
+
+  const nameByKey = Object.fromEntries(relvbotJobsCache.map(j => [j.key, j.name]));
+  const runsBody = document.getElementById("relvbotRuns");
+  runsBody.innerHTML = runs.length ? runs.map(r => `
+    <tr>
+      <td>${relvbotAgo(r.started_at)}${r.manual ? ' <span style="color:var(--muted);font-size:11px;">(by you)</span>' : ""}</td>
+      <td>${escapeHtml(nameByKey[r.job_key] || r.job_key)}</td>
+      <td><span class="pill ${r.status === "error" ? "banned" : "ok"}">${escapeHtml(r.status)}</span></td>
+      <td style="font-size:12.5px;color:var(--muted);">${escapeHtml(r.message || "")}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="4">Nothing has run yet.</td></tr>`;
+}
+
+async function saveRelvbotJob(key, enabled, interval){
+  const { error } = await supabaseClient.rpc("relvbot_set_job", { p_key: key, p_enabled: enabled, p_interval: interval });
+  if (error){ console.error(error); showToast("Couldn't save: " + (error.message || "unknown error")); return; }
+  await logAction(enabled ? "relvbot_enable" : "relvbot_disable", "relvbot", key);
+  showToast("Saved");
+  await renderRelvbot();
+}
+
+async function runRelvbotNow(key, btn){
+  btn.disabled = true; btn.textContent = "Running...";
+  const { data, error } = await supabaseClient.rpc("relvbot_run_now", { p_key: key });
+  if (error){ console.error(error); showToast("Couldn't run it: " + (error.message || "unknown error")); }
+  else { showToast(data || "Done"); await logAction("relvbot_run", "relvbot", key); }
+  await renderRelvbot();
+}
+
+async function toggleRelvbotMaster(){
+  const next = !relvbotMasterOn;
+  const { error } = await supabaseClient.from("feature_flags").update({ enabled: next }).eq("key", "relvbot_enabled");
+  if (error){ console.error(error); showToast("Couldn't change it: " + (error.message || "unknown error")); return; }
+  await logAction(next ? "relvbot_resume_all" : "relvbot_pause_all", "relvbot", "relvbot_enabled");
+  showToast(next ? "RelvBOT resumed" : "RelvBOT paused");
+  await renderRelvbot();
+}
+
+// ==========================================================
 // BETA TAB
 // ==========================================================
 async function loadBetaTab(){
@@ -3263,7 +3416,7 @@ async function refreshBetaTab(){
     ["Accounts", signups ?? 0],
     ["Open reports", openReports ?? 0],
   ].map(([label, value]) => `
-    <div class="stat-card"><div class="stat-value">${escapeHtml(String(value))}</div><div class="stat-label">${label}</div></div>`).join("");
+    <div class="stat-card"><div class="num">${escapeHtml(String(value))}</div><div class="label">${label}</div></div>`).join("");
 }
 
 function paintBetaToggle(id, isOn){
