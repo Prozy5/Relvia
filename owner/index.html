@@ -3309,6 +3309,13 @@ async function saveRateLimit(action){
 // RELVBOT: automations control center
 // ==========================================================
 const RELVBOT_INTERVALS = [[5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "Hour"], [360, "6 hours"], [1440, "Day"], [10080, "Week"]];
+// Automations that post publicly or message real people ask before they run on demand.
+const RELVBOT_CONFIRM = {
+  weekly_summary_post: "This posts publicly in the RelviaCreators feed from the Relvia Entertainment account. Post it now?",
+  announce_releases: "This posts \"New on Relvia\" in the RelviaCreators feed for any new release. Run it now?",
+  nudge_new_creators: "This sends a real message to every account that joined 3 to 30 days ago and has never posted. Each person only ever gets it once. Send now?",
+  payout_reminders: "This sends a real message to every creator who has tips waiting but has not finished payout setup. Send now?",
+};
 let relvbotJobsCache = [];
 let relvbotMasterOn = true;
 
@@ -3411,7 +3418,7 @@ async function saveRelvbotJob(key, enabled, interval){
 }
 
 async function runRelvbotNow(key, btn){
-  if (key === "weekly_summary_post" && !confirm("This posts publicly in the RelviaCreators feed from the Relvia Entertainment account. Post it now?")) return;
+  if (RELVBOT_CONFIRM[key] && !confirm(RELVBOT_CONFIRM[key])) return;
   btn.disabled = true; btn.textContent = "Running...";
   const { data, error } = await supabaseClient.rpc("relvbot_run_now", { p_key: key });
   if (error){ console.error(error); showToast("Couldn't run it: " + (error.message || "unknown error")); }
