@@ -245,6 +245,11 @@ body{
 .suggest-name-row{ display:flex; align-items:center; gap:6px; min-width:0; }
 .conv-name-wrap{ display:flex; align-items:center; gap:6px; min-width:0; }
 #storyViewerName{ display:inline-flex; align-items:center; gap:6px; }
+
+/* sponsored post link buttons */
+.sponsor-links{ display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 12px; }
+.sponsor-links a{ font-size:12.5px; font-weight:700; color:var(--gold); border:1px solid rgba(224,177,88,.45); padding:7px 14px; border-radius:999px; transition:background .2s, color .2s; }
+.sponsor-links a:hover{ background:var(--gold); color:#000; }
 </style>
 </head>
 <body>
@@ -434,6 +439,15 @@ function badgesHtml(userId){
   const label = badgeCache[userId];
   if (!label) return "";
   return `<span class="verified-badge" title="Verified">✓</span><span class="role-badge">${escapeHtml(label)}</span>`;
+}
+
+function sponsorLinksHtml(post){
+  if (!post.is_sponsored) return "";
+  let links = Array.isArray(post.sponsor_links) ? post.sponsor_links : [];
+  if (!links.length && post.sponsor_click_url) links = [{ label: "Learn more", url: post.sponsor_click_url }];
+  links = links.filter(l => l && /^https?:\/\//i.test(l.url || "")).slice(0, 3);
+  if (!links.length) return "";
+  return `<div class="sponsor-links">${links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer sponsored">${escapeHtml(l.label || "Learn more")} →</a>`).join("")}</div>`;
 }
 
 function avatarInnerHTML(url, name){
@@ -879,8 +893,8 @@ async function loadFeed(){
         ${!isMe && !post.is_sponsored ? `<button class="follow-btn ${isFollowing ? "following" : ""}" data-follow-user="${post.user_id}">${isFollowing ? "Following" : "Follow"}</button>` : ""}
       </div>
       ${post.caption ? `<div class="post-caption">${linkifyHashtags(post.caption)}</div>` : ""}
-      ${post.is_sponsored && post.sponsor_click_url ? `<a href="${post.sponsor_click_url}" target="_blank" style="display:inline-block;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:10px;">Learn more →</a>` : ""}
       <div class="post-media" id="media-${post.id}"></div>
+      ${sponsorLinksHtml(post)}
       ${pollByPost[post.id] ? renderPollHtml(pollByPost[post.id], myVoteByPoll[pollByPost[post.id].id]) : ""}
       <div class="post-actions">
         <div class="reaction-btn-wrap">
