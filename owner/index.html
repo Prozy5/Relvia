@@ -2528,7 +2528,7 @@ async function generateSponsoredDraft(){
     try { result = await response.json(); } catch (parseErr){ result = { error: `The draft service returned ${response.status}` }; }
 
     if (!response.ok || !result.draft){
-      showToast(result.error || "Couldn't generate a draft");
+      showToast((result.error || "Couldn't generate a draft") + (result.detail ? " " + result.detail : ""));
       btn.disabled = false; btn.textContent = "Generate draft";
       return;
     }
