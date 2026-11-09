@@ -645,7 +645,22 @@ tr:last-child td{ border-bottom:none; }
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
           <input type="text" id="promoAdvertiserName" placeholder="Business/advertiser name" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
           <input type="number" id="promoAmountPaid" placeholder="Amount paid ($)" min="0" step="1" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-          <input type="text" id="promoClickUrl" placeholder="Click-through URL (optional)" style="flex:1;min-width:180px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Links (up to 3, each one becomes a button on the post)</label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;"><input type="text" id="promoLinkLabel1" value="Learn more" placeholder="Button text" maxlength="24" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"><input type="text" id="promoLinkUrl1" placeholder="https://their-website.com" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+            <div style="display:flex;gap:8px;"><input type="text" id="promoLinkLabel2" placeholder="Button text (e.g. Instagram)" maxlength="24" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"><input type="text" id="promoLinkUrl2" placeholder="https://" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+            <div style="display:flex;gap:8px;"><input type="text" id="promoLinkLabel3" placeholder="Button text (e.g. Shop)" maxlength="24" style="width:150px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"><input type="text" id="promoLinkUrl3" placeholder="https://" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Pictures (up to 4, uploaded from your computer)</label>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn sm" id="promoAddImagesBtn" type="button">Add pictures</button>
+            <input type="file" id="promoImageInput" accept="image/*" multiple style="display:none;">
+            <div id="promoImageThumbs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+          </div>
         </div>
         <textarea id="promoBrief" placeholder="What should the post say? Describe the business, the offer, the vibe — a sentence or two." style="width:100%;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
         <div style="display:flex;gap:10px;">
@@ -654,6 +669,8 @@ tr:last-child td{ border-bottom:none; }
         <div id="draftPreviewBlock" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
           <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Final post text (edit freely before publishing)</label>
           <textarea id="promoFinalCaption" style="width:100%;min-height:80px;background:var(--surface-light);border:1px solid var(--gold-end);border-radius:10px;padding:10px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+          <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;">Preview of how it will look in the feed</label>
+          <div id="promoPreview" style="border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;background:var(--surface-light);"></div>
           <button class="btn gold" id="publishPromoBtn">Publish to RelviaCreators</button>
         </div>
       </div>
@@ -674,18 +691,16 @@ tr:last-child td{ border-bottom:none; }
       </p>
 
       <div class="panel" style="padding:18px;margin-bottom:20px;">
+        <h4 style="margin-bottom:4px;font-size:15px;font-family:var(--font-display);">✦ Jarvis, find partners</h4>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">Say who you want to find in plain words. Jarvis searches the web, rates each business, suggests how to work with them, finds public contact details, and writes the outreach for you to send.</p>
         <div style="display:flex;gap:10px;">
-          <input type="text" id="prospectSearchQuery" placeholder="e.g. energy drink brands that sponsor streamers, local coffee shops in Charlotte NC..." style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
-          <button class="btn gold" id="runProspectSearchBtn">Search</button>
+          <input type="text" id="prospectSearchQuery" placeholder="e.g. clothing brands in Raleigh that sponsor student creators" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+          <button class="btn gold" id="runProspectSearchBtn">Find</button>
         </div>
+        <div id="prospectChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;"></div>
+        <div id="prospectStatus" style="font-size:12.5px;color:var(--muted);margin-top:10px;min-height:16px;"></div>
       </div>
-
-      <div class="panel">
-        <table>
-          <thead><tr><th>Business</th><th>Why</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="prospectsTableBody"><tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr></tbody>
-        </table>
-      </div>
+      <div id="prospectsList"><div class="panel" style="padding:24px;color:var(--muted);font-size:13px;text-align:center;">No leads yet. Ask Jarvis above.</div></div>
     </div>
     </div><!-- /eco-growth -->
 
@@ -1172,6 +1187,24 @@ tr:last-child td{ border-bottom:none; }
     <div class="modal-close-row">
       <button class="btn" id="closeManageModal">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- OUTREACH MODAL -->
+<div class="modal-backdrop" id="outreachModal">
+  <div class="modal" style="width:640px;">
+    <h3 id="outreachModalName">Outreach</h3>
+    <div class="modal-sub" id="outreachNote">Nothing is sent from here. This is a draft for you to copy or open in your email.</div>
+    <input type="text" id="outreachSubject" placeholder="Subject" style="width:100%;margin-bottom:10px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+    <textarea id="outreachBody" style="width:100%;min-height:260px;line-height:1.6;resize:vertical;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn gold" id="outreachCopy" type="button">Copy</button>
+      <button class="btn" id="outreachEmailBtn" type="button" style="display:none;">Open in email</button>
+      <button class="btn" id="outreachSave" type="button">Save edits</button>
+      <button class="btn" id="outreachRegenerate" type="button">Write a new one</button>
+      <button class="btn" id="outreachContacted" type="button">Mark as contacted</button>
+    </div>
+    <div class="modal-close-row"><button class="btn" id="outreachClose" type="button">Close</button></div>
   </div>
 </div>
 
@@ -2389,6 +2422,7 @@ function wireGrowthButtons(){
   bindOnce("generateDraftBtn", generateSponsoredDraft);
   bindOnce("publishPromoBtn", publishSponsoredPost);
   bindOnce("runProspectSearchBtn", runProspectSearch);
+  wireGrowthExtras();
 }
 
 async function loadAdsSection(){
@@ -2508,7 +2542,9 @@ async function generateSponsoredDraft(){
   const advertiserName = document.getElementById("promoAdvertiserName").value.trim();
   const brief = document.getElementById("promoBrief").value.trim();
   const amountDollars = parseFloat(document.getElementById("promoAmountPaid").value) || 0;
-  const clickUrl = document.getElementById("promoClickUrl").value.trim() || null;
+  const links = collectPromoLinks(true);
+  if (links === null) return;
+  const clickUrl = links[0] ? links[0].url : null;
 
   if (!advertiserName || !brief){ showToast("Advertiser name and a brief are required"); return; }
 
@@ -2536,7 +2572,7 @@ async function generateSponsoredDraft(){
     const { data: newRequest, error } = await supabaseClient
       .from("sponsored_post_requests")
       .insert({
-        advertiser_name: advertiserName, brief, click_url: clickUrl,
+        advertiser_name: advertiserName, brief, click_url: clickUrl, links,
         amount_paid_cents: Math.round(amountDollars * 100),
         ai_generated_draft: result.draft, final_caption: result.draft,
         status: "draft", created_by: currentUser.id,
@@ -2548,6 +2584,7 @@ async function generateSponsoredDraft(){
     currentDraftRequestId = newRequest.id;
     document.getElementById("promoFinalCaption").value = result.draft;
     document.getElementById("draftPreviewBlock").style.display = "block";
+    renderPromoPreview();
     showToast("Draft ready — review and edit before publishing");
   } catch (err){
     console.error(err);
@@ -2557,137 +2594,477 @@ async function generateSponsoredDraft(){
   btn.disabled = false; btn.textContent = "Generate draft";
 }
 
+// ---------- Promotions: pictures, links, and a live preview ----------
+let promoImages = [];
+const PROMO_MAX_IMAGES = 4;
+const PROMO_BUCKET = "creators-media";
+
+function normalizeUrl(v){
+  v = (v || "").trim();
+  if (!v) return null;
+  if (!/^https?:\/\//i.test(v)) v = "https://" + v;
+  try {
+    const u = new URL(v);
+    return /^https?:$/.test(u.protocol) && u.hostname.includes(".") ? u.toString() : null;
+  } catch (e){ return null; }
+}
+
+// Returns the filled-in links. With strict = true, a link that isn't a web address cancels with a message (returns null).
+function collectPromoLinks(strict){
+  const out = [];
+  for (let i = 1; i <= 3; i++){
+    const raw = document.getElementById(`promoLinkUrl${i}`).value.trim();
+    if (!raw) continue;
+    const url = normalizeUrl(raw);
+    if (!url){
+      if (strict){ showToast(`Link ${i} doesn't look like a web address`); return null; }
+      continue;
+    }
+    const label = (document.getElementById(`promoLinkLabel${i}`).value.trim() || "Learn more").slice(0, 24);
+    out.push({ label, url });
+  }
+  return out;
+}
+
+function resizePromoImage(file, maxEdge){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#0f0b08"; ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("Couldn't process that picture")), "image/jpeg", 0.86);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That file isn't a picture we can read. Try a JPG or PNG.")); };
+    img.src = url;
+  });
+}
+
+async function uploadPromoImage(file){
+  if (file.size > 15 * 1024 * 1024) throw new Error("A picture is over 15 MB. Try a smaller one.");
+  const blob = await resizePromoImage(file, 1600);
+  const path = `${currentUser.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const { error } = await supabaseClient.storage.from(PROMO_BUCKET).upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+  if (error) throw new Error(error.message || "Upload failed");
+  return supabaseClient.storage.from(PROMO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+function renderPromoThumbs(){
+  const box = document.getElementById("promoImageThumbs");
+  box.innerHTML = "";
+  promoImages.forEach((file, i) => {
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--border);";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+    const x = document.createElement("button");
+    x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Remove picture");
+    x.style.cssText = "position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:14px;line-height:1;";
+    x.addEventListener("click", () => { promoImages.splice(i, 1); renderPromoThumbs(); });
+    wrap.append(img, x);
+    box.appendChild(wrap);
+  });
+  document.getElementById("promoAddImagesBtn").textContent = promoImages.length ? `Add more (${promoImages.length}/${PROMO_MAX_IMAGES})` : "Add pictures";
+  renderPromoPreview();
+}
+
+function renderPromoPreview(){
+  const el = document.getElementById("promoPreview");
+  if (!el) return;
+  const caption = document.getElementById("promoFinalCaption").value;
+  const links = collectPromoLinks(false);
+  const imgs = promoImages.map(f => URL.createObjectURL(f));
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-weight:700;font-size:13.5px;">Relvia Promotions</span>
+      <span style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold-end);padding:2px 8px;border-radius:999px;">SPONSORED</span>
+    </div>
+    <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;margin-bottom:10px;">${caption.trim() ? escapeHtml(caption) : '<span style="color:var(--muted);">Your post text shows here.</span>'}</div>
+    ${imgs.map(u => `<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:8px;">`).join("")}
+    ${links.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">${links.map(l => `<span style="font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold-end);padding:6px 12px;border-radius:999px;">${escapeHtml(l.label)} →</span>`).join("")}</div>` : ""}`;
+}
+
+function clearPromoForm(){
+  ["promoAdvertiserName", "promoAmountPaid", "promoBrief", "promoLinkUrl2", "promoLinkLabel2", "promoLinkUrl3", "promoLinkLabel3", "promoLinkUrl1"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("promoLinkLabel1").value = "Learn more";
+  promoImages = [];
+  renderPromoThumbs();
+  document.getElementById("draftPreviewBlock").style.display = "none";
+}
+
 async function publishSponsoredPost(){
   if (!currentDraftRequestId){ showToast("Generate a draft first"); return; }
 
   const finalCaption = document.getElementById("promoFinalCaption").value.trim();
   const advertiserName = document.getElementById("promoAdvertiserName").value.trim();
-  const clickUrl = document.getElementById("promoClickUrl").value.trim() || null;
+  const links = collectPromoLinks(true);
+  if (links === null) return;
+  const clickUrl = links[0] ? links[0].url : null;
 
   if (!finalCaption){ showToast("Post text can't be empty"); return; }
 
   const btn = document.getElementById("publishPromoBtn");
-  btn.disabled = true; btn.textContent = "Publishing...";
+  const resetBtn = () => { btn.disabled = false; btn.textContent = "Publish to RelviaCreators"; };
+  btn.disabled = true;
 
-  const { data: newPost, error: postError } = await supabaseClient
-    .from("social_posts")
-    .insert({
-      user_id: RELVIA_PROMOTIONS_BOT_ID, caption: finalCaption,
-      is_sponsored: true, sponsor_click_url: clickUrl, sponsor_advertiser_name: advertiserName,
-    })
-    .select().single();
+  try {
+    const imageUrls = [];
+    for (let i = 0; i < promoImages.length; i++){
+      btn.textContent = `Uploading picture ${i + 1} of ${promoImages.length}...`;
+      imageUrls.push(await uploadPromoImage(promoImages[i]));
+    }
 
-  if (postError){ console.error(postError); showToast("Couldn't publish: " + (postError.message || "unknown error")); btn.disabled = false; btn.textContent = "Publish to RelviaCreators"; return; }
+    btn.textContent = "Publishing...";
+    const { data: newPost, error: postError } = await supabaseClient
+      .from("social_posts")
+      .insert({
+        user_id: RELVIA_PROMOTIONS_BOT_ID, caption: finalCaption,
+        is_sponsored: true, sponsor_click_url: clickUrl, sponsor_advertiser_name: advertiserName,
+        sponsor_links: links,
+      })
+      .select().single();
+    if (postError) throw postError;
 
-  await supabaseClient
-    .from("sponsored_post_requests")
-    .update({ final_caption: finalCaption, status: "published", published_post_id: newPost.id, published_at: new Date().toISOString() })
-    .eq("id", currentDraftRequestId);
+    if (imageUrls.length){
+      const { error: mediaError } = await supabaseClient.from("social_post_media").insert(
+        imageUrls.map((u, i) => ({ post_id: newPost.id, media_type: "image", storage_path: u, position: i }))
+      );
+      if (mediaError){ console.error(mediaError); showToast("Published, but the pictures couldn't be attached: " + (mediaError.message || "unknown error")); }
+    }
 
-  showToast(`Published for ${advertiserName}`);
-  await logAction("publish_sponsored_post", "promotions", advertiserName);
+    await supabaseClient
+      .from("sponsored_post_requests")
+      .update({ final_caption: finalCaption, links, image_urls: imageUrls, status: "published", published_post_id: newPost.id, published_at: new Date().toISOString() })
+      .eq("id", currentDraftRequestId);
 
-  currentDraftRequestId = null;
-  document.getElementById("promoAdvertiserName").value = "";
-  document.getElementById("promoAmountPaid").value = "";
-  document.getElementById("promoClickUrl").value = "";
-  document.getElementById("promoBrief").value = "";
-  document.getElementById("draftPreviewBlock").style.display = "none";
-  btn.disabled = false; btn.textContent = "Publish to RelviaCreators";
+    showToast(`Published for ${advertiserName}`);
+    await logAction("publish_sponsored_post", "promotions", advertiserName);
+    currentDraftRequestId = null;
+    clearPromoForm();
+  } catch (err){
+    console.error(err);
+    showToast("Couldn't publish: " + (err.message || "unknown error"));
+    resetBtn();
+    return;
+  }
 
+  resetBtn();
   await loadPromotionsSection();
 }
 
 // ==========================================================
 // PROSPECTING (lead-finding assistant)
 // ==========================================================
-async function loadProspectsSection(){
-  const { data: leads, error } = await supabaseClient
-    .from("prospect_leads").select("*").order("created_at", { ascending:false });
+// ---------- Prospecting: Jarvis finds partners, digs up contact info, drafts the outreach ----------
+const PROSPECT_IDEAS = [
+  "Local businesses near Raleigh, NC that sponsor student events",
+  "Brands that sponsor streamers and creators",
+  "Music venues and promoters that book student artists",
+  "Colleges and student organizations that host creator events",
+  "Clothing and merch brands that partner with young creators",
+];
+let prospectsCache = {};
+let activeOutreachLeadId = null;
 
-  const tbody = document.getElementById("prospectsTableBody");
-  if (error){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load leads.</td></tr>`; return; }
-  if (!leads || leads.length === 0){ tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No leads yet — run a search above.</td></tr>`; return; }
-
-  tbody.innerHTML = "";
-  leads.forEach(lead => {
-    const statusClass = lead.status === "closed_won" ? "ok" : lead.status === "closed_lost" ? "banned" : lead.status === "new" ? "temp" : "ok";
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${lead.website ? `<a href="${lead.website}" target="_blank" style="color:var(--gold);">${escapeHtml(lead.business_name)}</a>` : escapeHtml(lead.business_name)}</td>
-      <td style="max-width:260px;font-size:12px;color:var(--muted);">${escapeHtml(lead.reasoning || "—")}</td>
-      <td style="font-size:12px;">${escapeHtml(lead.contact_info || "Not found")}</td>
-      <td>
-        <select data-lead-id="${lead.id}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:5px 8px;color:white;font-size:11.5px;">
-          <option value="new" ${lead.status === "new" ? "selected" : ""}>New</option>
-          <option value="contacted" ${lead.status === "contacted" ? "selected" : ""}>Contacted</option>
-          <option value="replied" ${lead.status === "replied" ? "selected" : ""}>Replied</option>
-          <option value="closed_won" ${lead.status === "closed_won" ? "selected" : ""}>Closed — Won</option>
-          <option value="closed_lost" ${lead.status === "closed_lost" ? "selected" : ""}>Closed — Lost</option>
-        </select>
-      </td>
-      <td><button class="btn danger sm" data-remove-lead="${lead.id}">Remove</button></td>`;
-    tbody.appendChild(row);
+function renderProspectChips(){
+  const box = document.getElementById("prospectChips");
+  if (!box || box.dataset.ready) return;
+  box.dataset.ready = "1";
+  PROSPECT_IDEAS.forEach(idea => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.textContent = idea;
+    chip.style.cssText = "font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--surface-light);";
+    chip.addEventListener("mouseenter", () => { chip.style.color = "var(--gold)"; chip.style.borderColor = "var(--gold-end)"; });
+    chip.addEventListener("mouseleave", () => { chip.style.color = "var(--muted)"; chip.style.borderColor = "var(--border)"; });
+    chip.addEventListener("click", () => {
+      const input = document.getElementById("prospectSearchQuery");
+      input.value = idea;
+      input.focus();
+    });
+    box.appendChild(chip);
   });
-
-  tbody.querySelectorAll("select[data-lead-id]").forEach(select => {
-    select.addEventListener("change", () => updateLeadStatus(select.dataset.leadId, select.value));
-  });
-  tbody.querySelectorAll("[data-remove-lead]").forEach(btn => {
-    btn.addEventListener("click", () => removeLead(btn.dataset.removeLead));
-  });
-
 }
 
-async function runProspectSearch(){
-  const query = document.getElementById("prospectSearchQuery").value.trim();
-  if (!query){ showToast("Describe what kind of business you're looking for"); return; }
-
-  const btn = document.getElementById("runProspectSearchBtn");
-  btn.disabled = true; btn.textContent = "Searching...";
-
+async function callProspectFunction(payload){
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const accessToken = sessionData?.session?.access_token;
-
   try {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/find-prospect-leads`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${accessToken}` },
-      body: JSON.stringify({ searchQuery: query }),
+      body: JSON.stringify(payload),
     });
-    const result = await response.json();
-
-    if (!response.ok){
-      showToast((result.error || "Search failed") + (result.detail ? " " + result.detail : ""));
-      btn.disabled = false; btn.textContent = "Search";
-      return;
-    }
-
-    if (!result.leads || result.leads.length === 0){
-      showToast("No businesses found — try a broader or different search");
-      btn.disabled = false; btn.textContent = "Search";
-      return;
-    }
-
-    const rows = result.leads.map(lead => ({
-      business_name: lead.business_name, website: lead.website || null,
-      reasoning: lead.reasoning || null, contact_info: lead.contact_info || null,
-      search_query: query, found_by: currentUser.id,
-    }));
-
-    const { error } = await supabaseClient.from("prospect_leads").insert(rows);
-    if (error){ console.error(error); showToast("Found leads but couldn't save them"); }
-    else showToast(`Found ${result.leads.length} lead(s)`);
-
-    document.getElementById("prospectSearchQuery").value = "";
-    await loadProspectsSection();
+    let data = {};
+    try { data = await response.json(); } catch (e){ data = { error: `The service returned ${response.status}` }; }
+    return { ok: response.ok, data };
   } catch (err){
     console.error(err);
-    showToast("Couldn't reach the search service");
+    return { ok: false, data: { error: "Couldn't reach Jarvis" } };
+  }
+}
+const prospectError = (res, fallback) => (res.data.error || fallback) + (res.data.detail ? " " + res.data.detail : "");
+
+function firstEmail(text){
+  const m = (text || "").match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+  return m ? m[0] : null;
+}
+
+function linkifyContact(text){
+  return escapeHtml(text || "")
+    .replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '<a href="mailto:$1" style="color:var(--gold);">$1</a>')
+    .replace(/(https?:\/\/[^\s<·|,]+)/g, (m) => `<a href="${m}" target="_blank" rel="noopener" style="color:var(--gold);">${m.replace(/^https?:\/\//, "")}</a>`);
+}
+
+async function runProspectSearch(){
+  const input = document.getElementById("prospectSearchQuery");
+  const query = input.value.trim();
+  if (!query){ showToast("Tell Jarvis who you're looking for"); return; }
+
+  const btn = document.getElementById("runProspectSearchBtn");
+  const status = document.getElementById("prospectStatus");
+  btn.disabled = true; btn.textContent = "Searching...";
+  status.textContent = "Searching the web and sizing up the results...";
+
+  const res = await callProspectFunction({ action: "search", searchQuery: query });
+  if (!res.ok){
+    showToast(prospectError(res, "Search failed"));
+    status.textContent = "";
+    btn.disabled = false; btn.textContent = "Find";
+    return;
   }
 
-  btn.disabled = false; btn.textContent = "Search";
+  const leads = res.data.leads || [];
+  const skipped = res.data.skipped || 0;
+  if (leads.length === 0){
+    status.textContent = skipped ? `Everything Jarvis found is already in your list (${skipped} skipped).` : "No new businesses found. Try wording it a different way.";
+    btn.disabled = false; btn.textContent = "Find";
+    return;
+  }
+
+  const rows = leads.map(l => ({
+    business_name: l.business_name, website: l.website || null, category: l.category || null,
+    fit: l.fit || null, reasoning: l.reasoning || null, approach: l.approach || null,
+    contact_info: l.contact_info || null, search_query: query, found_by: currentUser.id,
+  }));
+  const { error } = await supabaseClient.from("prospect_leads").insert(rows);
+  if (error){
+    console.error(error);
+    showToast("Found leads but couldn't save them: " + (error.message || "unknown error"));
+    status.textContent = "";
+    btn.disabled = false; btn.textContent = "Find";
+    return;
+  }
+
+  status.textContent = `Found ${leads.length} new business${leads.length === 1 ? "" : "es"}${skipped ? `, skipped ${skipped} already saved` : ""}.`;
+  input.value = "";
+  await loadProspectsSection();
+  btn.disabled = false; btn.textContent = "Find";
 }
+
+async function loadProspectsSection(){
+  const { data: leads, error } = await supabaseClient
+    .from("prospect_leads").select("*").order("created_at", { ascending: false });
+
+  const list = document.getElementById("prospectsList");
+  const empty = (msg) => { list.innerHTML = `<div class="panel" style="padding:24px;color:var(--muted);font-size:13px;text-align:center;">${msg}</div>`; };
+  if (error){ console.error(error); empty("Couldn't load leads: " + escapeHtml(error.message || "")); return; }
+  if (!leads || leads.length === 0){ empty("No leads yet. Ask Jarvis above."); return; }
+
+  prospectsCache = {};
+  list.innerHTML = "";
+  leads.forEach(lead => {
+    prospectsCache[lead.id] = lead;
+    const fitStyle = lead.fit === "high" ? "background:rgba(143,209,168,.14);color:#8fd1a8;border:1px solid rgba(143,209,168,.4);"
+      : lead.fit === "medium" ? "background:rgba(224,177,88,.12);color:var(--gold);border:1px solid rgba(224,177,88,.4);"
+      : "color:var(--muted);border:1px solid var(--border);";
+    const hasDraft = !!lead.outreach_draft;
+
+    const card = document.createElement("div");
+    card.className = "panel";
+    card.style.cssText = "padding:18px;margin-bottom:12px;";
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start;">
+        <div style="min-width:0;flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-family:var(--font-display);font-size:18px;font-weight:700;">${lead.website ? `<a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" style="color:var(--text);">${escapeHtml(lead.business_name)}</a>` : escapeHtml(lead.business_name)}</span>
+            ${lead.fit ? `<span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;${fitStyle}">${escapeHtml(lead.fit)} fit</span>` : ""}
+            ${lead.category ? `<span style="font-size:11.5px;color:var(--muted);">${escapeHtml(lead.category)}</span>` : ""}
+          </div>
+          ${lead.reasoning ? `<p style="font-size:13px;color:var(--soft);line-height:1.55;margin-bottom:6px;">${escapeHtml(lead.reasoning)}</p>` : ""}
+          ${lead.approach ? `<p style="font-size:12.5px;color:var(--muted);margin-bottom:6px;"><strong style="color:var(--text);font-weight:600;">Approach:</strong> ${escapeHtml(lead.approach)}</p>` : ""}
+          <p style="font-size:12.5px;color:var(--muted);"><strong style="color:var(--text);font-weight:600;">Contact:</strong> ${lead.contact_info ? linkifyContact(lead.contact_info) : "Not found yet"}</p>
+        </div>
+        <select data-lead-id="${lead.id}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:12px;">
+          <option value="new" ${lead.status === "new" ? "selected" : ""}>New</option>
+          <option value="contacted" ${lead.status === "contacted" ? "selected" : ""}>Contacted</option>
+          <option value="replied" ${lead.status === "replied" ? "selected" : ""}>Replied</option>
+          <option value="closed_won" ${lead.status === "closed_won" ? "selected" : ""}>Closed, won</option>
+          <option value="closed_lost" ${lead.status === "closed_lost" ? "selected" : ""}>Closed, lost</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn sm" data-research="${lead.id}" type="button">${lead.contact_info ? "Look for more contact info" : "Find contact info"}</button>
+        <button class="btn gold sm" data-outreach="${lead.id}" type="button">${hasDraft ? "View outreach draft" : "Draft outreach"}</button>
+        <button class="btn danger sm" data-remove-lead="${lead.id}" type="button">Remove</button>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll("select[data-lead-id]").forEach(select => {
+    select.addEventListener("change", () => updateLeadStatus(select.dataset.leadId, select.value));
+  });
+  list.querySelectorAll("[data-remove-lead]").forEach(b => b.addEventListener("click", () => removeLead(b.dataset.removeLead)));
+  list.querySelectorAll("[data-research]").forEach(b => b.addEventListener("click", () => researchLead(b.dataset.research, b)));
+  list.querySelectorAll("[data-outreach]").forEach(b => b.addEventListener("click", () => openOutreach(b.dataset.outreach)));
+}
+
+async function researchLead(leadId, btn){
+  const lead = prospectsCache[leadId];
+  if (!lead) return;
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = "Looking...";
+
+  const res = await callProspectFunction({ action: "research", businessName: lead.business_name, website: lead.website });
+  if (!res.ok){
+    showToast(prospectError(res, "Couldn't look that up"));
+    btn.disabled = false; btn.textContent = original;
+    return;
+  }
+
+  const found = (res.data.contact_info || "").trim();
+  if (!found){
+    showToast("No public contact info turned up. Try the business's website or contact page.");
+    btn.disabled = false; btn.textContent = original;
+    return;
+  }
+
+  // Keep whatever was already known and add the new details.
+  const merged = lead.contact_info && !lead.contact_info.includes(found) ? `${lead.contact_info} · ${found}` : found;
+  const { error } = await supabaseClient.from("prospect_leads")
+    .update({ contact_info: merged, last_researched_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", leadId);
+  if (error){ console.error(error); showToast("Found contact info but couldn't save it: " + (error.message || "")); btn.disabled = false; btn.textContent = original; return; }
+
+  showToast("Contact info found");
+  await loadProspectsSection();
+}
+
+function refreshOutreachEmailBtn(){
+  const lead = prospectsCache[activeOutreachLeadId];
+  document.getElementById("outreachEmailBtn").style.display = lead && firstEmail(lead.contact_info) ? "inline-block" : "none";
+}
+
+async function openOutreach(leadId, forceNew){
+  const lead = prospectsCache[leadId];
+  if (!lead) return;
+  activeOutreachLeadId = leadId;
+
+  const subject = document.getElementById("outreachSubject");
+  const body = document.getElementById("outreachBody");
+  const note = document.getElementById("outreachNote");
+  document.getElementById("outreachModalName").textContent = `Outreach to ${lead.business_name}`;
+  document.getElementById("outreachModal").classList.add("open");
+  refreshOutreachEmailBtn();
+
+  if (lead.outreach_draft && !forceNew){
+    subject.value = lead.outreach_subject || "";
+    body.value = lead.outreach_draft;
+    note.textContent = "Saved draft. Edit it however you like. Nothing is sent from here.";
+    return;
+  }
+
+  subject.value = ""; body.value = "";
+  note.textContent = "Writing a draft in your voice...";
+  body.disabled = true;
+  const res = await callProspectFunction({
+    action: "draft",
+    lead: { business_name: lead.business_name, website: lead.website, reasoning: lead.reasoning, approach: lead.approach, contact_info: lead.contact_info },
+  });
+  body.disabled = false;
+
+  if (!res.ok){ note.textContent = prospectError(res, "Couldn't write a draft"); return; }
+  subject.value = res.data.subject;
+  body.value = res.data.body;
+  note.textContent = "Draft ready. Edit it however you like. Nothing is sent from here.";
+  await saveOutreach(true);
+  await loadProspectsSection();
+}
+
+async function saveOutreach(silent){
+  if (!activeOutreachLeadId) return;
+  const { error } = await supabaseClient.from("prospect_leads").update({
+    outreach_subject: document.getElementById("outreachSubject").value.trim(),
+    outreach_draft: document.getElementById("outreachBody").value.trim(),
+    updated_at: new Date().toISOString(),
+  }).eq("id", activeOutreachLeadId);
+  if (error){ console.error(error); showToast("Couldn't save the draft: " + (error.message || "")); return; }
+  if (!silent) showToast("Draft saved");
+}
+
+function wireOutreachModal(){
+  const modal = document.getElementById("outreachModal");
+  const close = () => modal.classList.remove("open");
+  document.getElementById("outreachClose").addEventListener("click", close);
+  modal.addEventListener("click", e => { if (e.target === modal) close(); });
+
+  document.getElementById("outreachSave").addEventListener("click", () => saveOutreach(false));
+  document.getElementById("outreachRegenerate").addEventListener("click", () => openOutreach(activeOutreachLeadId, true));
+
+  document.getElementById("outreachCopy").addEventListener("click", async () => {
+    const text = `Subject: ${document.getElementById("outreachSubject").value}\n\n${document.getElementById("outreachBody").value}`;
+    try { await navigator.clipboard.writeText(text); showToast("Copied"); }
+    catch (e){ document.getElementById("outreachBody").select(); showToast("Press Ctrl+C to copy"); }
+  });
+
+  document.getElementById("outreachEmailBtn").addEventListener("click", () => {
+    const lead = prospectsCache[activeOutreachLeadId];
+    const email = lead ? firstEmail(lead.contact_info) : null;
+    if (!email) return;
+    const subject = encodeURIComponent(document.getElementById("outreachSubject").value);
+    const body = encodeURIComponent(document.getElementById("outreachBody").value);
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  });
+
+  document.getElementById("outreachContacted").addEventListener("click", async () => {
+    if (!activeOutreachLeadId) return;
+    await saveOutreach(true);
+    await updateLeadStatus(activeOutreachLeadId, "contacted");
+    close();
+    await loadProspectsSection();
+  });
+}
+
+function wireGrowthExtras(){
+  // Promotions
+  const input = document.getElementById("promoImageInput");
+  document.getElementById("promoAddImagesBtn").addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const files = [...input.files];
+    input.value = "";
+    for (const f of files){
+      if (!f.type.startsWith("image/")){ showToast("Only pictures can be added"); continue; }
+      if (promoImages.length >= PROMO_MAX_IMAGES){ showToast(`Up to ${PROMO_MAX_IMAGES} pictures`); break; }
+      promoImages.push(f);
+    }
+    renderPromoThumbs();
+  });
+  ["promoFinalCaption", "promoAdvertiserName", "promoLinkLabel1", "promoLinkUrl1", "promoLinkLabel2", "promoLinkUrl2", "promoLinkLabel3", "promoLinkUrl3"]
+    .forEach(id => document.getElementById(id).addEventListener("input", renderPromoPreview));
+
+  // Prospecting
+  renderProspectChips();
+  document.getElementById("prospectSearchQuery").addEventListener("keydown", e => { if (e.key === "Enter") runProspectSearch(); });
+  wireOutreachModal();
+}
+
 
 async function updateLeadStatus(leadId, newStatus){
   const { error } = await supabaseClient.from("prospect_leads").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", leadId);
