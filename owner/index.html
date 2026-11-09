@@ -2658,7 +2658,7 @@ async function runProspectSearch(){
     const result = await response.json();
 
     if (!response.ok){
-      showToast(result.error || "Search failed");
+      showToast((result.error || "Search failed") + (result.detail ? " " + result.detail : ""));
       btn.disabled = false; btn.textContent = "Search";
       return;
     }
