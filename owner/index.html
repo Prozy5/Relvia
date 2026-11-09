@@ -785,6 +785,43 @@ tr:last-child td{ border-bottom:none; }
 
         <div class="stats-row" id="relvbotStats" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;"></div>
 
+        <div class="section-head" style="margin-top:8px;"><h2>Money, security and system</h2></div>
+        <div id="relvbotOverview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px;"></div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:16px;">
+          <div class="panel" style="padding:18px;">
+            <div style="font-weight:700;margin-bottom:4px;">Monthly costs</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Add what you pay each month. They are compared to revenue in the overview and the weekly report.</div>
+            <table><tbody id="relvbotCosts"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody></table>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+              <input type="text" id="relvbotCostName" maxlength="80" placeholder="e.g. Supabase" style="flex:1;min-width:130px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+              <input type="number" id="relvbotCostAmount" min="0" step="0.01" placeholder="$ per month" style="width:120px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+              <button class="btn sm" id="relvbotCostAdd" type="button">Add</button>
+            </div>
+          </div>
+
+          <div class="panel" style="padding:18px;">
+            <div style="font-weight:700;margin-bottom:4px;">Alert thresholds</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">When RelvBOT should speak up. The limits should match your plan, and the Supabase free plan allows about 500 MB of database and 1 GB of files.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Large tip alert ($)</label><input type="number" id="relvbotSetLargeTip" min="1" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+              <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Tip counts as stuck after (minutes)</label><input type="number" id="relvbotSetStuck" min="1" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+              <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Database limit (MB)</label><input type="number" id="relvbotSetDb" min="1" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+              <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">File storage limit (MB)</label><input type="number" id="relvbotSetStorage" min="1" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+            </div>
+            <button class="btn sm gold" id="relvbotSettingsSave" type="button" style="margin-top:12px;">Save thresholds</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom:16px;">
+          <div style="padding:16px 18px 0;"><div style="font-weight:700;">Security findings</div>
+            <div style="font-size:12px;color:var(--muted);margin:4px 0 8px;">Found by the weekly security scan. Fix each one, or choose Accept if you have checked it and it is intentional. Fixed items disappear on the next scan.</div></div>
+          <table>
+            <thead><tr><th>What was found</th><th>First seen</th><th>Status</th><th></th></tr></thead>
+            <tbody id="relvbotFindings"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+
         <div class="panel">
           <table>
             <thead><tr><th>Automation</th><th>Runs every</th><th>Last result</th><th>Actions</th></tr></thead>
@@ -3315,6 +3352,8 @@ const RELVBOT_CONFIRM = {
   announce_releases: "This posts \"New on Relvia\" in the RelviaCreators feed for any new release. Run it now?",
   nudge_new_creators: "This sends a real message to every account that joined 3 to 30 days ago and has never posted. Each person only ever gets it once. Send now?",
   payout_reminders: "This sends a real message to every creator who has tips waiting but has not finished payout setup. Send now?",
+  monthly_creator_statements: "This sends a real earnings message to every creator who earned tips last month. Each creator only gets it once per month. Send now?",
+  sync_status_page: "This can change the public status page that every visitor sees. It never overrides a status you set by hand. Run it now?",
 };
 let relvbotJobsCache = [];
 let relvbotMasterOn = true;
@@ -3329,7 +3368,7 @@ function relvbotAgo(iso){
 }
 
 async function renderRelvbotAll(){
-  await Promise.all([renderRelvbot(), renderRelvbotAnnouncements(), renderRelvbotTerms()]);
+  await Promise.all([renderRelvbot(), renderRelvbotAnnouncements(), renderRelvbotTerms(), renderRelvbotMoney()]);
 }
 
 async function loadRelvbotTab(){
@@ -3338,6 +3377,8 @@ async function loadRelvbotTab(){
   document.getElementById("relvbotAnnSchedule").addEventListener("click", scheduleRelvbotAnnouncement);
   document.getElementById("relvbotTermAdd").addEventListener("click", addRelvbotTerm);
   document.getElementById("relvbotTermInput").addEventListener("keydown", e => { if (e.key === "Enter") addRelvbotTerm(); });
+  document.getElementById("relvbotCostAdd").addEventListener("click", addRelvbotCost);
+  document.getElementById("relvbotSettingsSave").addEventListener("click", saveRelvbotSettings);
   await renderRelvbotAll();
 }
 
@@ -3517,6 +3558,124 @@ async function removeRelvbotTerm(term){
   const { error } = await supabaseClient.rpc("relvbot_remove_term", { p_term: term });
   if (error){ console.error(error); showToast("Couldn't remove it: " + (error.message || "unknown error")); return; }
   await renderRelvbotTerms();
+}
+
+
+// ---------- money, security and system overview ----------
+const relvbotUsd = cents => "$" + (Number(cents || 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const relvbotMb = bytes => (Number(bytes || 0) / 1048576).toLocaleString(undefined, { maximumFractionDigits: 0 }) + " MB";
+const relvbotPct = (used, limit) => limit > 0 ? Math.round((used / limit) * 100) : 0;
+
+function relvbotCard(value, label, sub, tone){
+  const color = tone === "bad" ? "#f2a8a3" : tone === "good" ? "#8fd1a8" : tone === "warn" ? "var(--gold)" : "inherit";
+  return `<div class="stat-card"><div class="num" style="color:${color};">${escapeHtml(String(value))}</div><div class="label">${escapeHtml(label)}</div>${sub ? `<div style="font-size:11.5px;color:var(--muted);margin-top:6px;text-transform:none;letter-spacing:0;">${escapeHtml(sub)}</div>` : ""}</div>`;
+}
+
+async function renderRelvbotMoney(){
+  const box = document.getElementById("relvbotOverview");
+  const { data: o, error } = await supabaseClient.rpc("relvbot_overview");
+  if (error){
+    console.error(error);
+    box.innerHTML = `<div class="panel" style="padding:18px;grid-column:1/-1;color:var(--muted);font-size:13px;">The overview isn't set up yet. Run relvia-relvbot-update3.sql in Supabase, then refresh. (${escapeHtml(error.message || "")})</div>`;
+    document.getElementById("relvbotCosts").innerHTML = `<tr class="empty-row"><td colspan="3">Run relvia-relvbot-update3.sql first.</td></tr>`;
+    document.getElementById("relvbotFindings").innerHTML = `<tr class="empty-row"><td colspan="4">Run relvia-relvbot-update3.sql first.</td></tr>`;
+    return;
+  }
+
+  const dbPct = relvbotPct(o.db_bytes, o.db_limit_bytes), stPct = relvbotPct(o.storage_bytes, o.storage_limit_bytes);
+  box.innerHTML = [
+    relvbotCard(relvbotUsd(o.revenue_cents), "Revenue this month", `${relvbotUsd(o.tips_fee_cents)} fees · ${relvbotUsd(o.ads_income_cents)} ads · ${relvbotUsd(o.sponsored_income_cents)} sponsors`),
+    relvbotCard(relvbotUsd(o.costs_cents), "Monthly costs", "From the list below"),
+    relvbotCard(relvbotUsd(o.net_cents), "Net this month", o.net_cents >= 0 ? "Revenue minus costs" : "Costs are higher than revenue", o.net_cents >= 0 ? "good" : "bad"),
+    relvbotCard(o.tips_count, "Tips this month", `${relvbotUsd(o.tips_gross_cents)} total tipped`),
+    relvbotCard(relvbotUsd(o.owed_ready_cents), "Owed, ready to pay out", "Creators with payouts set up"),
+    relvbotCard(relvbotUsd(o.owed_blocked_cents), "Owed, waiting on setup", "Creators who haven't finished payout setup", o.owed_blocked_cents > 0 ? "warn" : ""),
+    relvbotCard(`${relvbotMb(o.db_bytes)}`, "Database", `${dbPct}% of ${relvbotMb(o.db_limit_bytes)}`, dbPct >= 80 ? "bad" : dbPct >= 60 ? "warn" : ""),
+    relvbotCard(`${relvbotMb(o.storage_bytes)}`, "File storage", `${stPct}% of ${relvbotMb(o.storage_limit_bytes)}`, stPct >= 80 ? "bad" : stPct >= 60 ? "warn" : ""),
+    relvbotCard(o.failed_crons_24h, "Failed scheduled jobs (24h)", "", o.failed_crons_24h > 0 ? "bad" : "good"),
+    relvbotCard(o.open_findings, "Open security findings", "", o.open_findings > 0 ? "warn" : "good"),
+  ].join("");
+
+  const [{ data: costs }, { data: settings }, { data: findings }] = await Promise.all([
+    supabaseClient.from("relvbot_costs").select("*").order("created_at"),
+    supabaseClient.from("relvbot_settings").select("*"),
+    supabaseClient.from("relvbot_security_findings").select("*").order("first_seen", { ascending:false }),
+  ]);
+
+  const costsBody = document.getElementById("relvbotCosts");
+  costsBody.innerHTML = (costs && costs.length) ? "" : `<tr class="empty-row"><td colspan="3">No costs added yet.</td></tr>`;
+  (costs || []).forEach(cost => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${escapeHtml(cost.name)}</td><td>${relvbotUsd(cost.monthly_cents)} / month</td><td><button class="btn danger sm" type="button">Remove</button></td>`;
+    row.querySelector("button").addEventListener("click", () => removeRelvbotCost(cost.id));
+    costsBody.appendChild(row);
+  });
+
+  const s = Object.fromEntries((settings || []).map(x => [x.key, x.value]));
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && document.activeElement !== el) el.value = v; };
+  setVal("relvbotSetLargeTip", s.large_tip_cents ? Math.round(Number(s.large_tip_cents) / 100) : "");
+  setVal("relvbotSetStuck", s.stuck_tip_minutes || "");
+  setVal("relvbotSetDb", s.db_limit_mb || "");
+  setVal("relvbotSetStorage", s.storage_limit_mb || "");
+
+  const fBody = document.getElementById("relvbotFindings");
+  fBody.innerHTML = (findings && findings.length) ? "" : `<tr class="empty-row"><td colspan="4">Nothing found. Either the weekly scan hasn't run yet or everything looks fine.</td></tr>`;
+  (findings || []).forEach(f => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="max-width:460px;">${escapeHtml(f.detail)}</td>
+      <td style="white-space:nowrap;">${relvbotAgo(f.first_seen)}</td>
+      <td><span class="pill ${f.status === "open" ? "banned" : "ok"}">${escapeHtml(f.status)}</span></td>
+      <td>${f.status === "open" ? `<button class="btn sm" type="button">Accept</button>` : ""}</td>`;
+    const accept = row.querySelector("button");
+    if (accept) accept.addEventListener("click", () => acceptRelvbotFinding(f.finding));
+    fBody.appendChild(row);
+  });
+}
+
+async function addRelvbotCost(){
+  const name = document.getElementById("relvbotCostName").value.trim();
+  const dollars = parseFloat(document.getElementById("relvbotCostAmount").value);
+  if (!name){ showToast("Give the cost a name"); return; }
+  if (!(dollars >= 0)){ showToast("Enter the monthly amount"); return; }
+  const { error } = await supabaseClient.rpc("relvbot_add_cost", { p_name: name, p_monthly_cents: Math.round(dollars * 100) });
+  if (error){ console.error(error); showToast("Couldn't add it: " + (error.message || "unknown error")); return; }
+  document.getElementById("relvbotCostName").value = "";
+  document.getElementById("relvbotCostAmount").value = "";
+  await renderRelvbotMoney();
+}
+
+async function removeRelvbotCost(id){
+  const { error } = await supabaseClient.rpc("relvbot_remove_cost", { p_id: id });
+  if (error){ console.error(error); showToast("Couldn't remove it: " + (error.message || "unknown error")); return; }
+  await renderRelvbotMoney();
+}
+
+async function saveRelvbotSettings(){
+  const get = id => document.getElementById(id).value.trim();
+  const largeDollars = parseFloat(get("relvbotSetLargeTip"));
+  const entries = [
+    ["large_tip_cents", largeDollars > 0 ? String(Math.round(largeDollars * 100)) : ""],
+    ["stuck_tip_minutes", get("relvbotSetStuck")],
+    ["db_limit_mb", get("relvbotSetDb")],
+    ["storage_limit_mb", get("relvbotSetStorage")],
+  ];
+  if (entries.some(([, v]) => !/^[0-9]{1,9}$/.test(v) || Number(v) < 1)){ showToast("Every threshold needs a whole number above zero"); return; }
+  for (const [key, value] of entries){
+    const { error } = await supabaseClient.rpc("relvbot_set_setting", { p_key: key, p_value: value });
+    if (error){ console.error(error); showToast("Couldn't save: " + (error.message || "unknown error")); return; }
+  }
+  await logAction("relvbot_settings", "relvbot", "thresholds");
+  showToast("Thresholds saved");
+  await renderRelvbotMoney();
+}
+
+async function acceptRelvbotFinding(finding){
+  if (!confirm("Accept this finding? It stays listed as accepted and stops counting as open. Only accept it if you have checked that it is intentional.")) return;
+  const { error } = await supabaseClient.rpc("relvbot_accept_finding", { p_finding: finding });
+  if (error){ console.error(error); showToast("Couldn't accept it: " + (error.message || "unknown error")); return; }
+  await logAction("relvbot_accept_finding", "relvbot", finding);
+  await renderRelvbotMoney();
 }
 
 
