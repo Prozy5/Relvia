@@ -802,6 +802,39 @@ tr:last-child td{ border-bottom:none; }
           </table>
         </div>
       </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Scheduled site banners</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Write a banner now and choose when it appears on the site and when it comes down. It goes out within 5 minutes of the time you pick.</p>
+        <div class="panel" style="padding:18px;margin-bottom:16px;">
+          <textarea id="relvbotAnnMessage" maxlength="300" placeholder="Banner text, for example: Relvia will be down for maintenance tonight at 9pm." style="width:100%;min-height:64px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;">
+            <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Goes up</label><input type="datetime-local" id="relvbotAnnStart" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+            <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Comes down (optional)</label><input type="datetime-local" id="relvbotAnnEnd" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"></div>
+            <div><label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;">Style</label>
+              <select id="relvbotAnnSeverity" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;"><option value="info">Info (gold)</option><option value="warning">Warning (orange)</option><option value="critical">Critical (red)</option></select></div>
+            <button class="btn gold" id="relvbotAnnSchedule" type="button">Schedule banner</button>
+          </div>
+        </div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Goes up</th><th>Banner</th><th>Status</th><th></th></tr></thead>
+            <tbody id="relvbotAnnouncements"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Flagged words</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">When a new post contains one of these words or phrases, RelvBOT adds it to your Reports list so you can review it. Nothing is deleted automatically. Posts from staff are never flagged.</p>
+        <div class="panel" style="padding:18px;">
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="text" id="relvbotTermInput" maxlength="60" placeholder="Add a word or phrase" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <button class="btn" id="relvbotTermAdd" type="button">Add</button>
+          </div>
+          <div id="relvbotTerms" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+      </div>
     </div><!-- /eco-relvbot -->
 
     <!-- ================= BETA TAB ================= -->
@@ -3275,7 +3308,7 @@ async function saveRateLimit(action){
 // ==========================================================
 // RELVBOT: automations control center
 // ==========================================================
-const RELVBOT_INTERVALS = [[5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "Hour"], [360, "6 hours"], [1440, "Day"]];
+const RELVBOT_INTERVALS = [[5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "Hour"], [360, "6 hours"], [1440, "Day"], [10080, "Week"]];
 let relvbotJobsCache = [];
 let relvbotMasterOn = true;
 
@@ -3288,10 +3321,17 @@ function relvbotAgo(iso){
   return `${Math.floor(s / 86400)}d ago`;
 }
 
+async function renderRelvbotAll(){
+  await Promise.all([renderRelvbot(), renderRelvbotAnnouncements(), renderRelvbotTerms()]);
+}
+
 async function loadRelvbotTab(){
-  document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbot);
+  document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbotAll);
   document.getElementById("relvbotMasterBtn").addEventListener("click", toggleRelvbotMaster);
-  await renderRelvbot();
+  document.getElementById("relvbotAnnSchedule").addEventListener("click", scheduleRelvbotAnnouncement);
+  document.getElementById("relvbotTermAdd").addEventListener("click", addRelvbotTerm);
+  document.getElementById("relvbotTermInput").addEventListener("keydown", e => { if (e.key === "Enter") addRelvbotTerm(); });
+  await renderRelvbotAll();
 }
 
 async function renderRelvbot(){
@@ -3371,6 +3411,7 @@ async function saveRelvbotJob(key, enabled, interval){
 }
 
 async function runRelvbotNow(key, btn){
+  if (key === "weekly_summary_post" && !confirm("This posts publicly in the RelviaCreators feed from the Relvia Entertainment account. Post it now?")) return;
   btn.disabled = true; btn.textContent = "Running...";
   const { data, error } = await supabaseClient.rpc("relvbot_run_now", { p_key: key });
   if (error){ console.error(error); showToast("Couldn't run it: " + (error.message || "unknown error")); }
@@ -3386,6 +3427,91 @@ async function toggleRelvbotMaster(){
   showToast(next ? "RelvBOT resumed" : "RelvBOT paused");
   await renderRelvbot();
 }
+
+async function renderRelvbotAnnouncements(){
+  const body = document.getElementById("relvbotAnnouncements");
+  const { data, error } = await supabaseClient.from("relvbot_announcements").select("*").order("publish_at", { ascending:false }).limit(20);
+  if (error){ console.error(error); body.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load banners: ${escapeHtml(error.message || "")}. Run relvia-relvbot-update1.sql.</td></tr>`; return; }
+  if (!data || data.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="4">No banners scheduled.</td></tr>`; return; }
+  const pillClass = { scheduled:"temp", published:"ok", expired:"temp", cancelled:"banned" };
+  body.innerHTML = "";
+  data.forEach(a => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="white-space:nowrap;">${new Date(a.publish_at).toLocaleString()}${a.expires_at ? `<div style="font-size:11.5px;color:var(--muted);">until ${new Date(a.expires_at).toLocaleString()}</div>` : ""}</td>
+      <td style="max-width:380px;">${escapeHtml(a.message)}</td>
+      <td><span class="pill ${pillClass[a.status] || "temp"}">${escapeHtml(a.status)}</span></td>
+      <td>${a.status === "scheduled" ? `<button class="btn danger sm" data-cancel>Cancel</button>` : ""}</td>`;
+    const cancel = row.querySelector("[data-cancel]");
+    if (cancel) cancel.addEventListener("click", () => cancelRelvbotAnnouncement(a.id));
+    body.appendChild(row);
+  });
+}
+
+async function scheduleRelvbotAnnouncement(){
+  const message = document.getElementById("relvbotAnnMessage").value.trim();
+  const startValue = document.getElementById("relvbotAnnStart").value;
+  const endValue = document.getElementById("relvbotAnnEnd").value;
+  const severity = document.getElementById("relvbotAnnSeverity").value;
+  if (!message){ showToast("Write the banner text first"); return; }
+  if (!startValue){ showToast("Pick when it should go up"); return; }
+  const start = new Date(startValue);
+  const end = endValue ? new Date(endValue) : null;
+  if (end && end <= start){ showToast("The end time has to be after the start time"); return; }
+
+  const btn = document.getElementById("relvbotAnnSchedule");
+  btn.disabled = true;
+  const { error } = await supabaseClient.rpc("relvbot_schedule_announcement", {
+    p_message: message, p_severity: severity, p_publish_at: start.toISOString(), p_expires_at: end ? end.toISOString() : null,
+  });
+  btn.disabled = false;
+  if (error){ console.error(error); showToast("Couldn't schedule it: " + (error.message || "unknown error")); return; }
+  await logAction("relvbot_schedule_banner", "relvbot", message.slice(0, 80));
+  document.getElementById("relvbotAnnMessage").value = "";
+  document.getElementById("relvbotAnnStart").value = "";
+  document.getElementById("relvbotAnnEnd").value = "";
+  showToast("Banner scheduled");
+  await renderRelvbotAnnouncements();
+}
+
+async function cancelRelvbotAnnouncement(id){
+  const { error } = await supabaseClient.rpc("relvbot_cancel_announcement", { p_id: id });
+  if (error){ console.error(error); showToast("Couldn't cancel it: " + (error.message || "unknown error")); return; }
+  showToast("Banner cancelled");
+  await renderRelvbotAnnouncements();
+}
+
+async function renderRelvbotTerms(){
+  const box = document.getElementById("relvbotTerms");
+  const { data, error } = await supabaseClient.from("relvbot_flag_terms").select("term").order("term");
+  if (error){ console.error(error); box.innerHTML = `<span style="color:var(--muted);font-size:13px;">Couldn't load words. Run relvia-relvbot-update1.sql.</span>`; return; }
+  if (!data || data.length === 0){ box.innerHTML = `<span style="color:var(--muted);font-size:13px;">No words yet. Posts won't be flagged.</span>`; return; }
+  box.innerHTML = "";
+  data.forEach(t => {
+    const chip = document.createElement("span");
+    chip.style.cssText = "display:inline-flex;align-items:center;gap:8px;font-size:12.5px;border:1px solid var(--border);border-radius:999px;padding:5px 6px 5px 12px;background:var(--surface-light);";
+    chip.innerHTML = `${escapeHtml(t.term)}<button type="button" aria-label="Remove ${escapeHtml(t.term)}" style="width:20px;height:20px;border-radius:50%;color:var(--muted);font-size:15px;line-height:1;">&times;</button>`;
+    chip.querySelector("button").addEventListener("click", () => removeRelvbotTerm(t.term));
+    box.appendChild(chip);
+  });
+}
+
+async function addRelvbotTerm(){
+  const input = document.getElementById("relvbotTermInput");
+  const term = input.value.trim();
+  if (term.length < 2){ showToast("Use at least 2 characters"); return; }
+  const { error } = await supabaseClient.rpc("relvbot_add_term", { p_term: term });
+  if (error){ console.error(error); showToast("Couldn't add it: " + (error.message || "unknown error")); return; }
+  input.value = "";
+  await renderRelvbotTerms();
+}
+
+async function removeRelvbotTerm(term){
+  const { error } = await supabaseClient.rpc("relvbot_remove_term", { p_term: term });
+  if (error){ console.error(error); showToast("Couldn't remove it: " + (error.message || "unknown error")); return; }
+  await renderRelvbotTerms();
+}
+
 
 // ==========================================================
 // BETA TAB
