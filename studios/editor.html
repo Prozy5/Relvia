@@ -171,6 +171,45 @@ img, video{ max-width:100%; display:block; }
 }
 .timeline-ruler{ margin-left:52px; margin-top:4px; font-family:var(--font-mono); font-size:9px; color:var(--muted-soft); display:flex; justify-content:space-between; }
 
+
+/* ===== Looks & VFX ===== */
+.vfx-details{ margin-top:12px; border-top:1px solid var(--border-soft); padding-top:10px; }
+.vfx-details summary{ cursor:pointer; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); list-style:none; }
+.vfx-details summary::-webkit-details-marker{ display:none; }
+.vfx-details summary::before{ content:"+ "; }
+.vfx-details[open] summary::before{ content:"- "; }
+.look-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:6px; margin:10px 0 6px; }
+.look-chip{ display:flex; align-items:center; gap:7px; padding:6px 8px; border:1px solid var(--border); border-radius:8px; font-size:11px; font-weight:600; color:var(--muted); text-align:left; }
+.look-chip:hover{ border-color:var(--gold-end); color:var(--text); }
+.look-chip.active{ border-color:var(--gold); color:var(--gold); background:rgba(224,177,88,.08); }
+.look-swatch{ width:16px; height:16px; border-radius:4px; flex-shrink:0; border:1px solid rgba(255,255,255,.15); }
+.vfx-link{ font-size:11px; font-weight:600; color:var(--muted); text-decoration:underline; padding:2px 4px; }
+.vfx-link:hover{ color:var(--gold); }
+.vfx-sliders{ display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin:10px 0; font-size:11.5px; color:var(--muted); }
+.vfx-sliders label{ display:flex; flex-direction:column; gap:4px; font-family:var(--font-mono); }
+.vfx-sliders input[type="range"]{ width:100%; accent-color:var(--gold); }
+.chroma-box{ margin-top:10px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:rgba(0,0,0,.2); }
+.chroma-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; cursor:pointer; }
+.chroma-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; font-size:11.5px; color:var(--muted); }
+.chroma-row select{ background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 8px; color:white; font-size:11.5px; }
+input[type="color"]{ width:34px; height:26px; padding:0; border:1px solid var(--border); border-radius:6px; background:none; cursor:pointer; }
+
+/* live monitor effects */
+.preview-grain{ position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; mix-blend-mode:overlay; background-size:160px 160px; animation:grainShift .45s steps(5) infinite; }
+@keyframes grainShift{ 0%{background-position:0 0} 25%{background-position:-40px 22px} 50%{background-position:30px -50px} 75%{background-position:-22px -30px} 100%{background-position:0 0} }
+.chroma-canvas{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:none; z-index:1; }
+.chroma-bar{ position:absolute; left:10px; right:10px; bottom:calc(9% + 8px); z-index:6; display:none; align-items:center; gap:10px; padding:6px 10px; background:rgba(0,0,0,.65); border-radius:8px; }
+.chroma-bar button{ font-size:11px; font-weight:700; color:var(--gold); min-width:42px; }
+.chroma-bar input{ flex:1; accent-color:var(--gold); }
+.fx-shake{ animation:fxShake .24s infinite steps(2); }
+@keyframes fxShake{ 0%{ transform:translate(calc(var(--amp,6) * 1px), calc(var(--amp,6) * -.6px)) scale(1.04); } 50%{ transform:translate(calc(var(--amp,6) * -1px), calc(var(--amp,6) * .8px)) scale(1.04); } 100%{ transform:translate(calc(var(--amp,6) * .4px), calc(var(--amp,6) * 1px)) scale(1.04); } }
+.fx-glitch{ animation:fxGlitch 2.6s infinite; }
+@keyframes fxGlitch{ 0%,90%,100%{ transform:none; } 92%{ transform:translateX(calc(var(--amp,6) * -1px)); filter:hue-rotate(80deg) saturate(2); } 94%{ transform:translateX(calc(var(--amp,6) * 1px)) skewX(2deg); } 96%{ transform:translateX(calc(var(--amp,6) * -.5px)); filter:hue-rotate(-60deg); } }
+
+/* 3D titles */
+.title3d-canvas{ width:100%; aspect-ratio:16/9; margin-top:8px; border-radius:8px; border:1px solid var(--border); background:radial-gradient(ellipse at center,#2a2014,#070504 75%); }
+.timeline-overlay-marker.title3d{ background:rgba(110,160,255,.28); border:1px dashed #7aa6ff; color:#bcd2ff; }
+.color-pill{ width:44px !important; padding:2px !important; }
 </style>
 </head>
 <body>
@@ -239,6 +278,11 @@ img, video{ max-width:100%; display:block; }
     <p class="hint">Titles or captions burned into the video at a specific time.</p>
     <div id="overlayList"></div>
     <button class="add-btn" id="addOverlayBtn">+ Add text overlay</button>
+
+    <span class="slate-tag"><span class="slate-icon">&#9636;</span>3D TITLES</span>
+    <p class="hint">Animated 3D titles that fly, spin, or rise over your film. They are drawn when you export, so each one adds a little render time.</p>
+    <div id="title3dList"></div>
+    <button class="add-btn" id="addTitle3dBtn">+ Add 3D title</button>
 
     <span class="slate-tag"><span class="slate-icon">&#9636;</span>SCORE</span>
     <p class="hint">One audio track, mixed under your clips' original sound.</p>
@@ -313,11 +357,297 @@ let clips = [];   // { id, file, name, trimStart, trimEnd, duration }
 let overlays = []; // { id, text, start, duration, position }
 let musicFile = null;
 let musicVolume = 50;
+let titles3d = []; // { id, text, style, font, color, start, duration }
 
 function uid(){ return Math.random().toString(36).slice(2, 10); }
 function escapeHtml(str){
   return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
+
+// <<VFX-PURE-START>>
+// ============================================================
+// VFX: looks, effects, green screen, and overlay compositing.
+// Pure functions (no DOM) so they can be tested against real ffmpeg.
+// ============================================================
+const VFX_W = 1280, VFX_H = 720, VFX_FPS = 30;
+
+// One-click looks. `ff` is the ffmpeg filter used at render. `css` is a close
+// approximation used for the live monitor only. `glow` adds a soft bloom.
+const LOOKS = {
+  none:        { label: "None",         ff: "", css: "", glow: 0, swatch: "linear-gradient(135deg,#2a2a2a,#8a8a8a)" },
+  teal_orange: { label: "Teal & Orange", ff: "colorbalance=rs=-.10:gs=-.03:bs=.14:rm=.04:gm=0:bm=-.02:rh=.16:gh=.05:bh=-.14,eq=contrast=1.1:saturation=1.18",
+                 css: "contrast(1.1) saturate(1.2) hue-rotate(-8deg)", glow: 0, swatch: "linear-gradient(135deg,#0e6b7a,#e08a3c)" },
+  noir:        { label: "Noir",          ff: "hue=s=0,eq=contrast=1.3:brightness=-0.03,vignette=PI/5",
+                 css: "grayscale(1) contrast(1.3) brightness(.97)", glow: 0, swatch: "linear-gradient(135deg,#050505,#bdbdbd)" },
+  cyberpunk:   { label: "Cyberpunk",     ff: "colorbalance=rs=.16:gs=-.1:bs=.24:rm=.1:gm=-.05:bm=.12:rh=-.06:bh=.14,eq=saturation=1.45:contrast=1.15",
+                 css: "saturate(1.6) contrast(1.15) hue-rotate(25deg)", glow: 0, swatch: "linear-gradient(135deg,#ff2bd6,#18e0ff)" },
+  vintage:     { label: "Vintage Film",  ff: "curves=preset=vintage,eq=saturation=0.85:contrast=1.05,vignette=PI/5",
+                 css: "sepia(.45) saturate(.85) contrast(1.05)", glow: 0, swatch: "linear-gradient(135deg,#6b4f2a,#d9b87a)" },
+  sunset:      { label: "Sunset",        ff: "colorbalance=rs=.18:gs=.03:bs=-.16:rm=.08:bm=-.06:rh=.1:bh=-.1,eq=saturation=1.2:contrast=1.05",
+                 css: "sepia(.25) saturate(1.3) hue-rotate(-12deg)", glow: 0, swatch: "linear-gradient(135deg,#ff5e3a,#ffd27a)" },
+  thriller:    { label: "Cold Thriller", ff: "colorbalance=rs=-.08:bs=.14:rm=-.04:bm=.08,eq=contrast=1.2:saturation=.8:brightness=-.03",
+                 css: "saturate(.75) contrast(1.2) hue-rotate(12deg) brightness(.95)", glow: 0, swatch: "linear-gradient(135deg,#0b2233,#7aa6c2)" },
+  dream:       { label: "Dream Glow",    ff: "eq=saturation=1.15:brightness=0.03",
+                 css: "brightness(1.08) saturate(1.2) contrast(.95)", glow: 0.55, swatch: "linear-gradient(135deg,#f7c6ff,#ffe9b8)" },
+};
+
+function defaultVfx(){ return { look: "none", grain: 0, glow: 0, glitch: 0, shake: 0 }; }
+function defaultChroma(){
+  return { enabled: false, color: "#00ff00", similarity: 0.14, blend: 0.08, bgType: "color", bgColor: "#0a0806", bgFile: null, bgUrl: null };
+}
+
+function isHex(v){ return typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v); }
+function toFfColor(hex, fallback){ return "0x" + (isHex(hex) ? hex : fallback).slice(1).toUpperCase(); }
+function clamp(n, lo, hi){ n = Number(n); if (!isFinite(n)) n = lo; return Math.min(hi, Math.max(lo, n)); }
+function fmt(n, d){ return Number(n).toFixed(d == null ? 2 : d); }
+
+// Which channel dominates the key colour (decides the spill clean-up).
+function keyFamily(hex){
+  const h = isHex(hex) ? hex : "#00ff00";
+  const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16);
+  if (g > r + 30 && g >= b) return "green";
+  if (b > r + 30 && b > g) return "blue";
+  return "other";
+}
+
+// Builds the ffmpeg video graph for ONE clip.
+// Returns { complex, graph, needsBgImage }.
+function buildClipGraph(clip){
+  const W = VFX_W, H = VFX_H;
+  const speed = clip.speed || 1;
+  const fx = clip.effects || {};
+  const v = Object.assign(defaultVfx(), clip.vfx || {});
+  const ck = Object.assign(defaultChroma(), clip.chroma || {});
+  const look = LOOKS[v.look] || LOOKS.none;
+
+  const base = [
+    `scale=${W}:${H}:force_original_aspect_ratio=decrease`,
+    `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2`,
+    "setsar=1",
+  ];
+
+  const post = [];
+  if (speed !== 1) post.push(`setpts=PTS/${speed}`);
+  if (fx.brightness || (fx.contrast ?? 1) !== 1 || (fx.saturation ?? 1) !== 1){
+    post.push(`eq=brightness=${fx.brightness || 0}:contrast=${fx.contrast ?? 1}:saturation=${fx.saturation ?? 1}`);
+  }
+  if (fx.blur > 0) post.push(`gblur=sigma=${fx.blur}`);
+  if (fx.vignette) post.push("vignette=PI/4");
+  if (look.ff) post.push(look.ff);
+
+  // Soft bloom: blend a blurred copy back over the picture.
+  const glow = clamp(Math.max(v.glow || 0, look.glow || 0), 0, 1);
+  if (glow > 0){
+    post.push(`split[gA][gB];[gB]gblur=sigma=${Math.round(10 + glow * 18)}[gC];[gA][gC]blend=all_mode=screen:all_opacity=${fmt(0.18 + glow * 0.5)}`);
+  }
+
+  // Handheld camera shake: zoom in slightly, then wander the crop window.
+  const shake = clamp(v.shake, 0, 1);
+  if (shake > 0){
+    const amp = Math.round(shake * 18), amp2 = fmt(amp * 0.6, 1);
+    post.push(
+      `scale=${Math.round(W * 1.06)}:${Math.round(H * 1.06)}`,
+      `crop=${W}:${H}:x='(iw-${W})/2+sin(t*23)*${amp}+sin(t*37)*${amp2}':y='(ih-${H})/2+cos(t*19)*${amp}+cos(t*41)*${amp2}'`
+    );
+  }
+
+  // Digital glitch: short bursts of colour-channel split and noise.
+  const glitch = clamp(v.glitch, 0, 1);
+  if (glitch > 0){
+    const shift = Math.round(4 + glitch * 16), period = fmt(3.4 - glitch * 2.2), burst = fmt(0.10 + glitch * 0.14);
+    const on = `lt(mod(t,${period}),${burst})`;
+    post.push(
+      `rgbashift=rh=-${shift}:bh=${shift}:gv=${Math.round(shift / 3)}:enable='${on}'`,
+      `noise=alls=${Math.round(30 + glitch * 50)}:allf=t:enable='${on}'`
+    );
+  }
+
+  // Film grain last, so it sits on top of everything.
+  const grain = clamp(v.grain, 0, 1);
+  if (grain > 0) post.push(`noise=alls=${Math.round(grain * 45)}:allf=t+u`);
+
+  const baseChain = base.join(",");
+  if (!ck.enabled){
+    return { complex: false, needsBgImage: false, graph: [baseChain, ...post].join(",") };
+  }
+
+  // Green screen: key out the colour, then lay the clip over a background.
+  const family = keyFamily(ck.color);
+  const keyFilters = [`chromakey=color=${toFfColor(ck.color, "#00ff00")}:similarity=${fmt(clamp(ck.similarity, 0.01, 0.5), 3)}:blend=${fmt(clamp(ck.blend, 0, 0.5), 3)}`];
+  if (family !== "other") keyFilters.push(`despill=type=${family}`);
+
+  const useImage = ck.bgType === "image" && !!(ck.bgFile || ck.bgUrl);
+  const bgChain = useImage
+    ? `[1:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=${VFX_FPS},format=yuv420p[bg]`
+    : `color=c=${toFfColor(ck.bgColor, "#0a0806")}:s=${W}x${H}:r=${VFX_FPS}[bg]`;
+
+  const tail = ["overlay=shortest=1:format=auto", "format=yuv420p", ...post].join(",");
+  return {
+    complex: true,
+    needsBgImage: useImage,
+    graph: `[0:v]${baseChain},${keyFilters.join(",")}[fg];${bgChain};[bg][fg]${tail}[vout]`,
+  };
+}
+
+// Overlays (text cards and 3D title frame sequences) composited in ONE pass.
+// items: [{ kind: "still"|"seq", start, duration }] where item k is ffmpeg input k+1.
+function buildOverlayGraph(items){
+  const parts = [];
+  let prev = "0:v";
+  items.forEach((it, k) => {
+    const start = fmt(Math.max(0, it.start), 3);
+    let prep = `[${k + 1}:v]format=rgba`;
+    if (it.kind === "still"){
+      const d = Math.max(1, it.duration);
+      prep += `,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=${fmt(d - 0.5)}:d=0.5:alpha=1`;
+    }
+    prep += `,setpts=PTS-STARTPTS+${start}/TB[o${k}]`;
+    parts.push(prep, `[${prev}][o${k}]overlay=format=auto:eof_action=pass[v${k + 1}]`);
+    prev = `v${k + 1}`;
+  });
+  return { graph: parts.join(";"), outLabel: prev };
+}
+
+// ---------- 3D title animation (numbers only, no three.js) ----------
+const TITLE_STYLES = {
+  gold_reveal: "Gold Reveal",
+  fly_through: "Fly-Through",
+  rise_spin:   "Rise & Spin",
+};
+const easeOutCubic = x => 1 - Math.pow(1 - x, 3);
+const easeInOutCubic = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOutBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// p is progress 0..1 over the title's duration; seconds is the duration.
+function titleFrameState(style, p, seconds){
+  p = clamp(p, 0, 1);
+  const fade = Math.min(0.5, seconds * 0.25) / seconds;
+  const opacity = clamp(Math.min(p / fade, (1 - p) / fade, 1), 0, 1);
+  const s = { rotX: 0, rotY: 0, rotZ: 0, posY: 0, scale: 1, camZ: 12, lightX: lerp(-9, 9, p), opacity };
+
+  if (style === "fly_through"){
+    const e = easeInOutCubic(p);
+    s.camZ = lerp(34, 11, e);
+    s.rotZ = (1 - e) * 0.14;
+    s.rotY = (1 - e) * -0.35;
+    s.opacity = clamp(Math.min(p / 0.12, (1 - p) / 0.15, 1), 0, 1);
+  } else if (style === "rise_spin"){
+    s.posY = lerp(-7, 0, easeOutBack(clamp(p / 0.6, 0, 1)));
+    s.rotY = lerp(Math.PI * 2, 0, easeOutCubic(clamp(p / 0.7, 0, 1)));
+    s.scale = lerp(0.6, 1, easeOutCubic(clamp(p / 0.6, 0, 1)));
+    s.camZ = 12;
+  } else {
+    s.rotY = lerp(-1.2, 0, easeOutCubic(clamp(p / 0.55, 0, 1))) + Math.sin(p * Math.PI) * 0.07;
+    s.rotX = Math.sin(p * Math.PI * 2) * 0.03;
+    s.camZ = lerp(16, 12, easeOutCubic(p));
+  }
+  return s;
+}
+
+// Breaks a long title over two lines at the space nearest the middle.
+function wrapTitle(text){
+  const t = (text || "").trim();
+  if (t.length <= 20 || !t.includes(" ")) return t;
+  const mid = t.length / 2;
+  let best = -1, bestDist = Infinity;
+  for (let i = 0; i < t.length; i++){
+    if (t[i] === " " && Math.abs(i - mid) < bestDist){ best = i; bestDist = Math.abs(i - mid); }
+  }
+  return best < 0 ? t : t.slice(0, best) + "\n" + t.slice(best + 1);
+}
+
+// Reads a three.js "typeface" JSON font and returns shapes for the text.
+// Mirrors three's Font.generateShapes so we only need the core library.
+function typefaceShapes(THREE, data, text, size){
+  const scale = size / data.resolution;
+  const lineHeight = (data.boundingBox.yMax - data.boundingBox.yMin + data.underlineThickness) * scale;
+  const shapes = [];
+  let offsetX = 0, offsetY = 0;
+  for (const ch of Array.from(text)){
+    if (ch === "\n"){ offsetX = 0; offsetY -= lineHeight; continue; }
+    const glyph = data.glyphs[ch] || data.glyphs["?"];
+    if (!glyph) continue;
+    const path = new THREE.ShapePath();
+    if (glyph.o){
+      const o = glyph._cached || (glyph._cached = glyph.o.split(" "));
+      for (let i = 0; i < o.length;){
+        const action = o[i++];
+        if (action === "m"){ path.moveTo(o[i++] * scale + offsetX, o[i++] * scale + offsetY); }
+        else if (action === "l"){ path.lineTo(o[i++] * scale + offsetX, o[i++] * scale + offsetY); }
+        else if (action === "q"){
+          const cpx = o[i++] * scale + offsetX, cpy = o[i++] * scale + offsetY;
+          const cpx1 = o[i++] * scale + offsetX, cpy1 = o[i++] * scale + offsetY;
+          path.quadraticCurveTo(cpx1, cpy1, cpx, cpy);
+        } else if (action === "b"){
+          const cpx = o[i++] * scale + offsetX, cpy = o[i++] * scale + offsetY;
+          const cpx1 = o[i++] * scale + offsetX, cpy1 = o[i++] * scale + offsetY;
+          const cpx2 = o[i++] * scale + offsetX, cpy2 = o[i++] * scale + offsetY;
+          path.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, cpx, cpy);
+        }
+      }
+    }
+    offsetX += glyph.ha * scale;
+    shapes.push(...path.toShapes());
+  }
+  return shapes;
+}
+
+// Builds a 3D title scene. THREE and the renderer are passed in so this can run
+// (and be tested) anywhere. Returns { setFrame(p), dispose() }.
+function createTitleScene(THREE, renderer, typeface, o){
+  const width = o.width || 1280, height = o.height || 720;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 200);
+
+  const shapes = typefaceShapes(THREE, typeface, wrapTitle(o.text), 1);
+  if (!shapes.length) throw new Error("There is nothing to draw. Type a title using plain letters and numbers.");
+  const geo = new THREE.ExtrudeGeometry(shapes, { depth: 0.28, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.025, bevelSegments: o.bevelSegments || 3, curveSegments: o.curveSegments || 10 });
+  geo.computeBoundingBox();
+  geo.center();
+  const bb = geo.boundingBox;
+  const w = Math.max(bb.max.x - bb.min.x, 0.0001), h = Math.max(bb.max.y - bb.min.y, 0.0001);
+  const fit = Math.min(11 / w, 5.2 / h);
+
+  const mat = new THREE.MeshPhongMaterial({ color: new THREE.Color(isHex(o.color) ? o.color : "#e0b158"), specular: new THREE.Color(0xfff0c8), shininess: 120, transparent: true });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.scale.setScalar(fit);
+  const group = new THREE.Group();
+  group.add(mesh);
+  scene.add(group);
+
+  scene.add(new THREE.AmbientLight(0xffe9c8, 0.9));
+  const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(6, 9, 12); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffd9a0, 1.4); rim.position.set(-8, 3, -6); scene.add(rim);
+  const sweep = new THREE.PointLight(0xffffff, 450, 0, 2); sweep.position.set(-9, 4, 10); scene.add(sweep);
+
+  function setFrame(p){
+    const s = titleFrameState(o.style, p, o.seconds || 3);
+    group.rotation.set(s.rotX, s.rotY, s.rotZ);
+    group.position.set(0, s.posY, 0);
+    group.scale.setScalar(s.scale);
+    camera.position.set(0, 0, s.camZ);
+    camera.lookAt(0, 0, 0);
+    sweep.position.set(s.lightX, 4, 10);
+    mat.opacity = s.opacity;
+    mesh.visible = s.opacity > 0.002;
+    renderer.render(scene, camera);
+    return s;
+  }
+  function dispose(){ geo.dispose(); mat.dispose(); }
+  return { setFrame, dispose, scene, camera, mesh, group };
+}
+
+// ---------- live green-screen preview (approximates ffmpeg's chromakey) ----------
+function hexToRgb(hex){ const h = isHex(hex) ? hex : "#00ff00"; return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function toCbCr(r, g, b){ return [-0.168736 * r - 0.331264 * g + 0.5 * b, 0.5 * r - 0.418688 * g - 0.081312 * b]; }
+// 0 = fully keyed out, 1 = fully kept. Same idea as ffmpeg: distance in colour (not brightness).
+function keyAlpha(r, g, b, keyCbCr, similarity, blend){
+  const c = toCbCr(r, g, b), d = Math.hypot(c[0] - keyCbCr[0], c[1] - keyCbCr[1]);
+  const lo = similarity * 355, hi = lo + Math.max(blend * 355, 1);
+  return d <= lo ? 0 : d >= hi ? 1 : (d - lo) / (hi - lo);
+}
+// <<VFX-PURE-END>>
 
 async function initFfmpeg(){
   try {
@@ -353,11 +683,12 @@ document.getElementById("clipFileInput").addEventListener("change", async (e) =>
       id: uid(), file, name: file.name, url,
       trimStart: 0, trimEnd: Math.floor(tempVideo.duration), duration: Math.floor(tempVideo.duration), speed: 1,
       effects: { brightness: 0, contrast: 1, saturation: 1, blur: 0, vignette: false },
+      vfx: defaultVfx(), chroma: defaultChroma(),
     });
   }
   e.target.value = "";
   renderClipList();
-  if (clips.length > 0) showPreview(clips[0].url);
+  if (clips.length > 0) showPreview(clips[0].url, clips[0]);
   updateRenderButton();
 });
 
@@ -404,9 +735,10 @@ function renderClipList(){
         <label>Saturation <input type="range" data-fx="saturation" min="0" max="2" step="0.05" value="${clip.effects.saturation}"></label>
         <label>Blur <input type="range" data-fx="blur" min="0" max="10" step="0.5" value="${clip.effects.blur}"></label>
         <label><input type="checkbox" data-fx="vignette" ${clip.effects.vignette ? "checked" : ""}> Vignette</label>
-      </div>`;
+      </div>
+      ${vfxPanelHtml(clip)}`;
 
-    item.querySelector('[data-action="preview"]').addEventListener("click", () => showPreview(clip.url));
+    item.querySelector('[data-action="preview"]').addEventListener("click", () => showPreview(clip.url, clip));
     item.querySelector('[data-action="split"]').addEventListener("click", () => splitClip(index));
     item.querySelector('[data-action="up"]').addEventListener("click", () => moveClip(index, -1));
     item.querySelector('[data-action="down"]').addEventListener("click", () => moveClip(index, 1));
@@ -418,9 +750,10 @@ function renderClipList(){
       input.addEventListener("input", () => {
         const key = input.dataset.fx;
         clip.effects[key] = input.type === "checkbox" ? input.checked : parseFloat(input.value);
-        applyPreviewEffects(clip);
+        ensurePreviewing(clip);
       });
     });
+    wireVfxPanel(item, clip);
 
     list.appendChild(item);
   });
@@ -436,7 +769,7 @@ function splitClip(index){
     return;
   }
 
-  const secondHalf = { ...clip, id: uid(), trimStart: midpoint };
+  const secondHalf = { ...clip, id: uid(), trimStart: midpoint, effects: { ...clip.effects }, vfx: { ...clip.vfx }, chroma: { ...clip.chroma } };
   clip.trimEnd = midpoint;
   clips.splice(index + 1, 0, secondHalf);
   renderClipList();
@@ -467,7 +800,7 @@ function renderTimeline(){
     block.style.width = `${widthPercent}%`;
     block.textContent = clip.speed && clip.speed !== 1 ? `T${i + 1} ${clip.speed}x` : `T${i + 1}`;
     block.title = `${clip.name} (${clipDurations[i].toFixed(1)}s)`;
-    block.addEventListener("click", () => showPreview(clip.url));
+    block.addEventListener("click", () => showPreview(clip.url, clip));
     videoTrack.appendChild(block);
   });
 
@@ -480,6 +813,14 @@ function renderTimeline(){
     marker.style.left = `${leftPercent}%`;
     marker.style.width = `${widthPercent}%`;
     marker.textContent = ov.text ? ov.text.slice(0, 10) : "text";
+    overlayTrack.appendChild(marker);
+  });
+  titles3d.forEach(t => {
+    const marker = document.createElement("div");
+    marker.className = "timeline-overlay-marker title3d";
+    marker.style.left = `${Math.min(97, (t.start / totalDuration) * 100)}%`;
+    marker.style.width = `${Math.max(3, (t.duration / totalDuration) * 100)}%`;
+    marker.textContent = "3D " + (t.text ? t.text.slice(0, 8) : "title");
     overlayTrack.appendChild(marker);
   });
 
@@ -499,16 +840,20 @@ function moveClip(index, direction){
   renderClipList();
 }
 
-function showPreview(url){
+function showPreview(url, clipRef){
   const frame = document.getElementById("previewFrame");
-  const clip = clips.find(c => c.url === url);
+  const clip = clipRef || clips.find(c => c.url === url);
   frame.dataset.clipUrl = url;
+  frame.dataset.clipId = clip ? clip.id : "";
   frame.innerHTML = `
     <div class="preview-letterbox-top"></div>
     <div class="preview-slate">MONITOR${clip ? " · " + escapeHtml(clip.name) : ""}</div>
     <video src="${url}" controls></video>
+    <canvas class="chroma-canvas" id="chromaCanvas"></canvas>
+    <div class="preview-grain" id="previewGrain"></div>
     <div class="preview-vignette" id="previewVignette"></div>
     <div class="preview-letterbox-bottom"></div>
+    <div class="chroma-bar" id="chromaBar"><button type="button" id="chromaPlay">Play</button><input type="range" id="chromaSeek" min="0" max="1000" value="0"></div>
     <div class="preview-timecode timecode" id="previewTimecode">00:00:00</div>
   `;
   const video = frame.querySelector("video");
@@ -523,15 +868,60 @@ function showPreview(url){
   applyPreviewEffects(clip);
 }
 
-// Shows the clip's effects on the monitor, so sliders update the picture live.
+// Make sure the monitor is showing this clip, then apply its effects.
+function ensurePreviewing(clip){
+  const frame = document.getElementById("previewFrame");
+  if (frame.dataset.clipId !== clip.id) showPreview(clip.url, clip);
+  else applyPreviewEffects(clip);
+}
+
+let noiseUrl = "";
+function makeNoiseUrl(){
+  if (noiseUrl) return noiseUrl;
+  const c = document.createElement("canvas"); c.width = 160; c.height = 160;
+  const ctx = c.getContext("2d");
+  if (!ctx) return "";
+  const img = ctx.createImageData(160, 160);
+  for (let i = 0; i < img.data.length; i += 4){ const v = Math.random() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  ctx.putImageData(img, 0, 0);
+  noiseUrl = c.toDataURL("image/png");
+  return noiseUrl;
+}
+
+// Shows the clip's look and effects on the monitor. This is a close preview;
+// the exported film is always rendered with the real filters.
 function applyPreviewEffects(clip){
   const frame = document.getElementById("previewFrame");
   const video = frame.querySelector("video");
-  if (!video || !clip || frame.dataset.clipUrl !== clip.url) return;
+  if (!video || !clip || frame.dataset.clipId !== clip.id) return;
   const fx = clip.effects || {};
-  video.style.filter = `brightness(${1 + (fx.brightness || 0)}) contrast(${fx.contrast ?? 1}) saturate(${fx.saturation ?? 1}) blur(${fx.blur || 0}px)`;
+  const v = Object.assign(defaultVfx(), clip.vfx || {});
+  const look = LOOKS[v.look] || LOOKS.none;
+  const glow = clamp(Math.max(v.glow || 0, look.glow || 0), 0, 1);
+
+  const filter = [
+    `brightness(${1 + (fx.brightness || 0)}) contrast(${fx.contrast ?? 1}) saturate(${fx.saturation ?? 1}) blur(${fx.blur || 0}px)`,
+    look.css,
+    glow > 0 ? `drop-shadow(0 0 ${Math.round(4 + glow * 10)}px rgba(255,255,255,${(0.12 + glow * 0.3).toFixed(2)}))` : "",
+  ].filter(Boolean).join(" ");
+
+  const canvas = document.getElementById("chromaCanvas");
+  for (const el of [video, canvas]){
+    if (!el) continue;
+    el.style.filter = filter;
+    el.classList.toggle("fx-shake", v.shake > 0);
+    el.classList.toggle("fx-glitch", v.glitch > 0);
+    el.style.setProperty("--amp", String(Math.round(2 + Math.max(v.shake, v.glitch) * 9)));
+  }
   const vig = document.getElementById("previewVignette");
   if (vig) vig.style.display = fx.vignette ? "block" : "none";
+
+  const grain = document.getElementById("previewGrain");
+  if (grain){
+    grain.style.opacity = String(v.grain * 0.55);
+    if (v.grain > 0) grain.style.backgroundImage = `url(${makeNoiseUrl()})`;
+  }
+  setupChromaPreview(clip, video);
 }
 
 document.getElementById("addOverlayBtn").addEventListener("click", () => {
@@ -597,6 +987,392 @@ document.getElementById("musicVolume").addEventListener("input", (e) => { musicV
 
 document.getElementById("renderBtn").addEventListener("click", renderFinalVideo);
 
+
+// ============================================================
+// Looks & VFX panel (per clip)
+// ============================================================
+function vfxPanelHtml(clip){
+  const v = clip.vfx, ck = clip.chroma;
+  const looks = Object.entries(LOOKS).map(([key, l]) =>
+    `<button type="button" class="look-chip${v.look === key ? " active" : ""}" data-look="${key}"><span class="look-swatch" style="background:${l.swatch}"></span>${escapeHtml(l.label)}</button>`).join("");
+  const open = (v.look !== "none" || v.grain || v.glow || v.glitch || v.shake || ck.enabled) ? " open" : "";
+  const slider = (key, label) => `<label>${label} <input type="range" data-vfx="${key}" min="0" max="1" step="0.05" value="${v[key]}"></label>`;
+  return `
+    <details class="vfx-details"${open}>
+      <summary>Looks &amp; VFX</summary>
+      <div class="look-grid">${looks}</div>
+      <button type="button" class="vfx-link" data-action="look-all">Use this look on every clip</button>
+      <div class="vfx-sliders">
+        ${slider("grain", "Film grain")}${slider("glow", "Glow")}${slider("glitch", "Glitch")}${slider("shake", "Camera shake")}
+      </div>
+      <div class="chroma-box">
+        <label class="chroma-toggle"><input type="checkbox" data-ck="enabled" ${ck.enabled ? "checked" : ""}> Green screen</label>
+        <div class="chroma-controls" style="display:${ck.enabled ? "block" : "none"};">
+          <div class="chroma-row">Key colour
+            <input type="color" data-ck="color" value="${ck.color}">
+            <button type="button" class="vfx-link" data-action="key-green">Green</button>
+            <button type="button" class="vfx-link" data-action="key-blue">Blue</button>
+          </div>
+          <div class="vfx-sliders">
+            <label>Colour range <input type="range" data-ck="similarity" min="0.03" max="0.4" step="0.01" value="${ck.similarity}"></label>
+            <label>Edge softness <input type="range" data-ck="blend" min="0" max="0.3" step="0.01" value="${ck.blend}"></label>
+          </div>
+          <div class="chroma-row">Background
+            <select data-ck="bgType">
+              <option value="color"${ck.bgType === "color" ? " selected" : ""}>Solid colour</option>
+              <option value="image"${ck.bgType === "image" ? " selected" : ""}>Image</option>
+            </select>
+            <input type="color" data-ck="bgColor" value="${ck.bgColor}" style="display:${ck.bgType === "color" ? "inline-block" : "none"};">
+            <button type="button" class="vfx-link" data-action="bg-pick" style="display:${ck.bgType === "image" ? "inline-block" : "none"};">${ck.bgFile ? escapeHtml(ck.bgFile.name.slice(0, 18)) : "Choose image"}</button>
+            <input type="file" accept="image/*" data-ck="bgFile" style="display:none;">
+          </div>
+          <p class="hint" style="margin:8px 0 0;">The monitor shows a quick preview of the key. The export uses the full-quality keyer.</p>
+        </div>
+      </div>
+    </details>`;
+}
+
+function wireVfxPanel(item, clip){
+  item.querySelectorAll("[data-look]").forEach(btn => btn.addEventListener("click", () => {
+    clip.vfx.look = btn.dataset.look;
+    item.querySelectorAll("[data-look]").forEach(b => b.classList.toggle("active", b === btn));
+    ensurePreviewing(clip);
+  }));
+  item.querySelector('[data-action="look-all"]').addEventListener("click", () => {
+    clips.forEach(other => { other.vfx.look = clip.vfx.look; });
+    renderClipList();
+    ensurePreviewing(clip);
+  });
+  item.querySelectorAll("[data-vfx]").forEach(input => input.addEventListener("input", () => {
+    clip.vfx[input.dataset.vfx] = parseFloat(input.value);
+    ensurePreviewing(clip);
+  }));
+
+  const controls = item.querySelector(".chroma-controls");
+  const bgColorInput = item.querySelector('[data-ck="bgColor"]');
+  const bgPickBtn = item.querySelector('[data-action="bg-pick"]');
+  const bgFileInput = item.querySelector('[data-ck="bgFile"]');
+
+  item.querySelectorAll("[data-ck]").forEach(input => {
+    const key = input.dataset.ck;
+    const handler = () => {
+      if (key === "enabled"){
+        clip.chroma.enabled = input.checked;
+        controls.style.display = input.checked ? "block" : "none";
+      } else if (key === "bgFile"){
+        const file = input.files[0];
+        if (!file) return;
+        if (clip.chroma.bgUrl) URL.revokeObjectURL(clip.chroma.bgUrl);
+        clip.chroma.bgFile = file;
+        clip.chroma.bgUrl = URL.createObjectURL(file);
+        bgPickBtn.textContent = file.name.slice(0, 18);
+      } else if (input.type === "range"){
+        clip.chroma[key] = parseFloat(input.value);
+      } else {
+        clip.chroma[key] = input.value;
+      }
+      if (key === "bgType"){
+        bgColorInput.style.display = input.value === "color" ? "inline-block" : "none";
+        bgPickBtn.style.display = input.value === "image" ? "inline-block" : "none";
+      }
+      ensurePreviewing(clip);
+    };
+    input.addEventListener(input.type === "range" || input.type === "color" ? "input" : "change", handler);
+  });
+
+  const setKey = hex => {
+    clip.chroma.color = hex;
+    item.querySelector('[data-ck="color"]').value = hex;
+    ensurePreviewing(clip);
+  };
+  item.querySelector('[data-action="key-green"]').addEventListener("click", () => setKey("#00ff00"));
+  item.querySelector('[data-action="key-blue"]').addEventListener("click", () => setKey("#0000ff"));
+  bgPickBtn.addEventListener("click", () => bgFileInput.click());
+}
+
+// ============================================================
+// Green screen preview on the monitor
+// ============================================================
+let chromaRaf = 0;
+let chromaBgImg = null, chromaBgUrl = "";
+const chromaWork = document.createElement("canvas");
+chromaWork.width = 640; chromaWork.height = 360;
+
+function setupChromaPreview(clip, video){
+  cancelAnimationFrame(chromaRaf);
+  const canvas = document.getElementById("chromaCanvas");
+  const bar = document.getElementById("chromaBar");
+  if (!canvas || !bar) return;
+  const ck = clip.chroma;
+
+  if (!ck || !ck.enabled){
+    canvas.style.display = "none"; bar.style.display = "none";
+    video.style.opacity = "1"; video.controls = true;
+    return;
+  }
+
+  canvas.style.display = "block"; bar.style.display = "flex";
+  video.style.opacity = "0"; video.controls = false;
+  canvas.width = 640; canvas.height = 360;
+  const ctx = canvas.getContext("2d");
+  const wctx = chromaWork.getContext("2d", { willReadFrequently: true });
+  if (!ctx || !wctx){ canvas.style.display = "none"; bar.style.display = "none"; video.style.opacity = "1"; video.controls = true; return; }
+
+  const keyCbCr = toCbCr(...hexToRgb(ck.color));
+  const lo = ck.similarity * 355, hi = lo + Math.max(ck.blend * 355, 1);
+  const playBtn = document.getElementById("chromaPlay");
+  const seek = document.getElementById("chromaSeek");
+
+  if (ck.bgType === "image" && ck.bgUrl){
+    if (chromaBgUrl !== ck.bgUrl){
+      chromaBgUrl = ck.bgUrl;
+      chromaBgImg = new Image();
+      chromaBgImg.onload = () => draw();
+      chromaBgImg.src = ck.bgUrl;
+    }
+  } else { chromaBgImg = null; chromaBgUrl = ""; }
+
+  function draw(){
+    if (ck.bgType === "image" && chromaBgImg && chromaBgImg.complete && chromaBgImg.naturalWidth){
+      const s = Math.max(640 / chromaBgImg.naturalWidth, 360 / chromaBgImg.naturalHeight);
+      const w = chromaBgImg.naturalWidth * s, h = chromaBgImg.naturalHeight * s;
+      ctx.drawImage(chromaBgImg, (640 - w) / 2, (360 - h) / 2, w, h);
+    } else {
+      ctx.fillStyle = isHex(ck.bgColor) ? ck.bgColor : "#0a0806";
+      ctx.fillRect(0, 0, 640, 360);
+    }
+    if (video.readyState >= 2 && video.videoWidth){
+      wctx.fillStyle = "#000"; wctx.fillRect(0, 0, 640, 360);
+      const s = Math.min(640 / video.videoWidth, 360 / video.videoHeight);
+      const w = video.videoWidth * s, h = video.videoHeight * s;
+      wctx.drawImage(video, (640 - w) / 2, (360 - h) / 2, w, h);
+      const img = wctx.getImageData(0, 0, 640, 360), d = img.data;
+      for (let i = 0; i < d.length; i += 4){
+        const cb = -0.168736 * d[i] - 0.331264 * d[i + 1] + 0.5 * d[i + 2];
+        const cr = 0.5 * d[i] - 0.418688 * d[i + 1] - 0.081312 * d[i + 2];
+        const dist = Math.sqrt((cb - keyCbCr[0]) * (cb - keyCbCr[0]) + (cr - keyCbCr[1]) * (cr - keyCbCr[1]));
+        d[i + 3] = dist <= lo ? 0 : dist >= hi ? 255 : ((dist - lo) / (hi - lo)) * 255;
+      }
+      wctx.putImageData(img, 0, 0);
+      ctx.drawImage(chromaWork, 0, 0);
+    }
+    if (video.duration) seek.value = String(Math.round((video.currentTime / video.duration) * 1000));
+  }
+  function loop(){
+    draw();
+    if (!video.paused && !video.ended) chromaRaf = requestAnimationFrame(loop);
+  }
+
+  playBtn.textContent = video.paused ? "Play" : "Pause";
+  playBtn.onclick = () => { if (video.paused) video.play(); else video.pause(); };
+  seek.oninput = () => { if (video.duration) video.currentTime = (Number(seek.value) / 1000) * video.duration; };
+  video.onplay = () => { playBtn.textContent = "Pause"; loop(); };
+  video.onpause = () => { playBtn.textContent = "Play"; draw(); };
+  video.onseeked = draw;
+  video.onloadeddata = draw;
+  draw();
+}
+
+// ============================================================
+// Text overlays are drawn as image cards (no font files needed)
+// ============================================================
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = text.replace(/\s+/g, " ").split(" ");
+  const lines = [];
+  let line = "";
+  for (const word of words){
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = word; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines.slice(0, 3);
+}
+
+function canvasToBytes(canvas){
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async blob => {
+      if (!blob){ reject(new Error("Couldn't turn the picture into a file.")); return; }
+      resolve(new Uint8Array(await blob.arrayBuffer()));
+    }, "image/png");
+  });
+}
+
+async function renderTextCard(ov){
+  try { await document.fonts.load("600 46px Inter"); } catch (e) {}
+  const canvas = document.createElement("canvas");
+  canvas.width = VFX_W; canvas.height = VFX_H;
+  const ctx = canvas.getContext("2d");
+  ctx.font = "600 46px Inter, sans-serif";
+  ctx.textBaseline = "middle"; ctx.textAlign = "center";
+  const lines = wrapCanvasText(ctx, ov.text.trim(), 1060);
+  const lineH = 60;
+  const boxW = Math.min(1160, Math.max(...lines.map(l => ctx.measureText(l).width)) + 64);
+  const boxH = lines.length * lineH + 30;
+  const cy = ov.position === "top" ? 36 + boxH / 2 : ov.position === "center" ? VFX_H / 2 : VFX_H - 36 - boxH / 2;
+
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(VFX_W / 2 - boxW / 2, cy - boxH / 2, boxW, boxH, 14); else ctx.rect(VFX_W / 2 - boxW / 2, cy - boxH / 2, boxW, boxH);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 8;
+  lines.forEach((line, i) => ctx.fillText(line, VFX_W / 2, cy - boxH / 2 + 15 + lineH * (i + 0.5)));
+  return canvasToBytes(canvas);
+}
+
+async function imageFileToPng(file){
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1920 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return canvasToBytes(canvas);
+}
+
+// ============================================================
+// 3D titles
+// ============================================================
+const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+const TITLE_FONTS = [
+  { key: "gentilis_bold", label: "Elegant" },
+  { key: "helvetiker_bold", label: "Modern" },
+  { key: "optimer_bold", label: "Classic" },
+];
+let threeModule = null;
+const typefaceCache = {};
+
+async function loadTitleAssets(fontKey){
+  if (!threeModule) threeModule = await import(THREE_URL);
+  if (!typefaceCache[fontKey]){
+    const res = await fetch(`https://cdn.jsdelivr.net/npm/three@0.160.0/examples/fonts/${fontKey}.typeface.json`);
+    if (!res.ok) throw new Error("Couldn't load the title font.");
+    typefaceCache[fontKey] = await res.json();
+  }
+  return { THREE: threeModule, typeface: typefaceCache[fontKey] };
+}
+
+function makeTitleRenderer(THREE, canvas, width, height){
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(width, height, false);
+  renderer.setClearColor(0x000000, 0);
+  return renderer;
+}
+
+// Draws every frame of a title (24 per second) and returns them as PNG bytes.
+async function renderTitleFrames(t, onProgress){
+  const { THREE, typeface } = await loadTitleAssets(t.font);
+  const canvas = document.createElement("canvas");
+  const renderer = makeTitleRenderer(THREE, canvas, VFX_W, VFX_H);
+  const scene = createTitleScene(THREE, renderer, typeface, { text: t.text, style: t.style, color: t.color, seconds: t.duration, width: VFX_W, height: VFX_H });
+  const total = Math.max(24, Math.round(t.duration * 24));
+  const frames = [];
+  try {
+    for (let i = 0; i < total; i++){
+      scene.setFrame(total === 1 ? 0 : i / (total - 1));
+      frames.push(await canvasToBytes(renderer.domElement));
+      if (onProgress) onProgress(i + 1, total);
+    }
+  } finally {
+    scene.dispose();
+    renderer.dispose();
+  }
+  return frames;
+}
+
+let titlePreview = null;
+function stopTitlePreview(){
+  if (!titlePreview) return;
+  cancelAnimationFrame(titlePreview.raf);
+  try { titlePreview.scene.dispose(); titlePreview.renderer.dispose(); } catch (e) {}
+  if (titlePreview.box) titlePreview.box.innerHTML = "";
+  titlePreview = null;
+}
+
+async function startTitlePreview(t, box, msg){
+  stopTitlePreview();
+  msg.textContent = "Loading 3D preview...";
+  try {
+    if (!t.text.trim()) throw new Error("Type a title first.");
+    const { THREE, typeface } = await loadTitleAssets(t.font);
+    const canvas = document.createElement("canvas");
+    canvas.className = "title3d-canvas";
+    box.innerHTML = ""; box.appendChild(canvas);
+    const renderer = makeTitleRenderer(THREE, canvas, 480, 270);
+    const scene = createTitleScene(THREE, renderer, typeface, { text: t.text, style: t.style, color: t.color, seconds: t.duration, width: 480, height: 270, curveSegments: 4, bevelSegments: 1 });
+    const state = { renderer, scene, box, raf: 0 };
+    titlePreview = state;
+    const startedAt = performance.now();
+    const loop = now => {
+      const cycle = (t.duration + 0.8) * 1000;
+      const p = Math.min(1, ((now - startedAt) % cycle) / (t.duration * 1000));
+      scene.setFrame(p);
+      state.raf = requestAnimationFrame(loop);
+    };
+    state.raf = requestAnimationFrame(loop);
+    msg.textContent = "Previewing. Press the button again to stop.";
+  } catch (err){
+    console.error("3D preview failed:", err);
+    stopTitlePreview();
+    box.innerHTML = "";
+    msg.textContent = /WebGL|context/i.test(err.message || "") ? "3D preview needs WebGL, which this browser or device isn't offering." : (err.message || "Couldn't start the preview.");
+  }
+}
+
+document.getElementById("addTitle3dBtn").addEventListener("click", () => {
+  const last = titles3d[titles3d.length - 1];
+  titles3d.push({ id: uid(), text: "", style: "gold_reveal", font: "gentilis_bold", color: "#e0b158", start: last ? last.start + last.duration : 0, duration: 4 });
+  renderTitle3dList();
+});
+
+function renderTitle3dList(){
+  const list = document.getElementById("title3dList");
+  stopTitlePreview();
+  if (titles3d.length === 0){
+    list.innerHTML = `<div class="hint">No 3D titles yet.</div>`;
+    renderTimeline();
+    return;
+  }
+  list.innerHTML = "";
+  titles3d.forEach((t, index) => {
+    const item = document.createElement("div");
+    item.className = "overlay-item";
+    item.innerHTML = `
+      <div class="overlay-row">
+        <input type="text" data-t="text" maxlength="48" placeholder="Title text" value="${escapeHtml(t.text)}">
+        <button class="remove-btn" data-action="remove">✕</button>
+      </div>
+      <div class="overlay-row">
+        <select data-t="style" style="flex:1;">${Object.entries(TITLE_STYLES).map(([k, label]) => `<option value="${k}"${t.style === k ? " selected" : ""}>${label}</option>`).join("")}</select>
+        <select data-t="font" style="flex:1;">${TITLE_FONTS.map(f => `<option value="${f.key}"${t.font === f.key ? " selected" : ""}>${f.label}</option>`).join("")}</select>
+      </div>
+      <div class="overlay-row">
+        <input type="number" data-t="start" value="${t.start}" min="0" step="0.5" title="Start (sec)">
+        <input type="number" data-t="duration" value="${t.duration}" min="2" max="6" step="0.5" title="Length (sec, 2 to 6)">
+        <input type="color" data-t="color" value="${t.color}" title="Colour" class="color-pill">
+      </div>
+      <button class="add-btn" data-action="preview" style="margin:4px 0 0;">Preview in 3D</button>
+      <div class="title3d-box"></div>
+      <div class="hint title3d-msg" style="margin:6px 0 0;">Plain letters and numbers work best.</div>`;
+
+    const box = item.querySelector(".title3d-box"), msg = item.querySelector(".title3d-msg");
+    item.querySelector('[data-t="text"]').addEventListener("input", e => { t.text = e.target.value; renderTimeline(); });
+    item.querySelector('[data-t="style"]').addEventListener("change", e => { t.style = e.target.value; });
+    item.querySelector('[data-t="font"]').addEventListener("change", e => { t.font = e.target.value; });
+    item.querySelector('[data-t="color"]').addEventListener("input", e => { t.color = e.target.value; });
+    item.querySelector('[data-t="start"]').addEventListener("input", e => { t.start = Math.max(0, parseFloat(e.target.value) || 0); renderTimeline(); });
+    item.querySelector('[data-t="duration"]').addEventListener("input", e => { t.duration = clamp(parseFloat(e.target.value) || 4, 2, 6); renderTimeline(); });
+    item.querySelector('[data-action="remove"]').addEventListener("click", () => { titles3d.splice(index, 1); renderTitle3dList(); });
+    item.querySelector('[data-action="preview"]').addEventListener("click", () => {
+      if (titlePreview && titlePreview.box === box){ stopTitlePreview(); msg.textContent = "Plain letters and numbers work best."; return; }
+      startTitlePreview(t, box, msg);
+    });
+    list.appendChild(item);
+  });
+  renderTimeline();
+}
+
 function setProgress(percent, label){
   document.getElementById("progressBox").classList.add("show");
   document.getElementById("progressFill").style.width = `${percent}%`;
@@ -621,39 +1397,28 @@ async function renderFinalVideo(){
       await ffmpeg.writeFile(`in${i}.mp4`, await fetchFile(clip.file));
     }
 
-    // Trim each clip, apply speed change, normalize to the same
-    // resolution/framerate so clips can be combined or crossfaded cleanly.
+    // Trim each clip, apply speed change, effects, looks, and green screen, and
+    // normalize every clip to the same size and frame rate so they join cleanly.
     setProgress(15, "Trimming and adjusting clips...");
     const clipFinalDurations = [];
     for (let i = 0; i < clips.length; i++){
       const clip = clips[i];
       const rawDuration = Math.max(0.5, clip.trimEnd - clip.trimStart);
       const speed = clip.speed || 1;
-      const finalDuration = rawDuration / speed;
-      clipFinalDurations.push(finalDuration);
+      clipFinalDurations.push(rawDuration / speed);
 
-      const fx = clip.effects || {};
-      const effectFilters = [
-        (fx.brightness || fx.contrast !== 1 || fx.saturation !== 1)
-          ? `eq=brightness=${fx.brightness || 0}:contrast=${fx.contrast ?? 1}:saturation=${fx.saturation ?? 1}` : null,
-        fx.blur > 0 ? `gblur=sigma=${fx.blur}` : null,
-        fx.vignette ? "vignette=PI/4" : null,
-      ].filter(Boolean);
-      const videoFilters = [
-        "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1",
-        speed !== 1 ? `setpts=PTS/${speed}` : null,
-        ...effectFilters,
-      ].filter(Boolean).join(",");
-
-      const audioFilters = speed !== 1 ? [`atempo=${Math.min(2, Math.max(0.5, speed))}`] : [];
-
-      const args = [
-        "-i", `in${i}.mp4`,
-        "-ss", String(clip.trimStart), "-t", String(rawDuration),
-        "-vf", videoFilters,
-        "-r", "30", "-c:v", "libx264", "-preset", "ultrafast",
-      ];
-      if (audioFilters.length > 0) args.push("-af", audioFilters.join(","));
+      const graph = buildClipGraph(clip);
+      // Trim on the way IN (before the filters), so a speed change cuts the right part of the clip.
+      const args = ["-ss", String(clip.trimStart), "-t", String(rawDuration), "-i", `in${i}.mp4`];
+      if (graph.needsBgImage){
+        const bgName = `bg${i}.png`;
+        await ffmpeg.writeFile(bgName, await imageFileToPng(clip.chroma.bgFile));
+        args.push("-loop", "1", "-i", bgName);
+      }
+      if (graph.complex) args.push("-filter_complex", graph.graph, "-map", "[vout]", "-map", "0:a?");
+      else args.push("-vf", graph.graph);
+      args.push("-r", "30", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p");
+      if (speed !== 1) args.push("-af", `atempo=${Math.min(2, Math.max(0.5, speed))}`);
       args.push("-c:a", "aac", `trimmed${i}.mp4`);
 
       await ffmpeg.exec(args);
@@ -711,27 +1476,53 @@ async function renderFinalVideo(){
       currentFile = "graded.mp4";
     }
 
-    if (overlays.length > 0){
-      setProgress(65, "Adding text overlays...");
-      for (let i = 0; i < overlays.length; i++){
-        const ov = overlays[i];
-        if (!ov.text.trim()) continue;
+    // Text cards and 3D titles go on in a single pass, so the picture is only re-encoded once.
+    let skippedTitles = 0;
+    const textItems = overlays.filter(ov => ov.text.trim());
+    const titleItems = titles3d.filter(t => t.text.trim());
+    if (textItems.length > 0 || titleItems.length > 0){
+      setProgress(64, "Preparing titles...");
+      const inputArgs = [], items = [], written = [];
 
-        const yPos = ov.position === "top" ? "40" : ov.position === "center" ? "(h-text_h)/2" : "h-th-40";
-        const escapedText = ov.text.replace(/'/g, "\\'").replace(/:/g, "\\:");
-        const enableExpr = `between(t,${ov.start},${ov.start + ov.duration})`;
-        const end = ov.start + ov.duration;
-        const fadeExpr = `if(lt(t,${ov.start}+0.5),(t-${ov.start})/0.5,if(gt(t,${end}-0.5),(${end}-t)/0.5,1))`;
-
-        await ffmpeg.exec([
-          "-i", currentFile,
-          "-vf", `drawtext=text='${escapedText}':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=${yPos}:box=1:boxcolor=black@0.5:boxborderw=10:alpha='${fadeExpr}':enable='${enableExpr}'`,
-          "-c:a", "copy",
-          `overlay${i}.mp4`,
-        ]);
-        currentFile = `overlay${i}.mp4`;
-        setProgress(65 + Math.round((i + 1) / overlays.length * 15), `Adding overlay ${i + 1} of ${overlays.length}...`);
+      for (let i = 0; i < textItems.length; i++){
+        const ov = textItems[i];
+        const name = `card${i}.png`;
+        await ffmpeg.writeFile(name, await renderTextCard(ov));
+        written.push(name);
+        const duration = Math.max(1, ov.duration);
+        inputArgs.push(["-loop", "1", "-framerate", "30", "-t", String(duration), "-i", name]);
+        items.push({ kind: "still", start: ov.start, duration });
       }
+
+      for (let i = 0; i < titleItems.length; i++){
+        const t = titleItems[i];
+        try {
+          const frames = await renderTitleFrames(t, (done, total) => {
+            setProgress(66 + Math.round(((i + done / total) / titleItems.length) * 14), `Drawing 3D title ${i + 1} of ${titleItems.length}...`);
+          });
+          for (let f = 0; f < frames.length; f++){
+            const name = `t${i}_${String(f).padStart(4, "0")}.png`;
+            await ffmpeg.writeFile(name, frames[f]);
+            written.push(name);
+          }
+          inputArgs.push(["-framerate", "24", "-start_number", "0", "-i", `t${i}_%04d.png`]);
+          items.push({ kind: "seq", start: t.start, duration: t.duration });
+        } catch (err){
+          console.error("Skipped a 3D title:", err);
+          skippedTitles++;
+        }
+      }
+
+      if (items.length > 0){
+        setProgress(82, "Adding titles to the film...");
+        const og = buildOverlayGraph(items);
+        const args = ["-i", currentFile];
+        inputArgs.forEach(a => args.push(...a));
+        args.push("-filter_complex", og.graph, "-map", `[${og.outLabel}]`, "-map", "0:a?", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", "-c:a", "copy", "titled.mp4");
+        await ffmpeg.exec(args);
+        currentFile = "titled.mp4";
+      }
+      for (const name of written){ try { await ffmpeg.deleteFile(name); } catch (e) {} }
     }
 
     if (musicFile){
@@ -760,7 +1551,7 @@ async function renderFinalVideo(){
 
     document.getElementById("downloadLink").href = downloadUrl;
     document.getElementById("downloadBox").classList.add("show");
-    setProgress(100, "Done!");
+    setProgress(100, skippedTitles > 0 ? `Done. ${skippedTitles} 3D title(s) were skipped because this browser couldn't draw 3D.` : "Done!");
   } catch (err){
     console.error("Render failed:", err);
     setProgress(0, "Something went wrong during rendering — check the console for details.");
@@ -771,6 +1562,7 @@ async function renderFinalVideo(){
 
 renderClipList();
 renderOverlayList();
+renderTitle3dList();
 initFfmpeg();
 </script>
 <script src="../beta-toolkit.js"></script>
