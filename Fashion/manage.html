@@ -250,6 +250,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .verif{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
 .verif .badge{ font-family:var(--display); font-weight:700; font-size:18px; color:var(--gold-1); }
 .verif p{ flex-basis:100%; font-size:14px; color:var(--muted); line-height:1.6; }
+.msg{ padding:14px 0; border-bottom:1px solid var(--line); }
+.msg:last-child{ border-bottom:none; }
+.msg .when{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-2); }
+.msg p{ margin-top:6px; font-size:14.5px; color:var(--soft); line-height:1.6; white-space:pre-wrap; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -479,7 +483,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [], updStatus = null, verif = null;
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [], updStatus = null, verif = null, inbox = [];
   var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
   function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
@@ -496,7 +500,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
         '<div class="field"><label for="fCategory">Category <span class="req">*</span></label><select class="select" id="fCategory">' + catOptions(v.category) + '</select></div>' +
         '<div class="field"><label for="fLocation">Location</label><input class="input" id="fLocation" maxlength="60" placeholder="City, State" value="' + RF.esc(v.location) + '"></div>' +
         '<div class="field full"><label for="fTagline">Tagline</label><input class="input" id="fTagline" maxlength="90" placeholder="One line that sums up your brand" value="' + RF.esc(v.tagline) + '"></div>' +
-        '<div class="field full"><label for="fBio">About your brand</label><textarea class="textarea" id="fBio" maxlength="800" placeholder="Your story, what you make, who it is for.">' + RF.esc(v.bio) + '</textarea><div class="hint" id="bioCount"></div></div>' +
+        '<div class="field"><label for="fFounder">Founder name</label><input class="input" id="fFounder" maxlength="80" placeholder="First and last name" value="' + RF.esc(v.founder_name || "") + '"></div>' +
+        '<div class="field"><label for="fYear">Year founded</label><input class="input" id="fYear" inputmode="numeric" maxlength="4" placeholder="2024" value="' + RF.esc(v.founded_year || "") + '"></div>' +
+        '<div class="field full"><label for="fTags">Tags</label><input class="input" id="fTags" maxlength="200" placeholder="streetwear, handmade, sustainable" value="' + RF.esc((v.tags || []).join(", ")) + '"><div class="hint">Up to 8 short tags: materials, style, sizing (like "runs small"). Separate with commas.</div></div>' +
+        '<div class="field full"><label for="fBio">About your brand</label><textarea class="textarea" id="fBio" maxlength="2000" style="min-height:180px;" placeholder="Your story: how the brand started, what you make, who it is for. Press Enter for a new paragraph.">' + RF.esc(v.bio) + '</textarea><div class="hint" id="bioCount"></div></div>' +
         '<div class="field full"><label for="fShop">Shop link <span class="req">*</span></label><input class="input" id="fShop" type="url" inputmode="url" maxlength="300" placeholder="https://yourstore.com" value="' + RF.esc(v.shop_url) + '"><div class="hint">Where people buy. It has to start with https://</div></div>' +
         '<div class="field"><label for="fInsta">Instagram</label><input class="input" id="fInsta" maxlength="60" placeholder="yourbrand" value="' + RF.esc(v.instagram) + '"></div>' +
         '<div class="field"><label for="fWebsite">Website</label><input class="input" id="fWebsite" type="url" inputmode="url" maxlength="300" placeholder="https://yourbrand.com" value="' + RF.esc(v.website_url) + '"></div>' +
@@ -508,7 +515,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 
   function wireForm(v) {
     var bio = $("fBio"), count = $("bioCount");
-    function upd() { count.textContent = bio.value.length + " / 800"; }
+    function upd() { count.textContent = bio.value.length + " / 2000"; }
     bio.addEventListener("input", upd); upd();
     [["fLogo", "logoPrev", v.logo_url], ["fCover", "coverPrev", v.cover_url]].forEach(function (a) {
       var prev = $(a[1]); if (a[2] && RF.isHttps(a[2])) prev.style.backgroundImage = 'url("' + encodeURI(a[2]) + '")';
@@ -551,9 +558,16 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       name: $("fName").value.trim(), slug: $("fSlug").value.trim(), category: $("fCategory").value, location: $("fLocation").value.trim(),
       tagline: $("fTagline").value.trim(), bio: $("fBio").value.trim(), shop_url: $("fShop").value.trim(),
       instagram: RF.cleanInstagram($("fInsta").value), website_url: $("fWebsite").value.trim(), contact_email: $("fEmail").value.trim(),
+      founder_name: $("fFounder").value.trim(), founded_year: $("fYear").value.trim(), tags: $("fTags").value,
     };
+    var tagList = String(v.tags || "").split(",").map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
+    var yearNum = v.founded_year === "" ? null : Number(v.founded_year);
     var e = null;
     if (v.name.length < 2) e = "Enter your brand name.";
+    else if (v.founder_name && v.founder_name.length < 2) e = "Founder name should be at least 2 letters.";
+    else if (yearNum !== null && (!Number.isInteger(yearNum) || yearNum < 1900 || yearNum > 2100)) e = "Year founded should be a four-digit year, like 2024.";
+    else if (tagList.length > 8) e = "Use up to 8 tags.";
+    else if (tagList.some(function (t) { return t.length > 24; })) e = "Each tag should be 24 characters or fewer.";
     else if (!RF.validSlug(v.slug)) e = "Pick a web address using 3 to 40 lowercase letters, numbers, and dashes.";
     else if (!RF.isHttps(v.shop_url)) e = "Add your shop link. It has to start with https://";
     else if (v.website_url && !RF.isHttps(v.website_url)) e = "The website link has to start with https://";
@@ -561,11 +575,13 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     else if (!RF.validEmail(v.contact_email)) e = "Enter a contact email so we can reach you about your application.";
     else if (applying && !$("fTerms").checked) e = "Please confirm the checkbox at the bottom.";
     if (!e && applying && !$("fLogo").files[0]) e = "Add your logo so people recognize your brand.";
+    v.tags = tagList; v.founded_year = yearNum;
     return { values: v, error: e };
   }
   function payload(v) {
     return { name: v.name, category: v.category, tagline: v.tagline || null, bio: v.bio || null, location: v.location || null, shop_url: v.shop_url,
-             instagram: v.instagram || null, website_url: v.website_url || null, contact_email: v.contact_email };
+             instagram: v.instagram || null, website_url: v.website_url || null, contact_email: v.contact_email,
+             founder_name: v.founder_name || null, founded_year: v.founded_year, tags: v.tags || [] };
   }
 
   function uploadImages(updates) {
@@ -648,6 +664,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).then(function () {
       if (!brand) return;
       return RF.client.rpc("fashion_my_verification").then(function (v) { verif = (!v.error && v.data) ? v.data : null; });
+    }).then(function () {
+      if (!brand) return;
+      return RF.client.rpc("fashion_my_inbox").then(function (m) { inbox = (!m.error && Array.isArray(m.data)) ? m.data : []; });
     });
   }
 
@@ -728,6 +747,14 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).join("");
     return '<div class="card" id="tagCard"><h2>Collaborations</h2><p class="lead">Brands that tagged you in their looks. Accepted tags show on the look.</p>' +
       (pending.length ? rows : '<p class="hint">No new requests.</p>') + '</div>';
+  }
+
+  function inboxHtml(){
+    if (!brand || brand.status !== "approved") return "";
+    var rows = inbox.length ? inbox.map(function (m) {
+      return '<div class="msg"><div class="when">' + RF.esc(new Date(m.created_at).toLocaleString()) + '</div><p>' + RF.esc(m.body) + '</p></div>';
+    }).join("") : '<p class="hint">No messages yet. Shoppers can send you a message from your brand page.</p>';
+    return '<div class="card"><h2>Messages</h2><p class="lead">Messages from shoppers on your brand page. They stay on RelviaFashion; nothing is emailed.</p>' + rows + '</div>';
   }
 
   function verificationHtml(){
@@ -877,7 +904,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   function renderManage() {
     var locked = brand.status === "approved" || brand.status === "suspended";
     var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + verificationHtml() + updatesHtml() + tagRequestsHtml() +
+    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + verificationHtml() + inboxHtml() + updatesHtml() + tagRequestsHtml() +
       '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
       '<div class="err" id="formErr" role="alert"></div>' +
       '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
