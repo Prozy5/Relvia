@@ -231,6 +231,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .locked{ opacity:.55; }
 .terms-box summary{ cursor:pointer; font-size:13px; font-weight:700; color:var(--gold); }
 @media (max-width:760px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+.chart{ margin-top:18px; }
+.chart svg{ width:100%; height:auto; display:block; }
+.chart-legend{ display:flex; gap:18px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:8px; }
+.chart-legend i{ display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:6px; vertical-align:middle; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -460,7 +464,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null;
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null;
   var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
   function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
@@ -617,6 +621,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).then(function () {
       if (!brand) return;
       return RF.client.rpc("fashion_my_analytics").then(function (a) { analytics = (!a.error && a.data) ? a.data : null; });
+    }).then(function () {
+      if (!brand || !analytics || !analytics.plus) return;
+      return RF.client.rpc("fashion_my_daily_stats", { p_days: 30 }).then(function (d) { daily = (!d.error && Array.isArray(d.data)) ? d.data : null; });
     });
   }
 
@@ -648,13 +655,47 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       '<div class="form-actions">' + btn + '</div></div>';
   }
 
+  function chartSvg(rows){
+    var W = 640, H = 220, pl = 36, pr = 12, pt = 14, pb = 28;
+    var max = 1;
+    rows.forEach(function (r) { max = Math.max(max, Number(r.views) || 0, Number(r.clicks) || 0); });
+    var step = Math.max(1, Math.ceil(max / 4)); max = step * 4;
+    var iw = W - pl - pr, ih = H - pt - pb;
+    function x(i){ return pl + (rows.length <= 1 ? 0 : (i / (rows.length - 1)) * iw); }
+    function y(v){ return pt + ih - (v / max) * ih; }
+    function line(key){
+      return rows.map(function (r, i) { return (i ? "L" : "M") + x(i).toFixed(1) + "," + y(Number(r[key]) || 0).toFixed(1); }).join(" ");
+    }
+    var grid = "";
+    for (var g = 0; g <= 4; g++) {
+      var v = step * g, gy = y(v);
+      grid += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + gy + '" y2="' + gy + '" stroke="#241b12" stroke-width="1"/>';
+      grid += '<text x="' + (pl - 6) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="#8a8073">' + v + '</text>';
+    }
+    var first = rows[0] ? rows[0].day.slice(5) : "", last = rows[rows.length - 1] ? rows[rows.length - 1].day.slice(5) : "";
+    var labels = '<text x="' + pl + '" y="' + (H - 6) + '" font-size="11" fill="#8a8073">' + first + '</text>' +
+                 '<text x="' + (W - pr) + '" y="' + (H - 6) + '" text-anchor="end" font-size="11" fill="#8a8073">' + last + '</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Daily views and shop clicks, last 30 days">' + grid + labels +
+      '<path d="' + line("views") + '" fill="none" stroke="#e0b158" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="' + line("clicks") + '" fill="none" stroke="#f6d27a" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/></svg>';
+  }
+
+  function chartHtml(){
+    if (!daily || !daily.length) return "";
+    var views = daily.reduce(function (s, r) { return s + (Number(r.views) || 0); }, 0);
+    var clicks = daily.reduce(function (s, r) { return s + (Number(r.clicks) || 0); }, 0);
+    if (!views && !clicks) return '<div class="chart"><p class="hint">Your daily chart starts filling in as people visit your page.</p></div>';
+    return '<div class="chart">' + chartSvg(daily) +
+      '<div class="chart-legend"><span><i style="background:#e0b158;"></i>Page views (' + views + ')</span><span><i style="background:#f6d27a;"></i>Shop clicks (' + clicks + ')</span></div></div>';
+  }
+
   function analyticsHtml(){
     if (!brand || !analytics) return "";
     var stat = function (n, label) { return '<div class="stat"><b>' + RF.fmtCount(n) + '</b><span>' + label + '</span></div>'; };
     if (analytics.plus) {
       return '<div class="card"><h2>Analytics</h2><p class="lead">The last 30 days.</p><div class="stats-grid">' +
         stat(analytics.views_30d, "Page views") + stat(analytics.shop_clicks_30d, "Shop clicks") +
-        stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div></div>';
+        stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div>' + chartHtml() + '</div>';
     }
     return '<div class="card locked"><h2>Analytics</h2><p class="lead">Page views and shop-link clicks are part of FashionPlus.</p><div class="stats-grid">' +
       stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div></div>';
