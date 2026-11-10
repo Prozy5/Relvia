@@ -245,6 +245,8 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .req .thumb{ width:56px; height:56px; border-radius:10px; background:#0a0704 center/cover; border:1px solid var(--line); flex-shrink:0; }
 .req .meta{ flex:1; min-width:0; font-size:14px; }
 .req .meta small{ display:block; color:var(--muted); margin-top:2px; }
+.upd-status{ font-size:13px; color:var(--muted); margin:6px 0 12px; }
+.upd-count{ font-size:12px; color:var(--muted-soft); text-align:right; margin-top:6px; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -474,7 +476,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [];
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [], updStatus = null;
   var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
   function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
@@ -637,6 +639,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).then(function () {
       if (!brand) return;
       return RF.client.rpc("fashion_my_tags").then(function (t) { tags = (!t.error && Array.isArray(t.data)) ? t.data : []; });
+    }).then(function () {
+      if (!brand) return;
+      return RF.client.rpc("fashion_my_update_status").then(function (s) { updStatus = (!s.error && s.data) ? s.data : null; });
     });
   }
 
@@ -717,6 +722,36 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).join("");
     return '<div class="card" id="tagCard"><h2>Collaborations</h2><p class="lead">Brands that tagged you in their looks. Accepted tags show on the look.</p>' +
       (pending.length ? rows : '<p class="hint">No new requests.</p>') + '</div>';
+  }
+
+  function updatesHtml(){
+    if (!brand || brand.status !== "approved" || !updStatus) return "";
+    var status;
+    if (updStatus.can_post) status = "You can post an update now. Your " + (updStatus.followers || 0) + " followers will see it in their feed.";
+    else status = "You have posted this week. Next update available " + (updStatus.next_at ? new Date(updStatus.next_at).toLocaleDateString() : "soon") + ".";
+    return '<div class="card" id="updCard"><h2>Updates to followers</h2>' +
+      '<p class="lead">One short update a week, up to 500 characters. It shows in your followers\' feed on RelviaFashion. Nothing is emailed.</p>' +
+      '<p class="upd-status">' + RF.esc(status) + '</p>' +
+      '<div class="field"><textarea class="textarea" id="updBody" maxlength="500" placeholder="New drop Friday, or a note about your next collection." ' + (updStatus.can_post ? "" : "disabled") + '></textarea>' +
+      '<div class="upd-count" id="updCount">0 / 500</div></div>' +
+      '<div class="err" id="updErr" role="alert"></div>' +
+      '<div class="form-actions"><button class="btn btn-gold" id="updBtn"' + (updStatus.can_post ? "" : " disabled") + '>Post update</button></div></div>';
+  }
+
+  function wireUpdates(){
+    var box = $("updBody"), btn = $("updBtn"); if (!box || !btn) return;
+    box.addEventListener("input", function () { $("updCount").textContent = box.value.length + " / 500"; });
+    btn.addEventListener("click", function () {
+      var body = box.value.trim();
+      $("updErr").textContent = "";
+      if (body.length < 3) { $("updErr").textContent = "Write a few words for your followers."; return; }
+      btn.disabled = true; btn.textContent = "Posting...";
+      RF.client.rpc("fashion_post_update", { p_body: body }).then(function (r) {
+        if (r.error) { btn.disabled = false; btn.textContent = "Post update"; $("updErr").textContent = RF.friendlyError(r.error); return; }
+        RF.toast("Posted to your followers.");
+        return loadPlan().then(render);
+      });
+    });
   }
 
   function analyticsHtml(){
@@ -807,7 +842,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   function renderManage() {
     var locked = brand.status === "approved" || brand.status === "suspended";
     var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + tagRequestsHtml() +
+    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + updatesHtml() + tagRequestsHtml() +
       '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
       '<div class="err" id="formErr" role="alert"></div>' +
       '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
@@ -820,7 +855,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     wireForm(brand);
     $("saveBtn").addEventListener("click", function () { save(false); });
     if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
-    wireAgreement(); wirePlan(); wireTagRequests();
+    wireAgreement(); wirePlan(); wireTagRequests(); wireUpdates();
     if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
     if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
   }
