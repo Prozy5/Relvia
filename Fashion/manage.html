@@ -235,6 +235,16 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .chart svg{ width:100%; height:auto; display:block; }
 .chart-legend{ display:flex; gap:18px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:8px; }
 .chart-legend i{ display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+.tagbox{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.tagbox .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.tagbox .input{ padding:8px 10px; font-size:13px; flex:1 1 140px; }
+.tagchip{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--line-gold); border-radius:999px; font-size:12px; color:var(--gold-1); margin:4px 4px 0 0; }
+.tagchip button{ font-size:14px; color:var(--muted); line-height:1; }
+.req{ display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
+.req:last-child{ border-bottom:none; }
+.req .thumb{ width:56px; height:56px; border-radius:10px; background:#0a0704 center/cover; border:1px solid var(--line); flex-shrink:0; }
+.req .meta{ flex:1; min-width:0; font-size:14px; }
+.req .meta small{ display:block; color:var(--muted); margin-top:2px; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -464,7 +474,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null;
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [];
   var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
   function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
@@ -624,6 +634,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).then(function () {
       if (!brand || !analytics || !analytics.plus) return;
       return RF.client.rpc("fashion_my_daily_stats", { p_days: 30 }).then(function (d) { daily = (!d.error && Array.isArray(d.data)) ? d.data : null; });
+    }).then(function () {
+      if (!brand) return;
+      return RF.client.rpc("fashion_my_tags").then(function (t) { tags = (!t.error && Array.isArray(t.data)) ? t.data : []; });
     });
   }
 
@@ -687,6 +700,23 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     if (!views && !clicks) return '<div class="chart"><p class="hint">Your daily chart starts filling in as people visit your page.</p></div>';
     return '<div class="chart">' + chartSvg(daily) +
       '<div class="chart-legend"><span><i style="background:#e0b158;"></i>Page views (' + views + ')</span><span><i style="background:#f6d27a;"></i>Shop clicks (' + clicks + ')</span></div></div>';
+  }
+
+  function tagRequestsHtml(){
+    if (!brand || brand.status !== "approved") return "";
+    var received = tags.filter(function (t) { return t.direction === "received"; });
+    var pending = received.filter(function (t) { return t.status === "pending"; });
+    var accepted = tags.filter(function (t) { return t.status === "accepted"; });
+    if (!pending.length && !accepted.length) return "";
+    var rows = pending.map(function (t) {
+      return '<div class="req"><div class="thumb" data-thumb="' + RF.esc(t.media_url || "") + '"></div><div class="meta">' +
+        '<b>' + RF.esc(t.poster_name) + '</b> tagged you in a look' + (t.caption ? ' &middot; ' + RF.esc(t.caption) : '') +
+        '<small>Accepting shows your name on that look.</small></div>' +
+        '<button class="btn btn-gold btn-sm" data-tag="accept" data-id="' + RF.esc(t.id) + '">Accept</button>' +
+        '<button class="btn btn-ghost btn-sm" data-tag="decline" data-id="' + RF.esc(t.id) + '">Decline</button></div>';
+    }).join("");
+    return '<div class="card" id="tagCard"><h2>Collaborations</h2><p class="lead">Brands that tagged you in their looks. Accepted tags show on the look.</p>' +
+      (pending.length ? rows : '<p class="hint">No new requests.</p>') + '</div>';
   }
 
   function analyticsHtml(){
@@ -777,7 +807,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   function renderManage() {
     var locked = brand.status === "approved" || brand.status === "suspended";
     var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() +
+    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + tagRequestsHtml() +
       '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
       '<div class="err" id="formErr" role="alert"></div>' +
       '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
@@ -790,7 +820,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     wireForm(brand);
     $("saveBtn").addEventListener("click", function () { save(false); });
     if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
-    wireAgreement(); wirePlan();
+    wireAgreement(); wirePlan(); wireTagRequests();
     if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
     if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
   }
@@ -828,6 +858,35 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     var d = new Date(iso), pad = function (n) { return String(n).padStart(2, "0"); };
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
+  function tagsForItem(id){
+    return tags.filter(function (t) { return t.direction === "sent" && t.item_id === id; });
+  }
+  function tagBoxHtml(it){
+    var mine = tagsForItem(it.id);
+    var chips = mine.map(function (t) {
+      return '<span class="tagchip">' + RF.esc(t.tagged_name) + (t.status === "pending" ? ' (pending)' : '') +
+        ' <button type="button" data-act="untag" data-id="' + RF.esc(t.id) + '" aria-label="Remove tag">&times;</button></span>';
+    }).join("");
+    return '<div class="tagbox"><div class="hint">Tag a brand in this look</div>' +
+      (chips ? '<div>' + chips + '</div>' : '') +
+      '<div class="row" style="margin-top:6px;"><input class="input" data-f="tagslug" maxlength="40" placeholder="their web address, like atelier-north" aria-label="Brand web address">' +
+      '<button class="btn btn-ghost btn-sm" data-act="tag">Send tag</button></div></div>';
+  }
+
+  function wireTagRequests(){
+    var card = $("tagCard"); if (!card) return;
+    card.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-tag]"); if (!b) return;
+      var accept = b.getAttribute("data-tag") === "accept";
+      b.disabled = true;
+      RF.client.rpc("fashion_respond_tag", { p_tag_id: b.getAttribute("data-id"), p_accept: accept }).then(function (r) {
+        if (r.error) { b.disabled = false; RF.toast(RF.friendlyError(r.error), true); return; }
+        RF.toast(accept ? "Tag accepted." : "Tag declined.");
+        return loadPlan().then(render);
+      });
+    });
+  }
+
   function goLiveHtml(it){
     var scheduled = it.publish_at && new Date(it.publish_at) > new Date();
     var label = scheduled ? "Goes live " + new Date(it.publish_at).toLocaleString() : "Live now";
@@ -847,7 +906,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       return '<div class="m-item" data-id="' + RF.esc(it.id) + '"><div class="m-thumb" data-thumb="' + RF.esc(thumb || "") + '">' + (it.media_type === "video" ? '<span class="play">VIDEO</span>' : '') + '</div>' +
         '<div class="m-fields"><input class="input" data-f="caption" maxlength="200" placeholder="Caption" value="' + RF.esc(it.caption) + '" aria-label="Caption">' +
         '<input class="input" data-f="product_url" maxlength="300" placeholder="Link to buy this piece (https://)" value="' + RF.esc(it.product_url) + '" aria-label="Product link">' +
-        goLiveHtml(it) +
+        goLiveHtml(it) + tagBoxHtml(it) +
         '<div class="m-actions"><button class="btn btn-ghost btn-sm" data-act="save">Save</button><button class="btn btn-danger btn-sm" data-act="delete">Delete</button></div></div></div>';
     }).join("");
     grid.querySelectorAll("[data-thumb]").forEach(function (el) { var u = el.getAttribute("data-thumb"); if (u && RF.isHttps(u)) el.style.backgroundImage = 'url("' + encodeURI(u) + '")'; });
@@ -863,6 +922,8 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       var act = e.target.getAttribute && e.target.getAttribute("data-act"); if (!act) return;
       var card = e.target.closest(".m-item"), id = card.getAttribute("data-id");
       if (act === "save") saveItem(card, id); else if (act === "delete") deleteItem(id);
+      else if (act === "tag") tagItem(card, id);
+      else if (act === "untag") untagItem(id);
     });
   }
 
@@ -906,6 +967,26 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     var chain = Promise.resolve();
     files.forEach(function (f) { chain = chain.then(function () { return addOne(f); }); });
     chain.then(function () { working = false; });
+  }
+
+  function tagItem(card, id){
+    var input = card.querySelector('[data-f="tagslug"]'), slug = (input.value || "").trim().toLowerCase();
+    if (!slug) { RF.toast("Type the brand's web address first.", true); return; }
+    RF.client.rpc("fashion_request_tag", { p_item_id: id, p_tagged_slug: slug }).then(function (r) {
+      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
+      RF.toast("Tag sent. It shows on the look once they accept.");
+      input.value = "";
+      return loadPlan().then(render);
+    });
+  }
+  function untagItem(id){
+    if (!window.confirm("Remove this tag?")) return;
+    var t = tags.filter(function (x) { return x.id === id; })[0];
+    RF.client.rpc("fashion_remove_tag", { p_tag_id: id }).then(function (r) {
+      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
+      RF.toast("Tag removed.");
+      return loadPlan().then(render);
+    });
   }
 
   function saveItem(card, id) {
