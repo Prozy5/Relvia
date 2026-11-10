@@ -217,6 +217,20 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 }
 @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } html{ scroll-behavior:auto; } }
 
+.agree{ margin-top:0; }
+.agree-text{ max-height:300px; overflow-y:auto; white-space:pre-wrap; font-size:13.5px; line-height:1.7; color:var(--soft); background:#0a0704; border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:12px 0 18px; }
+.agree-ok{ color:var(--ok); font-weight:700; }
+.plan{ border:1px solid var(--line-gold); background:radial-gradient(600px 240px at 90% 0%, rgba(224,177,88,.12), transparent 60%), var(--panel); }
+.plan-price{ font-family:var(--display); font-size:44px; color:var(--gold-1); line-height:1; }
+.plan-price small{ font-family:var(--body); font-size:14px; color:var(--muted); }
+.plan ul{ margin:16px 0 0 20px; color:var(--soft); font-size:14.5px; line-height:1.9; }
+.stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+.stat{ padding:16px; border:1px solid var(--line); border-radius:14px; background:#0a0704; }
+.stat b{ display:block; font-family:var(--display); font-size:26px; color:var(--gold-1); }
+.stat span{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.locked{ opacity:.55; }
+.terms-box summary{ cursor:pointer; font-size:13px; font-weight:700; color:var(--gold); }
+@media (max-width:760px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -433,7 +447,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   }
 
   window.RF = {
-    client: client, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
+    client: client, ANON_KEY: SUPABASE_ANON_KEY, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
     esc: esc, slugify: slugify, validSlug: validSlug, isHttps: isHttps, cleanInstagram: cleanInstagram, validEmail: validEmail,
     fmtCount: fmtCount, catLabel: catLabel, brandUrl: brandUrl, initial: initial, pathFromUrl: pathFromUrl, extFor: extFor,
     videoProblem: videoProblem, imageProblem: imageProblem, friendlyError: friendlyError,
@@ -446,7 +460,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false;
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null;
+  var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
+  function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
   // ---------- shared form ----------
   function catOptions(sel) { return RF.CATEGORIES.map(function (c) { return '<option value="' + c.key + '"' + (sel === c.key ? " selected" : "") + '>' + RF.esc(c.label) + '</option>'; }).join(""); }
@@ -575,7 +591,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
         RF.toast("Your application was sent, but a photo didn't upload: " + RF.friendlyError(err) + " You can add it below.", true);
       });
     }).then(function () {
-      working = false; render(); window.scrollTo({ top: 0 });
+      working = false; return loadAgreement().then(loadPlan).then(function () { render(); window.scrollTo({ top: 0 }); });
     }).catch(function (err) {
       working = false; btn.disabled = false; btn.textContent = "Send application";
       $("formErr").textContent = RF.friendlyError(err);
@@ -591,22 +607,150 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     return '<div class="banner approved"><b>You are live</b>Your page is public. <a href="' + RF.esc(RF.brandUrl(brand.slug)) + '" style="text-decoration:underline;">View my page</a></div>';
   }
 
+  function loadAgreement(){
+    return RF.client.rpc("fashion_my_agreement").then(function (r) { agreement = (!r.error && r.data) ? r.data : null; });
+  }
+
+  function loadPlan(){
+    return RF.client.rpc("fashion_my_plan").then(function (r) { plan = (!r.error && r.data) ? r.data : null; }).then(function () {
+      if (plan) return RF.client.rpc("fashion_current_plus_terms").then(function (t) { if (!t.error && t.data) { plan.terms_body = t.data.body; plan.terms_version = t.data.version; } });
+    }).then(function () {
+      if (!brand) return;
+      return RF.client.rpc("fashion_my_analytics").then(function (a) { analytics = (!a.error && a.data) ? a.data : null; });
+    });
+  }
+
+  function planHtml(){
+    if (!brand || !plan || !plan.has_brand) return "";
+    var price = plan.price_cents ? "$" + (plan.price_cents / 100).toFixed(2).replace(/\.00$/, "") : "";
+    var features = '<ul><li>Featured placement on the RelviaFashion homepage</li><li>A lookbook of up to 150 looks (60 on the free plan)</li><li>Analytics: views, follows, and shop-link clicks</li><li>A verified badge once the Relvia team confirms your brand</li><li>Priority review of your application</li></ul>';
+    var dateTxt = plan.current_period_end ? new Date(plan.current_period_end).toLocaleDateString() : "";
+    if (plan.plus) {
+      var status = plan.cancel_at_period_end
+        ? '<p class="hint" style="margin-top:12px;color:var(--warn);">Your subscription will end on ' + RF.esc(dateTxt) + '. It will not renew.</p><div class="form-actions"><button class="btn btn-gold" id="resumeBtn">Keep FashionPlus</button></div>'
+        : '<p class="hint" style="margin-top:12px;">Renews on ' + RF.esc(dateTxt) + '. You can cancel at any time.</p><div class="form-actions"><button class="btn btn-ghost" id="cancelBtn">Cancel renewal</button></div>';
+      return '<div class="card plan"><h2>FashionPlus</h2><p class="agree-ok">You are on FashionPlus.</p>' + features + status +
+        '<div class="err" id="planErr" role="alert"></div>' +
+        '<details class="terms-box" style="margin-top:18px;"><summary>FashionPlus terms</summary><div class="agree-text">' + RF.esc(plan.terms_body || "") + '</div></details></div>';
+    }
+    var needTerms = !plan.terms_accepted;
+    var termsBlock = needTerms
+      ? '<label class="check" style="margin-top:16px;"><input type="checkbox" id="termsBox"><span>I have read the FashionPlus terms, including the monthly renewal and how to cancel.</span></label>'
+      : '<p class="hint" style="margin-top:12px;color:var(--ok);">You have accepted the current FashionPlus terms.</p>';
+    var btn = !plan.checkout_ready ? '<button class="btn btn-gold" disabled>Coming soon</button>'
+      : needTerms ? '<button class="btn btn-gold" id="planBtn" disabled>Accept terms and subscribe</button>'
+      : '<button class="btn btn-gold" id="planBtn">Get FashionPlus</button>';
+    return '<div class="card plan"><h2>FashionPlus</h2>' +
+      '<p class="plan-price">' + RF.esc(price) + ' <small>per month</small></p>' +
+      '<p class="lead" style="margin-top:10px;">' + RF.esc(plan.tagline || "") + '</p>' + features +
+      '<details class="terms-box" style="margin-top:18px;" ' + (needTerms ? 'open' : '') + '><summary>FashionPlus terms</summary><div class="agree-text">' + RF.esc(plan.terms_body || "") + '</div></details>' +
+      termsBlock + '<div class="err" id="planErr" role="alert"></div>' +
+      '<div class="form-actions">' + btn + '</div></div>';
+  }
+
+  function analyticsHtml(){
+    if (!brand || !analytics) return "";
+    var stat = function (n, label) { return '<div class="stat"><b>' + RF.fmtCount(n) + '</b><span>' + label + '</span></div>'; };
+    if (analytics.plus) {
+      return '<div class="card"><h2>Analytics</h2><p class="lead">The last 30 days.</p><div class="stats-grid">' +
+        stat(analytics.views_30d, "Page views") + stat(analytics.shop_clicks_30d, "Shop clicks") +
+        stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div></div>';
+    }
+    return '<div class="card locked"><h2>Analytics</h2><p class="lead">Page views and shop-link clicks are part of FashionPlus.</p><div class="stats-grid">' +
+      stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div></div>';
+  }
+
+  function wirePlan(){
+    var FN_MANAGE = RF.SUPABASE_URL + "/functions/v1/fashion-plan-manage";
+    function authedCall(url, body){
+      return RF.client.auth.getSession().then(function (r) {
+        var token = r && r.data && r.data.session && r.data.session.access_token;
+        if (!token) throw new Error("Sign in first");
+        return fetch(url, { method: "POST", headers: { Authorization: "Bearer " + token, apikey: RF.ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+      }).then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error(j.error || "Something went wrong."); return j; }); });
+    }
+    var terms = $("termsBox"), planBtn = $("planBtn");
+    if (terms && planBtn) {
+      terms.addEventListener("change", function () { planBtn.disabled = !terms.checked; });
+      planBtn.addEventListener("click", function () {
+        if (!terms.checked) return;
+        planBtn.disabled = true; planBtn.textContent = "Saving...";
+        RF.client.rpc("fashion_accept_plus_terms", { p_version: plan.terms_version }).then(function (r) {
+          if (r.error) throw new Error(RF.friendlyError(r.error));
+          planBtn.textContent = "Opening checkout...";
+          return authedCall(FN_CHECKOUT).then(function (j) { window.location.href = j.url; });
+        }).catch(function (err) { planBtn.disabled = false; planBtn.textContent = "Accept terms and subscribe"; $("planErr").textContent = err.message || "Couldn't start checkout."; });
+      });
+    } else if (planBtn) {
+      planBtn.addEventListener("click", function () {
+        planBtn.disabled = true; planBtn.textContent = "Opening checkout...";
+        authedCall(FN_CHECKOUT).then(function (j) { window.location.href = j.url; })
+          .catch(function (err) { planBtn.disabled = false; planBtn.textContent = "Get FashionPlus"; $("planErr").textContent = err.message || "Couldn't start checkout."; });
+      });
+    }
+    var cancel = $("cancelBtn"), resume = $("resumeBtn");
+    function manage(action, btn){
+      if (action === "cancel" && !window.confirm("Stop FashionPlus from renewing? You keep it until the end of the period you have paid for.")) return;
+      btn.disabled = true;
+      authedCall(FN_MANAGE, { action: action }).then(function () {
+        RF.toast(action === "cancel" ? "Renewal canceled. You keep FashionPlus until the period ends." : "Done. FashionPlus will keep renewing.");
+        return loadPlan().then(render);
+      }).catch(function (err) { btn.disabled = false; $("planErr").textContent = err.message || "Something went wrong."; });
+    }
+    if (cancel) cancel.addEventListener("click", function () { manage("cancel", cancel); });
+    if (resume) resume.addEventListener("click", function () { manage("resume", resume); });
+  }
+
+  function agreementHtml(){
+    if (!brand || !agreement || brand.status === "suspended") return "";
+    if (agreement.signed) {
+      return '<div class="card agree"><h2>Brand Agreement</h2>' +
+        '<p class="agree-ok">Signed by ' + RF.esc(agreement.signer_name) + ' on ' + new Date(agreement.signed_at).toLocaleDateString() + '.</p>' +
+        '<p class="hint" style="margin-top:8px;">Version ' + RF.esc(agreement.version) + '. You can always read the full text below.</p>' +
+        '<div class="agree-text">' + RF.esc(agreement.body) + '</div></div>';
+    }
+    return '<div class="card agree"><h2>' + RF.esc(agreement.title) + '</h2>' +
+      '<p class="lead">Read the full agreement, then sign. Relvia only has obligations to a brand that signs. Your lookbook opens after you sign.</p>' +
+      '<div class="agree-text" tabindex="0">' + RF.esc(agreement.body) + '</div>' +
+      '<div class="field"><label for="aName">Type your full legal name <span class="req">*</span></label><input class="input" id="aName" maxlength="120" autocomplete="name" placeholder="First and last name"></div>' +
+      '<label class="check" style="margin-top:16px;"><input type="checkbox" id="aConsent"><span>I have read this agreement. I agree to sign it electronically, and my typed name above is my signature.</span></label>' +
+      '<div class="err" id="agreeErr" role="alert"></div>' +
+      '<div class="form-actions"><button class="btn btn-gold" id="signBtn">Sign agreement</button></div></div>';
+  }
+
+  function wireAgreement(){
+    var btn = $("signBtn"); if (!btn) return;
+    btn.addEventListener("click", function () {
+      var name = $("aName").value.trim(), consent = $("aConsent").checked;
+      $("agreeErr").textContent = "";
+      if (!consent) { $("agreeErr").textContent = "Tick the box to confirm you agree."; return; }
+      if (name.length < 3) { $("agreeErr").textContent = "Type your full legal name to sign."; return; }
+      btn.disabled = true; btn.textContent = "Signing...";
+      RF.client.rpc("fashion_sign_agreement", { p_name: name, p_consent: true }).then(function (r) {
+        if (r.error) { btn.disabled = false; btn.textContent = "Sign agreement"; $("agreeErr").textContent = RF.friendlyError(r.error); return; }
+        return loadAgreement().then(function () { RF.toast("Signed. Thank you."); render(); });
+      });
+    });
+  }
+
   function renderManage() {
     var locked = brand.status === "approved" || brand.status === "suspended";
     var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() +
+    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() +
       '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
       '<div class="err" id="formErr" role="alert"></div>' +
       '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
       (brand.status === "rejected" ? '<button class="btn btn-ghost" id="resubmitBtn">Save and send for review</button>' : '') + '</div></div>' +
-      (brand.status === "approved" ? '<div class="card" id="lookCard"><h2>Lookbook</h2><p class="lead">Add photos and short videos of your pieces. Photos are shrunk for you. Videos can be up to ' + RF.LIMITS.videoSeconds + ' seconds and 40 MB (MP4, WebM, or MOV).</p>' +
+      (brand.status === "approved" && agreement && !agreement.signed ? '<div class="banner pending" style="margin-bottom:22px;"><b>Lookbook locked</b>Sign the Brand Agreement above to add photos and videos.</div>' : '') +
+      (brand.status === "approved" && agreement && agreement.signed ? '<div class="card" id="lookCard"><h2>Lookbook</h2><p class="lead">Add photos and short videos of your pieces. Photos are shrunk for you. Videos can be up to ' + RF.LIMITS.videoSeconds + ' seconds and 40 MB (MP4, WebM, or MOV).</p>' +
         '<label class="drop" id="drop" for="fFiles"><b>Add photos and videos</b><span>Click to choose, or drop files here</span><span class="hint" id="roomHint"></span></label>' +
         '<input type="file" id="fFiles" class="sr-only" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime">' +
         '<div class="queue" id="queue"></div><div class="m-grid" id="mGrid"></div></div>' : '');
     wireForm(brand);
     $("saveBtn").addEventListener("click", function () { save(false); });
     if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
-    if (brand.status === "approved") { wireLookbook(); loadItems(); }
+    wireAgreement(); wirePlan();
+    if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
     if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
   }
 
@@ -636,10 +780,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   function loadItems() {
     return RF.client.from("fashion_items").select("*").eq("brand_id", brand.id).order("created_at", { ascending: false }).then(function (r) { items = r.data || []; renderItems(); });
   }
-  function roomLeft() { return Math.max(0, RF.LIMITS.items - items.length); }
+  function roomLeft() { return Math.max(0, limitItems() - items.length); }
 
   function renderItems() {
-    $("roomHint").textContent = items.length + " of " + RF.LIMITS.items + " used";
+    $("roomHint").textContent = items.length + " of " + limitItems() + " used";
     var grid = $("mGrid");
     if (!items.length) { grid.innerHTML = ""; return; }
     grid.innerHTML = items.map(function (it, i) {
@@ -674,7 +818,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 
   function addOne(file) {
     var q = queueRow(file), isVideo = file.type.indexOf("video/") === 0;
-    if (!roomLeft()) { q.fail("Lookbook is full (" + RF.LIMITS.items + ")"); return Promise.resolve(); }
+    if (!roomLeft()) { q.fail("Lookbook is full (" + limitItems() + ")"); return Promise.resolve(); }
     var problem = isVideo ? RF.videoProblem(file, null) : RF.imageProblem(file);
     if (problem) { q.fail(problem); return Promise.resolve(); }
     var uploaded = [];
@@ -735,7 +879,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       return RF.renderHeader("manage").then(function (u) {
         user = u;
         if (!user) { $("page").innerHTML = '<div class="card" style="text-align:center;"><h2>Sign in to apply</h2><p class="lead">You need a Relvia account to create a RelviaFashion page.</p><a class="btn btn-gold" href="/login.html">Sign in</a></div>'; return; }
-        return RF.getMyBrand(user.id).then(function (b) { brand = b; render(); });
+        return RF.getMyBrand(user.id).then(function (b) { brand = b; return brand ? loadAgreement() : null; }).then(function () { return brand ? loadPlan() : null; }).then(function () { render(); });
       });
     });
   }
