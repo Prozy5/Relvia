@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My brand | RelviaFashion</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
+<style>html,body{background:#060403;color:#f5f1ea;margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}</style>
+<style id="rf-css">
+/* RelviaFashion: shared styles. Matches RelviaCreators (black and gold, Playfair + Inter). */
+:root{
+  --bg:#060403; --panel:#0e0a07; --glass:#0e0a07; --ink:#f5f1ea; --text:#f5f1ea; --soft:#cdc5b5; --muted:#8a8073; --muted-soft:#8a8073;
+  --line:#241b12; --border:#241b12; --border-soft:#1a130c; --line-gold:rgba(224,177,88,.4);
+  --gold-1:#f6d27a; --gold-2:#b9832f; --gold:#e0b158; --gold-start:#f6d27a; --gold-end:#b9832f;
+  --red:#e0574f; --danger:#e0574f; --ok:#6dbb83; --warn:#e8a33d;
+  --display:"Playfair Display",Georgia,serif; --body:"Inter",system-ui,sans-serif;
+  --font-display:var(--display); --font-body:var(--body); --background:var(--bg);
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html{ scroll-behavior:smooth; }
+body{ color:var(--ink); min-height:100vh; background:var(--bg); background-image:radial-gradient(1100px 520px at 50% -120px, rgba(224,177,88,.08), transparent 70%); background-repeat:no-repeat; -webkit-font-smoothing:antialiased; }
+a{ text-decoration:none; color:inherit; }
+button, input, textarea, select{ font-family:inherit; font-size:inherit; color:inherit; }
+button{ cursor:pointer; border:none; background:none; }
+img, video{ max-width:100%; display:block; }
+:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+/* ----- header ----- */
+.topbar{ position:sticky; top:0; z-index:50; height:72px; display:flex; align-items:center; gap:18px; padding:0 clamp(16px,3vw,32px); background:rgba(6,4,3,.88); backdrop-filter:blur(18px); border-bottom:1px solid var(--line-gold); }
+.brand{ display:flex; align-items:center; gap:12px; }
+.crest{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-style:italic; font-weight:800; font-size:21px; color:var(--gold-start); border:1.5px solid var(--gold-2); background:#000; }
+.brand-text{ display:flex; flex-direction:column; line-height:1; }
+.brand-name{ font-family:var(--font-display); font-weight:800; font-size:24px; letter-spacing:-.02em; background:linear-gradient(100deg,var(--gold-1),var(--gold-2) 55%,var(--gold-1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.brand-sub{ margin-top:5px; font-size:9.5px; font-weight:700; letter-spacing:.4em; color:var(--gold-end); }
+.top-nav{ display:flex; gap:clamp(14px,2.2vw,28px); margin-left:auto; }
+.top-nav a{ font-size:13px; font-weight:600; color:var(--soft); transition:color .2s; }
+.top-nav a:hover, .top-nav a.active{ color:var(--gold-start); }
+.top-actions{ display:flex; align-items:center; gap:10px; }
+
+/* ----- buttons, chips, tags ----- */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 22px; border-radius:999px; font-weight:700; font-size:14px; transition:transform .15s, box-shadow .2s, border-color .2s, opacity .2s; white-space:nowrap; }
+.btn:active{ transform:scale(.97); }
+.btn-sm{ padding:8px 16px; font-size:12.5px; }
+.btn-gold{ color:#060403; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); box-shadow:0 8px 26px rgba(224,177,88,.22); }
+.btn-gold:hover{ box-shadow:0 10px 32px rgba(224,177,88,.38); }
+.btn-ghost{ border:1px solid var(--border); color:var(--text); }
+.btn-ghost:hover{ border-color:var(--gold-end); color:var(--gold-start); }
+.btn-danger{ border:1px solid rgba(224,87,79,.5); color:#f2a8a3; }
+.btn-danger:hover{ background:rgba(224,87,79,.12); }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; transform:none; }
+.chip{ display:inline-flex; align-items:center; padding:8px 16px; border:1px solid var(--border); border-radius:999px; font-size:12.5px; font-weight:600; color:var(--muted); white-space:nowrap; transition:all .15s; }
+.chip:hover{ border-color:var(--gold-end); color:var(--text); }
+.chip.active{ border-color:var(--gold); color:var(--gold-start); background:rgba(224,177,88,.09); }
+.tag{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(224,177,88,.4); }
+.tag.featured{ color:#060403; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); border-color:transparent; }
+
+/* ----- layout ----- */
+.wrap{ width:min(1180px,100%); margin:0 auto; padding:0 clamp(16px,3vw,32px); }
+.section{ padding:34px 0 8px; }
+.section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.section-title{ font-family:var(--font-display); font-weight:700; font-size:clamp(24px,3.4vw,32px); }
+.section-note{ font-size:13px; color:var(--muted); }
+.muted{ color:var(--muted); }
+.empty{ text-align:center; padding:64px 20px; border:1px dashed var(--border); border-radius:20px; color:var(--muted); }
+.empty h3{ font-family:var(--font-display); font-size:26px; color:var(--text); margin-bottom:8px; }
+.empty .btn{ margin-top:18px; }
+
+/* ----- hero ----- */
+.hero{ text-align:center; padding:clamp(48px,9vw,96px) 0 clamp(28px,5vw,54px); }
+.eyebrow{ font-size:11px; font-weight:800; letter-spacing:.42em; color:var(--gold-end); margin-bottom:18px; }
+.hero h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(44px,9vw,104px); line-height:1.02; letter-spacing:-.025em; background:linear-gradient(100deg,var(--gold-1),var(--gold-2) 55%,var(--gold-1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero p{ max-width:560px; margin:20px auto 0; font-size:clamp(15px,1.8vw,18px); color:var(--soft); line-height:1.6; }
+.hero-cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px; }
+
+/* ----- filters ----- */
+.filters{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+.chip-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; flex:1 1 360px; scrollbar-width:none; }
+.chip-row::-webkit-scrollbar{ display:none; }
+.search{ flex:0 1 240px; background:var(--glass); border:1px solid var(--border); border-radius:999px; padding:10px 16px; font-size:13.5px; }
+.search:focus{ outline:none; border-color:var(--gold); }
+.sort{ background:var(--glass); border:1px solid var(--border); border-radius:999px; padding:10px 14px; font-size:13px; color:var(--muted); }
+
+/* ----- brand cards ----- */
+.brand-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; }
+.brand-card{ display:flex; flex-direction:column; background:var(--glass); border:1px solid var(--border); border-radius:20px; overflow:hidden; transition:transform .2s, border-color .2s, box-shadow .25s; }
+.brand-card:hover{ transform:translateY(-4px); border-color:var(--gold-end); box-shadow:0 14px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(224,177,88,.12); }
+.bc-cover{ position:relative; aspect-ratio:16/10; background:linear-gradient(135deg,#1a130c,#0e0a07); background-size:cover; background-position:center; }
+.bc-cover::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(10,8,6,.85), transparent 55%); }
+.bc-logo{ position:absolute; left:16px; bottom:-26px; z-index:2; width:60px; height:60px; border-radius:50%; border:2px solid var(--gold-end); background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:24px; color:var(--gold-start); }
+.bc-logo img{ width:100%; height:100%; object-fit:cover; }
+.bc-tags{ position:absolute; top:12px; left:12px; z-index:2; display:flex; gap:6px; }
+.bc-body{ padding:36px 18px 18px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.bc-name{ font-family:var(--font-display); font-weight:700; font-size:21px; line-height:1.15; }
+.bc-cat{ font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-end); }
+.bc-tagline{ font-size:13.5px; color:var(--muted); line-height:1.5; }
+.bc-meta{ margin-top:auto; padding-top:12px; display:flex; gap:14px; font-size:12px; color:var(--muted-soft); }
+.featured-row{ display:flex; gap:18px; overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x proximity; }
+.featured-row .brand-card{ flex:0 0 min(340px,82vw); scroll-snap-align:start; }
+.skeleton{ border-radius:20px; min-height:300px; background:linear-gradient(100deg,#0e0a07 30%,#0e0a07 50%,#0e0a07 70%); background-size:200% 100%; animation:shimmer 1.4s infinite linear; border:1px solid var(--border-soft); }
+@keyframes shimmer{ to{ background-position:-200% 0; } }
+
+/* ----- brand page ----- */
+.cover{ position:relative; height:clamp(170px,30vw,330px); background:linear-gradient(135deg,#1a130c,#0e0a07); background-size:cover; background-position:center; border-bottom:1px solid var(--border); }
+.cover::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, var(--background), transparent 60%); }
+.brand-head{ position:relative; z-index:2; display:flex; gap:22px; align-items:flex-end; flex-wrap:wrap; margin-top:-62px; }
+.logo-lg{ width:124px; height:124px; border-radius:50%; border:3px solid var(--gold-end); background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:52px; color:var(--gold-start); flex-shrink:0; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+.logo-lg img{ width:100%; height:100%; object-fit:cover; }
+.head-main{ flex:1 1 280px; min-width:0; padding-bottom:6px; }
+.head-main h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(30px,5vw,46px); line-height:1.08; }
+.head-sub{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted); }
+.head-actions{ display:flex; gap:10px; flex-wrap:wrap; padding-bottom:8px; }
+.about{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:28px; margin:26px 0 8px; }
+.about p.bio{ font-size:15.5px; line-height:1.75; color:#cdc5b5; white-space:pre-wrap; }
+.tagline-lg{ font-family:var(--font-display); font-style:italic; font-size:clamp(20px,2.6vw,26px); color:var(--gold); margin-bottom:12px; }
+.links{ display:flex; flex-direction:column; gap:10px; }
+.link-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:600; transition:border-color .2s, color .2s; }
+.link-row:hover{ border-color:var(--gold-end); color:var(--gold-start); }
+.link-row small{ font-weight:500; color:var(--muted-soft); }
+.stat-row{ display:flex; gap:22px; margin-top:12px; font-size:13px; color:var(--muted); }
+.stat-row b{ color:var(--text); font-size:17px; margin-right:4px; }
+.banner{ margin:18px 0 0; padding:14px 18px; border-radius:14px; border:1px solid var(--border); font-size:14px; line-height:1.6; }
+.banner b{ display:block; margin-bottom:2px; }
+.banner.pending{ border-color:rgba(232,163,61,.45); background:rgba(232,163,61,.07); color:#f6d27a; }
+.banner.rejected, .banner.suspended{ border-color:rgba(224,87,79,.45); background:rgba(224,87,79,.07); color:#f2a8a3; }
+.banner.approved{ border-color:rgba(109,187,131,.45); background:rgba(109,187,131,.07); color:#cdc5b5; }
+.banner .btn{ margin-top:10px; }
+
+/* ----- lookbook ----- */
+.lookbook{ columns:3 260px; column-gap:14px; }
+.look{ position:relative; display:block; width:100%; margin:0 0 14px; break-inside:avoid; border-radius:14px; overflow:hidden; background:var(--glass); border:1px solid var(--border-soft); transition:border-color .2s, transform .2s; }
+.look:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
+.look img{ width:100%; height:auto; }
+.look .ph{ aspect-ratio:3/4; background:linear-gradient(135deg,#1a130c,#0e0a07); }
+.look .play{ position:absolute; right:12px; top:12px; display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(0,0,0,.65); font-size:11px; font-weight:800; letter-spacing:.12em; color:var(--gold-start); }
+.look .cap{ position:absolute; left:0; right:0; bottom:0; padding:26px 14px 12px; font-size:12.5px; line-height:1.4; background:linear-gradient(to top, rgba(0,0,0,.82), transparent); opacity:0; transition:opacity .2s; text-align:left; }
+.look:hover .cap, .look:focus-visible .cap{ opacity:1; }
+
+/* ----- lightbox ----- */
+.lb{ position:fixed; inset:0; z-index:200; background:rgba(4,3,2,.94); display:none; align-items:center; justify-content:center; padding:18px; }
+.lb.open{ display:flex; }
+.lb-inner{ width:min(1040px,100%); max-height:100%; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; align-items:center; }
+.lb-media{ display:flex; align-items:center; justify-content:center; max-height:88vh; min-height:200px; }
+.lb-media img, .lb-media video{ max-height:88vh; max-width:100%; width:auto; border-radius:12px; background:#000; }
+.lb-side{ display:flex; flex-direction:column; gap:14px; }
+.lb-side .count{ font-size:11px; letter-spacing:.3em; font-weight:800; color:var(--gold-end); }
+.lb-side .caption{ font-family:var(--font-display); font-size:20px; line-height:1.35; }
+.lb-x{ position:absolute; top:14px; right:18px; font-size:30px; color:var(--soft); line-height:1; padding:6px 12px; }
+.lb-x:hover{ color:var(--gold-start); }
+.lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; border:1px solid var(--border); background:rgba(10,8,6,.8); font-size:22px; color:var(--soft); }
+.lb-nav:hover{ border-color:var(--gold); color:var(--gold-start); }
+.lb-prev{ left:14px; } .lb-next{ right:14px; }
+
+/* ----- forms ----- */
+.card{ background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:clamp(18px,3vw,30px); margin-bottom:22px; }
+.card h2{ font-family:var(--font-display); font-weight:700; font-size:26px; margin-bottom:6px; }
+.card > .lead{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+.field{ display:flex; flex-direction:column; gap:7px; }
+.field.full{ grid-column:1/-1; }
+.field label{ font-size:12px; font-weight:700; letter-spacing:.06em; color:var(--soft); }
+.field label .req{ color:var(--gold); }
+.input, .textarea, .select{ background:#0e0a07; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:14.5px; width:100%; }
+.textarea{ resize:vertical; min-height:110px; line-height:1.55; }
+.input:focus, .textarea:focus, .select:focus{ outline:none; border-color:var(--gold); }
+.input[disabled]{ opacity:.55; }
+.hint{ font-size:12px; color:var(--muted-soft); line-height:1.5; }
+.hint.ok{ color:var(--ok); } .hint.bad{ color:#f2a8a3; }
+.err{ color:#f2a8a3; font-size:13px; margin-top:12px; min-height:18px; }
+.imgpick{ display:flex; gap:14px; align-items:center; }
+.imgpick .prev{ width:84px; height:84px; border-radius:50%; background:#0e0a07 center/cover; border:1px dashed var(--border); flex-shrink:0; }
+.imgpick .prev.wide{ width:150px; height:84px; border-radius:12px; }
+.check{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; line-height:1.55; color:var(--soft); cursor:pointer; }
+.check input{ margin-top:3px; accent-color:var(--gold); }
+.form-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:22px; }
+
+/* ----- lookbook manager ----- */
+.drop{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; padding:30px 18px; border:1.5px dashed var(--border); border-radius:16px; cursor:pointer; color:var(--muted); transition:border-color .2s, background .2s; }
+.drop:hover, .drop.drag{ border-color:var(--gold); background:rgba(224,177,88,.05); }
+.drop b{ color:var(--text); font-size:15px; }
+.queue{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.q-item{ display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid var(--border); border-radius:12px; font-size:13px; }
+.q-item .name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-item .state{ font-size:12px; color:var(--muted); }
+.q-item.done .state{ color:var(--ok); } .q-item.fail .state{ color:#f2a8a3; }
+.m-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; margin-top:20px; }
+.m-item{ border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#0e0a07; display:flex; flex-direction:column; }
+.m-thumb{ position:relative; aspect-ratio:4/5; background:#000 center/cover; }
+.m-thumb .play{ position:absolute; right:10px; top:10px; padding:4px 10px; border-radius:999px; background:rgba(0,0,0,.7); font-size:10.5px; font-weight:800; letter-spacing:.12em; color:var(--gold-start); }
+.m-fields{ padding:12px; display:flex; flex-direction:column; gap:8px; }
+.m-fields .input{ padding:9px 11px; font-size:13px; }
+.m-actions{ display:flex; gap:8px; justify-content:space-between; }
+
+/* ----- misc ----- */
+.modal{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:18px; }
+.modal.open{ display:flex; }
+.modal-box{ width:min(440px,100%); background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:24px; }
+.modal-box h3{ font-family:var(--font-display); font-size:22px; margin-bottom:6px; }
+.modal-box .field{ margin-top:14px; }
+.toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); z-index:400; padding:12px 20px; border-radius:12px; background:#0e0a07; border:1px solid var(--gold-end); font-size:13.5px; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:92vw; text-align:center; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+.toast.bad{ border-color:var(--danger); color:#f2a8a3; }
+footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--border-soft); font-size:12px; letter-spacing:.14em; color:var(--muted-soft); text-align:center; }
+
+@media (max-width:860px){
+  .top-nav{ display:none; }
+  .about{ grid-template-columns:1fr; }
+  .lb-inner{ grid-template-columns:1fr; gap:12px; }
+  .lb-side{ align-items:flex-start; }
+  .lb-media img, .lb-media video{ max-height:62vh; }
+  .form-grid{ grid-template-columns:1fr; }
+  .brand-head{ margin-top:-48px; }
+  .logo-lg{ width:96px; height:96px; font-size:40px; }
+}
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } html{ scroll-behavior:auto; } }
+
+.agree{ margin-top:0; }
+.agree-text{ max-height:300px; overflow-y:auto; white-space:pre-wrap; font-size:13.5px; line-height:1.7; color:var(--soft); background:#0a0704; border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:12px 0 18px; }
+.agree-ok{ color:var(--ok); font-weight:700; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="siteHeader"></div>
+
+<main class="wrap" style="max-width:860px;padding-top:34px;" id="page">
+  <div class="skeleton"></div>
+</main>
+
+<footer class="site">RELVIA ENTERTAINMENT &middot; FASHION</footer>
+
+<script id="rf-core">
+/* RelviaFashion: shared helpers. Loaded by index.html, brand.html, and manage.html after supabase-js. */
+(function () {
+  "use strict";
+  var SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+  var BUCKET = "fashion-media";
+  var LIMITS = { items: 60, videoSeconds: 30, videoBytes: 40 * 1024 * 1024, imageBytes: 15 * 1024 * 1024 };
+  var CATEGORIES = [
+    { key: "streetwear", label: "Streetwear" },
+    { key: "luxury", label: "Luxury & Designer" },
+    { key: "handmade", label: "Handmade" },
+    { key: "accessories", label: "Accessories & Jewelry" },
+    { key: "footwear", label: "Footwear" },
+    { key: "vintage", label: "Vintage & Thrift" },
+    { key: "sustainable", label: "Sustainable" },
+    { key: "other", label: "Other" },
+  ];
+  var VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+  var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+  var client = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  // ---------- small pure helpers ----------
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]; }); }
+  function slugify(name) {
+    return String(name || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+      .replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+  }
+  function validSlug(s) { return typeof s === "string" && s.length >= 3 && s.length <= 40 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(s); }
+  function isHttps(u) {
+    if (!u || u.length > 300 || /\s/.test(u)) return false;
+    try { var x = new URL(u); return x.protocol === "https:" && x.hostname.indexOf(".") > 0; } catch (e) { return false; }
+  }
+  // returns "" for empty, the clean handle for good input, or null for input we cannot use
+  function cleanInstagram(v) {
+    v = String(v || "").trim();
+    if (!v) return "";
+    var m = v.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+    if (m) v = m[1];
+    v = v.replace(/^@/, "");
+    return /^[A-Za-z0-9._]{1,30}$/.test(v) ? v : null;
+  }
+  function validEmail(e) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e || "") && e.length <= 120; }
+  function fmtCount(n) {
+    n = Number(n) || 0;
+    if (n < 1000) return String(n);
+    if (n < 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    if (n < 1000000) return Math.round(n / 1000) + "K";
+    return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  function catLabel(key) { var c = CATEGORIES.filter(function (x) { return x.key === key; })[0]; return c ? c.label : "Other"; }
+  function brandUrl(slug) { return "brand.html?b=" + encodeURIComponent(slug); }
+  function initial(name) { return (String(name || "R").trim()[0] || "R").toUpperCase(); }
+  function pathFromUrl(url) { var i = String(url || "").indexOf("/" + BUCKET + "/"); return i < 0 ? null : decodeURIComponent(String(url).slice(i + BUCKET.length + 2).split("?")[0]); }
+  function extFor(type) { return { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" }[type] || "bin"; }
+
+  // What is wrong with this video file? Empty string means it is fine.
+  function videoProblem(file, durationSeconds) {
+    if (VIDEO_TYPES.indexOf(file.type) < 0) return "Use an MP4, WebM, or MOV video.";
+    if (file.size > LIMITS.videoBytes) return "That video is over 40 MB. Trim it or export it smaller.";
+    if (durationSeconds != null && durationSeconds > LIMITS.videoSeconds + 0.5) return "Videos can be up to " + LIMITS.videoSeconds + " seconds. This one is " + Math.round(durationSeconds) + ".";
+    return "";
+  }
+  function imageProblem(file) {
+    if (IMAGE_TYPES.indexOf(file.type) < 0) return "Use a JPG, PNG, or WebP photo.";
+    if (file.size > LIMITS.imageBytes) return "That photo is over 15 MB. Try a smaller one.";
+    return "";
+  }
+
+  // Turn database errors into something a person can act on.
+  function friendlyError(err) {
+    var m = (err && (err.message || err.details)) || String(err || "");
+    if (/fashion_brands_slug_key|duplicate key.*slug/i.test(m)) return "That web address is already taken. Try another one.";
+    if (/fashion_brands_owner_id_key/i.test(m)) return "You already have a RelviaFashion application. Open My brand to see it.";
+    if (/fashion_brands_slug_check/i.test(m)) return "The web address can only use lowercase letters, numbers, and dashes (3 to 40 characters).";
+    if (/shop_url_check/i.test(m)) return "The shop link has to start with https:// and be a full web address.";
+    if (/website_url_check/i.test(m)) return "The website link has to start with https:// and be a full web address.";
+    if (/product_url_check/i.test(m)) return "The product link has to start with https:// and be a full web address.";
+    if (/instagram_check/i.test(m)) return "That Instagram name does not look right. Use just the handle, like yourbrand.";
+    if (/contact_email_check/i.test(m)) return "Enter a valid contact email.";
+    if (/lookbook can hold up to 60/i.test(m)) return "A lookbook can hold up to 60 items. Remove one to add another.";
+    if (/has to be approved/i.test(m)) return "Your page has to be approved before you can add to the lookbook.";
+    if (/row-level security|read_only|fashion_block/i.test(m)) return "That is not allowed right now. RelviaFashion may be paused or in read-only mode. Try again later.";
+    if (/Payload too large|exceeded the maximum allowed size|too large/i.test(m)) return "That file is too large. Videos can be up to 40 MB.";
+    if (/mime type|not supported/i.test(m)) return "That file type is not supported. Use JPG, PNG, WebP, MP4, WebM, or MOV.";
+    return m || "Something went wrong. Please try again.";
+  }
+
+  // ---------- account ----------
+  function getUser() {
+    return client.auth.getSession().then(function (r) { return r && r.data && r.data.session ? r.data.session.user : null; });
+  }
+  function getMyBrand(userId) {
+    return client.from("fashion_brands").select("*").eq("owner_id", userId).maybeSingle().then(function (r) { return r.data || null; });
+  }
+
+  // ---------- page furniture ----------
+  function renderHeader(active) {
+    var host = document.getElementById("siteHeader");
+    if (!host) return Promise.resolve(null);
+    host.innerHTML =
+      '<header class="topbar">' +
+      '<a class="brand" href="index.html" aria-label="RelviaFashion home"><span class="crest" aria-hidden="true">R</span><span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">FASHION</span></span></a>' +
+      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="../index.html">Relvia</a></nav>' +
+      '<div class="top-actions" id="topActions"></div></header>';
+    var actions = document.getElementById("topActions");
+    return getUser().then(function (user) {
+      if (!user) { actions.innerHTML = '<a class="btn btn-gold btn-sm" href="/login.html">Sign in</a>'; return null; }
+      return getMyBrand(user.id).then(function (brand) {
+        actions.innerHTML = brand
+          ? '<a class="btn btn-ghost btn-sm' + (active === "manage" ? " active" : "") + '" href="manage.html">My brand</a>'
+          : '<a class="btn btn-gold btn-sm" href="manage.html">Apply</a>';
+        return user;
+      }).catch(function () { actions.innerHTML = '<a class="btn btn-ghost btn-sm" href="manage.html">My brand</a>'; return user; });
+    }).catch(function () { actions.innerHTML = '<a class="btn btn-gold btn-sm" href="/login.html">Sign in</a>'; return null; });
+  }
+
+  // If you switch RelviaFashion off in Kill-Switches, visitors see a calm closed screen.
+  function closedCheck() {
+    return fetch(SUPABASE_URL + "/rest/v1/feature_flags?select=enabled&key=eq.fashion_enabled", { headers: { apikey: SUPABASE_ANON_KEY } })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        if (rows && rows[0] && rows[0].enabled === false) {
+          var d = document.createElement("div");
+          d.id = "rfClosed";
+          d.style.cssText = "position:fixed;inset:0;z-index:99999;background:#060403;color:#f5f1ea;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;";
+          d.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:36px;margin-bottom:12px;">RelviaFashion is paused</div><div style="color:#8a8073;font-size:15px;max-width:420px;line-height:1.6;">We are making a few changes. Please check back soon.</div><a href="../index.html" style="margin-top:22px;color:#e0b158;font-weight:700;">Back to Relvia</a>';
+          document.body.appendChild(d);
+          return true;
+        }
+        return false;
+      }).catch(function () { return false; });
+  }
+
+  var toastTimer = 0;
+  function toast(message, bad) {
+    var t = document.getElementById("rfToast");
+    if (!t) { t = document.createElement("div"); t.id = "rfToast"; t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+    t.textContent = message; t.classList.toggle("bad", !!bad); t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove("show"); }, bad ? 6000 : 3200);
+  }
+
+  // ---------- photos and videos ----------
+  function resizeImage(file, maxEdge, quality, square) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var sx = 0, sy = 0, sw = img.width, sh = img.height, w, h;
+        if (square) { var side = Math.min(img.width, img.height); sx = (img.width - side) / 2; sy = (img.height - side) / 2; sw = side; sh = side; w = h = Math.min(maxEdge, side); }
+        else { var scale = Math.min(1, maxEdge / Math.max(img.width, img.height)); w = Math.round(img.width * scale); h = Math.round(img.height * scale); }
+        var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d"); ctx.fillStyle = "#0e0a07"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error("Couldn't process that photo.")); }, "image/jpeg", quality || 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("That file is not a photo we can read. Try a JPG or PNG.")); };
+      img.src = url;
+    });
+  }
+
+  // Reads a video's length and grabs a poster frame, entirely in the browser.
+  function videoInfo(file) {
+    return new Promise(function (resolve, reject) {
+      var v = document.createElement("video"), url = URL.createObjectURL(file), finished = false, info = {};
+      v.preload = "metadata"; v.muted = true; v.playsInline = true;
+      function fail(msg) { if (finished) return; finished = true; clearTimeout(timer); URL.revokeObjectURL(url); reject(new Error(msg)); }
+      var timer = setTimeout(function () { fail("That video took too long to read. Export it as an H.264 MP4 and try again."); }, 20000);
+      v.onerror = function () { fail("This browser can't read that video. Export it as an H.264 MP4 and try again."); };
+      v.onloadedmetadata = function () {
+        if (!isFinite(v.duration) || v.duration <= 0) return fail("We couldn't read that video's length. Export it as an H.264 MP4 and try again.");
+        info.duration = v.duration; info.width = v.videoWidth; info.height = v.videoHeight;
+        var problem = videoProblem(file, v.duration);
+        if (problem) return fail(problem);
+        try { v.currentTime = Math.min(0.5, v.duration / 2); } catch (e) { fail("Couldn't read a frame from that video."); }
+      };
+      v.onseeked = function () {
+        if (finished) return;
+        var scale = Math.min(1, 720 / Math.max(info.width || 720, 1));
+        var canvas = document.createElement("canvas"); canvas.width = Math.max(2, Math.round((info.width || 720) * scale)); canvas.height = Math.max(2, Math.round((info.height || 405) * scale));
+        try { canvas.getContext("2d").drawImage(v, 0, 0, canvas.width, canvas.height); } catch (e) { return fail("Couldn't read a frame from that video."); }
+        canvas.toBlob(function (b) {
+          if (finished) return; finished = true; clearTimeout(timer); URL.revokeObjectURL(url);
+          resolve({ duration: info.duration, width: info.width, height: info.height, poster: b });
+        }, "image/jpeg", 0.82);
+      };
+      v.src = url;
+    });
+  }
+
+  function uploadPath(userId, kind, contentType) { return userId + "/" + kind + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + extFor(contentType); }
+  function uploadBlob(path, blob, contentType) {
+    return client.storage.from(BUCKET).upload(path, blob, { contentType: contentType, cacheControl: "31536000", upsert: false }).then(function (r) {
+      if (r.error) throw new Error(friendlyError(r.error));
+      return client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    });
+  }
+  function removeByUrls(urls) {
+    var paths = (urls || []).map(pathFromUrl).filter(Boolean);
+    if (!paths.length) return Promise.resolve();
+    return client.storage.from(BUCKET).remove(paths).then(function () {}, function () {});
+  }
+
+  window.RF = {
+    client: client, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
+    esc: esc, slugify: slugify, validSlug: validSlug, isHttps: isHttps, cleanInstagram: cleanInstagram, validEmail: validEmail,
+    fmtCount: fmtCount, catLabel: catLabel, brandUrl: brandUrl, initial: initial, pathFromUrl: pathFromUrl, extFor: extFor,
+    videoProblem: videoProblem, imageProblem: imageProblem, friendlyError: friendlyError,
+    getUser: getUser, getMyBrand: getMyBrand, renderHeader: renderHeader, closedCheck: closedCheck, toast: toast,
+    resizeImage: resizeImage, videoInfo: videoInfo, uploadPath: uploadPath, uploadBlob: uploadBlob, removeByUrls: removeByUrls,
+  };
+})();
+
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null;
+
+  // ---------- shared form ----------
+  function catOptions(sel) { return RF.CATEGORIES.map(function (c) { return '<option value="' + c.key + '"' + (sel === c.key ? " selected" : "") + '>' + RF.esc(c.label) + '</option>'; }).join(""); }
+
+  function formHtml(v, opts) {
+    var locked = opts.slugLocked;
+    return '' +
+      '<div class="form-grid">' +
+        '<div class="field"><label for="fName">Brand name <span class="req">*</span></label><input class="input" id="fName" maxlength="60" value="' + RF.esc(v.name) + '" autocomplete="off"></div>' +
+        '<div class="field"><label for="fSlug">Web address <span class="req">*</span></label><input class="input" id="fSlug" maxlength="40" value="' + RF.esc(v.slug) + '"' + (locked ? " disabled" : "") + ' autocomplete="off" spellcheck="false">' +
+          '<div class="hint" id="slugHint">' + (locked ? "Your web address is locked once you are approved." : "relvia.online/fashion/brand.html?b=" + RF.esc(v.slug || "yourbrand")) + '</div></div>' +
+        '<div class="field"><label for="fCategory">Category <span class="req">*</span></label><select class="select" id="fCategory">' + catOptions(v.category) + '</select></div>' +
+        '<div class="field"><label for="fLocation">Location</label><input class="input" id="fLocation" maxlength="60" placeholder="City, State" value="' + RF.esc(v.location) + '"></div>' +
+        '<div class="field full"><label for="fTagline">Tagline</label><input class="input" id="fTagline" maxlength="90" placeholder="One line that sums up your brand" value="' + RF.esc(v.tagline) + '"></div>' +
+        '<div class="field full"><label for="fBio">About your brand</label><textarea class="textarea" id="fBio" maxlength="800" placeholder="Your story, what you make, who it is for.">' + RF.esc(v.bio) + '</textarea><div class="hint" id="bioCount"></div></div>' +
+        '<div class="field full"><label for="fShop">Shop link <span class="req">*</span></label><input class="input" id="fShop" type="url" inputmode="url" maxlength="300" placeholder="https://yourstore.com" value="' + RF.esc(v.shop_url) + '"><div class="hint">Where people buy. It has to start with https://</div></div>' +
+        '<div class="field"><label for="fInsta">Instagram</label><input class="input" id="fInsta" maxlength="60" placeholder="yourbrand" value="' + RF.esc(v.instagram) + '"></div>' +
+        '<div class="field"><label for="fWebsite">Website</label><input class="input" id="fWebsite" type="url" inputmode="url" maxlength="300" placeholder="https://yourbrand.com" value="' + RF.esc(v.website_url) + '"></div>' +
+        '<div class="field full"><label for="fEmail">Contact email <span class="req">*</span></label><input class="input" id="fEmail" type="email" maxlength="120" value="' + RF.esc(v.contact_email) + '"><div class="hint">Only the Relvia team sees this. It is never shown on your page.</div></div>' +
+        '<div class="field"><label>Logo</label><div class="imgpick"><div class="prev" id="logoPrev"></div><div><input type="file" id="fLogo" accept="image/jpeg,image/png,image/webp" class="sr-only"><label for="fLogo" class="btn btn-ghost btn-sm" style="cursor:pointer;">Choose logo</label><div class="hint" style="margin-top:6px;">Square works best.</div></div></div></div>' +
+        '<div class="field"><label>Cover photo</label><div class="imgpick"><div class="prev wide" id="coverPrev"></div><div><input type="file" id="fCover" accept="image/jpeg,image/png,image/webp" class="sr-only"><label for="fCover" class="btn btn-ghost btn-sm" style="cursor:pointer;">Choose cover</label><div class="hint" style="margin-top:6px;">Wide photo, like a banner.</div></div></div></div>' +
+      '</div>';
+  }
+
+  function wireForm(v) {
+    var bio = $("fBio"), count = $("bioCount");
+    function upd() { count.textContent = bio.value.length + " / 800"; }
+    bio.addEventListener("input", upd); upd();
+    [["fLogo", "logoPrev", v.logo_url], ["fCover", "coverPrev", v.cover_url]].forEach(function (a) {
+      var prev = $(a[1]); if (a[2] && RF.isHttps(a[2])) prev.style.backgroundImage = 'url("' + encodeURI(a[2]) + '")';
+      $(a[0]).addEventListener("change", function (e) {
+        var f = e.target.files[0]; if (!f) return;
+        var problem = RF.imageProblem(f); if (problem) { RF.toast(problem, true); e.target.value = ""; return; }
+        prev.style.backgroundImage = 'url("' + URL.createObjectURL(f) + '")';
+      });
+    });
+    var name = $("fName"), slug = $("fSlug");
+    if (!slug.disabled){
+      name.addEventListener("input", function () { if (!slugEdited) { slug.value = RF.slugify(name.value); checkSlug(); } });
+      slug.addEventListener("input", function () { slugEdited = true; slug.value = slug.value.toLowerCase().replace(/[^a-z0-9-]/g, ""); checkSlug(); });
+    }
+  }
+
+  function checkSlug(immediate) {
+    var slug = $("fSlug"), hint = $("slugHint"); if (!slug || slug.disabled) return Promise.resolve(true);
+    clearTimeout(slugTimer);
+    var s = slug.value;
+    if (!s) { hint.className = "hint"; hint.textContent = "Pick a web address for your page."; return Promise.resolve(false); }
+    if (!RF.validSlug(s)) { hint.className = "hint bad"; hint.textContent = "Use 3 to 40 lowercase letters, numbers, and single dashes."; return Promise.resolve(false); }
+    if (brand && brand.slug === s) { hint.className = "hint ok"; hint.textContent = "This is your current address."; return Promise.resolve(true); }
+    hint.className = "hint"; hint.textContent = "Checking...";
+    return new Promise(function (resolve) {
+      slugTimer = setTimeout(function () {
+        RF.client.rpc("fashion_slug_available", { p_slug: s }).then(function (r) {
+          if ($("fSlug") && $("fSlug").value !== s) return resolve(false);
+          var ok = !r.error && r.data === true;
+          hint.className = "hint " + (ok ? "ok" : "bad"); hint.textContent = ok ? "Available: relvia.online/fashion/brand.html?b=" + s : (r.error ? "Couldn't check that right now." : "That address is taken. Try another.");
+          resolve(ok);
+        });
+      }, immediate ? 0 : 350);
+    });
+  }
+
+  // reads and checks the form; returns { values, error }
+  function collect(applying) {
+    var v = {
+      name: $("fName").value.trim(), slug: $("fSlug").value.trim(), category: $("fCategory").value, location: $("fLocation").value.trim(),
+      tagline: $("fTagline").value.trim(), bio: $("fBio").value.trim(), shop_url: $("fShop").value.trim(),
+      instagram: RF.cleanInstagram($("fInsta").value), website_url: $("fWebsite").value.trim(), contact_email: $("fEmail").value.trim(),
+    };
+    var e = null;
+    if (v.name.length < 2) e = "Enter your brand name.";
+    else if (!RF.validSlug(v.slug)) e = "Pick a web address using 3 to 40 lowercase letters, numbers, and dashes.";
+    else if (!RF.isHttps(v.shop_url)) e = "Add your shop link. It has to start with https://";
+    else if (v.website_url && !RF.isHttps(v.website_url)) e = "The website link has to start with https://";
+    else if (v.instagram === null) e = "That Instagram name does not look right. Use just the handle, like yourbrand.";
+    else if (!RF.validEmail(v.contact_email)) e = "Enter a contact email so we can reach you about your application.";
+    else if (applying && !$("fTerms").checked) e = "Please confirm the checkbox at the bottom.";
+    if (!e && applying && !$("fLogo").files[0]) e = "Add your logo so people recognize your brand.";
+    return { values: v, error: e };
+  }
+  function payload(v) {
+    return { name: v.name, category: v.category, tagline: v.tagline || null, bio: v.bio || null, location: v.location || null, shop_url: v.shop_url,
+             instagram: v.instagram || null, website_url: v.website_url || null, contact_email: v.contact_email };
+  }
+
+  function uploadImages(updates) {
+    var jobs = [];
+    var logo = $("fLogo").files[0], cover = $("fCover").files[0];
+    if (logo) jobs.push(RF.resizeImage(logo, 512, 0.9, true).then(function (b) { return RF.uploadBlob(RF.uploadPath(user.id, "logo", "image/jpeg"), b, "image/jpeg"); }).then(function (u) { updates.logo_url = u; }));
+    if (cover) jobs.push(RF.resizeImage(cover, 1800, 0.86, false).then(function (b) { return RF.uploadBlob(RF.uploadPath(user.id, "cover", "image/jpeg"), b, "image/jpeg"); }).then(function (u) { updates.cover_url = u; }));
+    return Promise.all(jobs);
+  }
+
+  // ---------- application ----------
+  function renderApply() {
+    var v = { name: "", slug: "", category: "streetwear", location: "", tagline: "", bio: "", shop_url: "", instagram: "", website_url: "", contact_email: (user.email || "") };
+    $("page").innerHTML =
+      '<div class="card"><h2>Apply for a RelviaFashion page</h2>' +
+      '<p class="lead">Tell us about your brand. We review every application. Once you are approved, your page goes live and you can add a lookbook of photos and short videos.</p>' +
+      formHtml(v, { slugLocked: false }) +
+      '<div class="field full" style="margin-top:18px;"><label class="check"><input type="checkbox" id="fTerms"><span>I own this brand or I am allowed to represent it. I own or have permission to use everything I upload, and the products I show are real.</span></label></div>' +
+      '<div class="err" id="formErr" role="alert"></div>' +
+      '<div class="form-actions"><button class="btn btn-gold" id="submitApply">Send application</button><a class="btn btn-ghost" href="index.html">Cancel</a></div></div>';
+    wireForm(v);
+    $("submitApply").addEventListener("click", submitApply);
+  }
+
+  function submitApply() {
+    if (working) return;
+    var c = collect(true); $("formErr").textContent = c.error || "";
+    if (c.error) return;
+    working = true; var btn = $("submitApply"); btn.disabled = true; btn.textContent = "Sending...";
+    checkSlug(true).then(function (ok) {
+      if (!ok) throw new Error("That web address is already taken. Try another one.");
+      var row = payload(c.values); row.owner_id = user.id; row.slug = c.values.slug;
+      return RF.client.from("fashion_brands").insert(row).select("*").single();
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      brand = r.data;
+      var updates = {};
+      return uploadImages(updates).then(function () {
+        if (!Object.keys(updates).length) return;
+        return RF.client.from("fashion_brands").update(updates).eq("id", brand.id).select("*").single().then(function (u) { if (u.data) brand = u.data; });
+      }).catch(function (err) {
+        RF.toast("Your application was sent, but a photo didn't upload: " + RF.friendlyError(err) + " You can add it below.", true);
+      });
+    }).then(function () {
+      working = false; return loadAgreement().then(function () { render(); window.scrollTo({ top: 0 }); });
+    }).catch(function (err) {
+      working = false; btn.disabled = false; btn.textContent = "Send application";
+      $("formErr").textContent = RF.friendlyError(err);
+    });
+  }
+
+  // ---------- manage ----------
+  function statusBanner() {
+    var s = brand.status;
+    if (s === "pending") return '<div class="banner pending"><b>Under review</b>Thanks for applying. We will message you in RelviaCreators when we decide. You can keep editing your details while you wait.</div>';
+    if (s === "rejected") return '<div class="banner rejected"><b>Not approved yet</b>' + RF.esc(brand.admin_note || "We need a bit more to go on.") + '<br>Update your details below, then send it for review again.</div>';
+    if (s === "suspended") return '<div class="banner suspended"><b>Your page is paused</b>' + RF.esc(brand.admin_note || "Contact Relvia to find out more.") + '</div>';
+    return '<div class="banner approved"><b>You are live</b>Your page is public. <a href="' + RF.esc(RF.brandUrl(brand.slug)) + '" style="text-decoration:underline;">View my page</a></div>';
+  }
+
+  function loadAgreement(){
+    return RF.client.rpc("fashion_my_agreement").then(function (r) { agreement = (!r.error && r.data) ? r.data : null; });
+  }
+
+  function agreementHtml(){
+    if (!brand || !agreement || brand.status === "suspended") return "";
+    if (agreement.signed) {
+      return '<div class="card agree"><h2>Brand Agreement</h2>' +
+        '<p class="agree-ok">Signed by ' + RF.esc(agreement.signer_name) + ' on ' + new Date(agreement.signed_at).toLocaleDateString() + '.</p>' +
+        '<p class="hint" style="margin-top:8px;">Version ' + RF.esc(agreement.version) + '. You can always read the full text below.</p>' +
+        '<div class="agree-text">' + RF.esc(agreement.body) + '</div></div>';
+    }
+    return '<div class="card agree"><h2>' + RF.esc(agreement.title) + '</h2>' +
+      '<p class="lead">Read the full agreement, then sign. Relvia only has obligations to a brand that signs. Your lookbook opens after you sign.</p>' +
+      '<div class="agree-text" tabindex="0">' + RF.esc(agreement.body) + '</div>' +
+      '<div class="field"><label for="aName">Type your full legal name <span class="req">*</span></label><input class="input" id="aName" maxlength="120" autocomplete="name" placeholder="First and last name"></div>' +
+      '<label class="check" style="margin-top:16px;"><input type="checkbox" id="aConsent"><span>I have read this agreement. I agree to sign it electronically, and my typed name above is my signature.</span></label>' +
+      '<div class="err" id="agreeErr" role="alert"></div>' +
+      '<div class="form-actions"><button class="btn btn-gold" id="signBtn">Sign agreement</button></div></div>';
+  }
+
+  function wireAgreement(){
+    var btn = $("signBtn"); if (!btn) return;
+    btn.addEventListener("click", function () {
+      var name = $("aName").value.trim(), consent = $("aConsent").checked;
+      $("agreeErr").textContent = "";
+      if (!consent) { $("agreeErr").textContent = "Tick the box to confirm you agree."; return; }
+      if (name.length < 3) { $("agreeErr").textContent = "Type your full legal name to sign."; return; }
+      btn.disabled = true; btn.textContent = "Signing...";
+      RF.client.rpc("fashion_sign_agreement", { p_name: name, p_consent: true }).then(function (r) {
+        if (r.error) { btn.disabled = false; btn.textContent = "Sign agreement"; $("agreeErr").textContent = RF.friendlyError(r.error); return; }
+        return loadAgreement().then(function () { RF.toast("Signed. Thank you."); render(); });
+      });
+    });
+  }
+
+  function renderManage() {
+    var locked = brand.status === "approved" || brand.status === "suspended";
+    var disabled = brand.status === "suspended";
+    $("page").innerHTML = statusBanner() + agreementHtml() +
+      '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
+      '<div class="err" id="formErr" role="alert"></div>' +
+      '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
+      (brand.status === "rejected" ? '<button class="btn btn-ghost" id="resubmitBtn">Save and send for review</button>' : '') + '</div></div>' +
+      (brand.status === "approved" && agreement && !agreement.signed ? '<div class="banner pending" style="margin-bottom:22px;"><b>Lookbook locked</b>Sign the Brand Agreement above to add photos and videos.</div>' : '') +
+      (brand.status === "approved" && agreement && agreement.signed ? '<div class="card" id="lookCard"><h2>Lookbook</h2><p class="lead">Add photos and short videos of your pieces. Photos are shrunk for you. Videos can be up to ' + RF.LIMITS.videoSeconds + ' seconds and 40 MB (MP4, WebM, or MOV).</p>' +
+        '<label class="drop" id="drop" for="fFiles"><b>Add photos and videos</b><span>Click to choose, or drop files here</span><span class="hint" id="roomHint"></span></label>' +
+        '<input type="file" id="fFiles" class="sr-only" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime">' +
+        '<div class="queue" id="queue"></div><div class="m-grid" id="mGrid"></div></div>' : '');
+    wireForm(brand);
+    $("saveBtn").addEventListener("click", function () { save(false); });
+    if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
+    wireAgreement();
+    if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
+    if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
+  }
+
+  function save(resubmit) {
+    if (working) return;
+    var c = collect(false); $("formErr").textContent = c.error || "";
+    if (c.error) return;
+    working = true; var btn = resubmit ? $("resubmitBtn") : $("saveBtn"); btn.disabled = true;
+    var locked = brand.status === "approved" || brand.status === "suspended";
+    var p = checkSlug(true);
+    p.then(function (ok) {
+      if (!ok && !locked) throw new Error("That web address is already taken. Try another one.");
+      var upd = payload(c.values); if (!locked) upd.slug = c.values.slug;
+      return uploadImages(upd).then(function () { return RF.client.from("fashion_brands").update(upd).eq("id", brand.id).select("*").single(); });
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      brand = r.data;
+      return resubmit ? RF.client.rpc("fashion_resubmit").then(function (x) { if (x.error) throw x.error; return RF.getMyBrand(user.id).then(function (b) { brand = b || brand; }); }) : null;
+    }).then(function () {
+      working = false; RF.toast(resubmit ? "Sent for review. We will message you." : "Saved."); render();
+    }).catch(function (err) {
+      working = false; btn.disabled = false; $("formErr").textContent = RF.friendlyError(err);
+    });
+  }
+
+  // ---------- lookbook manager ----------
+  function loadItems() {
+    return RF.client.from("fashion_items").select("*").eq("brand_id", brand.id).order("created_at", { ascending: false }).then(function (r) { items = r.data || []; renderItems(); });
+  }
+  function roomLeft() { return Math.max(0, RF.LIMITS.items - items.length); }
+
+  function renderItems() {
+    $("roomHint").textContent = items.length + " of " + RF.LIMITS.items + " used";
+    var grid = $("mGrid");
+    if (!items.length) { grid.innerHTML = ""; return; }
+    grid.innerHTML = items.map(function (it, i) {
+      var thumb = it.media_type === "video" ? it.poster_url : it.media_url;
+      return '<div class="m-item" data-id="' + RF.esc(it.id) + '"><div class="m-thumb" data-thumb="' + RF.esc(thumb || "") + '">' + (it.media_type === "video" ? '<span class="play">VIDEO</span>' : '') + '</div>' +
+        '<div class="m-fields"><input class="input" data-f="caption" maxlength="200" placeholder="Caption" value="' + RF.esc(it.caption) + '" aria-label="Caption">' +
+        '<input class="input" data-f="product_url" maxlength="300" placeholder="Link to buy this piece (https://)" value="' + RF.esc(it.product_url) + '" aria-label="Product link">' +
+        '<div class="m-actions"><button class="btn btn-ghost btn-sm" data-act="save">Save</button><button class="btn btn-danger btn-sm" data-act="delete">Delete</button></div></div></div>';
+    }).join("");
+    grid.querySelectorAll("[data-thumb]").forEach(function (el) { var u = el.getAttribute("data-thumb"); if (u && RF.isHttps(u)) el.style.backgroundImage = 'url("' + encodeURI(u) + '")'; });
+  }
+
+  function wireLookbook() {
+    var input = $("fFiles"), drop = $("drop");
+    input.addEventListener("change", function () { var f = Array.prototype.slice.call(input.files); input.value = ""; handleFiles(f); });
+    ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("drag"); }); });
+    ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.remove("drag"); }); });
+    drop.addEventListener("drop", function (e) { handleFiles(Array.prototype.slice.call(e.dataTransfer.files)); });
+    $("mGrid").addEventListener("click", function (e) {
+      var act = e.target.getAttribute && e.target.getAttribute("data-act"); if (!act) return;
+      var card = e.target.closest(".m-item"), id = card.getAttribute("data-id");
+      if (act === "save") saveItem(card, id); else if (act === "delete") deleteItem(id);
+    });
+  }
+
+  function queueRow(file) {
+    var row = document.createElement("div"); row.className = "q-item";
+    row.innerHTML = '<span class="name"></span><span class="state">Waiting</span>'; row.querySelector(".name").textContent = file.name;
+    $("queue").appendChild(row);
+    return { ok: function () { row.classList.add("done"); row.querySelector(".state").textContent = "Added"; }, fail: function (m) { row.classList.add("fail"); row.querySelector(".state").textContent = m; }, state: function (m) { row.querySelector(".state").textContent = m; } };
+  }
+
+  function addOne(file) {
+    var q = queueRow(file), isVideo = file.type.indexOf("video/") === 0;
+    if (!roomLeft()) { q.fail("Lookbook is full (" + RF.LIMITS.items + ")"); return Promise.resolve(); }
+    var problem = isVideo ? RF.videoProblem(file, null) : RF.imageProblem(file);
+    if (problem) { q.fail(problem); return Promise.resolve(); }
+    var uploaded = [];
+    q.state(isVideo ? "Reading video..." : "Shrinking photo...");
+    var prep = isVideo
+      ? RF.videoInfo(file).then(function (info) { return { blob: file, type: file.type, poster: info.poster }; })
+      : RF.resizeImage(file, 1600, 0.86, false).then(function (b) { return { blob: b, type: "image/jpeg" }; });
+    return prep.then(function (p) {
+      q.state("Uploading...");
+      return RF.uploadBlob(RF.uploadPath(user.id, "item", p.type), p.blob, p.type).then(function (mediaUrl) {
+        uploaded.push(mediaUrl);
+        if (!p.poster) return { mediaUrl: mediaUrl, posterUrl: null };
+        return RF.uploadBlob(RF.uploadPath(user.id, "poster", "image/jpeg"), p.poster, "image/jpeg").then(function (posterUrl) { uploaded.push(posterUrl); return { mediaUrl: mediaUrl, posterUrl: posterUrl }; });
+      });
+    }).then(function (u) {
+      return RF.client.from("fashion_items").insert({ brand_id: brand.id, media_type: isVideo ? "video" : "image", media_url: u.mediaUrl, poster_url: u.posterUrl }).select("*").single();
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      items.unshift(r.data); q.ok(); renderItems();
+    }).catch(function (err) {
+      RF.removeByUrls(uploaded); q.fail(RF.friendlyError(err));
+    });
+  }
+
+  function handleFiles(files) {
+    if (working || !files.length) return;
+    working = true;
+    var chain = Promise.resolve();
+    files.forEach(function (f) { chain = chain.then(function () { return addOne(f); }); });
+    chain.then(function () { working = false; });
+  }
+
+  function saveItem(card, id) {
+    var caption = card.querySelector('[data-f="caption"]').value.trim(), url = card.querySelector('[data-f="product_url"]').value.trim();
+    if (url && !RF.isHttps(url)) { RF.toast("The product link has to start with https://", true); return; }
+    RF.client.from("fashion_items").update({ caption: caption || null, product_url: url || null }).eq("id", id).then(function (r) {
+      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
+      items.forEach(function (it) { if (it.id === id) { it.caption = caption || null; it.product_url = url || null; } });
+      RF.toast("Saved.");
+    });
+  }
+  function deleteItem(id) {
+    var it = items.filter(function (x) { return x.id === id; })[0]; if (!it) return;
+    if (!window.confirm("Delete this from your lookbook?")) return;
+    RF.client.from("fashion_items").delete().eq("id", id).then(function (r) {
+      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
+      items = items.filter(function (x) { return x.id !== id; }); renderItems();
+      RF.removeByUrls([it.media_url, it.poster_url]);
+      RF.toast("Deleted.");
+    });
+  }
+
+  function render() { slugEdited = !!(brand && brand.slug); if (brand) renderManage(); else renderApply(); }
+
+  function init() {
+    RF.closedCheck().then(function (closed) {
+      if (closed) return;
+      return RF.renderHeader("manage").then(function (u) {
+        user = u;
+        if (!user) { $("page").innerHTML = '<div class="card" style="text-align:center;"><h2>Sign in to apply</h2><p class="lead">You need a Relvia account to create a RelviaFashion page.</p><a class="btn btn-gold" href="/login.html">Sign in</a></div>'; return; }
+        return RF.getMyBrand(user.id).then(function (b) { brand = b; return brand ? loadAgreement() : null; }).then(function () { render(); });
+      });
+    });
+  }
+  init();
+})();
+</script>
+<script src="../beta-toolkit.js"></script>
+</body>
+</html>
