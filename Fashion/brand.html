@@ -251,6 +251,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 @media (max-width:860px){ .about{ grid-template-columns:1fr; gap:26px; } .brand-head{ margin-top:-70px; } .logo-lg{ width:112px; height:112px; } .stat-row{ gap:22px; } }
 .with{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
 .with a{ color:var(--gold-1); font-weight:700; border-bottom:1px solid var(--line-gold); }
+.updates{ margin-top:40px; }
+.upd{ padding:18px 20px; border:1px solid var(--line); border-radius:16px; background:var(--panel); margin-bottom:12px; }
+.upd .when{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-2); margin-bottom:8px; }
+.upd p{ font-size:15px; color:var(--soft); line-height:1.65; white-space:pre-wrap; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -518,6 +522,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   var $ = function (id) { return document.getElementById(id); };
   var slug = (new URLSearchParams(location.search).get("b") || "").toLowerCase();
   var user = null, brand = null, mine = null, items = [], following = false, lbIndex = 0, reportTarget = null, publicTags = [];
+  var publicUpdates = [], muted = false;
 
   function setBg(el, url) { if (el && url && RF.isHttps(url)) el.style.backgroundImage = 'url("' + encodeURI(url) + '")'; }
   function safeLink(url) { return RF.isHttps(url) ? RF.esc(url) : null; }
@@ -540,7 +545,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     if (!brand || brand.status !== "approved") return "";
     if (!user) return '<a class="btn btn-gold" href="/login.html">Sign in to follow</a>';
     if (mine && mine.id === brand.id) return "";
-    return '<button class="btn ' + (following ? "btn-ghost" : "btn-gold") + '" id="followBtn" aria-pressed="' + following + '">' + (following ? "Following" : "Follow") + '</button>';
+    var follow = '<button class="btn ' + (following ? "btn-ghost" : "btn-gold") + '" id="followBtn" aria-pressed="' + following + '">' + (following ? "Following" : "Follow") + '</button>';
+    var mute = following ? ' <button class="btn btn-ghost btn-sm" id="muteBtn">' + (muted ? "Unmute updates" : "Mute updates") + '</button>' : "";
+    return follow + mute;
   }
 
   function render() {
@@ -568,7 +575,17 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       '</div>';
     setBg($("cover"), brand.cover_url);
     renderLookbook();
+    renderUpdates();
     track("view");
+  }
+
+  function renderUpdates(){
+    if (!publicUpdates.length) return;
+    var html = '<section class="section updates"><div class="section-head"><h2 class="section-title">Updates</h2></div>' +
+      publicUpdates.map(function (u) {
+        return '<div class="upd"><div class="when">' + RF.esc(new Date(u.created_at).toLocaleDateString()) + '</div><p>' + RF.esc(u.body) + '</p></div>';
+      }).join("") + '</section>';
+    $("page").querySelector(".wrap").insertAdjacentHTML("beforeend", html);
   }
 
   function renderLookbook() {
@@ -633,6 +650,17 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     });
   }
 
+  // ---------- muting updates (followers only) ----------
+  function toggleMute(){
+    var btn = $("muteBtn"); if (!btn || !brand) return; btn.disabled = true;
+    var next = !muted;
+    RF.client.rpc("fashion_set_mute", { p_brand_id: brand.id, p_muted: next }).then(function (r) {
+      if (r.error) { btn.disabled = false; RF.toast(RF.friendlyError(r.error), true); return; }
+      muted = next; RF.toast(muted ? "Updates muted. You still follow this brand." : "Updates back on.");
+      $("headActions").innerHTML = followBtn();
+    });
+  }
+
   // ---------- following ----------
   function toggleFollow() {
     var btn = $("followBtn"); if (!btn) return; btn.disabled = true;
@@ -654,6 +682,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     var look = t.closest && t.closest(".look");
     if (look) return openLook(Number(look.getAttribute("data-i")));
     if (t.id === "followBtn") return toggleFollow();
+    if (t.id === "muteBtn") return toggleMute();
     if (t.id === "reportBrand") return openReport("fashion_brand", brand.id, "this brand");
     if (t.id === "lbReport") return openReport("fashion_item", items[lbIndex].id, "this look");
     if (t.id === "lbClose" || t === $("lb")) return closeLook();
@@ -687,7 +716,10 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
             user ? RF.client.from("fashion_follows").select("brand_id").eq("brand_id", brand.id).eq("user_id", user.id).maybeSingle() : null,
           ]).then(function (res) {
             mine = res[0]; items = (res[1] && res[1].data) || []; following = !!(res[2] && res[2].data);
-            return RF.client.rpc("fashion_public_tags", { p_brand_id: brand.id }).then(function (t) { publicTags = (!t.error && Array.isArray(t.data)) ? t.data : []; render(); });
+            return RF.client.rpc("fashion_public_tags", { p_brand_id: brand.id }).then(function (t) { publicTags = (!t.error && Array.isArray(t.data)) ? t.data : []; })
+              .then(function () { return RF.client.rpc("fashion_brand_updates", { p_brand_id: brand.id }).then(function (u) { publicUpdates = (!u.error && Array.isArray(u.data)) ? u.data : []; }); })
+              .then(function () { return user ? RF.client.rpc("fashion_my_mutes").then(function (m) { muted = (!m.error && Array.isArray(m.data)) && m.data.indexOf(brand.id) >= 0; }) : null; })
+              .then(render);
           });
         });
       });
