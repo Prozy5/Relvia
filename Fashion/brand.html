@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand | RelviaFashion</title>
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
+<style>html,body{background:#060403;color:#f5f1ea;margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}</style>
+<style id="rf-css">
+/* RelviaFashion: shared styles. Matches RelviaCreators (black and gold, Playfair + Inter). */
+:root{
+  --bg:#060403; --panel:#0e0a07; --glass:#0e0a07; --ink:#f5f1ea; --text:#f5f1ea; --soft:#cdc5b5; --muted:#8a8073; --muted-soft:#8a8073;
+  --line:#241b12; --border:#241b12; --border-soft:#1a130c; --line-gold:rgba(224,177,88,.4);
+  --gold-1:#f6d27a; --gold-2:#b9832f; --gold:#e0b158; --gold-start:#f6d27a; --gold-end:#b9832f;
+  --red:#e0574f; --danger:#e0574f; --ok:#6dbb83; --warn:#e8a33d;
+  --display:"Playfair Display",Georgia,serif; --body:"Inter",system-ui,sans-serif;
+  --font-display:var(--display); --font-body:var(--body); --background:var(--bg);
+}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:var(--font-body); }
+html{ scroll-behavior:smooth; }
+body{ color:var(--ink); min-height:100vh; background:var(--bg); background-image:radial-gradient(1100px 520px at 50% -120px, rgba(224,177,88,.08), transparent 70%); background-repeat:no-repeat; -webkit-font-smoothing:antialiased; }
+a{ text-decoration:none; color:inherit; }
+button, input, textarea, select{ font-family:inherit; font-size:inherit; color:inherit; }
+button{ cursor:pointer; border:none; background:none; }
+img, video{ max-width:100%; display:block; }
+:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+/* ----- header ----- */
+.topbar{ position:sticky; top:0; z-index:50; height:72px; display:flex; align-items:center; gap:18px; padding:0 clamp(16px,3vw,32px); background:rgba(6,4,3,.88); backdrop-filter:blur(18px); border-bottom:1px solid var(--line-gold); }
+.brand{ display:flex; align-items:center; gap:12px; }
+.crest{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-style:italic; font-weight:800; font-size:21px; color:var(--gold-start); border:1.5px solid var(--gold-2); background:#000; }
+.brand-text{ display:flex; flex-direction:column; line-height:1; }
+.brand-name{ font-family:var(--font-display); font-weight:800; font-size:24px; letter-spacing:-.02em; background:linear-gradient(100deg,var(--gold-1),var(--gold-2) 55%,var(--gold-1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.brand-sub{ margin-top:5px; font-size:9.5px; font-weight:700; letter-spacing:.4em; color:var(--gold-end); }
+.top-nav{ display:flex; gap:clamp(14px,2.2vw,28px); margin-left:auto; }
+.top-nav a{ font-size:13px; font-weight:600; color:var(--soft); transition:color .2s; }
+.top-nav a:hover, .top-nav a.active{ color:var(--gold-start); }
+.top-actions{ display:flex; align-items:center; gap:10px; }
+
+/* ----- buttons, chips, tags ----- */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 22px; border-radius:999px; font-weight:700; font-size:14px; transition:transform .15s, box-shadow .2s, border-color .2s, opacity .2s; white-space:nowrap; }
+.btn:active{ transform:scale(.97); }
+.btn-sm{ padding:8px 16px; font-size:12.5px; }
+.btn-gold{ color:#060403; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); box-shadow:0 8px 26px rgba(224,177,88,.22); }
+.btn-gold:hover{ box-shadow:0 10px 32px rgba(224,177,88,.38); }
+.btn-ghost{ border:1px solid var(--border); color:var(--text); }
+.btn-ghost:hover{ border-color:var(--gold-end); color:var(--gold-start); }
+.btn-danger{ border:1px solid rgba(224,87,79,.5); color:#f2a8a3; }
+.btn-danger:hover{ background:rgba(224,87,79,.12); }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; transform:none; }
+.chip{ display:inline-flex; align-items:center; padding:8px 16px; border:1px solid var(--border); border-radius:999px; font-size:12.5px; font-weight:600; color:var(--muted); white-space:nowrap; transition:all .15s; }
+.chip:hover{ border-color:var(--gold-end); color:var(--text); }
+.chip.active{ border-color:var(--gold); color:var(--gold-start); background:rgba(224,177,88,.09); }
+.tag{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(224,177,88,.4); }
+.tag.featured{ color:#060403; background:linear-gradient(135deg,var(--gold-start),var(--gold-end)); border-color:transparent; }
+
+/* ----- layout ----- */
+.wrap{ width:min(1180px,100%); margin:0 auto; padding:0 clamp(16px,3vw,32px); }
+.section{ padding:34px 0 8px; }
+.section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.section-title{ font-family:var(--font-display); font-weight:700; font-size:clamp(24px,3.4vw,32px); }
+.section-note{ font-size:13px; color:var(--muted); }
+.muted{ color:var(--muted); }
+.empty{ text-align:center; padding:64px 20px; border:1px dashed var(--border); border-radius:20px; color:var(--muted); }
+.empty h3{ font-family:var(--font-display); font-size:26px; color:var(--text); margin-bottom:8px; }
+.empty .btn{ margin-top:18px; }
+
+/* ----- hero ----- */
+.hero{ text-align:center; padding:clamp(48px,9vw,96px) 0 clamp(28px,5vw,54px); }
+.eyebrow{ font-size:11px; font-weight:800; letter-spacing:.42em; color:var(--gold-end); margin-bottom:18px; }
+.hero h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(44px,9vw,104px); line-height:1.02; letter-spacing:-.025em; background:linear-gradient(100deg,var(--gold-1),var(--gold-2) 55%,var(--gold-1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero p{ max-width:560px; margin:20px auto 0; font-size:clamp(15px,1.8vw,18px); color:var(--soft); line-height:1.6; }
+.hero-cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px; }
+
+/* ----- filters ----- */
+.filters{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+.chip-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; flex:1 1 360px; scrollbar-width:none; }
+.chip-row::-webkit-scrollbar{ display:none; }
+.search{ flex:0 1 240px; background:var(--glass); border:1px solid var(--border); border-radius:999px; padding:10px 16px; font-size:13.5px; }
+.search:focus{ outline:none; border-color:var(--gold); }
+.sort{ background:var(--glass); border:1px solid var(--border); border-radius:999px; padding:10px 14px; font-size:13px; color:var(--muted); }
+
+/* ----- brand cards ----- */
+.brand-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; }
+.brand-card{ display:flex; flex-direction:column; background:var(--glass); border:1px solid var(--border); border-radius:20px; overflow:hidden; transition:transform .2s, border-color .2s, box-shadow .25s; }
+.brand-card:hover{ transform:translateY(-4px); border-color:var(--gold-end); box-shadow:0 14px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(224,177,88,.12); }
+.bc-cover{ position:relative; aspect-ratio:16/10; background:linear-gradient(135deg,#1a130c,#0e0a07); background-size:cover; background-position:center; }
+.bc-cover::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(10,8,6,.85), transparent 55%); }
+.bc-logo{ position:absolute; left:16px; bottom:-26px; z-index:2; width:60px; height:60px; border-radius:50%; border:2px solid var(--gold-end); background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:24px; color:var(--gold-start); }
+.bc-logo img{ width:100%; height:100%; object-fit:cover; }
+.bc-tags{ position:absolute; top:12px; left:12px; z-index:2; display:flex; gap:6px; }
+.bc-body{ padding:36px 18px 18px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.bc-name{ font-family:var(--font-display); font-weight:700; font-size:21px; line-height:1.15; }
+.bc-cat{ font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-end); }
+.bc-tagline{ font-size:13.5px; color:var(--muted); line-height:1.5; }
+.bc-meta{ margin-top:auto; padding-top:12px; display:flex; gap:14px; font-size:12px; color:var(--muted-soft); }
+.featured-row{ display:flex; gap:18px; overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x proximity; }
+.featured-row .brand-card{ flex:0 0 min(340px,82vw); scroll-snap-align:start; }
+.skeleton{ border-radius:20px; min-height:300px; background:linear-gradient(100deg,#0e0a07 30%,#0e0a07 50%,#0e0a07 70%); background-size:200% 100%; animation:shimmer 1.4s infinite linear; border:1px solid var(--border-soft); }
+@keyframes shimmer{ to{ background-position:-200% 0; } }
+
+/* ----- brand page ----- */
+.cover{ position:relative; height:clamp(170px,30vw,330px); background:linear-gradient(135deg,#1a130c,#0e0a07); background-size:cover; background-position:center; border-bottom:1px solid var(--border); }
+.cover::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, var(--background), transparent 60%); }
+.brand-head{ position:relative; z-index:2; display:flex; gap:22px; align-items:flex-end; flex-wrap:wrap; margin-top:-62px; }
+.logo-lg{ width:124px; height:124px; border-radius:50%; border:3px solid var(--gold-end); background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:52px; color:var(--gold-start); flex-shrink:0; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+.logo-lg img{ width:100%; height:100%; object-fit:cover; }
+.head-main{ flex:1 1 280px; min-width:0; padding-bottom:6px; }
+.head-main h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(30px,5vw,46px); line-height:1.08; }
+.head-sub{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted); }
+.head-actions{ display:flex; gap:10px; flex-wrap:wrap; padding-bottom:8px; }
+.about{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:28px; margin:26px 0 8px; }
+.about p.bio{ font-size:15.5px; line-height:1.75; color:#cdc5b5; white-space:pre-wrap; }
+.tagline-lg{ font-family:var(--font-display); font-style:italic; font-size:clamp(20px,2.6vw,26px); color:var(--gold); margin-bottom:12px; }
+.links{ display:flex; flex-direction:column; gap:10px; }
+.link-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:600; transition:border-color .2s, color .2s; }
+.link-row:hover{ border-color:var(--gold-end); color:var(--gold-start); }
+.link-row small{ font-weight:500; color:var(--muted-soft); }
+.stat-row{ display:flex; gap:22px; margin-top:12px; font-size:13px; color:var(--muted); }
+.stat-row b{ color:var(--text); font-size:17px; margin-right:4px; }
+.banner{ margin:18px 0 0; padding:14px 18px; border-radius:14px; border:1px solid var(--border); font-size:14px; line-height:1.6; }
+.banner b{ display:block; margin-bottom:2px; }
+.banner.pending{ border-color:rgba(232,163,61,.45); background:rgba(232,163,61,.07); color:#f6d27a; }
+.banner.rejected, .banner.suspended{ border-color:rgba(224,87,79,.45); background:rgba(224,87,79,.07); color:#f2a8a3; }
+.banner.approved{ border-color:rgba(109,187,131,.45); background:rgba(109,187,131,.07); color:#cdc5b5; }
+.banner .btn{ margin-top:10px; }
+
+/* ----- lookbook ----- */
+.lookbook{ columns:3 260px; column-gap:14px; }
+.look{ position:relative; display:block; width:100%; margin:0 0 14px; break-inside:avoid; border-radius:14px; overflow:hidden; background:var(--glass); border:1px solid var(--border-soft); transition:border-color .2s, transform .2s; }
+.look:hover{ border-color:var(--gold-end); transform:translateY(-2px); }
+.look img{ width:100%; height:auto; }
+.look .ph{ aspect-ratio:3/4; background:linear-gradient(135deg,#1a130c,#0e0a07); }
+.look .play{ position:absolute; right:12px; top:12px; display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(0,0,0,.65); font-size:11px; font-weight:800; letter-spacing:.12em; color:var(--gold-start); }
+.look .cap{ position:absolute; left:0; right:0; bottom:0; padding:26px 14px 12px; font-size:12.5px; line-height:1.4; background:linear-gradient(to top, rgba(0,0,0,.82), transparent); opacity:0; transition:opacity .2s; text-align:left; }
+.look:hover .cap, .look:focus-visible .cap{ opacity:1; }
+
+/* ----- lightbox ----- */
+.lb{ position:fixed; inset:0; z-index:200; background:rgba(4,3,2,.94); display:none; align-items:center; justify-content:center; padding:18px; }
+.lb.open{ display:flex; }
+.lb-inner{ width:min(1040px,100%); max-height:100%; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; align-items:center; }
+.lb-media{ display:flex; align-items:center; justify-content:center; max-height:88vh; min-height:200px; }
+.lb-media img, .lb-media video{ max-height:88vh; max-width:100%; width:auto; border-radius:12px; background:#000; }
+.lb-side{ display:flex; flex-direction:column; gap:14px; }
+.lb-side .count{ font-size:11px; letter-spacing:.3em; font-weight:800; color:var(--gold-end); }
+.lb-side .caption{ font-family:var(--font-display); font-size:20px; line-height:1.35; }
+.lb-x{ position:absolute; top:14px; right:18px; font-size:30px; color:var(--soft); line-height:1; padding:6px 12px; }
+.lb-x:hover{ color:var(--gold-start); }
+.lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; border:1px solid var(--border); background:rgba(10,8,6,.8); font-size:22px; color:var(--soft); }
+.lb-nav:hover{ border-color:var(--gold); color:var(--gold-start); }
+.lb-prev{ left:14px; } .lb-next{ right:14px; }
+
+/* ----- forms ----- */
+.card{ background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:clamp(18px,3vw,30px); margin-bottom:22px; }
+.card h2{ font-family:var(--font-display); font-weight:700; font-size:26px; margin-bottom:6px; }
+.card > .lead{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+.field{ display:flex; flex-direction:column; gap:7px; }
+.field.full{ grid-column:1/-1; }
+.field label{ font-size:12px; font-weight:700; letter-spacing:.06em; color:var(--soft); }
+.field label .req{ color:var(--gold); }
+.input, .textarea, .select{ background:#0e0a07; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:14.5px; width:100%; }
+.textarea{ resize:vertical; min-height:110px; line-height:1.55; }
+.input:focus, .textarea:focus, .select:focus{ outline:none; border-color:var(--gold); }
+.input[disabled]{ opacity:.55; }
+.hint{ font-size:12px; color:var(--muted-soft); line-height:1.5; }
+.hint.ok{ color:var(--ok); } .hint.bad{ color:#f2a8a3; }
+.err{ color:#f2a8a3; font-size:13px; margin-top:12px; min-height:18px; }
+.imgpick{ display:flex; gap:14px; align-items:center; }
+.imgpick .prev{ width:84px; height:84px; border-radius:50%; background:#0e0a07 center/cover; border:1px dashed var(--border); flex-shrink:0; }
+.imgpick .prev.wide{ width:150px; height:84px; border-radius:12px; }
+.check{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; line-height:1.55; color:var(--soft); cursor:pointer; }
+.check input{ margin-top:3px; accent-color:var(--gold); }
+.form-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:22px; }
+
+/* ----- lookbook manager ----- */
+.drop{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; padding:30px 18px; border:1.5px dashed var(--border); border-radius:16px; cursor:pointer; color:var(--muted); transition:border-color .2s, background .2s; }
+.drop:hover, .drop.drag{ border-color:var(--gold); background:rgba(224,177,88,.05); }
+.drop b{ color:var(--text); font-size:15px; }
+.queue{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.q-item{ display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid var(--border); border-radius:12px; font-size:13px; }
+.q-item .name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-item .state{ font-size:12px; color:var(--muted); }
+.q-item.done .state{ color:var(--ok); } .q-item.fail .state{ color:#f2a8a3; }
+.m-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; margin-top:20px; }
+.m-item{ border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#0e0a07; display:flex; flex-direction:column; }
+.m-thumb{ position:relative; aspect-ratio:4/5; background:#000 center/cover; }
+.m-thumb .play{ position:absolute; right:10px; top:10px; padding:4px 10px; border-radius:999px; background:rgba(0,0,0,.7); font-size:10.5px; font-weight:800; letter-spacing:.12em; color:var(--gold-start); }
+.m-fields{ padding:12px; display:flex; flex-direction:column; gap:8px; }
+.m-fields .input{ padding:9px 11px; font-size:13px; }
+.m-actions{ display:flex; gap:8px; justify-content:space-between; }
+
+/* ----- misc ----- */
+.modal{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:18px; }
+.modal.open{ display:flex; }
+.modal-box{ width:min(440px,100%); background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:24px; }
+.modal-box h3{ font-family:var(--font-display); font-size:22px; margin-bottom:6px; }
+.modal-box .field{ margin-top:14px; }
+.toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); z-index:400; padding:12px 20px; border-radius:12px; background:#0e0a07; border:1px solid var(--gold-end); font-size:13.5px; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:92vw; text-align:center; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+.toast.bad{ border-color:var(--danger); color:#f2a8a3; }
+footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--border-soft); font-size:12px; letter-spacing:.14em; color:var(--muted-soft); text-align:center; }
+
+@media (max-width:860px){
+  .top-nav{ display:none; }
+  .about{ grid-template-columns:1fr; }
+  .lb-inner{ grid-template-columns:1fr; gap:12px; }
+  .lb-side{ align-items:flex-start; }
+  .lb-media img, .lb-media video{ max-height:62vh; }
+  .form-grid{ grid-template-columns:1fr; }
+  .brand-head{ margin-top:-48px; }
+  .logo-lg{ width:96px; height:96px; font-size:40px; }
+}
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } html{ scroll-behavior:auto; } }
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="siteHeader"></div>
+
+<main id="page">
+  <div class="wrap" style="padding-top:60px;"><div class="skeleton"></div></div>
+</main>
+
+<footer class="site">RELVIA ENTERTAINMENT &middot; FASHION</footer>
+
+<!-- lookbook viewer -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Lookbook viewer">
+  <button class="lb-x" id="lbClose" aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+  <div class="lb-inner">
+    <div class="lb-media" id="lbMedia"></div>
+    <div class="lb-side">
+      <div class="count" id="lbCount"></div>
+      <div class="caption" id="lbCaption"></div>
+      <div id="lbShop"></div>
+      <button class="btn btn-ghost btn-sm" id="lbReport" style="align-self:flex-start;">Report</button>
+    </div>
+  </div>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&#8250;</button>
+</div>
+
+<!-- report -->
+<div class="modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="modal-box">
+    <h3 id="reportTitle">Report this</h3>
+    <p class="hint">Reports go to the Relvia team. Tell us what is wrong.</p>
+    <div class="field"><label for="reportReason">Reason</label>
+      <select class="select" id="reportReason">
+        <option>Counterfeit or stolen content</option>
+        <option>Nudity or sexual content</option>
+        <option>Scam or misleading</option>
+        <option>Harassment or hate</option>
+        <option>Something else</option>
+      </select>
+    </div>
+    <div class="field"><label for="reportNote">Anything else (optional)</label><textarea class="textarea" id="reportNote" maxlength="120" style="min-height:70px;"></textarea></div>
+    <div class="form-actions"><button class="btn btn-gold btn-sm" id="reportSend">Send report</button><button class="btn btn-ghost btn-sm" id="reportCancel">Cancel</button></div>
+  </div>
+</div>
+
+<script id="rf-core">
+/* RelviaFashion: shared helpers. Loaded by index.html, brand.html, and manage.html after supabase-js. */
+(function () {
+  "use strict";
+  var SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+  var BUCKET = "fashion-media";
+  var LIMITS = { items: 60, videoSeconds: 30, videoBytes: 40 * 1024 * 1024, imageBytes: 15 * 1024 * 1024 };
+  var CATEGORIES = [
+    { key: "streetwear", label: "Streetwear" },
+    { key: "luxury", label: "Luxury & Designer" },
+    { key: "handmade", label: "Handmade" },
+    { key: "accessories", label: "Accessories & Jewelry" },
+    { key: "footwear", label: "Footwear" },
+    { key: "vintage", label: "Vintage & Thrift" },
+    { key: "sustainable", label: "Sustainable" },
+    { key: "other", label: "Other" },
+  ];
+  var VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+  var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+  var client = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  // ---------- small pure helpers ----------
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]; }); }
+  function slugify(name) {
+    return String(name || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+      .replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+  }
+  function validSlug(s) { return typeof s === "string" && s.length >= 3 && s.length <= 40 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(s); }
+  function isHttps(u) {
+    if (!u || u.length > 300 || /\s/.test(u)) return false;
+    try { var x = new URL(u); return x.protocol === "https:" && x.hostname.indexOf(".") > 0; } catch (e) { return false; }
+  }
+  // returns "" for empty, the clean handle for good input, or null for input we cannot use
+  function cleanInstagram(v) {
+    v = String(v || "").trim();
+    if (!v) return "";
+    var m = v.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+    if (m) v = m[1];
+    v = v.replace(/^@/, "");
+    return /^[A-Za-z0-9._]{1,30}$/.test(v) ? v : null;
+  }
+  function validEmail(e) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e || "") && e.length <= 120; }
+  function fmtCount(n) {
+    n = Number(n) || 0;
+    if (n < 1000) return String(n);
+    if (n < 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    if (n < 1000000) return Math.round(n / 1000) + "K";
+    return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  function catLabel(key) { var c = CATEGORIES.filter(function (x) { return x.key === key; })[0]; return c ? c.label : "Other"; }
+  function brandUrl(slug) { return "brand.html?b=" + encodeURIComponent(slug); }
+  function initial(name) { return (String(name || "R").trim()[0] || "R").toUpperCase(); }
+  function pathFromUrl(url) { var i = String(url || "").indexOf("/" + BUCKET + "/"); return i < 0 ? null : decodeURIComponent(String(url).slice(i + BUCKET.length + 2).split("?")[0]); }
+  function extFor(type) { return { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" }[type] || "bin"; }
+
+  // What is wrong with this video file? Empty string means it is fine.
+  function videoProblem(file, durationSeconds) {
+    if (VIDEO_TYPES.indexOf(file.type) < 0) return "Use an MP4, WebM, or MOV video.";
+    if (file.size > LIMITS.videoBytes) return "That video is over 40 MB. Trim it or export it smaller.";
+    if (durationSeconds != null && durationSeconds > LIMITS.videoSeconds + 0.5) return "Videos can be up to " + LIMITS.videoSeconds + " seconds. This one is " + Math.round(durationSeconds) + ".";
+    return "";
+  }
+  function imageProblem(file) {
+    if (IMAGE_TYPES.indexOf(file.type) < 0) return "Use a JPG, PNG, or WebP photo.";
+    if (file.size > LIMITS.imageBytes) return "That photo is over 15 MB. Try a smaller one.";
+    return "";
+  }
+
+  // Turn database errors into something a person can act on.
+  function friendlyError(err) {
+    var m = (err && (err.message || err.details)) || String(err || "");
+    if (/fashion_brands_slug_key|duplicate key.*slug/i.test(m)) return "That web address is already taken. Try another one.";
+    if (/fashion_brands_owner_id_key/i.test(m)) return "You already have a RelviaFashion application. Open My brand to see it.";
+    if (/fashion_brands_slug_check/i.test(m)) return "The web address can only use lowercase letters, numbers, and dashes (3 to 40 characters).";
+    if (/shop_url_check/i.test(m)) return "The shop link has to start with https:// and be a full web address.";
+    if (/website_url_check/i.test(m)) return "The website link has to start with https:// and be a full web address.";
+    if (/product_url_check/i.test(m)) return "The product link has to start with https:// and be a full web address.";
+    if (/instagram_check/i.test(m)) return "That Instagram name does not look right. Use just the handle, like yourbrand.";
+    if (/contact_email_check/i.test(m)) return "Enter a valid contact email.";
+    if (/lookbook can hold up to 60/i.test(m)) return "A lookbook can hold up to 60 items. Remove one to add another.";
+    if (/has to be approved/i.test(m)) return "Your page has to be approved before you can add to the lookbook.";
+    if (/row-level security|read_only|fashion_block/i.test(m)) return "That is not allowed right now. RelviaFashion may be paused or in read-only mode. Try again later.";
+    if (/Payload too large|exceeded the maximum allowed size|too large/i.test(m)) return "That file is too large. Videos can be up to 40 MB.";
+    if (/mime type|not supported/i.test(m)) return "That file type is not supported. Use JPG, PNG, WebP, MP4, WebM, or MOV.";
+    return m || "Something went wrong. Please try again.";
+  }
+
+  // ---------- account ----------
+  function getUser() {
+    return client.auth.getSession().then(function (r) { return r && r.data && r.data.session ? r.data.session.user : null; });
+  }
+  function getMyBrand(userId) {
+    return client.from("fashion_brands").select("*").eq("owner_id", userId).maybeSingle().then(function (r) { return r.data || null; });
+  }
+
+  // ---------- page furniture ----------
+  function renderHeader(active) {
+    var host = document.getElementById("siteHeader");
+    if (!host) return Promise.resolve(null);
+    host.innerHTML =
+      '<header class="topbar">' +
+      '<a class="brand" href="index.html" aria-label="RelviaFashion home"><span class="crest" aria-hidden="true">R</span><span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">FASHION</span></span></a>' +
+      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="../index.html">Relvia</a></nav>' +
+      '<div class="top-actions" id="topActions"></div></header>';
+    var actions = document.getElementById("topActions");
+    return getUser().then(function (user) {
+      if (!user) { actions.innerHTML = '<a class="btn btn-gold btn-sm" href="/login.html">Sign in</a>'; return null; }
+      return getMyBrand(user.id).then(function (brand) {
+        actions.innerHTML = brand
+          ? '<a class="btn btn-ghost btn-sm' + (active === "manage" ? " active" : "") + '" href="manage.html">My brand</a>'
+          : '<a class="btn btn-gold btn-sm" href="manage.html">Apply</a>';
+        return user;
+      }).catch(function () { actions.innerHTML = '<a class="btn btn-ghost btn-sm" href="manage.html">My brand</a>'; return user; });
+    }).catch(function () { actions.innerHTML = '<a class="btn btn-gold btn-sm" href="/login.html">Sign in</a>'; return null; });
+  }
+
+  // If you switch RelviaFashion off in Kill-Switches, visitors see a calm closed screen.
+  function closedCheck() {
+    return fetch(SUPABASE_URL + "/rest/v1/feature_flags?select=enabled&key=eq.fashion_enabled", { headers: { apikey: SUPABASE_ANON_KEY } })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        if (rows && rows[0] && rows[0].enabled === false) {
+          var d = document.createElement("div");
+          d.id = "rfClosed";
+          d.style.cssText = "position:fixed;inset:0;z-index:99999;background:#060403;color:#f5f1ea;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;";
+          d.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:36px;margin-bottom:12px;">RelviaFashion is paused</div><div style="color:#8a8073;font-size:15px;max-width:420px;line-height:1.6;">We are making a few changes. Please check back soon.</div><a href="../index.html" style="margin-top:22px;color:#e0b158;font-weight:700;">Back to Relvia</a>';
+          document.body.appendChild(d);
+          return true;
+        }
+        return false;
+      }).catch(function () { return false; });
+  }
+
+  var toastTimer = 0;
+  function toast(message, bad) {
+    var t = document.getElementById("rfToast");
+    if (!t) { t = document.createElement("div"); t.id = "rfToast"; t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+    t.textContent = message; t.classList.toggle("bad", !!bad); t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove("show"); }, bad ? 6000 : 3200);
+  }
+
+  // ---------- photos and videos ----------
+  function resizeImage(file, maxEdge, quality, square) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var sx = 0, sy = 0, sw = img.width, sh = img.height, w, h;
+        if (square) { var side = Math.min(img.width, img.height); sx = (img.width - side) / 2; sy = (img.height - side) / 2; sw = side; sh = side; w = h = Math.min(maxEdge, side); }
+        else { var scale = Math.min(1, maxEdge / Math.max(img.width, img.height)); w = Math.round(img.width * scale); h = Math.round(img.height * scale); }
+        var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d"); ctx.fillStyle = "#0e0a07"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error("Couldn't process that photo.")); }, "image/jpeg", quality || 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("That file is not a photo we can read. Try a JPG or PNG.")); };
+      img.src = url;
+    });
+  }
+
+  // Reads a video's length and grabs a poster frame, entirely in the browser.
+  function videoInfo(file) {
+    return new Promise(function (resolve, reject) {
+      var v = document.createElement("video"), url = URL.createObjectURL(file), finished = false, info = {};
+      v.preload = "metadata"; v.muted = true; v.playsInline = true;
+      function fail(msg) { if (finished) return; finished = true; clearTimeout(timer); URL.revokeObjectURL(url); reject(new Error(msg)); }
+      var timer = setTimeout(function () { fail("That video took too long to read. Export it as an H.264 MP4 and try again."); }, 20000);
+      v.onerror = function () { fail("This browser can't read that video. Export it as an H.264 MP4 and try again."); };
+      v.onloadedmetadata = function () {
+        if (!isFinite(v.duration) || v.duration <= 0) return fail("We couldn't read that video's length. Export it as an H.264 MP4 and try again.");
+        info.duration = v.duration; info.width = v.videoWidth; info.height = v.videoHeight;
+        var problem = videoProblem(file, v.duration);
+        if (problem) return fail(problem);
+        try { v.currentTime = Math.min(0.5, v.duration / 2); } catch (e) { fail("Couldn't read a frame from that video."); }
+      };
+      v.onseeked = function () {
+        if (finished) return;
+        var scale = Math.min(1, 720 / Math.max(info.width || 720, 1));
+        var canvas = document.createElement("canvas"); canvas.width = Math.max(2, Math.round((info.width || 720) * scale)); canvas.height = Math.max(2, Math.round((info.height || 405) * scale));
+        try { canvas.getContext("2d").drawImage(v, 0, 0, canvas.width, canvas.height); } catch (e) { return fail("Couldn't read a frame from that video."); }
+        canvas.toBlob(function (b) {
+          if (finished) return; finished = true; clearTimeout(timer); URL.revokeObjectURL(url);
+          resolve({ duration: info.duration, width: info.width, height: info.height, poster: b });
+        }, "image/jpeg", 0.82);
+      };
+      v.src = url;
+    });
+  }
+
+  function uploadPath(userId, kind, contentType) { return userId + "/" + kind + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + extFor(contentType); }
+  function uploadBlob(path, blob, contentType) {
+    return client.storage.from(BUCKET).upload(path, blob, { contentType: contentType, cacheControl: "31536000", upsert: false }).then(function (r) {
+      if (r.error) throw new Error(friendlyError(r.error));
+      return client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    });
+  }
+  function removeByUrls(urls) {
+    var paths = (urls || []).map(pathFromUrl).filter(Boolean);
+    if (!paths.length) return Promise.resolve();
+    return client.storage.from(BUCKET).remove(paths).then(function () {}, function () {});
+  }
+
+  window.RF = {
+    client: client, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
+    esc: esc, slugify: slugify, validSlug: validSlug, isHttps: isHttps, cleanInstagram: cleanInstagram, validEmail: validEmail,
+    fmtCount: fmtCount, catLabel: catLabel, brandUrl: brandUrl, initial: initial, pathFromUrl: pathFromUrl, extFor: extFor,
+    videoProblem: videoProblem, imageProblem: imageProblem, friendlyError: friendlyError,
+    getUser: getUser, getMyBrand: getMyBrand, renderHeader: renderHeader, closedCheck: closedCheck, toast: toast,
+    resizeImage: resizeImage, videoInfo: videoInfo, uploadPath: uploadPath, uploadBlob: uploadBlob, removeByUrls: removeByUrls,
+  };
+})();
+
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var slug = (new URLSearchParams(location.search).get("b") || "").toLowerCase();
+  var user = null, brand = null, mine = null, items = [], following = false, lbIndex = 0, reportTarget = null;
+
+  function setBg(el, url) { if (el && url && RF.isHttps(url)) el.style.backgroundImage = 'url("' + encodeURI(url) + '")'; }
+  function safeLink(url) { return RF.isHttps(url) ? RF.esc(url) : null; }
+
+  function missing() {
+    document.title = "Brand not found | RelviaFashion";
+    $("page").innerHTML = '<div class="wrap" style="padding-top:60px;"><div class="empty"><h3>We couldn\'t find that brand</h3><p>It may have moved, or it is not on RelviaFashion yet.</p><a class="btn btn-gold" href="index.html">Browse brands</a></div></div>';
+  }
+
+  function banner() {
+    if (!mine || mine.id !== brand.id) return (brand.status && brand.status !== "approved" && user) ? '<div class="banner pending"><b>Preview</b>This page is not public yet. Status: ' + RF.esc(brand.status) + '.</div>' : "";
+    var s = mine.status;
+    if (s === "approved") return '<div class="banner approved"><b>This is your page</b>It is live. Add looks and edit your details from My brand.<br><a class="btn btn-gold btn-sm" href="manage.html">Manage my page</a></div>';
+    if (s === "pending") return '<div class="banner pending"><b>Under review</b>Only you can see this page until it is approved. We will message you in RelviaCreators when it is decided.<br><a class="btn btn-ghost btn-sm" href="manage.html">Edit application</a></div>';
+    if (s === "rejected") return '<div class="banner rejected"><b>Not approved yet</b>' + RF.esc(mine.admin_note || "We need a bit more to go on.") + '<br><a class="btn btn-gold btn-sm" href="manage.html">Fix and send again</a></div>';
+    return '<div class="banner suspended"><b>This page is paused</b>' + RF.esc(mine.admin_note || "Contact Relvia for details.") + '</div>';
+  }
+
+  function followBtn() {
+    if (!brand || brand.status !== "approved") return "";
+    if (!user) return '<a class="btn btn-gold" href="/login.html">Sign in to follow</a>';
+    if (mine && mine.id === brand.id) return "";
+    return '<button class="btn ' + (following ? "btn-ghost" : "btn-gold") + '" id="followBtn" aria-pressed="' + following + '">' + (following ? "Following" : "Follow") + '</button>';
+  }
+
+  function render() {
+    document.title = brand.name + " | RelviaFashion";
+    var shop = safeLink(brand.shop_url), web = safeLink(brand.website_url), ig = brand.instagram ? RF.esc(brand.instagram) : "";
+    var logo = brand.logo_url ? '<img src="' + RF.esc(brand.logo_url) + '" alt="' + RF.esc(brand.name) + ' logo">' : RF.esc(RF.initial(brand.name));
+    var links = "";
+    if (shop) links += '<a class="link-row" href="' + shop + '" target="_blank" rel="noopener noreferrer nofollow"><span>Shop ' + RF.esc(brand.name) + '</span><small>Opens their store</small></a>';
+    if (ig) links += '<a class="link-row" href="https://instagram.com/' + ig + '" target="_blank" rel="noopener noreferrer nofollow"><span>Instagram</span><small>@' + ig + '</small></a>';
+    if (web) links += '<a class="link-row" href="' + web + '" target="_blank" rel="noopener noreferrer nofollow"><span>Website</span><small>' + RF.esc(web.replace(/^https:\/\//, "").slice(0, 28)) + '</small></a>';
+
+    $("page").innerHTML =
+      '<div class="cover" id="cover"></div>' +
+      '<div class="wrap">' +
+        '<div class="brand-head"><div class="logo-lg">' + logo + '</div>' +
+          '<div class="head-main"><h1>' + RF.esc(brand.name) + '</h1>' +
+            '<div class="head-sub"><span class="tag">' + RF.esc(RF.catLabel(brand.category)) + '</span>' + (brand.featured ? '<span class="tag featured">Featured</span>' : '') + (brand.location ? '<span>' + RF.esc(brand.location) + '</span>' : '') + '</div></div>' +
+          '<div class="head-actions" id="headActions">' + followBtn() + '</div></div>' +
+        banner() +
+        '<div class="about"><div>' + (brand.tagline ? '<div class="tagline-lg">' + RF.esc(brand.tagline) + '</div>' : '') + (brand.bio ? '<p class="bio">' + RF.esc(brand.bio) + '</p>' : '') +
+          '<div class="stat-row"><span><b id="followCount">' + RF.fmtCount(brand.followers_count) + '</b>followers</span><span><b>' + items.length + '</b>looks</span></div>' +
+          (brand.status === "approved" ? '<p style="margin-top:16px;"><button class="vfx-link" id="reportBrand" style="font-size:12px;color:var(--muted-soft);text-decoration:underline;">Report this brand</button></p>' : '') + '</div>' +
+          '<div class="links">' + links + '</div></div>' +
+        '<section class="section"><div class="section-head"><h2 class="section-title">Lookbook</h2><span class="section-note">' + (items.length ? items.length + (items.length === 1 ? " look" : " looks") : "") + '</span></div><div class="lookbook" id="lookbook"></div></section>' +
+      '</div>';
+    setBg($("cover"), brand.cover_url);
+    renderLookbook();
+  }
+
+  function renderLookbook() {
+    var box = $("lookbook");
+    if (!items.length) {
+      box.style.columns = "1";
+      box.innerHTML = '<div class="empty"><h3>No looks yet</h3><p>' + (mine && mine.id === brand.id && mine.status === "approved" ? "Add your first photos and videos from My brand." : "Check back soon.") + '</p></div>';
+      return;
+    }
+    box.innerHTML = items.map(function (it, i) {
+      var isVideo = it.media_type === "video";
+      var src = isVideo ? it.poster_url : it.media_url;
+      var alt = it.caption ? RF.esc(it.caption) : (RF.esc(brand.name) + " look " + (i + 1));
+      var visual = src ? '<img src="' + RF.esc(src) + '" alt="' + alt + '" loading="lazy" decoding="async">' : '<div class="ph"></div>';
+      return '<button class="look" data-i="' + i + '" aria-label="Open look ' + (i + 1) + '">' + visual + (isVideo ? '<span class="play">VIDEO</span>' : '') + (it.caption ? '<span class="cap">' + RF.esc(it.caption) + '</span>' : '') + '</button>';
+    }).join("");
+  }
+
+  // ---------- viewer ----------
+  function showLook() {
+    var it = items[lbIndex]; if (!it) return;
+    var media = it.media_type === "video"
+      ? '<video src="' + RF.esc(it.media_url) + '"' + (it.poster_url ? ' poster="' + RF.esc(it.poster_url) + '"' : '') + ' controls playsinline autoplay muted loop></video>'
+      : '<img src="' + RF.esc(it.media_url) + '" alt="' + RF.esc(it.caption || brand.name) + '">';
+    $("lbMedia").innerHTML = media;
+    $("lbCount").textContent = (lbIndex + 1) + " / " + items.length;
+    $("lbCaption").textContent = it.caption || "";
+    var p = safeLink(it.product_url);
+    $("lbShop").innerHTML = p ? '<a class="btn btn-gold" href="' + p + '" target="_blank" rel="noopener noreferrer nofollow">Shop this piece</a>' : "";
+    $("lbPrev").style.display = $("lbNext").style.display = items.length > 1 ? "" : "none";
+  }
+  function openLook(i) { lbIndex = i; $("lb").classList.add("open"); document.body.style.overflow = "hidden"; showLook(); $("lbClose").focus(); }
+  function closeLook() { $("lb").classList.remove("open"); document.body.style.overflow = ""; $("lbMedia").innerHTML = ""; }
+  function step(d) { lbIndex = (lbIndex + d + items.length) % items.length; showLook(); }
+
+  // ---------- reporting ----------
+  function openReport(type, id, label) {
+    if (!user) { location.href = "/login.html"; return; }
+    reportTarget = { type: type, id: id };
+    $("reportTitle").textContent = "Report " + label;
+    $("reportModal").classList.add("open");
+  }
+  function sendReport() {
+    var reason = $("reportReason").value, note = $("reportNote").value.trim();
+    var btn = $("reportSend"); btn.disabled = true;
+    RF.client.rpc("fashion_report", { p_type: reportTarget.type, p_id: reportTarget.id, p_reason: note ? reason + ": " + note : reason }).then(function (r) {
+      btn.disabled = false;
+      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
+      $("reportModal").classList.remove("open"); $("reportNote").value = "";
+      RF.toast("Thanks. We will take a look.");
+    });
+  }
+
+  // ---------- following ----------
+  function toggleFollow() {
+    var btn = $("followBtn"); if (!btn) return; btn.disabled = true;
+    var was = following;
+    var op = was
+      ? RF.client.from("fashion_follows").delete().eq("brand_id", brand.id).eq("user_id", user.id)
+      : RF.client.from("fashion_follows").insert({ brand_id: brand.id, user_id: user.id });
+    op.then(function (r) {
+      if (r.error) { btn.disabled = false; RF.toast(RF.friendlyError(r.error), true); return; }
+      following = !was; brand.followers_count = Math.max(0, (brand.followers_count || 0) + (was ? -1 : 1));
+      $("headActions").innerHTML = followBtn(); $("followCount").textContent = RF.fmtCount(brand.followers_count);
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target, look = t.closest && t.closest(".look");
+    if (look) return openLook(Number(look.getAttribute("data-i")));
+    if (t.id === "followBtn") return toggleFollow();
+    if (t.id === "reportBrand") return openReport("fashion_brand", brand.id, "this brand");
+    if (t.id === "lbReport") return openReport("fashion_item", items[lbIndex].id, "this look");
+    if (t.id === "lbClose" || t === $("lb")) return closeLook();
+    if (t.id === "lbPrev") return step(-1);
+    if (t.id === "lbNext") return step(1);
+    if (t.id === "reportSend") return sendReport();
+    if (t.id === "reportCancel" || t === $("reportModal")) $("reportModal").classList.remove("open");
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!$("lb").classList.contains("open")) return;
+    if (e.key === "Escape") closeLook(); else if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1);
+  });
+
+  // ---------- load ----------
+  function init() {
+    return RF.closedCheck().then(function (closed) {
+      if (closed) return;
+      return RF.renderHeader("").then(function (u) {
+        user = u;
+        if (!slug) return missing();
+        return RF.client.from("fashion_public_brands").select("*").eq("slug", slug).maybeSingle().then(function (r) {
+          if (r.data) return r.data;
+          if (!user) return null;
+          return RF.client.from("fashion_brands").select("*").eq("slug", slug).maybeSingle().then(function (r2) { return r2.data || null; });
+        }).then(function (found) {
+          if (!found) return missing();
+          brand = found;
+          return Promise.all([
+            user ? RF.getMyBrand(user.id) : null,
+            RF.client.from("fashion_items").select("*").eq("brand_id", brand.id).order("created_at", { ascending: false }),
+            user ? RF.client.from("fashion_follows").select("brand_id").eq("brand_id", brand.id).eq("user_id", user.id).maybeSingle() : null,
+          ]).then(function (res) {
+            mine = res[0]; items = (res[1] && res[1].data) || []; following = !!(res[2] && res[2].data);
+            render();
+          });
+        });
+      });
+    });
+  }
+  init();
+})();
+</script>
+<script src="../beta-toolkit.js"></script>
+</body>
+</html>
