@@ -719,6 +719,10 @@ tr:last-child td{ border-bottom:none; }
       <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>What</th><th>Brand</th><th>Reason</th><th>Reports</th><th>Actions</th></tr></thead>
         <tbody id="fashionReports"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
 
+      <div class="section-head"><h2 style="font-size:18px;">Verification requests</h2><span class="section-note" style="color:var(--muted);font-size:12px;">FashionPlus brands are listed first</span></div>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Brand</th><th>Plan</th><th>Category</th><th>Owner</th><th>Shop</th><th>Requested</th><th>Actions</th></tr></thead>
+        <tbody id="fashionVerify"><tr class="empty-row"><td colspan="7">Loading...</td></tr></tbody></table></div>
+
       <div class="section-head"><h2 style="font-size:18px;">Signed agreements</h2><span class="section-note" style="color:var(--muted);font-size:12px;">Records cannot be edited or deleted</span></div>
       <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Brand</th><th>Signed by</th><th>Version</th><th>Signed</th><th>Brand status</th></tr></thead>
         <tbody id="fashionContracts"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
@@ -3401,6 +3405,7 @@ async function renderRelvbotAll(){
 // <<FASHION-ADMIN-START>>
 let fashionData = { brands: [], reports: [] };
 let fashionContracts = [];
+let fashionVerify = [];
 let fashionFilter = "all";
 const FASHION_PILL = { pending: "temp", approved: "ok", rejected: "banned", suspended: "banned" };
 
@@ -3421,7 +3426,9 @@ async function renderFashion(){
   fashionData = { brands: data.brands || [], reports: data.reports || [] };
   const contracts = await supabaseClient.rpc("fashion_admin_contracts");
   fashionContracts = (!contracts.error && Array.isArray(contracts.data)) ? contracts.data : [];
-  renderFashionStats(); renderFashionPending(); renderFashionReports(); renderFashionContracts(); renderFashionAll();
+  const vq = await supabaseClient.rpc("fashion_verification_queue");
+  fashionVerify = (!vq.error && Array.isArray(vq.data)) ? vq.data : [];
+  renderFashionStats(); renderFashionPending(); renderFashionReports(); renderFashionVerify(); renderFashionContracts(); renderFashionAll();
 }
 
 function fashionLink(b){ return `<a href="/fashion/brand.html?b=${encodeURIComponent(b.slug)}" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">${escapeHtml(b.name)}</a>`; }
@@ -3449,6 +3456,19 @@ function renderFashionPending(){
     : `<tr class="empty-row"><td colspan="7">No applications waiting.</td></tr>`;
 }
 
+function renderFashionVerify(){
+  const rows = fashionVerify;
+  document.getElementById("fashionVerify").innerHTML = rows.length ? rows.map(r => `<tr>
+    <td>${fashionLink(r)}</td>
+    <td>${r.plus ? '<span class="pill ok">FashionPlus</span>' : '<span class="pill">Free</span>'}</td>
+    <td>${escapeHtml(r.category || "")}</td>
+    <td>${escapeHtml(r.owner_name || "Unknown")}</td>
+    <td>${fashionShop(r)}</td>
+    <td>${fashionDate(r.requested_at)}</td>
+    <td>${fashionBtn("verify-approve", r.id, "Verify", "gold")}${fashionBtn("verify-decline", r.id, "Decline", "danger")}</td></tr>`).join("")
+    : `<tr class="empty-row"><td colspan="7">No verification requests waiting.</td></tr>`;
+}
+
 function renderFashionContracts(){
   const rows = fashionContracts;
   document.getElementById("fashionContracts").innerHTML = rows.length ? rows.map(r => `<tr>
@@ -3466,7 +3486,7 @@ function renderFashionAll(){
   else if (fashionFilter !== "all") rows = rows.filter(b => b.status === fashionFilter);
   document.getElementById("fashionAll").innerHTML = rows.length ? rows.map(b => {
     let actions = "";
-    if (b.status === "approved") actions = fashionBtn(b.featured ? "unfeature" : "feature", b.id, b.featured ? "Unfeature" : "Feature") + fashionBtn("suspend", b.id, "Suspend", "danger");
+    if (b.status === "approved") actions = fashionBtn(b.featured ? "unfeature" : "feature", b.id, b.featured ? "Unfeature" : "Feature") + fashionBtn(b.verified ? "unverify" : "verify", b.id, b.verified ? "Unverify" : "Verify") + fashionBtn("suspend", b.id, "Suspend", "danger");
     else if (b.status === "suspended") actions = fashionBtn("unsuspend", b.id, "Restore", "gold");
     else actions = fashionBtn("approve", b.id, "Approve", "gold") + (b.status === "pending" ? fashionBtn("reject", b.id, "Reject", "danger") : "");
     return `<tr><td>${fashionLink(b)}${b.featured ? ' <span class="pill featured">Featured</span>' : ""}</td>
@@ -3511,6 +3531,21 @@ async function onFashionClick(e){
     const note = prompt(`Suspend ${name}? Their page and lookbook disappear. Add a note the brand will see (optional).`);
     if (note === null) return;
     done = await fashionReview(id, "suspend", note); if (done) showToast(`${name} suspended.`);
+  } else if (act === "verify-approve" || act === "verify-decline"){
+    const req = fashionVerify.find(r => r.id === id);
+    const who = req ? req.name : "this brand";
+    let note = null;
+    if (act === "verify-approve"){
+      if (!confirm(`Verify ${who}? The verified badge shows on their page and in the feed.`)) return;
+    } else {
+      note = prompt(`Decline ${who}? Their brand sees this reason. Leave blank for a general note.`);
+      if (note === null) return;
+    }
+    const { error } = await supabaseClient.rpc("fashion_decide_verification", { p_request_id: id, p_approve: act === "verify-approve", p_note: note || null });
+    if (error) showToast(error.message || "That didn't work."); else { done = true; showToast(act === "verify-approve" ? `${who} verified.` : `${who} declined.`); }
+  } else if (act === "verify" || act === "unverify"){
+    const { error } = await supabaseClient.rpc("fashion_set_verified", { p_brand_id: id, p_verified: act === "verify" });
+    if (error) showToast(error.message || "That didn't work."); else { done = true; showToast(act === "verify" ? `${name} verified.` : `${name} unverified.`); }
   } else if (act === "unsuspend" || act === "feature" || act === "unfeature"){
     done = await fashionReview(id, act); if (done) showToast("Done.");
   } else if (act === "remove-item"){
