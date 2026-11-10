@@ -203,6 +203,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
       <button class="eco-tab" data-eco-tab="campus">Relvia Campus</button>
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
+      <button class="eco-tab" data-eco-tab="fashion">RelviaFashion</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
@@ -706,6 +707,30 @@ tr:last-child td{ border-bottom:none; }
     </div><!-- /eco-growth -->
 
     <!-- ================= NEWS TAB ================= -->
+    <div class="eco-panel" id="eco-fashion">
+      <div class="section-head"><h2>RelviaFashion</h2><div><a class="btn sm" href="/fashion/index.html" target="_blank" rel="noopener">Open RelviaFashion</a><button class="btn sm" id="fashionRefresh" type="button">Refresh</button></div></div>
+      <div class="stats-row" id="fashionStats" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;"></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Applications waiting</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Brand</th><th>Category</th><th>Owner</th><th>Contact</th><th>Shop</th><th>Applied</th><th>Actions</th></tr></thead>
+        <tbody id="fashionPending"><tr class="empty-row"><td colspan="7">Loading...</td></tr></tbody></table></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Reports</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>What</th><th>Brand</th><th>Reason</th><th>Reports</th><th>Actions</th></tr></thead>
+        <tbody id="fashionReports"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Signed agreements</h2><span class="section-note" style="color:var(--muted);font-size:12px;">Records cannot be edited or deleted</span></div>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Brand</th><th>Signed by</th><th>Version</th><th>Signed</th><th>Brand status</th></tr></thead>
+        <tbody id="fashionContracts"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">All brands</h2>
+        <select id="fashionFilter" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:white;font-size:12.5px;">
+          <option value="all">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="suspended">Suspended</option><option value="featured">Featured</option>
+        </select></div>
+      <div class="panel"><table><thead><tr><th>Brand</th><th>Status</th><th>Category</th><th>Owner</th><th>Followers</th><th>Looks</th><th>Actions</th></tr></thead>
+        <tbody id="fashionAll"><tr class="empty-row"><td colspan="7">Loading...</td></tr></tbody></table></div>
+    </div>
+
     <div class="eco-panel" id="eco-news">
       <div class="section">
         <div class="section-head"><h2>Write an Article</h2></div>
@@ -3218,6 +3243,7 @@ let newsLoaded = false;
 let officesLoaded = false;
 let betaTabLoaded = false;
 let relvbotLoaded = false;
+let fashionLoaded = false;
 
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
@@ -3242,6 +3268,7 @@ function setupEcosystemTabs(){
       if (target === "offices" && !officesLoaded){ officesLoaded = true; await loadOfficesTab(); }
       if (target === "beta" && !betaTabLoaded){ betaTabLoaded = true; await loadBetaTab(); }
       if (target === "relvbot" && !relvbotLoaded){ relvbotLoaded = true; await loadRelvbotTab(); }
+      if (target === "fashion" && !fashionLoaded){ fashionLoaded = true; await loadFashionTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
@@ -3370,6 +3397,133 @@ function relvbotAgo(iso){
 async function renderRelvbotAll(){
   await Promise.all([renderRelvbot(), renderRelvbotAnnouncements(), renderRelvbotTerms(), renderRelvbotMoney()]);
 }
+
+// <<FASHION-ADMIN-START>>
+let fashionData = { brands: [], reports: [] };
+let fashionContracts = [];
+let fashionFilter = "all";
+const FASHION_PILL = { pending: "temp", approved: "ok", rejected: "banned", suspended: "banned" };
+
+async function loadFashionTab(){
+  document.getElementById("fashionRefresh").addEventListener("click", renderFashion);
+  document.getElementById("fashionFilter").addEventListener("change", e => { fashionFilter = e.target.value; renderFashionAll(); });
+  document.getElementById("eco-fashion").addEventListener("click", onFashionClick);
+  await renderFashion();
+}
+
+async function renderFashion(){
+  const { data, error } = await supabaseClient.rpc("fashion_admin_list");
+  if (error || !data){
+    const msg = `Couldn't load RelviaFashion. Run relvia-fashion-schema.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})`;
+    ["fashionPending", "fashionAll", "fashionReports"].forEach(id => { document.getElementById(id).innerHTML = `<tr class="empty-row"><td colspan="7">${msg}</td></tr>`; });
+    return;
+  }
+  fashionData = { brands: data.brands || [], reports: data.reports || [] };
+  const contracts = await supabaseClient.rpc("fashion_admin_contracts");
+  fashionContracts = (!contracts.error && Array.isArray(contracts.data)) ? contracts.data : [];
+  renderFashionStats(); renderFashionPending(); renderFashionReports(); renderFashionContracts(); renderFashionAll();
+}
+
+function fashionLink(b){ return `<a href="/fashion/brand.html?b=${encodeURIComponent(b.slug)}" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">${escapeHtml(b.name)}</a>`; }
+function fashionShop(b){ return /^https:\/\//.test(b.shop_url || "") ? `<a href="${escapeHtml(b.shop_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--muted);">Shop link</a>` : "—"; }
+function fashionBtn(act, id, label, cls){ return `<button class="btn sm ${cls || ""}" type="button" data-fashion="${act}" data-id="${escapeHtml(id)}">${label}</button>`; }
+function fashionDate(d){ try { return new Date(d).toLocaleDateString(); } catch (e){ return ""; } }
+
+function renderFashionStats(){
+  const b = fashionData.brands;
+  const cards = [
+    [b.filter(x => x.status === "pending").length, "Waiting for review"],
+    [b.filter(x => x.status === "approved").length, "Live brands"],
+    [fashionData.reports.length, "Open reports"],
+  ];
+  document.getElementById("fashionStats").innerHTML = cards.map(c => `<div class="stat-card"><div class="num">${c[0]}</div><div class="label">${c[1]}</div></div>`).join("");
+}
+
+function renderFashionPending(){
+  const rows = fashionData.brands.filter(b => b.status === "pending");
+  document.getElementById("fashionPending").innerHTML = rows.length ? rows.map(b => `<tr>
+    <td>${fashionLink(b)}</td><td>${escapeHtml(b.category)}</td><td>${escapeHtml(b.owner_name)}</td>
+    <td><a href="mailto:${escapeHtml(b.contact_email)}" style="color:var(--muted);">${escapeHtml(b.contact_email)}</a></td>
+    <td>${fashionShop(b)}</td><td>${fashionDate(b.created_at)}</td>
+    <td>${fashionBtn("approve", b.id, "Approve", "gold")}${fashionBtn("reject", b.id, "Reject", "danger")}</td></tr>`).join("")
+    : `<tr class="empty-row"><td colspan="7">No applications waiting.</td></tr>`;
+}
+
+function renderFashionContracts(){
+  const rows = fashionContracts;
+  document.getElementById("fashionContracts").innerHTML = rows.length ? rows.map(r => `<tr>
+    <td>${escapeHtml(r.brand_name || "")}</td>
+    <td>${escapeHtml(r.signer_name || "")}</td>
+    <td>${escapeHtml(r.version || "")}</td>
+    <td>${new Date(r.signed_at).toLocaleString()}</td>
+    <td><span class="pill ${FASHION_PILL[r.brand_status] || ""}">${escapeHtml(r.brand_status || "")}</span></td></tr>`).join("")
+    : `<tr class="empty-row"><td colspan="5">Nobody has signed yet.</td></tr>`;
+}
+
+function renderFashionAll(){
+  let rows = fashionData.brands;
+  if (fashionFilter === "featured") rows = rows.filter(b => b.featured);
+  else if (fashionFilter !== "all") rows = rows.filter(b => b.status === fashionFilter);
+  document.getElementById("fashionAll").innerHTML = rows.length ? rows.map(b => {
+    let actions = "";
+    if (b.status === "approved") actions = fashionBtn(b.featured ? "unfeature" : "feature", b.id, b.featured ? "Unfeature" : "Feature") + fashionBtn("suspend", b.id, "Suspend", "danger");
+    else if (b.status === "suspended") actions = fashionBtn("unsuspend", b.id, "Restore", "gold");
+    else actions = fashionBtn("approve", b.id, "Approve", "gold") + (b.status === "pending" ? fashionBtn("reject", b.id, "Reject", "danger") : "");
+    return `<tr><td>${fashionLink(b)}${b.featured ? ' <span class="pill featured">Featured</span>' : ""}</td>
+      <td><span class="pill ${FASHION_PILL[b.status] || ""}">${escapeHtml(b.status)}</span>${b.admin_note ? `<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">${escapeHtml(b.admin_note)}</div>` : ""}</td>
+      <td>${escapeHtml(b.category)}</td><td>${escapeHtml(b.owner_name)}</td><td>${b.followers_count}</td><td>${b.item_count}</td><td>${actions}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="7">Nothing here.</td></tr>`;
+}
+
+function renderFashionReports(){
+  const rows = fashionData.reports;
+  document.getElementById("fashionReports").innerHTML = rows.length ? rows.map(r => {
+    const isItem = r.content_type === "fashion_item";
+    const brand = isItem ? null : fashionData.brands.find(b => b.id === r.content_id);
+    const media = isItem && /^https:\/\//.test(r.media_url || "") ? `<a href="${escapeHtml(r.media_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--gold);font-weight:700;">${r.media_type === "video" ? "Video" : "Photo"}</a>${r.item_caption ? ` · ${escapeHtml(r.item_caption)}` : ""}` : "Brand page";
+    const actions = (isItem ? fashionBtn("remove-item", r.content_id, "Remove item", "danger") : (brand ? fashionBtn("suspend", brand.id, "Suspend brand", "danger") : "")) +
+      `<button class="btn sm" type="button" data-fashion="dismiss" data-id="${escapeHtml(r.content_id)}" data-type="${escapeHtml(r.content_type)}">Dismiss</button>`;
+    return `<tr><td>${media}</td><td>${brand ? fashionLink(brand) : escapeHtml(r.brand_name || "")}</td><td>${escapeHtml(r.reason || "")}</td><td>${r.report_count}</td><td>${actions}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">No open reports.</td></tr>`;
+}
+
+async function fashionReview(id, action, note){
+  const { error } = await supabaseClient.rpc("fashion_review", { p_brand_id: id, p_action: action, p_note: note || null });
+  if (error){ showToast(error.message || "That didn't work."); return false; }
+  return true;
+}
+
+async function onFashionClick(e){
+  const btn = e.target.closest("[data-fashion]");
+  if (!btn || btn.disabled) return;
+  const act = btn.dataset.fashion, id = btn.dataset.id;
+  const brand = fashionData.brands.find(b => b.id === id);
+  const name = brand ? brand.name : "this brand";
+  let done = false;
+  if (act === "approve"){
+    if (!confirm(`Approve ${name}? Their page goes live and they get a message.`)) return;
+    done = await fashionReview(id, "approve"); if (done) showToast(`${name} approved.`);
+  } else if (act === "reject"){
+    const note = prompt(`Why is ${name} not approved? This is sent to the brand. Leave blank for a general note.`);
+    if (note === null) return;
+    done = await fashionReview(id, "reject", note); if (done) showToast(`${name} rejected.`);
+  } else if (act === "suspend"){
+    const note = prompt(`Suspend ${name}? Their page and lookbook disappear. Add a note the brand will see (optional).`);
+    if (note === null) return;
+    done = await fashionReview(id, "suspend", note); if (done) showToast(`${name} suspended.`);
+  } else if (act === "unsuspend" || act === "feature" || act === "unfeature"){
+    done = await fashionReview(id, act); if (done) showToast("Done.");
+  } else if (act === "remove-item"){
+    if (!confirm("Remove this item from the brand's lookbook?")) return;
+    const { error } = await supabaseClient.rpc("fashion_remove_item", { p_item_id: id });
+    if (error) showToast(error.message || "That didn't work."); else { done = true; showToast("Item removed."); }
+  } else if (act === "dismiss"){
+    const { error } = await supabaseClient.rpc("fashion_dismiss_reports", { p_type: btn.dataset.type, p_id: id });
+    if (error) showToast(error.message || "That didn't work."); else { done = true; showToast("Dismissed."); }
+  }
+  if (done) await renderFashion();
+}
+// <<FASHION-ADMIN-END>>
 
 async function loadRelvbotTab(){
   document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbotAll);
