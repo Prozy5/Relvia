@@ -255,6 +255,22 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .upd{ padding:18px 20px; border:1px solid var(--line); border-radius:16px; background:var(--panel); margin-bottom:12px; }
 .upd .when{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-2); margin-bottom:8px; }
 .upd p{ font-size:15px; color:var(--soft); line-height:1.65; white-space:pre-wrap; }
+.founded{ margin-top:14px; font-size:14px; color:var(--soft); }
+.founded b{ color:var(--gold-1); font-weight:700; }
+.ptags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.ptags span{ padding:6px 13px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--soft); }
+.shop-big{ min-width:220px; }
+.lookbook{ columns:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px; }
+.look{ margin-bottom:0; }
+.look img{ aspect-ratio:4/5; object-fit:cover; width:100%; height:auto; }
+.look .ph{ aspect-ratio:4/5; }
+.contact{ margin-top:48px; padding:28px; background:var(--panel); border:1px solid var(--line); border-radius:20px; }
+.contact h2{ font-family:var(--display); font-size:28px; margin-bottom:8px; }
+.contact p.lead{ color:var(--muted); font-size:14.5px; line-height:1.6; margin-bottom:16px; }
+.contact textarea{ width:100%; min-height:110px; background:#0e0a07; border:1px solid var(--line); border-radius:14px; padding:14px; color:var(--ink); font-size:15px; resize:vertical; }
+.contact textarea:focus{ outline:none; border-color:var(--gold); }
+.contact .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+.contact .cnt{ font-size:12px; color:var(--muted-soft); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -407,7 +423,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     host.innerHTML =
       '<header class="topbar">' +
       '<a class="brand" href="index.html" aria-label="RelviaFashion home"><span class="crest" aria-hidden="true">R</span><span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">FASHION</span></span></a>' +
-      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="../index.html">Relvia</a></nav>' +
+      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="feed.html">Feed</a><a href="../index.html">Relvia</a></nav>' +
       '<div class="top-actions" id="topActions"></div></header>';
     var actions = document.getElementById("topActions");
     return getUser().then(function (user) {
@@ -541,6 +557,49 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     return '<div class="banner suspended"><b>This page is paused</b>' + RF.esc(mine.admin_note || "Contact Relvia for details.") + '</div>';
   }
 
+  function shopBtn(){
+    var s = RF.isHttps(brand.shop_url) ? RF.esc(brand.shop_url) : null;
+    return s ? '<a class="btn btn-gold shop-big" data-track="shop_click" href="' + s + '" target="_blank" rel="noopener noreferrer nofollow">Shop ' + RF.esc(brand.name) + '</a>' : "";
+  }
+
+  function profileBits(){
+    var founded = (brand.founded_year || brand.founder_name)
+      ? '<div class="founded">' + (brand.founded_year ? 'Founded <b>' + RF.esc(brand.founded_year) + '</b>' : '') +
+        (brand.founded_year && brand.founder_name ? ' &middot; ' : '') + (brand.founder_name ? 'by <b>' + RF.esc(brand.founder_name) + '</b>' : '') + '</div>'
+      : "";
+    var tagList = Array.isArray(brand.tags) ? brand.tags : [];
+    var chips = tagList.length ? '<div class="ptags">' + tagList.map(function (t) { return '<span>' + RF.esc(t) + '</span>'; }).join("") + '</div>' : "";
+    return '<div class="about-extra">' + founded + chips + '</div>';
+  }
+
+  function contactHtml(){
+    if (!brand || brand.status !== "approved") return "";
+    if (mine && mine.id === brand.id) return "";
+    if (!user) return '<section class="contact"><h2>Message ' + RF.esc(brand.name) + '</h2><p class="lead">Sign in to send this brand a message. It stays on RelviaFashion.</p><a class="btn btn-gold" href="/login.html">Sign in</a></section>';
+    return '<section class="contact" id="contactBox"><h2>Message ' + RF.esc(brand.name) + '</h2>' +
+      '<p class="lead">Ask about a piece, a drop, or sizing. You can send one message a day to each brand. It stays on RelviaFashion.</p>' +
+      '<textarea id="msgBody" maxlength="500" placeholder="Hi! When is the next drop?"></textarea>' +
+      '<div class="row"><span class="cnt" id="msgCount">0 / 500</span><button class="btn btn-gold" id="msgSend">Send message</button></div>' +
+      '<div class="err" id="msgErr" role="alert"></div></section>';
+  }
+
+  function wireContact(){
+    var box = document.getElementById("msgBody"); if (!box) return;
+    box.addEventListener("input", function () { document.getElementById("msgCount").textContent = box.value.length + " / 500"; });
+    document.getElementById("msgSend").addEventListener("click", function () {
+      var body = box.value.trim(), err = document.getElementById("msgErr"), btn = document.getElementById("msgSend");
+      err.textContent = "";
+      if (body.length < 3) { err.textContent = "Write a few words first."; return; }
+      btn.disabled = true; btn.textContent = "Sending...";
+      RF.client.rpc("fashion_send_brand_message", { p_brand_id: brand.id, p_body: body }).then(function (r) {
+        btn.disabled = false; btn.textContent = "Send message";
+        if (r.error) { err.textContent = RF.friendlyError(r.error); return; }
+        box.value = ""; document.getElementById("msgCount").textContent = "0 / 500";
+        RF.toast("Sent. The brand will see it in their messages.");
+      });
+    });
+  }
+
   function followBtn() {
     if (!brand || brand.status !== "approved") return "";
     if (!user) return '<a class="btn btn-gold" href="/login.html">Sign in to follow</a>';
@@ -565,7 +624,8 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
         '<div class="brand-head"><div class="logo-lg">' + logo + '</div>' +
           '<div class="head-main"><h1>' + RF.esc(brand.name) + '</h1>' +
             '<div class="head-sub"><span class="tag">' + RF.esc(RF.catLabel(brand.category)) + '</span>' + (brand.featured ? '<span class="tag featured">Featured</span>' : '') + (brand.verified ? '<span class="tag">Verified</span>' : '') + (brand.plus ? '<span class="tag">FashionPlus</span>' : '') + (brand.location ? '<span>' + RF.esc(brand.location) + '</span>' : '') + '</div></div>' +
-          '<div class="head-actions" id="headActions">' + followBtn() + '</div></div>' +
+          '<div class="head-actions" id="headActions">' + shopBtn() + followBtn() + '</div></div>' +
+        profileBits() +
         banner() +
         '<div class="about"><div>' + (brand.tagline ? '<div class="tagline-lg">' + RF.esc(brand.tagline) + '</div>' : '') + (brand.bio ? '<p class="bio">' + RF.esc(brand.bio) + '</p>' : '') +
           '<div class="stat-row"><span><b id="followCount">' + RF.fmtCount(brand.followers_count) + '</b>followers</span><span><b>' + items.length + '</b>looks</span></div>' +
@@ -576,6 +636,8 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     setBg($("cover"), brand.cover_url);
     renderLookbook();
     renderUpdates();
+    if (contactHtml()) $("page").querySelector(".wrap").insertAdjacentHTML("beforeend", contactHtml());
+    wireContact();
     track("view");
   }
 
