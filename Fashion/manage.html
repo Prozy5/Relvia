@@ -823,6 +823,21 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   }
   function roomLeft() { return Math.max(0, limitItems() - items.length); }
 
+  function localInputValue(iso){
+    if (!iso) return "";
+    var d = new Date(iso), pad = function (n) { return String(n).padStart(2, "0"); };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function goLiveHtml(it){
+    var scheduled = it.publish_at && new Date(it.publish_at) > new Date();
+    var label = scheduled ? "Goes live " + new Date(it.publish_at).toLocaleString() : "Live now";
+    if (!plan || !plan.plus) {
+      return '<div class="hint">' + (scheduled ? "Scheduled" : "Live now") + ' &middot; scheduling is part of FashionPlus</div>';
+    }
+    return '<label class="hint" style="display:block;">Go live (leave empty to go live now)<input class="input" type="datetime-local" data-f="publish_at" value="' + localInputValue(it.publish_at) + '" style="margin-top:4px;"></label>' +
+      '<div class="hint">' + RF.esc(label) + '</div>';
+  }
+
   function renderItems() {
     $("roomHint").textContent = items.length + " of " + limitItems() + " used";
     var grid = $("mGrid");
@@ -832,6 +847,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       return '<div class="m-item" data-id="' + RF.esc(it.id) + '"><div class="m-thumb" data-thumb="' + RF.esc(thumb || "") + '">' + (it.media_type === "video" ? '<span class="play">VIDEO</span>' : '') + '</div>' +
         '<div class="m-fields"><input class="input" data-f="caption" maxlength="200" placeholder="Caption" value="' + RF.esc(it.caption) + '" aria-label="Caption">' +
         '<input class="input" data-f="product_url" maxlength="300" placeholder="Link to buy this piece (https://)" value="' + RF.esc(it.product_url) + '" aria-label="Product link">' +
+        goLiveHtml(it) +
         '<div class="m-actions"><button class="btn btn-ghost btn-sm" data-act="save">Save</button><button class="btn btn-danger btn-sm" data-act="delete">Delete</button></div></div></div>';
     }).join("");
     grid.querySelectorAll("[data-thumb]").forEach(function (el) { var u = el.getAttribute("data-thumb"); if (u && RF.isHttps(u)) el.style.backgroundImage = 'url("' + encodeURI(u) + '")'; });
@@ -894,11 +910,24 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 
   function saveItem(card, id) {
     var caption = card.querySelector('[data-f="caption"]').value.trim(), url = card.querySelector('[data-f="product_url"]').value.trim();
+    var goInput = card.querySelector('[data-f="publish_at"]');
+    var publishAt = null;
     if (url && !RF.isHttps(url)) { RF.toast("The product link has to start with https://", true); return; }
-    RF.client.from("fashion_items").update({ caption: caption || null, product_url: url || null }).eq("id", id).then(function (r) {
+    if (goInput && goInput.value) {
+      var when = new Date(goInput.value);
+      if (isNaN(when.getTime())) { RF.toast("Pick a valid date and time.", true); return; }
+      publishAt = when.toISOString();
+    }
+    var existing = items.filter(function (x) { return x.id === id; })[0] || {};
+    var changedTime = goInput && (publishAt || null) !== (existing.publish_at || null);
+    var update = { caption: caption || null, product_url: url || null };
+    if (goInput && changedTime) update.publish_at = publishAt;
+    if (goInput && !goInput.value && existing.publish_at && new Date(existing.publish_at) > new Date()) update.publish_at = null;
+    RF.client.from("fashion_items").update(update).eq("id", id).select("*").then(function (r) {
       if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
-      items.forEach(function (it) { if (it.id === id) { it.caption = caption || null; it.product_url = url || null; } });
-      RF.toast("Saved.");
+      items.forEach(function (it) { if (it.id === id) { it.caption = caption || null; it.product_url = url || null; if ("publish_at" in update) it.publish_at = update.publish_at; } });
+      RF.toast(update.publish_at ? "Scheduled." : "Saved.");
+      renderItems();
     });
   }
   function deleteItem(id) {
