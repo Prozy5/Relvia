@@ -43,6 +43,9 @@
 .up .by{ font-weight:700; font-size:14px; display:flex; gap:8px; align-items:center; }
 .up .by small{ margin-left:auto; color:var(--muted); font-weight:500; font-size:12px; }
 .up p{ margin-top:10px; color:var(--soft); font-size:14.5px; line-height:1.6; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; }
+.disc{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.disc .chip{ background:none; }
+.disc .chip[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold-1); background:rgba(224,177,88,.09); }
 </style>
 <style id="rf-css">
 /* RelviaFashion: shared styles. Matches RelviaCreators (black and gold, Playfair + Inter). */
@@ -325,6 +328,11 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       <div class="filters">
         <div class="chip-row" id="chips" role="tablist" aria-label="Categories"></div>
         <input class="search" id="search" type="search" placeholder="Search brands" aria-label="Search brands" maxlength="60">
+        <div class="disc" id="disc" role="group" aria-label="Filter brands">
+          <button class="chip" type="button" data-disc="verified">Verified</button>
+          <button class="chip" type="button" data-disc="new">New this month</button>
+          <select class="sort" id="locFilter" aria-label="Filter by location"><option value="">Any location</option></select>
+        </div>
         <select class="sort" id="sort" aria-label="Sort brands">
           <option value="new">Newest</option>
           <option value="followed">Most followed</option>
@@ -455,7 +463,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     host.innerHTML =
       '<header class="topbar">' +
       '<a class="brand" href="index.html" aria-label="RelviaFashion home"><span class="crest" aria-hidden="true">R</span><span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">FASHION</span></span></a>' +
-      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="../index.html">Relvia</a></nav>' +
+      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="feed.html">Feed</a><a href="../index.html">Relvia</a></nav>' +
       '<div class="top-actions" id="topActions"></div></header>';
     var actions = document.getElementById("topActions");
     return getUser().then(function (user) {
@@ -568,7 +576,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var all = [];
-  var state = { cat: "all", q: "", sort: "new" };
+  var state = { cat: "all", q: "", sort: "new", verified: false, isNew: false, loc: "" };
   var $ = function (id) { return document.getElementById(id); };
 
   function cardHtml(b) {
@@ -588,6 +596,30 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     });
   }
 
+  function isNewBrand(b){
+    var when = new Date(b.approved_at || b.created_at).getTime();
+    return !isNaN(when) && (Date.now() - when) <= 30 * 24 * 60 * 60 * 1000;
+  }
+
+  function locationOptions(){
+    var sel = $("locFilter"); if (!sel) return;
+    var places = [];
+    all.forEach(function (b) { if (b.location && places.indexOf(b.location) < 0) places.push(b.location); });
+    places.sort();
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">Any location</option>' + places.map(function (p) {
+      return '<option value="' + RF.esc(p) + '">' + RF.esc(p) + '</option>';
+    }).join("");
+    sel.value = places.indexOf(keep) >= 0 ? keep : "";
+  }
+
+  function syncDisc(){
+    document.querySelectorAll("#disc [data-disc]").forEach(function (b) {
+      var on = b.getAttribute("data-disc") === "verified" ? state.verified : state.isNew;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
   function chips() {
     var present = {};
     all.forEach(function (b) { present[b.category] = (present[b.category] || 0) + 1; });
@@ -599,10 +631,14 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   }
 
   function render() {
+    locationOptions(); syncDisc();
     chips();
     var q = state.q.trim().toLowerCase();
     var list = all.filter(function (b) {
       if (state.cat !== "all" && b.category !== state.cat) return false;
+      if (state.verified && !b.verified) return false;
+      if (state.isNew && !isNewBrand(b)) return false;
+      if (state.loc && (b.location || "") !== state.loc) return false;
       if (!q) return true;
       return (b.name + " " + (b.tagline || "") + " " + (b.location || "") + " " + RF.catLabel(b.category)).toLowerCase().indexOf(q) >= 0;
     });
@@ -649,6 +685,12 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   });
   $("search").addEventListener("input", function (e) { state.q = e.target.value; render(); });
   $("sort").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
+  $("locFilter").addEventListener("change", function (e) { state.loc = e.target.value; render(); });
+  $("disc").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-disc]"); if (!b) return;
+    if (b.getAttribute("data-disc") === "verified") state.verified = !state.verified; else state.isNew = !state.isNew;
+    render();
+  });
 
   function hpCats(){
     var box = document.getElementById("hpCats"); if (!box) return;
