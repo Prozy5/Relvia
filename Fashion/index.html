@@ -9,6 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
 <style>html,body{background:#060403;color:#f5f1ea;margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}.hp-line{ margin-top:14px; font-family:var(--display); font-style:italic; font-size:clamp(17px,2vw,21px); color:var(--gold-1); }
+.show2027{ padding:clamp(44px,7vw,80px) 0; text-align:center; border-bottom:1px solid var(--line); background:radial-gradient(800px 300px at 50% 0%, rgba(224,177,88,.14), transparent 70%); }
+.show-eyebrow{ font-size:11px; font-weight:800; letter-spacing:.42em; color:var(--gold-2); margin-bottom:14px; }
+.show-title{ font-family:var(--display); font-weight:800; font-size:clamp(28px,4.4vw,52px); line-height:1.1; background:linear-gradient(100deg,var(--gold-1),var(--gold-2) 55%,var(--gold-1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.show-lead{ max-width:560px; margin:14px auto 0; font-size:16px; color:var(--soft); line-height:1.65; }
 </style>
 <style id="rf-css">
 /* RelviaFashion: shared styles. Matches RelviaCreators (black and gold, Playfair + Inter). */
@@ -262,6 +266,13 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 </div>
   </section>
 
+<section class="show2027" aria-label="RelviaFashion Show 2027">
+    <div class="wrap">
+      <div class="show-eyebrow">COMING 2027</div>
+      <h2 class="show-title">RelviaFashion Show 2027 is in the works.</h2>
+      <p class="show-lead">A runway built for the brands on this site. Details, dates, and how to take part will be shared here first.</p>
+    </div>
+  </section>
   <div class="wrap">
     <section class="section">
       <div class="section-head"><h2 class="section-title">Shop by category</h2><span class="section-note">Tap a category to browse</span></div>
@@ -521,7 +532,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 
   function cardHtml(b) {
     var logo = b.logo_url ? '<img src="' + RF.esc(b.logo_url) + '" alt="" loading="lazy">' : RF.esc(RF.initial(b.name));
-    var tags = (b.featured ? '<span class="tag featured">Featured</span>' : '');
+    var tags = (b.featured ? '<span class="tag featured">Featured</span>' : '') + (b.verified ? '<span class="tag">Verified</span>' : '');
     return '<a class="brand-card" href="' + RF.esc(RF.brandUrl(b.slug)) + '">' +
       '<div class="bc-cover" data-bg="' + RF.esc(b.cover_url || "") + '"><div class="bc-tags">' + tags + '</div><div class="bc-logo">' + logo + '</div></div>' +
       '<div class="bc-body"><div class="bc-cat">' + RF.esc(RF.catLabel(b.category)) + '</div>' +
@@ -560,7 +571,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
       return new Date(b.approved_at || b.created_at) - new Date(a.approved_at || a.created_at);
     });
 
-    var feat = all.filter(function (b) { return b.featured; });
+    var feat = all.filter(function (b) { return b.featured || b.plus; });
     $("featuredSection").hidden = !(feat.length && state.cat === "all" && !q);
     $("featuredRow").innerHTML = feat.map(cardHtml).join("");
     paintCovers($("featuredRow"));
