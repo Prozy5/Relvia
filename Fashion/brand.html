@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My brand | RelviaFashion</title>
-<meta name="robots" content="noindex">
+<title>Brand | RelviaFashion</title>
+<meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
@@ -217,45 +217,87 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 }
 @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } html{ scroll-behavior:auto; } }
 
-.agree{ margin-top:0; }
-.agree-text{ max-height:300px; overflow-y:auto; white-space:pre-wrap; font-size:13.5px; line-height:1.7; color:var(--soft); background:#0a0704; border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:12px 0 18px; }
-.agree-ok{ color:var(--ok); font-weight:700; }
-.plan{ border:1px solid var(--line-gold); background:radial-gradient(600px 240px at 90% 0%, rgba(224,177,88,.12), transparent 60%), var(--panel); }
-.plan-price{ font-family:var(--display); font-size:44px; color:var(--gold-1); line-height:1; }
-.plan-price small{ font-family:var(--body); font-size:14px; color:var(--muted); }
-.plan ul{ margin:16px 0 0 20px; color:var(--soft); font-size:14.5px; line-height:1.9; }
-.stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
-.stat{ padding:16px; border:1px solid var(--line); border-radius:14px; background:#0a0704; }
-.stat b{ display:block; font-family:var(--display); font-size:26px; color:var(--gold-1); }
-.stat span{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
-.locked{ opacity:.55; }
-.terms-box summary{ cursor:pointer; font-size:13px; font-weight:700; color:var(--gold); }
-@media (max-width:760px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
-.chart{ margin-top:18px; }
-.chart svg{ width:100%; height:auto; display:block; }
-.chart-legend{ display:flex; gap:18px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:8px; }
-.chart-legend i{ display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:6px; vertical-align:middle; }
-.tagbox{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
-.tagbox .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.tagbox .input{ padding:8px 10px; font-size:13px; flex:1 1 140px; }
-.tagchip{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--line-gold); border-radius:999px; font-size:12px; color:var(--gold-1); margin:4px 4px 0 0; }
-.tagchip button{ font-size:14px; color:var(--muted); line-height:1; }
-.req{ display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
-.req:last-child{ border-bottom:none; }
-.req .thumb{ width:56px; height:56px; border-radius:10px; background:#0a0704 center/cover; border:1px solid var(--line); flex-shrink:0; }
-.req .meta{ flex:1; min-width:0; font-size:14px; }
-.req .meta small{ display:block; color:var(--muted); margin-top:2px; }
+
+/* ===== brand page redesign ===== */
+.cover{ height:clamp(220px,38vw,400px); border-bottom:none; background:radial-gradient(900px 400px at 70% 20%, rgba(224,177,88,.22), transparent 60%), linear-gradient(135deg,#2a1c0c,#0a0704 70%); }
+.cover::after{ background:linear-gradient(to top, var(--bg) 4%, rgba(6,4,3,.55) 55%, rgba(6,4,3,.15)); }
+.brand-head{ margin-top:-96px; gap:26px; align-items:flex-end; }
+.logo-lg{ width:150px; height:150px; border:2px solid var(--gold-2); box-shadow:0 0 0 6px var(--bg), 0 0 44px rgba(224,177,88,.25); }
+.head-main{ padding-bottom:0; }
+.head-main h1{ font-size:clamp(36px,6vw,64px); letter-spacing:-.02em; line-height:1.02; }
+.head-sub{ margin-top:14px; gap:8px; }
+.head-sub .tag{ padding:6px 13px; font-size:10.5px; }
+.head-actions{ padding-bottom:6px; }
+.head-actions .btn{ min-width:150px; }
+.about{ grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:44px; margin:38px 0 14px; }
+.tagline-lg{ font-size:clamp(22px,2.8vw,30px); margin-bottom:16px; }
+.about p.bio{ font-size:16px; color:var(--soft); line-height:1.8; }
+.stat-row{ gap:30px; margin-top:22px; }
+.stat-row span{ display:flex; flex-direction:column; gap:2px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.stat-row b{ font-family:var(--display); font-size:30px; color:var(--gold-1); margin:0; line-height:1.1; }
+.links{ gap:10px; align-self:start; }
+.link-row{ padding:15px 20px; border-radius:999px; border:1px solid var(--line-gold); color:var(--gold-1); font-size:14px; font-weight:700; justify-content:space-between; background:rgba(224,177,88,.05); }
+.link-row:hover{ background:rgba(224,177,88,.12); border-color:var(--gold); color:var(--gold-1); }
+.link-row small{ color:var(--muted); font-weight:500; }
+.section{ padding-top:56px; }
+.section-head{ margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+.section-title{ font-family:var(--display); font-size:clamp(28px,3.4vw,38px); }
+.lookbook{ columns:3 240px; column-gap:18px; }
+.look{ border-radius:18px; border:1px solid var(--line); margin-bottom:18px; background:var(--panel); }
+.look:hover{ border-color:var(--gold-2); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,.5); }
+.look .cap{ padding:34px 16px 14px; font-size:13px; }
+.look .play{ background:rgba(6,4,3,.78); border:1px solid var(--line-gold); }
+.banner{ border-radius:18px; }
+@media (max-width:860px){ .about{ grid-template-columns:1fr; gap:26px; } .brand-head{ margin-top:-70px; } .logo-lg{ width:112px; height:112px; } .stat-row{ gap:22px; } }
+.with{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
+.with a{ color:var(--gold-1); font-weight:700; border-bottom:1px solid var(--line-gold); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="siteHeader"></div>
 
-<main class="wrap" style="max-width:860px;padding-top:34px;" id="page">
-  <div class="skeleton"></div>
+<main id="page">
+  <div class="wrap" style="padding-top:60px;"><div class="skeleton"></div></div>
 </main>
 
 <footer class="site">RELVIA ENTERTAINMENT &middot; FASHION</footer>
+
+<!-- lookbook viewer -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Lookbook viewer">
+  <button class="lb-x" id="lbClose" aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+  <div class="lb-inner">
+    <div class="lb-media" id="lbMedia"></div>
+    <div class="lb-side">
+      <div class="count" id="lbCount"></div>
+      <div class="caption" id="lbCaption"></div>
+      <div id="lbWith"></div>
+      <div id="lbShop"></div>
+      <button class="btn btn-ghost btn-sm" id="lbReport" style="align-self:flex-start;">Report</button>
+    </div>
+  </div>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&#8250;</button>
+</div>
+
+<!-- report -->
+<div class="modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="modal-box">
+    <h3 id="reportTitle">Report this</h3>
+    <p class="hint">Reports go to the Relvia team. Tell us what is wrong.</p>
+    <div class="field"><label for="reportReason">Reason</label>
+      <select class="select" id="reportReason">
+        <option>Counterfeit or stolen content</option>
+        <option>Nudity or sexual content</option>
+        <option>Scam or misleading</option>
+        <option>Harassment or hate</option>
+        <option>Something else</option>
+      </select>
+    </div>
+    <div class="field"><label for="reportNote">Anything else (optional)</label><textarea class="textarea" id="reportNote" maxlength="120" style="min-height:70px;"></textarea></div>
+    <div class="form-actions"><button class="btn btn-gold btn-sm" id="reportSend">Send report</button><button class="btn btn-ghost btn-sm" id="reportCancel">Cancel</button></div>
+  </div>
+</div>
 
 <script id="rf-core">
 /* RelviaFashion: shared helpers. Loaded by index.html, brand.html, and manage.html after supabase-js. */
@@ -461,7 +503,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   }
 
   window.RF = {
-    client: client, ANON_KEY: SUPABASE_ANON_KEY, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
+    client: client, BUCKET: BUCKET, LIMITS: LIMITS, CATEGORIES: CATEGORIES, SUPABASE_URL: SUPABASE_URL,
     esc: esc, slugify: slugify, validSlug: validSlug, isHttps: isHttps, cleanInstagram: cleanInstagram, validEmail: validEmail,
     fmtCount: fmtCount, catLabel: catLabel, brandUrl: brandUrl, initial: initial, pathFromUrl: pathFromUrl, extFor: extFor,
     videoProblem: videoProblem, imageProblem: imageProblem, friendlyError: friendlyError,
@@ -474,563 +516,180 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [];
-  var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
-  function limitItems(){ return plan && plan.plus ? 150 : 60; }
+  var slug = (new URLSearchParams(location.search).get("b") || "").toLowerCase();
+  var user = null, brand = null, mine = null, items = [], following = false, lbIndex = 0, reportTarget = null, publicTags = [];
 
-  // ---------- shared form ----------
-  function catOptions(sel) { return RF.CATEGORIES.map(function (c) { return '<option value="' + c.key + '"' + (sel === c.key ? " selected" : "") + '>' + RF.esc(c.label) + '</option>'; }).join(""); }
+  function setBg(el, url) { if (el && url && RF.isHttps(url)) el.style.backgroundImage = 'url("' + encodeURI(url) + '")'; }
+  function safeLink(url) { return RF.isHttps(url) ? RF.esc(url) : null; }
 
-  function formHtml(v, opts) {
-    var locked = opts.slugLocked;
-    return '' +
-      '<div class="form-grid">' +
-        '<div class="field"><label for="fName">Brand name <span class="req">*</span></label><input class="input" id="fName" maxlength="60" value="' + RF.esc(v.name) + '" autocomplete="off"></div>' +
-        '<div class="field"><label for="fSlug">Web address <span class="req">*</span></label><input class="input" id="fSlug" maxlength="40" value="' + RF.esc(v.slug) + '"' + (locked ? " disabled" : "") + ' autocomplete="off" spellcheck="false">' +
-          '<div class="hint" id="slugHint">' + (locked ? "Your web address is locked once you are approved." : "relvia.online/fashion/brand.html?b=" + RF.esc(v.slug || "yourbrand")) + '</div></div>' +
-        '<div class="field"><label for="fCategory">Category <span class="req">*</span></label><select class="select" id="fCategory">' + catOptions(v.category) + '</select></div>' +
-        '<div class="field"><label for="fLocation">Location</label><input class="input" id="fLocation" maxlength="60" placeholder="City, State" value="' + RF.esc(v.location) + '"></div>' +
-        '<div class="field full"><label for="fTagline">Tagline</label><input class="input" id="fTagline" maxlength="90" placeholder="One line that sums up your brand" value="' + RF.esc(v.tagline) + '"></div>' +
-        '<div class="field full"><label for="fBio">About your brand</label><textarea class="textarea" id="fBio" maxlength="800" placeholder="Your story, what you make, who it is for.">' + RF.esc(v.bio) + '</textarea><div class="hint" id="bioCount"></div></div>' +
-        '<div class="field full"><label for="fShop">Shop link <span class="req">*</span></label><input class="input" id="fShop" type="url" inputmode="url" maxlength="300" placeholder="https://yourstore.com" value="' + RF.esc(v.shop_url) + '"><div class="hint">Where people buy. It has to start with https://</div></div>' +
-        '<div class="field"><label for="fInsta">Instagram</label><input class="input" id="fInsta" maxlength="60" placeholder="yourbrand" value="' + RF.esc(v.instagram) + '"></div>' +
-        '<div class="field"><label for="fWebsite">Website</label><input class="input" id="fWebsite" type="url" inputmode="url" maxlength="300" placeholder="https://yourbrand.com" value="' + RF.esc(v.website_url) + '"></div>' +
-        '<div class="field full"><label for="fEmail">Contact email <span class="req">*</span></label><input class="input" id="fEmail" type="email" maxlength="120" value="' + RF.esc(v.contact_email) + '"><div class="hint">Only the Relvia team sees this. It is never shown on your page.</div></div>' +
-        '<div class="field"><label>Logo</label><div class="imgpick"><div class="prev" id="logoPrev"></div><div><input type="file" id="fLogo" accept="image/jpeg,image/png,image/webp" class="sr-only"><label for="fLogo" class="btn btn-ghost btn-sm" style="cursor:pointer;">Choose logo</label><div class="hint" style="margin-top:6px;">Square works best.</div></div></div></div>' +
-        '<div class="field"><label>Cover photo</label><div class="imgpick"><div class="prev wide" id="coverPrev"></div><div><input type="file" id="fCover" accept="image/jpeg,image/png,image/webp" class="sr-only"><label for="fCover" class="btn btn-ghost btn-sm" style="cursor:pointer;">Choose cover</label><div class="hint" style="margin-top:6px;">Wide photo, like a banner.</div></div></div></div>' +
-      '</div>';
+  function missing() {
+    document.title = "Brand not found | RelviaFashion";
+    $("page").innerHTML = '<div class="wrap" style="padding-top:60px;"><div class="empty"><h3>We couldn\'t find that brand</h3><p>It may have moved, or it is not on RelviaFashion yet.</p><a class="btn btn-gold" href="index.html">Browse brands</a></div></div>';
   }
 
-  function wireForm(v) {
-    var bio = $("fBio"), count = $("bioCount");
-    function upd() { count.textContent = bio.value.length + " / 800"; }
-    bio.addEventListener("input", upd); upd();
-    [["fLogo", "logoPrev", v.logo_url], ["fCover", "coverPrev", v.cover_url]].forEach(function (a) {
-      var prev = $(a[1]); if (a[2] && RF.isHttps(a[2])) prev.style.backgroundImage = 'url("' + encodeURI(a[2]) + '")';
-      $(a[0]).addEventListener("change", function (e) {
-        var f = e.target.files[0]; if (!f) return;
-        var problem = RF.imageProblem(f); if (problem) { RF.toast(problem, true); e.target.value = ""; return; }
-        prev.style.backgroundImage = 'url("' + URL.createObjectURL(f) + '")';
-      });
-    });
-    var name = $("fName"), slug = $("fSlug");
-    if (!slug.disabled){
-      name.addEventListener("input", function () { if (!slugEdited) { slug.value = RF.slugify(name.value); checkSlug(); } });
-      slug.addEventListener("input", function () { slugEdited = true; slug.value = slug.value.toLowerCase().replace(/[^a-z0-9-]/g, ""); checkSlug(); });
-    }
+  function banner() {
+    if (!mine || mine.id !== brand.id) return (brand.status && brand.status !== "approved" && user) ? '<div class="banner pending"><b>Preview</b>This page is not public yet. Status: ' + RF.esc(brand.status) + '.</div>' : "";
+    var s = mine.status;
+    if (s === "approved") return '<div class="banner approved"><b>This is your page</b>It is live. Add looks and edit your details from My brand.<br><a class="btn btn-gold btn-sm" href="manage.html">Manage my page</a></div>';
+    if (s === "pending") return '<div class="banner pending"><b>Under review</b>Only you can see this page until it is approved. We will message you in RelviaCreators when it is decided.<br><a class="btn btn-ghost btn-sm" href="manage.html">Edit application</a></div>';
+    if (s === "rejected") return '<div class="banner rejected"><b>Not approved yet</b>' + RF.esc(mine.admin_note || "We need a bit more to go on.") + '<br><a class="btn btn-gold btn-sm" href="manage.html">Fix and send again</a></div>';
+    return '<div class="banner suspended"><b>This page is paused</b>' + RF.esc(mine.admin_note || "Contact Relvia for details.") + '</div>';
   }
 
-  function checkSlug(immediate) {
-    var slug = $("fSlug"), hint = $("slugHint"); if (!slug || slug.disabled) return Promise.resolve(true);
-    clearTimeout(slugTimer);
-    var s = slug.value;
-    if (!s) { hint.className = "hint"; hint.textContent = "Pick a web address for your page."; return Promise.resolve(false); }
-    if (!RF.validSlug(s)) { hint.className = "hint bad"; hint.textContent = "Use 3 to 40 lowercase letters, numbers, and single dashes."; return Promise.resolve(false); }
-    if (brand && brand.slug === s) { hint.className = "hint ok"; hint.textContent = "This is your current address."; return Promise.resolve(true); }
-    hint.className = "hint"; hint.textContent = "Checking...";
-    return new Promise(function (resolve) {
-      slugTimer = setTimeout(function () {
-        RF.client.rpc("fashion_slug_available", { p_slug: s }).then(function (r) {
-          if ($("fSlug") && $("fSlug").value !== s) return resolve(false);
-          var ok = !r.error && r.data === true;
-          hint.className = "hint " + (ok ? "ok" : "bad"); hint.textContent = ok ? "Available: relvia.online/fashion/brand.html?b=" + s : (r.error ? "Couldn't check that right now." : "That address is taken. Try another.");
-          resolve(ok);
-        });
-      }, immediate ? 0 : 350);
-    });
-  }
-
-  // reads and checks the form; returns { values, error }
-  function collect(applying) {
-    var v = {
-      name: $("fName").value.trim(), slug: $("fSlug").value.trim(), category: $("fCategory").value, location: $("fLocation").value.trim(),
-      tagline: $("fTagline").value.trim(), bio: $("fBio").value.trim(), shop_url: $("fShop").value.trim(),
-      instagram: RF.cleanInstagram($("fInsta").value), website_url: $("fWebsite").value.trim(), contact_email: $("fEmail").value.trim(),
-    };
-    var e = null;
-    if (v.name.length < 2) e = "Enter your brand name.";
-    else if (!RF.validSlug(v.slug)) e = "Pick a web address using 3 to 40 lowercase letters, numbers, and dashes.";
-    else if (!RF.isHttps(v.shop_url)) e = "Add your shop link. It has to start with https://";
-    else if (v.website_url && !RF.isHttps(v.website_url)) e = "The website link has to start with https://";
-    else if (v.instagram === null) e = "That Instagram name does not look right. Use just the handle, like yourbrand.";
-    else if (!RF.validEmail(v.contact_email)) e = "Enter a contact email so we can reach you about your application.";
-    else if (applying && !$("fTerms").checked) e = "Please confirm the checkbox at the bottom.";
-    if (!e && applying && !$("fLogo").files[0]) e = "Add your logo so people recognize your brand.";
-    return { values: v, error: e };
-  }
-  function payload(v) {
-    return { name: v.name, category: v.category, tagline: v.tagline || null, bio: v.bio || null, location: v.location || null, shop_url: v.shop_url,
-             instagram: v.instagram || null, website_url: v.website_url || null, contact_email: v.contact_email };
-  }
-
-  function uploadImages(updates) {
-    var jobs = [];
-    var logo = $("fLogo").files[0], cover = $("fCover").files[0];
-    if (logo) jobs.push(RF.resizeImage(logo, 512, 0.9, true).then(function (b) { return RF.uploadBlob(RF.uploadPath(user.id, "logo", "image/jpeg"), b, "image/jpeg"); }).then(function (u) { updates.logo_url = u; }));
-    if (cover) jobs.push(RF.resizeImage(cover, 1800, 0.86, false).then(function (b) { return RF.uploadBlob(RF.uploadPath(user.id, "cover", "image/jpeg"), b, "image/jpeg"); }).then(function (u) { updates.cover_url = u; }));
-    return Promise.all(jobs);
-  }
-
-  // ---------- application ----------
-  function renderApply() {
-    var v = { name: "", slug: "", category: "streetwear", location: "", tagline: "", bio: "", shop_url: "", instagram: "", website_url: "", contact_email: (user.email || "") };
-    $("page").innerHTML =
-      '<div class="card"><h2>Apply for a RelviaFashion page</h2>' +
-      '<p class="lead">Tell us about your brand. We review every application. Once you are approved, your page goes live and you can add a lookbook of photos and short videos.</p>' +
-      formHtml(v, { slugLocked: false }) +
-      '<div class="field full" style="margin-top:18px;"><label class="check"><input type="checkbox" id="fTerms"><span>I own this brand or I am allowed to represent it. I own or have permission to use everything I upload, and the products I show are real.</span></label></div>' +
-      '<div class="err" id="formErr" role="alert"></div>' +
-      '<div class="form-actions"><button class="btn btn-gold" id="submitApply">Send application</button><a class="btn btn-ghost" href="index.html">Cancel</a></div></div>';
-    wireForm(v);
-    $("submitApply").addEventListener("click", submitApply);
-  }
-
-  function submitApply() {
-    if (working) return;
-    var c = collect(true); $("formErr").textContent = c.error || "";
-    if (c.error) return;
-    working = true; var btn = $("submitApply"); btn.disabled = true; btn.textContent = "Sending...";
-    checkSlug(true).then(function (ok) {
-      if (!ok) throw new Error("That web address is already taken. Try another one.");
-      var row = payload(c.values); row.owner_id = user.id; row.slug = c.values.slug;
-      return RF.client.from("fashion_brands").insert(row).select("*").single();
-    }).then(function (r) {
-      if (r.error) throw r.error;
-      brand = r.data;
-      var updates = {};
-      return uploadImages(updates).then(function () {
-        if (!Object.keys(updates).length) return;
-        return RF.client.from("fashion_brands").update(updates).eq("id", brand.id).select("*").single().then(function (u) { if (u.data) brand = u.data; });
-      }).catch(function (err) {
-        RF.toast("Your application was sent, but a photo didn't upload: " + RF.friendlyError(err) + " You can add it below.", true);
-      });
-    }).then(function () {
-      working = false; return loadAgreement().then(loadPlan).then(function () { render(); window.scrollTo({ top: 0 }); });
-    }).catch(function (err) {
-      working = false; btn.disabled = false; btn.textContent = "Send application";
-      $("formErr").textContent = RF.friendlyError(err);
-    });
-  }
-
-  // ---------- manage ----------
-  function statusBanner() {
-    var s = brand.status;
-    if (s === "pending") return '<div class="banner pending"><b>Under review</b>Thanks for applying. We will message you in RelviaCreators when we decide. You can keep editing your details while you wait.</div>';
-    if (s === "rejected") return '<div class="banner rejected"><b>Not approved yet</b>' + RF.esc(brand.admin_note || "We need a bit more to go on.") + '<br>Update your details below, then send it for review again.</div>';
-    if (s === "suspended") return '<div class="banner suspended"><b>Your page is paused</b>' + RF.esc(brand.admin_note || "Contact Relvia to find out more.") + '</div>';
-    return '<div class="banner approved"><b>You are live</b>Your page is public. <a href="' + RF.esc(RF.brandUrl(brand.slug)) + '" style="text-decoration:underline;">View my page</a></div>';
-  }
-
-  function loadAgreement(){
-    return RF.client.rpc("fashion_my_agreement").then(function (r) { agreement = (!r.error && r.data) ? r.data : null; });
-  }
-
-  function loadPlan(){
-    return RF.client.rpc("fashion_my_plan").then(function (r) { plan = (!r.error && r.data) ? r.data : null; }).then(function () {
-      if (plan) return RF.client.rpc("fashion_current_plus_terms").then(function (t) { if (!t.error && t.data) { plan.terms_body = t.data.body; plan.terms_version = t.data.version; } });
-    }).then(function () {
-      if (!brand) return;
-      return RF.client.rpc("fashion_my_analytics").then(function (a) { analytics = (!a.error && a.data) ? a.data : null; });
-    }).then(function () {
-      if (!brand || !analytics || !analytics.plus) return;
-      return RF.client.rpc("fashion_my_daily_stats", { p_days: 30 }).then(function (d) { daily = (!d.error && Array.isArray(d.data)) ? d.data : null; });
-    }).then(function () {
-      if (!brand) return;
-      return RF.client.rpc("fashion_my_tags").then(function (t) { tags = (!t.error && Array.isArray(t.data)) ? t.data : []; });
-    });
-  }
-
-  function planHtml(){
-    if (!brand || !plan || !plan.has_brand) return "";
-    var price = plan.price_cents ? "$" + (plan.price_cents / 100).toFixed(2).replace(/\.00$/, "") : "";
-    var features = '<ul><li>Featured placement on the RelviaFashion homepage</li><li>A lookbook of up to 150 looks (60 on the free plan)</li><li>Analytics: views, follows, and shop-link clicks</li><li>A verified badge once the Relvia team confirms your brand</li><li>Priority review of your application</li></ul>';
-    var dateTxt = plan.current_period_end ? new Date(plan.current_period_end).toLocaleDateString() : "";
-    if (plan.plus) {
-      var status = plan.cancel_at_period_end
-        ? '<p class="hint" style="margin-top:12px;color:var(--warn);">Your subscription will end on ' + RF.esc(dateTxt) + '. It will not renew.</p><div class="form-actions"><button class="btn btn-gold" id="resumeBtn">Keep FashionPlus</button></div>'
-        : '<p class="hint" style="margin-top:12px;">Renews on ' + RF.esc(dateTxt) + '. You can cancel at any time.</p><div class="form-actions"><button class="btn btn-ghost" id="cancelBtn">Cancel renewal</button></div>';
-      return '<div class="card plan"><h2>FashionPlus</h2><p class="agree-ok">You are on FashionPlus.</p>' + features + status +
-        '<div class="err" id="planErr" role="alert"></div>' +
-        '<details class="terms-box" style="margin-top:18px;"><summary>FashionPlus terms</summary><div class="agree-text">' + RF.esc(plan.terms_body || "") + '</div></details></div>';
-    }
-    var needTerms = !plan.terms_accepted;
-    var termsBlock = needTerms
-      ? '<label class="check" style="margin-top:16px;"><input type="checkbox" id="termsBox"><span>I have read the FashionPlus terms, including the monthly renewal and how to cancel.</span></label>'
-      : '<p class="hint" style="margin-top:12px;color:var(--ok);">You have accepted the current FashionPlus terms.</p>';
-    var btn = !plan.checkout_ready ? '<button class="btn btn-gold" disabled>Coming soon</button>'
-      : needTerms ? '<button class="btn btn-gold" id="planBtn" disabled>Accept terms and subscribe</button>'
-      : '<button class="btn btn-gold" id="planBtn">Get FashionPlus</button>';
-    return '<div class="card plan"><h2>FashionPlus</h2>' +
-      '<p class="plan-price">' + RF.esc(price) + ' <small>per month</small></p>' +
-      '<p class="lead" style="margin-top:10px;">' + RF.esc(plan.tagline || "") + '</p>' + features +
-      '<details class="terms-box" style="margin-top:18px;" ' + (needTerms ? 'open' : '') + '><summary>FashionPlus terms</summary><div class="agree-text">' + RF.esc(plan.terms_body || "") + '</div></details>' +
-      termsBlock + '<div class="err" id="planErr" role="alert"></div>' +
-      '<div class="form-actions">' + btn + '</div></div>';
-  }
-
-  function chartSvg(rows){
-    var W = 640, H = 220, pl = 36, pr = 12, pt = 14, pb = 28;
-    var max = 1;
-    rows.forEach(function (r) { max = Math.max(max, Number(r.views) || 0, Number(r.clicks) || 0); });
-    var step = Math.max(1, Math.ceil(max / 4)); max = step * 4;
-    var iw = W - pl - pr, ih = H - pt - pb;
-    function x(i){ return pl + (rows.length <= 1 ? 0 : (i / (rows.length - 1)) * iw); }
-    function y(v){ return pt + ih - (v / max) * ih; }
-    function line(key){
-      return rows.map(function (r, i) { return (i ? "L" : "M") + x(i).toFixed(1) + "," + y(Number(r[key]) || 0).toFixed(1); }).join(" ");
-    }
-    var grid = "";
-    for (var g = 0; g <= 4; g++) {
-      var v = step * g, gy = y(v);
-      grid += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + gy + '" y2="' + gy + '" stroke="#241b12" stroke-width="1"/>';
-      grid += '<text x="' + (pl - 6) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="#8a8073">' + v + '</text>';
-    }
-    var first = rows[0] ? rows[0].day.slice(5) : "", last = rows[rows.length - 1] ? rows[rows.length - 1].day.slice(5) : "";
-    var labels = '<text x="' + pl + '" y="' + (H - 6) + '" font-size="11" fill="#8a8073">' + first + '</text>' +
-                 '<text x="' + (W - pr) + '" y="' + (H - 6) + '" text-anchor="end" font-size="11" fill="#8a8073">' + last + '</text>';
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Daily views and shop clicks, last 30 days">' + grid + labels +
-      '<path d="' + line("views") + '" fill="none" stroke="#e0b158" stroke-width="2.5" stroke-linejoin="round"/>' +
-      '<path d="' + line("clicks") + '" fill="none" stroke="#f6d27a" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/></svg>';
-  }
-
-  function chartHtml(){
-    if (!daily || !daily.length) return "";
-    var views = daily.reduce(function (s, r) { return s + (Number(r.views) || 0); }, 0);
-    var clicks = daily.reduce(function (s, r) { return s + (Number(r.clicks) || 0); }, 0);
-    if (!views && !clicks) return '<div class="chart"><p class="hint">Your daily chart starts filling in as people visit your page.</p></div>';
-    return '<div class="chart">' + chartSvg(daily) +
-      '<div class="chart-legend"><span><i style="background:#e0b158;"></i>Page views (' + views + ')</span><span><i style="background:#f6d27a;"></i>Shop clicks (' + clicks + ')</span></div></div>';
-  }
-
-  function tagRequestsHtml(){
+  function followBtn() {
     if (!brand || brand.status !== "approved") return "";
-    var received = tags.filter(function (t) { return t.direction === "received"; });
-    var pending = received.filter(function (t) { return t.status === "pending"; });
-    var accepted = tags.filter(function (t) { return t.status === "accepted"; });
-    if (!pending.length && !accepted.length) return "";
-    var rows = pending.map(function (t) {
-      return '<div class="req"><div class="thumb" data-thumb="' + RF.esc(t.media_url || "") + '"></div><div class="meta">' +
-        '<b>' + RF.esc(t.poster_name) + '</b> tagged you in a look' + (t.caption ? ' &middot; ' + RF.esc(t.caption) : '') +
-        '<small>Accepting shows your name on that look.</small></div>' +
-        '<button class="btn btn-gold btn-sm" data-tag="accept" data-id="' + RF.esc(t.id) + '">Accept</button>' +
-        '<button class="btn btn-ghost btn-sm" data-tag="decline" data-id="' + RF.esc(t.id) + '">Decline</button></div>';
+    if (!user) return '<a class="btn btn-gold" href="/login.html">Sign in to follow</a>';
+    if (mine && mine.id === brand.id) return "";
+    return '<button class="btn ' + (following ? "btn-ghost" : "btn-gold") + '" id="followBtn" aria-pressed="' + following + '">' + (following ? "Following" : "Follow") + '</button>';
+  }
+
+  function render() {
+    document.title = brand.name + " | RelviaFashion";
+    var shop = safeLink(brand.shop_url), web = safeLink(brand.website_url), ig = brand.instagram ? RF.esc(brand.instagram) : "";
+    var logo = brand.logo_url ? '<img src="' + RF.esc(brand.logo_url) + '" alt="' + RF.esc(brand.name) + ' logo">' : RF.esc(RF.initial(brand.name));
+    var links = "";
+    if (shop) links += '<a class="link-row" data-track="shop_click" href="' + shop + '" target="_blank" rel="noopener noreferrer nofollow"><span>Shop ' + RF.esc(brand.name) + '</span><small>Opens their store</small></a>';
+    if (ig) links += '<a class="link-row" href="https://instagram.com/' + ig + '" target="_blank" rel="noopener noreferrer nofollow"><span>Instagram</span><small>@' + ig + '</small></a>';
+    if (web) links += '<a class="link-row" href="' + web + '" target="_blank" rel="noopener noreferrer nofollow"><span>Website</span><small>' + RF.esc(web.replace(/^https:\/\//, "").slice(0, 28)) + '</small></a>';
+
+    $("page").innerHTML =
+      '<div class="cover" id="cover"></div>' +
+      '<div class="wrap">' +
+        '<div class="brand-head"><div class="logo-lg">' + logo + '</div>' +
+          '<div class="head-main"><h1>' + RF.esc(brand.name) + '</h1>' +
+            '<div class="head-sub"><span class="tag">' + RF.esc(RF.catLabel(brand.category)) + '</span>' + (brand.featured ? '<span class="tag featured">Featured</span>' : '') + (brand.verified ? '<span class="tag">Verified</span>' : '') + (brand.plus ? '<span class="tag">FashionPlus</span>' : '') + (brand.location ? '<span>' + RF.esc(brand.location) + '</span>' : '') + '</div></div>' +
+          '<div class="head-actions" id="headActions">' + followBtn() + '</div></div>' +
+        banner() +
+        '<div class="about"><div>' + (brand.tagline ? '<div class="tagline-lg">' + RF.esc(brand.tagline) + '</div>' : '') + (brand.bio ? '<p class="bio">' + RF.esc(brand.bio) + '</p>' : '') +
+          '<div class="stat-row"><span><b id="followCount">' + RF.fmtCount(brand.followers_count) + '</b>followers</span><span><b>' + items.length + '</b>looks</span></div>' +
+          (brand.status === "approved" ? '<p style="margin-top:16px;"><button class="vfx-link" id="reportBrand" style="font-size:12px;color:var(--muted-soft);text-decoration:underline;">Report this brand</button></p>' : '') + '</div>' +
+          '<div class="links">' + links + '</div></div>' +
+        '<section class="section"><div class="section-head"><h2 class="section-title">Lookbook</h2><span class="section-note">' + (items.length ? items.length + (items.length === 1 ? " look" : " looks") : "") + '</span></div><div class="lookbook" id="lookbook"></div></section>' +
+      '</div>';
+    setBg($("cover"), brand.cover_url);
+    renderLookbook();
+    track("view");
+  }
+
+  function renderLookbook() {
+    var box = $("lookbook");
+    if (!items.length) {
+      box.style.columns = "1";
+      box.innerHTML = '<div class="empty"><h3>No looks yet</h3><p>' + (mine && mine.id === brand.id && mine.status === "approved" ? "Add your first photos and videos from My brand." : "Check back soon.") + '</p></div>';
+      return;
+    }
+    box.innerHTML = items.map(function (it, i) {
+      var isVideo = it.media_type === "video";
+      var src = isVideo ? it.poster_url : it.media_url;
+      var alt = it.caption ? RF.esc(it.caption) : (RF.esc(brand.name) + " look " + (i + 1));
+      var visual = src ? '<img src="' + RF.esc(src) + '" alt="' + alt + '" loading="lazy" decoding="async">' : '<div class="ph"></div>';
+      return '<button class="look" data-i="' + i + '" aria-label="Open look ' + (i + 1) + '">' + visual + (isVideo ? '<span class="play">VIDEO</span>' : '') + (it.caption ? '<span class="cap">' + RF.esc(it.caption) + '</span>' : '') + '</button>';
     }).join("");
-    return '<div class="card" id="tagCard"><h2>Collaborations</h2><p class="lead">Brands that tagged you in their looks. Accepted tags show on the look.</p>' +
-      (pending.length ? rows : '<p class="hint">No new requests.</p>') + '</div>';
   }
 
-  function analyticsHtml(){
-    if (!brand || !analytics) return "";
-    var stat = function (n, label) { return '<div class="stat"><b>' + RF.fmtCount(n) + '</b><span>' + label + '</span></div>'; };
-    if (analytics.plus) {
-      return '<div class="card"><h2>Analytics</h2><p class="lead">The last 30 days.</p><div class="stats-grid">' +
-        stat(analytics.views_30d, "Page views") + stat(analytics.shop_clicks_30d, "Shop clicks") +
-        stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div>' + chartHtml() + '</div>';
-    }
-    return '<div class="card locked"><h2>Analytics</h2><p class="lead">Page views and shop-link clicks are part of FashionPlus.</p><div class="stats-grid">' +
-      stat(analytics.followers, "Followers") + stat(analytics.looks, "Looks") + '</div></div>';
+  function track(kind){
+    if (!brand || brand.status !== "approved") return;
+    if (mine && mine.id === brand.id) return;   // owners' own visits are not counted
+    RF.client.rpc("fashion_track", { p_brand_id: brand.id, p_kind: kind }).then(function () {}, function () {});
   }
 
-  function wirePlan(){
-    var FN_MANAGE = RF.SUPABASE_URL + "/functions/v1/fashion-plan-manage";
-    function authedCall(url, body){
-      return RF.client.auth.getSession().then(function (r) {
-        var token = r && r.data && r.data.session && r.data.session.access_token;
-        if (!token) throw new Error("Sign in first");
-        return fetch(url, { method: "POST", headers: { Authorization: "Bearer " + token, apikey: RF.ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
-      }).then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error(j.error || "Something went wrong."); return j; }); });
-    }
-    var terms = $("termsBox"), planBtn = $("planBtn");
-    if (terms && planBtn) {
-      terms.addEventListener("change", function () { planBtn.disabled = !terms.checked; });
-      planBtn.addEventListener("click", function () {
-        if (!terms.checked) return;
-        planBtn.disabled = true; planBtn.textContent = "Saving...";
-        RF.client.rpc("fashion_accept_plus_terms", { p_version: plan.terms_version }).then(function (r) {
-          if (r.error) throw new Error(RF.friendlyError(r.error));
-          planBtn.textContent = "Opening checkout...";
-          return authedCall(FN_CHECKOUT).then(function (j) { window.location.href = j.url; });
-        }).catch(function (err) { planBtn.disabled = false; planBtn.textContent = "Accept terms and subscribe"; $("planErr").textContent = err.message || "Couldn't start checkout."; });
-      });
-    } else if (planBtn) {
-      planBtn.addEventListener("click", function () {
-        planBtn.disabled = true; planBtn.textContent = "Opening checkout...";
-        authedCall(FN_CHECKOUT).then(function (j) { window.location.href = j.url; })
-          .catch(function (err) { planBtn.disabled = false; planBtn.textContent = "Get FashionPlus"; $("planErr").textContent = err.message || "Couldn't start checkout."; });
-      });
-    }
-    var cancel = $("cancelBtn"), resume = $("resumeBtn");
-    function manage(action, btn){
-      if (action === "cancel" && !window.confirm("Stop FashionPlus from renewing? You keep it until the end of the period you have paid for.")) return;
-      btn.disabled = true;
-      authedCall(FN_MANAGE, { action: action }).then(function () {
-        RF.toast(action === "cancel" ? "Renewal canceled. You keep FashionPlus until the period ends." : "Done. FashionPlus will keep renewing.");
-        return loadPlan().then(render);
-      }).catch(function (err) { btn.disabled = false; $("planErr").textContent = err.message || "Something went wrong."; });
-    }
-    if (cancel) cancel.addEventListener("click", function () { manage("cancel", cancel); });
-    if (resume) resume.addEventListener("click", function () { manage("resume", resume); });
+  // ---------- viewer ----------
+  function showLook() {
+    var it = items[lbIndex]; if (!it) return;
+    var media = it.media_type === "video"
+      ? '<video src="' + RF.esc(it.media_url) + '"' + (it.poster_url ? ' poster="' + RF.esc(it.poster_url) + '"' : '') + ' controls playsinline autoplay muted loop></video>'
+      : '<img src="' + RF.esc(it.media_url) + '" alt="' + RF.esc(it.caption || brand.name) + '">';
+    $("lbMedia").innerHTML = media;
+    $("lbCount").textContent = (lbIndex + 1) + " / " + items.length;
+    $("lbCaption").textContent = it.caption || "";
+    var withTags = publicTags.filter(function (t) { return t.item_id === it.id; });
+    var withHtml = withTags.length
+      ? '<div class="with">With ' + withTags.map(function (t) { return '<a href="' + RF.esc(RF.brandUrl(t.slug)) + '">' + RF.esc(t.name) + '</a>'; }).join(", ") + '</div>'
+      : "";
+    $("lbWith").innerHTML = withHtml;
+    var p = safeLink(it.product_url);
+    $("lbShop").innerHTML = p ? '<a class="btn btn-gold" data-track="item_click" href="' + p + '" target="_blank" rel="noopener noreferrer nofollow">Shop this piece</a>' : "";
+    $("lbPrev").style.display = $("lbNext").style.display = items.length > 1 ? "" : "none";
   }
+  function openLook(i) { lbIndex = i; $("lb").classList.add("open"); document.body.style.overflow = "hidden"; showLook(); $("lbClose").focus(); }
+  function closeLook() { $("lb").classList.remove("open"); document.body.style.overflow = ""; $("lbMedia").innerHTML = ""; }
+  function step(d) { lbIndex = (lbIndex + d + items.length) % items.length; showLook(); }
 
-  function agreementHtml(){
-    if (!brand || !agreement || brand.status === "suspended") return "";
-    if (agreement.signed) {
-      return '<div class="card agree"><h2>Brand Agreement</h2>' +
-        '<p class="agree-ok">Signed by ' + RF.esc(agreement.signer_name) + ' on ' + new Date(agreement.signed_at).toLocaleDateString() + '.</p>' +
-        '<p class="hint" style="margin-top:8px;">Version ' + RF.esc(agreement.version) + '. You can always read the full text below.</p>' +
-        '<div class="agree-text">' + RF.esc(agreement.body) + '</div></div>';
-    }
-    return '<div class="card agree"><h2>' + RF.esc(agreement.title) + '</h2>' +
-      '<p class="lead">Read the full agreement, then sign. Relvia only has obligations to a brand that signs. Your lookbook opens after you sign.</p>' +
-      '<div class="agree-text" tabindex="0">' + RF.esc(agreement.body) + '</div>' +
-      '<div class="field"><label for="aName">Type your full legal name <span class="req">*</span></label><input class="input" id="aName" maxlength="120" autocomplete="name" placeholder="First and last name"></div>' +
-      '<label class="check" style="margin-top:16px;"><input type="checkbox" id="aConsent"><span>I have read this agreement. I agree to sign it electronically, and my typed name above is my signature.</span></label>' +
-      '<div class="err" id="agreeErr" role="alert"></div>' +
-      '<div class="form-actions"><button class="btn btn-gold" id="signBtn">Sign agreement</button></div></div>';
+  // ---------- reporting ----------
+  function openReport(type, id, label) {
+    if (!user) { location.href = "/login.html"; return; }
+    reportTarget = { type: type, id: id };
+    $("reportTitle").textContent = "Report " + label;
+    $("reportModal").classList.add("open");
   }
-
-  function wireAgreement(){
-    var btn = $("signBtn"); if (!btn) return;
-    btn.addEventListener("click", function () {
-      var name = $("aName").value.trim(), consent = $("aConsent").checked;
-      $("agreeErr").textContent = "";
-      if (!consent) { $("agreeErr").textContent = "Tick the box to confirm you agree."; return; }
-      if (name.length < 3) { $("agreeErr").textContent = "Type your full legal name to sign."; return; }
-      btn.disabled = true; btn.textContent = "Signing...";
-      RF.client.rpc("fashion_sign_agreement", { p_name: name, p_consent: true }).then(function (r) {
-        if (r.error) { btn.disabled = false; btn.textContent = "Sign agreement"; $("agreeErr").textContent = RF.friendlyError(r.error); return; }
-        return loadAgreement().then(function () { RF.toast("Signed. Thank you."); render(); });
-      });
-    });
-  }
-
-  function renderManage() {
-    var locked = brand.status === "approved" || brand.status === "suspended";
-    var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + tagRequestsHtml() +
-      '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
-      '<div class="err" id="formErr" role="alert"></div>' +
-      '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
-      (brand.status === "rejected" ? '<button class="btn btn-ghost" id="resubmitBtn">Save and send for review</button>' : '') + '</div></div>' +
-      (brand.status === "approved" && agreement && !agreement.signed ? '<div class="banner pending" style="margin-bottom:22px;"><b>Lookbook locked</b>Sign the Brand Agreement above to add photos and videos.</div>' : '') +
-      (brand.status === "approved" && agreement && agreement.signed ? '<div class="card" id="lookCard"><h2>Lookbook</h2><p class="lead">Add photos and short videos of your pieces. Photos are shrunk for you. Videos can be up to ' + RF.LIMITS.videoSeconds + ' seconds and 40 MB (MP4, WebM, or MOV).</p>' +
-        '<label class="drop" id="drop" for="fFiles"><b>Add photos and videos</b><span>Click to choose, or drop files here</span><span class="hint" id="roomHint"></span></label>' +
-        '<input type="file" id="fFiles" class="sr-only" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime">' +
-        '<div class="queue" id="queue"></div><div class="m-grid" id="mGrid"></div></div>' : '');
-    wireForm(brand);
-    $("saveBtn").addEventListener("click", function () { save(false); });
-    if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
-    wireAgreement(); wirePlan(); wireTagRequests();
-    if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
-    if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
-  }
-
-  function save(resubmit) {
-    if (working) return;
-    var c = collect(false); $("formErr").textContent = c.error || "";
-    if (c.error) return;
-    working = true; var btn = resubmit ? $("resubmitBtn") : $("saveBtn"); btn.disabled = true;
-    var locked = brand.status === "approved" || brand.status === "suspended";
-    var p = checkSlug(true);
-    p.then(function (ok) {
-      if (!ok && !locked) throw new Error("That web address is already taken. Try another one.");
-      var upd = payload(c.values); if (!locked) upd.slug = c.values.slug;
-      return uploadImages(upd).then(function () { return RF.client.from("fashion_brands").update(upd).eq("id", brand.id).select("*").single(); });
-    }).then(function (r) {
-      if (r.error) throw r.error;
-      brand = r.data;
-      return resubmit ? RF.client.rpc("fashion_resubmit").then(function (x) { if (x.error) throw x.error; return RF.getMyBrand(user.id).then(function (b) { brand = b || brand; }); }) : null;
-    }).then(function () {
-      working = false; RF.toast(resubmit ? "Sent for review. We will message you." : "Saved."); render();
-    }).catch(function (err) {
-      working = false; btn.disabled = false; $("formErr").textContent = RF.friendlyError(err);
-    });
-  }
-
-  // ---------- lookbook manager ----------
-  function loadItems() {
-    return RF.client.from("fashion_items").select("*").eq("brand_id", brand.id).order("created_at", { ascending: false }).then(function (r) { items = r.data || []; renderItems(); });
-  }
-  function roomLeft() { return Math.max(0, limitItems() - items.length); }
-
-  function localInputValue(iso){
-    if (!iso) return "";
-    var d = new Date(iso), pad = function (n) { return String(n).padStart(2, "0"); };
-    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
-  }
-  function tagsForItem(id){
-    return tags.filter(function (t) { return t.direction === "sent" && t.item_id === id; });
-  }
-  function tagBoxHtml(it){
-    var mine = tagsForItem(it.id);
-    var chips = mine.map(function (t) {
-      return '<span class="tagchip">' + RF.esc(t.tagged_name) + (t.status === "pending" ? ' (pending)' : '') +
-        ' <button type="button" data-act="untag" data-id="' + RF.esc(t.id) + '" aria-label="Remove tag">&times;</button></span>';
-    }).join("");
-    return '<div class="tagbox"><div class="hint">Tag a brand in this look</div>' +
-      (chips ? '<div>' + chips + '</div>' : '') +
-      '<div class="row" style="margin-top:6px;"><input class="input" data-f="tagslug" maxlength="40" placeholder="their web address, like atelier-north" aria-label="Brand web address">' +
-      '<button class="btn btn-ghost btn-sm" data-act="tag">Send tag</button></div></div>';
-  }
-
-  function wireTagRequests(){
-    var card = $("tagCard"); if (!card) return;
-    card.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-tag]"); if (!b) return;
-      var accept = b.getAttribute("data-tag") === "accept";
-      b.disabled = true;
-      RF.client.rpc("fashion_respond_tag", { p_tag_id: b.getAttribute("data-id"), p_accept: accept }).then(function (r) {
-        if (r.error) { b.disabled = false; RF.toast(RF.friendlyError(r.error), true); return; }
-        RF.toast(accept ? "Tag accepted." : "Tag declined.");
-        return loadPlan().then(render);
-      });
-    });
-  }
-
-  function goLiveHtml(it){
-    var scheduled = it.publish_at && new Date(it.publish_at) > new Date();
-    var label = scheduled ? "Goes live " + new Date(it.publish_at).toLocaleString() : "Live now";
-    if (!plan || !plan.plus) {
-      return '<div class="hint">' + (scheduled ? "Scheduled" : "Live now") + ' &middot; scheduling is part of FashionPlus</div>';
-    }
-    return '<label class="hint" style="display:block;">Go live (leave empty to go live now)<input class="input" type="datetime-local" data-f="publish_at" value="' + localInputValue(it.publish_at) + '" style="margin-top:4px;"></label>' +
-      '<div class="hint">' + RF.esc(label) + '</div>';
-  }
-
-  function renderItems() {
-    $("roomHint").textContent = items.length + " of " + limitItems() + " used";
-    var grid = $("mGrid");
-    if (!items.length) { grid.innerHTML = ""; return; }
-    grid.innerHTML = items.map(function (it, i) {
-      var thumb = it.media_type === "video" ? it.poster_url : it.media_url;
-      return '<div class="m-item" data-id="' + RF.esc(it.id) + '"><div class="m-thumb" data-thumb="' + RF.esc(thumb || "") + '">' + (it.media_type === "video" ? '<span class="play">VIDEO</span>' : '') + '</div>' +
-        '<div class="m-fields"><input class="input" data-f="caption" maxlength="200" placeholder="Caption" value="' + RF.esc(it.caption) + '" aria-label="Caption">' +
-        '<input class="input" data-f="product_url" maxlength="300" placeholder="Link to buy this piece (https://)" value="' + RF.esc(it.product_url) + '" aria-label="Product link">' +
-        goLiveHtml(it) + tagBoxHtml(it) +
-        '<div class="m-actions"><button class="btn btn-ghost btn-sm" data-act="save">Save</button><button class="btn btn-danger btn-sm" data-act="delete">Delete</button></div></div></div>';
-    }).join("");
-    grid.querySelectorAll("[data-thumb]").forEach(function (el) { var u = el.getAttribute("data-thumb"); if (u && RF.isHttps(u)) el.style.backgroundImage = 'url("' + encodeURI(u) + '")'; });
-  }
-
-  function wireLookbook() {
-    var input = $("fFiles"), drop = $("drop");
-    input.addEventListener("change", function () { var f = Array.prototype.slice.call(input.files); input.value = ""; handleFiles(f); });
-    ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("drag"); }); });
-    ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.remove("drag"); }); });
-    drop.addEventListener("drop", function (e) { handleFiles(Array.prototype.slice.call(e.dataTransfer.files)); });
-    $("mGrid").addEventListener("click", function (e) {
-      var act = e.target.getAttribute && e.target.getAttribute("data-act"); if (!act) return;
-      var card = e.target.closest(".m-item"), id = card.getAttribute("data-id");
-      if (act === "save") saveItem(card, id); else if (act === "delete") deleteItem(id);
-      else if (act === "tag") tagItem(card, id);
-      else if (act === "untag") untagItem(id);
-    });
-  }
-
-  function queueRow(file) {
-    var row = document.createElement("div"); row.className = "q-item";
-    row.innerHTML = '<span class="name"></span><span class="state">Waiting</span>'; row.querySelector(".name").textContent = file.name;
-    $("queue").appendChild(row);
-    return { ok: function () { row.classList.add("done"); row.querySelector(".state").textContent = "Added"; }, fail: function (m) { row.classList.add("fail"); row.querySelector(".state").textContent = m; }, state: function (m) { row.querySelector(".state").textContent = m; } };
-  }
-
-  function addOne(file) {
-    var q = queueRow(file), isVideo = file.type.indexOf("video/") === 0;
-    if (!roomLeft()) { q.fail("Lookbook is full (" + limitItems() + ")"); return Promise.resolve(); }
-    var problem = isVideo ? RF.videoProblem(file, null) : RF.imageProblem(file);
-    if (problem) { q.fail(problem); return Promise.resolve(); }
-    var uploaded = [];
-    q.state(isVideo ? "Reading video..." : "Shrinking photo...");
-    var prep = isVideo
-      ? RF.videoInfo(file).then(function (info) { return { blob: file, type: file.type, poster: info.poster }; })
-      : RF.resizeImage(file, 1600, 0.86, false).then(function (b) { return { blob: b, type: "image/jpeg" }; });
-    return prep.then(function (p) {
-      q.state("Uploading...");
-      return RF.uploadBlob(RF.uploadPath(user.id, "item", p.type), p.blob, p.type).then(function (mediaUrl) {
-        uploaded.push(mediaUrl);
-        if (!p.poster) return { mediaUrl: mediaUrl, posterUrl: null };
-        return RF.uploadBlob(RF.uploadPath(user.id, "poster", "image/jpeg"), p.poster, "image/jpeg").then(function (posterUrl) { uploaded.push(posterUrl); return { mediaUrl: mediaUrl, posterUrl: posterUrl }; });
-      });
-    }).then(function (u) {
-      return RF.client.from("fashion_items").insert({ brand_id: brand.id, media_type: isVideo ? "video" : "image", media_url: u.mediaUrl, poster_url: u.posterUrl }).select("*").single();
-    }).then(function (r) {
-      if (r.error) throw r.error;
-      items.unshift(r.data); q.ok(); renderItems();
-    }).catch(function (err) {
-      RF.removeByUrls(uploaded); q.fail(RF.friendlyError(err));
-    });
-  }
-
-  function handleFiles(files) {
-    if (working || !files.length) return;
-    working = true;
-    var chain = Promise.resolve();
-    files.forEach(function (f) { chain = chain.then(function () { return addOne(f); }); });
-    chain.then(function () { working = false; });
-  }
-
-  function tagItem(card, id){
-    var input = card.querySelector('[data-f="tagslug"]'), slug = (input.value || "").trim().toLowerCase();
-    if (!slug) { RF.toast("Type the brand's web address first.", true); return; }
-    RF.client.rpc("fashion_request_tag", { p_item_id: id, p_tagged_slug: slug }).then(function (r) {
+  function sendReport() {
+    var reason = $("reportReason").value, note = $("reportNote").value.trim();
+    var btn = $("reportSend"); btn.disabled = true;
+    RF.client.rpc("fashion_report", { p_type: reportTarget.type, p_id: reportTarget.id, p_reason: note ? reason + ": " + note : reason }).then(function (r) {
+      btn.disabled = false;
       if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
-      RF.toast("Tag sent. It shows on the look once they accept.");
-      input.value = "";
-      return loadPlan().then(render);
-    });
-  }
-  function untagItem(id){
-    if (!window.confirm("Remove this tag?")) return;
-    var t = tags.filter(function (x) { return x.id === id; })[0];
-    RF.client.rpc("fashion_remove_tag", { p_tag_id: id }).then(function (r) {
-      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
-      RF.toast("Tag removed.");
-      return loadPlan().then(render);
+      $("reportModal").classList.remove("open"); $("reportNote").value = "";
+      RF.toast("Thanks. We will take a look.");
     });
   }
 
-  function saveItem(card, id) {
-    var caption = card.querySelector('[data-f="caption"]').value.trim(), url = card.querySelector('[data-f="product_url"]').value.trim();
-    var goInput = card.querySelector('[data-f="publish_at"]');
-    var publishAt = null;
-    if (url && !RF.isHttps(url)) { RF.toast("The product link has to start with https://", true); return; }
-    if (goInput && goInput.value) {
-      var when = new Date(goInput.value);
-      if (isNaN(when.getTime())) { RF.toast("Pick a valid date and time.", true); return; }
-      publishAt = when.toISOString();
-    }
-    var existing = items.filter(function (x) { return x.id === id; })[0] || {};
-    var changedTime = goInput && (publishAt || null) !== (existing.publish_at || null);
-    var update = { caption: caption || null, product_url: url || null };
-    if (goInput && changedTime) update.publish_at = publishAt;
-    if (goInput && !goInput.value && existing.publish_at && new Date(existing.publish_at) > new Date()) update.publish_at = null;
-    RF.client.from("fashion_items").update(update).eq("id", id).select("*").then(function (r) {
-      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
-      items.forEach(function (it) { if (it.id === id) { it.caption = caption || null; it.product_url = url || null; if ("publish_at" in update) it.publish_at = update.publish_at; } });
-      RF.toast(update.publish_at ? "Scheduled." : "Saved.");
-      renderItems();
-    });
-  }
-  function deleteItem(id) {
-    var it = items.filter(function (x) { return x.id === id; })[0]; if (!it) return;
-    if (!window.confirm("Delete this from your lookbook?")) return;
-    RF.client.from("fashion_items").delete().eq("id", id).then(function (r) {
-      if (r.error) { RF.toast(RF.friendlyError(r.error), true); return; }
-      items = items.filter(function (x) { return x.id !== id; }); renderItems();
-      RF.removeByUrls([it.media_url, it.poster_url]);
-      RF.toast("Deleted.");
+  // ---------- following ----------
+  function toggleFollow() {
+    var btn = $("followBtn"); if (!btn) return; btn.disabled = true;
+    var was = following;
+    var op = was
+      ? RF.client.from("fashion_follows").delete().eq("brand_id", brand.id).eq("user_id", user.id)
+      : RF.client.from("fashion_follows").insert({ brand_id: brand.id, user_id: user.id });
+    op.then(function (r) {
+      if (r.error) { btn.disabled = false; RF.toast(RF.friendlyError(r.error), true); return; }
+      following = !was; brand.followers_count = Math.max(0, (brand.followers_count || 0) + (was ? -1 : 1));
+      $("headActions").innerHTML = followBtn(); $("followCount").textContent = RF.fmtCount(brand.followers_count);
     });
   }
 
-  function render() { slugEdited = !!(brand && brand.slug); if (brand) renderManage(); else renderApply(); }
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    var tracked = t.closest && t.closest("[data-track]");
+    if (tracked) track(tracked.getAttribute("data-track"));
+    var look = t.closest && t.closest(".look");
+    if (look) return openLook(Number(look.getAttribute("data-i")));
+    if (t.id === "followBtn") return toggleFollow();
+    if (t.id === "reportBrand") return openReport("fashion_brand", brand.id, "this brand");
+    if (t.id === "lbReport") return openReport("fashion_item", items[lbIndex].id, "this look");
+    if (t.id === "lbClose" || t === $("lb")) return closeLook();
+    if (t.id === "lbPrev") return step(-1);
+    if (t.id === "lbNext") return step(1);
+    if (t.id === "reportSend") return sendReport();
+    if (t.id === "reportCancel" || t === $("reportModal")) $("reportModal").classList.remove("open");
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!$("lb").classList.contains("open")) return;
+    if (e.key === "Escape") closeLook(); else if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1);
+  });
 
+  // ---------- load ----------
   function init() {
-    RF.closedCheck().then(function (closed) {
+    return RF.closedCheck().then(function (closed) {
       if (closed) return;
-      return RF.renderHeader("manage").then(function (u) {
+      return RF.renderHeader("").then(function (u) {
         user = u;
-        if (!user) { $("page").innerHTML = '<div class="card" style="text-align:center;"><h2>Sign in to apply</h2><p class="lead">You need a Relvia account to create a RelviaFashion page.</p><a class="btn btn-gold" href="/login.html">Sign in</a></div>'; return; }
-        return RF.getMyBrand(user.id).then(function (b) { brand = b; return brand ? loadAgreement() : null; }).then(function () { return brand ? loadPlan() : null; }).then(function () { render(); });
+        if (!slug) return missing();
+        return RF.client.from("fashion_public_brands").select("*").eq("slug", slug).maybeSingle().then(function (r) {
+          if (r.data) return r.data;
+          if (!user) return null;
+          return RF.client.from("fashion_brands").select("*").eq("slug", slug).maybeSingle().then(function (r2) { return r2.data || null; });
+        }).then(function (found) {
+          if (!found) return missing();
+          brand = found;
+          return Promise.all([
+            user ? RF.getMyBrand(user.id) : null,
+            RF.client.from("fashion_items").select("*").eq("brand_id", brand.id).order("created_at", { ascending: false }),
+            user ? RF.client.from("fashion_follows").select("brand_id").eq("brand_id", brand.id).eq("user_id", user.id).maybeSingle() : null,
+          ]).then(function (res) {
+            mine = res[0]; items = (res[1] && res[1].data) || []; following = !!(res[2] && res[2].data);
+            return RF.client.rpc("fashion_public_tags", { p_brand_id: brand.id }).then(function (t) { publicTags = (!t.error && Array.isArray(t.data)) ? t.data : []; render(); });
+          });
+        });
       });
     });
   }
