@@ -247,6 +247,9 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 .req .meta small{ display:block; color:var(--muted); margin-top:2px; }
 .upd-status{ font-size:13px; color:var(--muted); margin:6px 0 12px; }
 .upd-count{ font-size:12px; color:var(--muted-soft); text-align:right; margin-top:6px; }
+.verif{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.verif .badge{ font-family:var(--display); font-weight:700; font-size:18px; color:var(--gold-1); }
+.verif p{ flex-basis:100%; font-size:14px; color:var(--muted); line-height:1.6; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -363,7 +366,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     host.innerHTML =
       '<header class="topbar">' +
       '<a class="brand" href="index.html" aria-label="RelviaFashion home"><span class="crest" aria-hidden="true">R</span><span class="brand-text"><span class="brand-name">Relvia</span><span class="brand-sub">FASHION</span></span></a>' +
-      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="../index.html">Relvia</a></nav>' +
+      '<nav class="top-nav" aria-label="Relvia divisions"><a href="../studios/index.html">Studios</a><a href="../music/index.html">Music</a><a href="../live/live.html">Live</a><a href="../creators/index.html">Creators</a><a href="feed.html">Feed</a><a href="../index.html">Relvia</a></nav>' +
       '<div class="top-actions" id="topActions"></div></header>';
     var actions = document.getElementById("topActions");
     return getUser().then(function (user) {
@@ -476,7 +479,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [], updStatus = null;
+  var user = null, brand = null, items = [], slugEdited = false, slugTimer = 0, working = false, agreement = null, plan = null, analytics = null, daily = null, tags = [], updStatus = null, verif = null;
   var FN_CHECKOUT = RF.SUPABASE_URL + "/functions/v1/fashion-checkout";
   function limitItems(){ return plan && plan.plus ? 150 : 60; }
 
@@ -642,13 +645,16 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).then(function () {
       if (!brand) return;
       return RF.client.rpc("fashion_my_update_status").then(function (s) { updStatus = (!s.error && s.data) ? s.data : null; });
+    }).then(function () {
+      if (!brand) return;
+      return RF.client.rpc("fashion_my_verification").then(function (v) { verif = (!v.error && v.data) ? v.data : null; });
     });
   }
 
   function planHtml(){
     if (!brand || !plan || !plan.has_brand) return "";
     var price = plan.price_cents ? "$" + (plan.price_cents / 100).toFixed(2).replace(/\.00$/, "") : "";
-    var features = '<ul><li>Featured placement on the RelviaFashion homepage</li><li>A lookbook of up to 150 looks (60 on the free plan)</li><li>Analytics: views, follows, and shop-link clicks</li><li>A verified badge once the Relvia team confirms your brand</li><li>Priority review of your application</li></ul>';
+    var features = '<ul><li>Featured placement on the RelviaFashion homepage</li><li>A lookbook of up to 150 looks (60 on the free plan)</li><li>Analytics: views, follows, and shop-link clicks</li><li>Priority review of your verification requests and application</li></ul>';
     var dateTxt = plan.current_period_end ? new Date(plan.current_period_end).toLocaleDateString() : "";
     if (plan.plus) {
       var status = plan.cancel_at_period_end
@@ -722,6 +728,35 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     }).join("");
     return '<div class="card" id="tagCard"><h2>Collaborations</h2><p class="lead">Brands that tagged you in their looks. Accepted tags show on the look.</p>' +
       (pending.length ? rows : '<p class="hint">No new requests.</p>') + '</div>';
+  }
+
+  function verificationHtml(){
+    if (!brand || brand.status !== "approved" || !verif) return "";
+    var text, btn = "";
+    if (verif.verified) {
+      text = "Your brand is verified. The badge shows on your page and in the feed.";
+    } else if (verif.status === "pending") {
+      text = "Your verification request is with the Relvia team. We review FashionPlus brands first.";
+    } else {
+      text = "Verification adds a badge to your page so shoppers know you're the real brand. Any approved brand can request it.";
+      if (verif.last_decision === "declined" && verif.decision_note) text += " Last request was not approved: " + verif.decision_note;
+      if (verif.can_request) btn = '<div class="form-actions" style="flex-basis:100%;"><button class="btn btn-gold" id="verifyBtn">Request verification</button></div>';
+    }
+    return '<div class="card"><h2>Verification</h2><div class="verif">' +
+      (verif.verified ? '<span class="badge">&#10003; Verified brand</span>' : '') +
+      '<p>' + RF.esc(text) + '</p>' + btn + '</div></div>';
+  }
+
+  function wireVerification(){
+    var b = $("verifyBtn"); if (!b) return;
+    b.addEventListener("click", function () {
+      b.disabled = true; b.textContent = "Sending...";
+      RF.client.rpc("fashion_request_verification").then(function (r) {
+        if (r.error) { b.disabled = false; b.textContent = "Request verification"; RF.toast(RF.friendlyError(r.error), true); return; }
+        RF.toast("Request sent. We'll message you when it's decided.");
+        return loadPlan().then(render);
+      });
+    });
   }
 
   function updatesHtml(){
@@ -842,7 +877,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
   function renderManage() {
     var locked = brand.status === "approved" || brand.status === "suspended";
     var disabled = brand.status === "suspended";
-    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + updatesHtml() + tagRequestsHtml() +
+    $("page").innerHTML = statusBanner() + agreementHtml() + planHtml() + analyticsHtml() + verificationHtml() + updatesHtml() + tagRequestsHtml() +
       '<div class="card" style="margin-top:20px;"><h2>Your details</h2><p class="lead">What people see on your page.</p>' + formHtml(brand, { slugLocked: locked }) +
       '<div class="err" id="formErr" role="alert"></div>' +
       '<div class="form-actions"><button class="btn btn-gold" id="saveBtn"' + (disabled ? " disabled" : "") + '>Save changes</button>' +
@@ -855,7 +890,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     wireForm(brand);
     $("saveBtn").addEventListener("click", function () { save(false); });
     if ($("resubmitBtn")) $("resubmitBtn").addEventListener("click", function () { save(true); });
-    wireAgreement(); wirePlan(); wireTagRequests(); wireUpdates();
+    wireAgreement(); wirePlan(); wireTagRequests(); wireUpdates(); wireVerification();
     if (brand.status === "approved" && agreement && agreement.signed) { wireLookbook(); loadItems(); }
     if (disabled) $("page").querySelectorAll(".card input, .card select, .card textarea").forEach(function (el) { el.disabled = true; });
   }
