@@ -198,7 +198,8 @@ tr:last-child td{ border-bottom:none; }
   <div class="container">
 
     <div class="ecosystem-tabs">
-      <button class="eco-tab active" data-eco-tab="live">Relvia Live</button>
+      <button class="eco-tab" data-eco-tab="overview">Overview</button>
+      <button class="eco-tab" data-eco-tab="live">Relvia Live</button>
       <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
       <button class="eco-tab" data-eco-tab="campus">Relvia Campus</button>
@@ -206,6 +207,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="fashion">RelviaFashion</button>
       <button class="eco-tab" data-eco-tab="research">Research Desk</button>
       <button class="eco-tab" data-eco-tab="sponsors">Sponsor Bot</button>
+      <button class="eco-tab" data-eco-tab="takedowns">Takedowns</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
@@ -216,7 +218,16 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
-    <div class="eco-panel active" id="eco-live">
+    <div class="eco-panel" id="eco-overview">
+      <div class="section-head"><h2>Overview</h2><div><button class="btn sm" id="ovRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">Everything waiting on you, in one place. Click a card to open that area.</p>
+      <div id="ovCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Unread alerts</h2><div><button class="btn sm" id="ovReadAll" type="button">Mark all read</button></div></div>
+      <div class="panel" style="margin-bottom:24px;"><div id="ovAlerts" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+    </div>
+
+    <div class="eco-panel" id="eco-live">
 
     <div class="stats-row">
       <div class="stat-card"><div class="num" id="statLiveNow">—</div><div class="label">Live Now</div></div>
@@ -780,6 +791,13 @@ tr:last-child td{ border-bottom:none; }
 
       <div class="section-head"><h2 style="font-size:18px;">Recent runs</h2></div>
       <div class="panel"><table><thead><tr><th>When</th><th>Source</th><th>Searches</th><th>New leads</th></tr></thead><tbody id="sponsorRuns"><tr class="empty-row"><td colspan="4">No runs yet.</td></tr></tbody></table></div>
+    </div>
+
+    <div class="eco-panel" id="eco-takedowns">
+      <div class="section-head"><h2>Copyright takedowns</h2><div><button class="btn sm" id="tdRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">Notices from the public copyright form. Review each one, then decide. Every decision needs a note, which stays on file.</p>
+      <div class="panel"><table><thead><tr><th>Notice</th><th>Status</th><th>Links</th><th>Received</th><th>Decision</th></tr></thead>
+        <tbody id="tdQueue"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
     </div>
 
     <div class="eco-panel" id="eco-news">
@@ -1740,6 +1758,7 @@ async function gate(){
   document.getElementById("streamSearch").addEventListener("input", (e) => renderStreams(e.target.value));
   document.getElementById("userSearch").addEventListener("input", (e) => renderUsers(e.target.value));
   setupEcosystemTabs();
+  document.querySelector('.eco-tab[data-eco-tab="overview"]').click();
 
   document.getElementById("banStreamingPermanentBtn").addEventListener("click", () => applyBan("streaming", "permanent"));
   document.getElementById("banStreamingTempBtn").addEventListener("click", () => applyBan("streaming", "temp"));
@@ -3296,6 +3315,64 @@ let betaTabLoaded = false;
 let relvbotLoaded = false;
 let fashionLoaded = false;
 
+// <<OVERVIEW-START>>
+const OV_CARDS = [
+  { key: "verifications_over_3_days", label: "Verification waiting 3+ days", tab: "fashion", urgent: true },
+  { key: "verifications_waiting", label: "Verification requests", tab: "fashion" },
+  { key: "brands_pending", label: "Brands waiting for approval", tab: "fashion" },
+  { key: "research_drafts", label: "Research drafts to review", tab: "research" },
+  { key: "research_due_48h", label: "Research live in 48 hours", tab: "research", urgent: true },
+  { key: "sponsor_followups_due", label: "Sponsor follow-ups due", tab: "sponsors", urgent: true },
+  { key: "sponsor_new_leads", label: "New sponsor leads", tab: "sponsors" },
+  { key: "takedowns_waiting", label: "Takedown notices waiting", tab: "takedowns", urgent: true },
+  { key: "unread_alerts", label: "Unread alerts", tab: "relvbot" }
+];
+
+async function loadOverviewTab(){
+  const cards = document.getElementById("ovCards");
+  const { data, error } = await supabaseClient.rpc("owner_overview");
+  if (error || !data){
+    cards.innerHTML = `<div class="hint">Couldn't load the overview. Run relvia-owner-overview.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</div>`;
+    document.getElementById("ovAlerts").innerHTML = "";
+    return;
+  }
+  cards.innerHTML = OV_CARDS.map(card => {
+    const n = Number(data[card.key] || 0);
+    const hot = n > 0 && card.urgent;
+    const style = hot ? "border-color:#e8a33d;" : "";
+    return `<button type="button" data-ov-goto="${card.tab}" style="text-align:left;background:var(--surface-light);border:1px solid var(--border);border-radius:14px;padding:16px;color:white;cursor:pointer;${style}">
+      <div style="font-size:28px;font-weight:800;color:${hot ? "#f6d27a" : "white"};">${n}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:4px;">${escapeHtml(card.label)}</div></button>`;
+  }).join("");
+
+  const alerts = data.recent_alerts || [];
+  document.getElementById("ovAlerts").innerHTML = alerts.length
+    ? alerts.map(a => `<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="flex:1;"><div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;">${escapeHtml(a.alert_type)} · ${escapeHtml(new Date(a.created_at).toLocaleString())}</div>
+        <div style="font-size:13.5px;margin-top:4px;line-height:1.5;">${escapeHtml(a.message)}</div></div>
+        <button class="btn sm" type="button" data-ov-read="${escapeHtml(a.id)}">Mark read</button></div>`).join("")
+    : '<div class="hint">No unread alerts. You are caught up.</div>';
+}
+
+document.addEventListener("click", async function (e){
+  const go = e.target.closest("[data-ov-goto]");
+  if (go){ const t = document.querySelector(`.eco-tab[data-eco-tab="${go.dataset.ovGoto}"]`); if (t) t.click(); return; }
+  const read = e.target.closest("[data-ov-read]");
+  if (read){
+    const { error } = await supabaseClient.from("founder_alerts").update({ is_read: true }).eq("id", read.dataset.ovRead);
+    if (error){ showToast(error.message || "Couldn't mark that alert read."); return; }
+    await loadOverviewTab(); return;
+  }
+  if (e.target.id === "ovRefresh"){ await loadOverviewTab(); return; }
+  if (e.target.id === "ovReadAll"){
+    if (!confirm("Mark every unread alert as read?")) return;
+    const { error } = await supabaseClient.from("founder_alerts").update({ is_read: true }).eq("is_read", false);
+    if (error){ showToast(error.message || "Couldn't mark them read."); return; }
+    await loadOverviewTab();
+  }
+});
+// <<OVERVIEW-END>>
+
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
     tab.addEventListener("click", async () => {
@@ -3322,6 +3399,8 @@ function setupEcosystemTabs(){
       if (target === "fashion" && !fashionLoaded){ fashionLoaded = true; await loadFashionTab(); }
       if (target === "research" && !researchLoaded){ researchLoaded = true; await loadResearchTab(); }
       if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
+      if (target === "takedowns" && !takedownsLoaded){ takedownsLoaded = true; await loadTakedownTab(); }
+      if (target === "overview"){ await loadOverviewTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
@@ -3456,6 +3535,8 @@ let fashionData = { brands: [], reports: [] };
 let fashionContracts = [];
 let researchLoaded = false;
 let sponsorsLoaded = false;
+let takedownsLoaded = false;
+let takedownRows = [];
 let researchRows = [];
 let fashionVerify = [];
 let fashionFilter = "all";
@@ -3828,6 +3909,54 @@ document.addEventListener("click", async function (e){
   window.open("https://mail.google.com/mail/?view=cm&fs=1&su=" + encodeURIComponent(subjectMatch ? subjectMatch[1] : "Partnering with Relvia") + "&body=" + encodeURIComponent(body), "_blank", "noopener");
 });
 // <<SPONSOR-END>>
+
+// <<TAKEDOWN-START>>
+const TD_DECISIONS = [["reviewing", "Mark reviewing"], ["removed", "Remove content"], ["rejected", "Reject"], ["counter_notice_received", "Counter-notice received"], ["restored", "Restore content"]];
+
+async function loadTakedownTab(){
+  document.getElementById("tdRefresh").addEventListener("click", renderTakedowns);
+  document.getElementById("eco-takedowns").addEventListener("click", onTakedownClick);
+  await renderTakedowns();
+}
+
+async function renderTakedowns(){
+  const { data, error } = await supabaseClient.rpc("takedown_queue");
+  const body = document.getElementById("tdQueue");
+  if (error || !Array.isArray(data)){
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load notices. Run relvia-takedown.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
+    return;
+  }
+  takedownRows = data;
+  body.innerHTML = data.length ? data.map(t => {
+    const actions = TD_DECISIONS.map(([val, label]) =>
+      `<button class="btn sm${val === "removed" || val === "restored" ? " gold" : val === "rejected" ? " danger" : ""}" type="button" data-td="${val}" data-id="${escapeHtml(t.id)}">${escapeHtml(label)}</button>`).join(" ");
+    return `<tr>
+      <td><b>${escapeHtml(t.complainant_name)}</b> &lt;${escapeHtml(t.complainant_email)}&gt;
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">${t.is_owner ? "Says they own the work" : "Says they act for the owner"}</div>
+        <div style="font-size:13px;margin-top:6px;">${escapeHtml(t.work_description)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Signed: ${escapeHtml(t.signature)} &middot; ${escapeHtml(t.complainant_address)}</div></td>
+      <td><span class="pill ${t.status === "removed" ? "banned" : ""}">${escapeHtml(t.status)}</span>${t.decision_note ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(t.decision_note)}</div>` : ""}</td>
+      <td style="font-size:12px;">${t.original_url ? `<div>Original: <a href="${escapeHtml(t.original_url)}" target="_blank" rel="noopener noreferrer">link</a></div>` : ""}<div>Copy: <a href="${escapeHtml(t.infringing_url)}" target="_blank" rel="noopener noreferrer">link</a></div></td>
+      <td style="font-size:12px;">${escapeHtml(new Date(t.received_at).toLocaleString())}</td>
+      <td style="white-space:normal;">${actions}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">No notices waiting.</td></tr>`;
+}
+
+async function onTakedownClick(e){
+  const btn = e.target.closest("[data-td]"); if (!btn) return;
+  const decision = btn.dataset.td, id = btn.dataset.id;
+  const row = takedownRows.find(t => t.id === id);
+  const who = row ? row.complainant_name : "this notice";
+  const label = (TD_DECISIONS.find(d => d[0] === decision) || [null, decision])[1];
+  if (decision === "removed" && !confirm(`Remove the content named in ${who}'s notice? Record the reason in the next prompt.`)) return;
+  const note = prompt(`${label} for ${who}. Write the reason (kept on file, at least 3 characters):`);
+  if (!note || note.trim().length < 3) { if (note !== null) showToast("A note of at least 3 characters is required."); return; }
+  const { error } = await supabaseClient.rpc("takedown_decide", { p_id: id, p_status: decision, p_note: note.trim() });
+  if (error){ showToast(error.message || "That didn't work."); return; }
+  showToast("Decision recorded.");
+  await renderTakedowns();
+}
+// <<TAKEDOWN-END>>
 
 async function loadRelvbotTab(){
   document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbotAll);
