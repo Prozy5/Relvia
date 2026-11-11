@@ -603,6 +603,12 @@ function setupAddStoryModal(){
     document.getElementById("storyCaption").value = "";
   };
 
+  const capBox = document.getElementById("storyCaption");
+  if (capBox && !document.getElementById("storyCount")){
+    capBox.maxLength = 200;
+    capBox.insertAdjacentHTML("afterend", '<div id="storyCount" style="font-size:12px;color:#8a8073;text-align:right;margin-top:4px;">0 / 200</div>');
+    capBox.addEventListener("input", () => { document.getElementById("storyCount").textContent = capBox.value.length + " / 200"; });
+  }
   fileInput.addEventListener("change", () => {
     const f = fileInput.files[0];
     if (!f){ preview.style.display = "none"; return; }
@@ -613,23 +619,34 @@ function setupAddStoryModal(){
     document.getElementById("addStoryModal").classList.remove("open");
     resetForm();
   });
+  function storyError(err){
+    const m = (err && (err.message || err.details)) || "";
+    if (/caption_check|char_length|200/i.test(m)) return "Captions can be up to 200 characters.";
+    if (/row-level security|permission denied|JWT|not authenticated/i.test(m)) return "Please sign in again, then post your story.";
+    if (/social_stories|column .* does not exist|relation .* does not exist/i.test(m)) return "Stories need a quick database update. Ask the Relvia team to run the stories fix.";
+    if (/too large|exceeded|payload/i.test(m)) return "That photo is too large. Try a smaller one.";
+    return m || "Couldn't post your story. Please try again.";
+  }
   postBtn.addEventListener("click", async () => {
     const file = fileInput.files[0];
     const caption = document.getElementById("storyCaption").value.trim();
     if (!file){ showToast("Choose a photo first"); return; }
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)){ showToast("Use a JPG, PNG, WebP, or GIF photo."); return; }
+    if (file.size > 10 * 1024 * 1024){ showToast("That photo is over 10 MB. Try a smaller one."); return; }
+    if (caption.length > 200){ showToast("Captions can be up to 200 characters."); return; }
 
     const label = postBtn.textContent;
     postBtn.disabled = true; postBtn.textContent = "Posting...";
     try {
       const imageUrl = await uploadImage(file, { maxEdge: 1400 });
       const { error } = await supabaseClient.from("social_stories").insert({ user_id: currentUser.id, media_url: imageUrl, caption });
-      if (error) throw new Error(error.message || "Couldn't post story");
+      if (error) throw error;
       document.getElementById("addStoryModal").classList.remove("open");
       resetForm();
       showToast("Story posted");
       await loadStories();
     } catch (err){
-      showToast(err.message || "Couldn't post story");
+      showToast(storyError(err));
     }
     postBtn.disabled = false; postBtn.textContent = label;
   });
