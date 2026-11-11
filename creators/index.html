@@ -250,6 +250,22 @@ body{
 .sponsor-links{ display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 12px; }
 .sponsor-links a{ font-size:12.5px; font-weight:700; color:var(--gold); border:1px solid rgba(224,177,88,.45); padding:7px 14px; border-radius:999px; transition:background .2s, color .2s; }
 .sponsor-links a:hover{ background:var(--gold); color:#000; }
+
+/* ===== RelviaCreators upgrade: visual layer (same features, same ids) ===== */
+body{ background:#060403 !important; color:#f5f1ea; -webkit-font-smoothing:antialiased; }
+:root{ --gold:#e0b158; --gold-1:#f6d27a; --gold-2:#b9832f; --line:#241b12; --panel:#0e0a07; }
+.post, .post-card, .feed-post{ background:#0e0a07 !important; border:1px solid #241b12 !important; border-radius:18px !important; box-shadow:0 10px 30px rgba(0,0,0,.35); transition:border-color .2s, transform .2s; }
+.post:hover, .post-card:hover, .feed-post:hover{ border-color:#b9832f !important; }
+.post-caption{ line-height:1.65; }
+.post-media img, .post-media video{ border-radius:14px; }
+.post-action-btn{ border-radius:999px !important; transition:color .15s, background .15s; }
+.post-action-btn:hover{ color:#f6d27a !important; background:rgba(224,177,88,.08) !important; }
+.side-box{ background:#0e0a07 !important; border:1px solid #241b12 !important; border-radius:18px !important; }
+.side-link{ border-radius:12px; transition:background .15s; }
+.side-link:hover{ background:rgba(224,177,88,.06); }
+.story-ring.unseen{ box-shadow:0 0 0 2px #060403, 0 0 14px rgba(246,210,122,.5); }
+button.primary, .composer-post-btn, .btn-gold{ background:linear-gradient(135deg,#f6d27a,#b9832f) !important; color:#120c04 !important; border:none !important; }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
 </style>
 </head>
 <body>
@@ -321,6 +337,12 @@ body{
   </div>
 
   <aside class="side-col" aria-label="Sidebar">
+    <section class="side-box" id="spaceBox">
+      <h3 class="side-title" style="font-family:'Playfair Display',serif;color:#f6d27a;font-size:18px;margin:0 0 10px;">Your space</h3>
+      <a class="side-link" id="shortcutProfile" href="profile.html"><span>My profile</span><span>Posts, media, and details</span></a>
+      <a class="side-link" href="messages.html"><span>Messages</span><span>Direct messages</span></a>
+      <a class="side-link" href="../fashion/manage.html"><span>My brand</span><span>RelviaFashion page and updates</span></a>
+    </section>
     <section class="side-box" id="trendBox" hidden>
       <h3>Trending</h3>
       <div class="trending-tags-row" id="trendingTagsRow"></div>
@@ -350,6 +372,7 @@ body{
     <button class="story-viewer-close" id="storyViewerClose">×</button>
     <img id="storyViewerImg">
     <div class="story-viewer-caption" id="storyViewerCaption"></div>
+    <div id="storyViewCount" style="color:#cdc5b5;font-size:12px;text-align:center;margin-top:6px;"></div>
     <div class="story-nav-zone left" id="storyNavLeft"></div>
     <div class="story-nav-zone right" id="storyNavRight"></div>
   </div>
@@ -474,27 +497,27 @@ async function initialize(){
   if (!userData.user){ window.location.href = "/login.html"; return; }
   currentUser = userData.user;
 
-  const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
+  const [profileRes, followsRes] = await Promise.all([
+    supabaseClient.from("profiles").select("*").eq("id", currentUser.id).maybeSingle(),
+    supabaseClient.from("social_follows").select("followed_id").eq("follower_id", currentUser.id),
+  ]);
+  const profile = profileRes.data;
   currentProfile = profile;
-  try { await supabaseClient.rpc("register_page_visit", { target_page_key: "creators", target_label: "RelviaCreators (Feed)" }); } catch (e){}
+  followingIds = new Set((followsRes.data || []).map(f => f.followed_id));
+  Promise.resolve(supabaseClient.rpc("register_page_visit", { target_page_key: "creators", target_label: "RelviaCreators (Feed)" })).catch(() => {});
+  const shortcutProfile = document.getElementById("shortcutProfile");
+  if (shortcutProfile) shortcutProfile.href = `profile.html?user=${currentUser.id}`;
 
   document.getElementById("myAvatarLink").href = `profile.html?user=${currentUser.id}`;
   document.getElementById("myAvatarLink").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
   document.getElementById("composerAvatar").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
-
-  const { data: follows } = await supabaseClient.from("social_follows").select("followed_id").eq("follower_id", currentUser.id);
-  followingIds = new Set((follows || []).map(f => f.followed_id));
 
   setupComposer();
   setupStoryViewer();
   setupAddStoryModal();
   setupFeedTabs();
 
-  await loadStories();
-  await loadTrendingTags();
-  loadSuggestions();
-  await loadFeed();
-  await loadUnreadCount();
+  await Promise.all([loadStories(), loadTrendingTags(), loadSuggestions(), loadFeed(), loadUnreadCount()]);
 }
 
 async function loadSuggestions(){
@@ -563,14 +586,16 @@ async function loadStories(){
 
   if (error || !stories || stories.length === 0) return;
 
-  const { data: views } = await supabaseClient.from("social_story_views").select("story_id").eq("viewer_id", currentUser.id);
-  const seenIds = new Set((views || []).map(v => v.story_id));
-
   const byUser = {};
   stories.forEach(s => { if (!byUser[s.user_id]) byUser[s.user_id] = []; byUser[s.user_id].push(s); });
-
   const userIds = Object.keys(byUser);
-  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, avatar_url").in("id", userIds);
+
+  const [viewsRes, profilesRes] = await Promise.all([
+    supabaseClient.from("social_story_views").select("story_id").eq("viewer_id", currentUser.id),
+    supabaseClient.from("profiles").select("id, display_name, avatar_url").in("id", userIds),
+  ]);
+  const seenIds = new Set((viewsRes.data || []).map(v => v.story_id));
+  const profiles = profilesRes.data;
   const profileById = {};
   (profiles || []).forEach(p => { profileById[p.id] = p; });
   await loadBadges(userIds);
@@ -665,6 +690,7 @@ function setupStoryViewer(){
 function openStoryViewer(stories, profile){
   storyQueue = stories;
   storyIndex = 0;
+  showViewCount(stories);
   document.getElementById("storyViewerBackdrop").classList.add("open");
   document.getElementById("storyViewerAvatar").innerHTML = avatarInnerHTML(profile?.avatar_url, profile?.display_name);
   document.getElementById("storyViewerName").innerHTML = escapeHtml(profile?.display_name || "Unknown") + badgesHtml(profile?.id);
@@ -697,6 +723,16 @@ function advanceStory(direction){
   if (storyIndex < 0) storyIndex = 0;
   if (storyIndex >= storyQueue.length){ closeStoryViewer(); return; }
   showStoryFrame();
+}
+
+async function showViewCount(stories){
+  const el = document.getElementById("storyViewCount");
+  if (!el) return;
+  el.textContent = "";
+  if (!stories.length || stories[0].user_id !== currentUser.id) return;
+  const { data } = await supabaseClient.from("social_story_views").select("story_id").in("story_id", stories.map(s => s.id));
+  const n = (data || []).length;
+  el.textContent = n === 1 ? "1 view" : `${n} views`;
 }
 
 function closeStoryViewer(){
