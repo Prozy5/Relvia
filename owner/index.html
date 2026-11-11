@@ -208,6 +208,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="research">Research Desk</button>
       <button class="eco-tab" data-eco-tab="sponsors">Sponsor Bot</button>
       <button class="eco-tab" data-eco-tab="takedowns">Takedowns</button>
+      <button class="eco-tab" data-eco-tab="moderation">Moderation</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
@@ -225,6 +226,19 @@ tr:last-child td{ border-bottom:none; }
 
       <div class="section-head"><h2 style="font-size:18px;">Unread alerts</h2><div><button class="btn sm" id="ovReadAll" type="button">Mark all read</button></div></div>
       <div class="panel" style="margin-bottom:24px;"><div id="ovAlerts" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+    </div>
+
+    <div class="eco-panel" id="eco-moderation">
+      <div class="section-head"><h2>Moderation</h2><div><button class="btn sm" id="modRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">Everything reported across the ecosystem, in one queue. Each action records what was decided. Removals and brand suspensions can't be undone from here, so check before you act.</p>
+
+      <div class="section-head"><h2 style="font-size:18px;">Reported content</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Content</th><th>Reports</th><th>Reasons</th><th>First reported</th><th>Actions</th></tr></thead>
+        <tbody id="modReports"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Copyright notices waiting</h2><div><button class="btn sm" type="button" data-ov-goto="takedowns">Open takedowns</button></div></div>
+      <div class="panel"><table><thead><tr><th>Notice</th><th>Copy on Relvia</th><th>Received</th></tr></thead>
+        <tbody id="modTakedowns"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody></table></div>
     </div>
 
     <div class="eco-panel" id="eco-live">
@@ -3325,6 +3339,7 @@ const OV_CARDS = [
   { key: "sponsor_followups_due", label: "Sponsor follow-ups due", tab: "sponsors", urgent: true },
   { key: "sponsor_new_leads", label: "New sponsor leads", tab: "sponsors" },
   { key: "takedowns_waiting", label: "Takedown notices waiting", tab: "takedowns", urgent: true },
+  { key: "open_reports", label: "Reported items to review", tab: "moderation", urgent: true },
   { key: "unread_alerts", label: "Unread alerts", tab: "relvbot" }
 ];
 
@@ -3336,6 +3351,17 @@ async function loadOverviewTab(){
     document.getElementById("ovAlerts").innerHTML = "";
     return;
   }
+  const money = (cents) => "$" + ((Number(cents) || 0) / 100).toFixed(2);
+  const finCards = data.can_see_finance ? [
+    { label: "Stripe revenue", value: money((data.finance || {}).stripe_revenue_cents), tab: "finance" },
+    { label: "RelvBits fees", value: money((data.finance || {}).relvbits_fees_cents), tab: "finance" },
+    { label: "FashionPlus subscribers", value: String(data.fashion_plus_active || 0), tab: "fashion" },
+    { label: "FashionPlus per month", value: money(data.fashion_plus_monthly_cents), tab: "fashion" }
+  ] : [];
+  const finHtml = finCards.map(f => `<button type="button" data-ov-goto="${f.tab}" style="text-align:left;background:var(--surface-light);border:1px solid var(--border);border-radius:14px;padding:16px;color:white;cursor:pointer;">
+      <div style="font-size:24px;font-weight:800;">${escapeHtml(f.value)}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:4px;">${escapeHtml(f.label)}</div></button>`).join("");
+
   cards.innerHTML = OV_CARDS.map(card => {
     const n = Number(data[card.key] || 0);
     const hot = n > 0 && card.urgent;
@@ -3343,7 +3369,7 @@ async function loadOverviewTab(){
     return `<button type="button" data-ov-goto="${card.tab}" style="text-align:left;background:var(--surface-light);border:1px solid var(--border);border-radius:14px;padding:16px;color:white;cursor:pointer;${style}">
       <div style="font-size:28px;font-weight:800;color:${hot ? "#f6d27a" : "white"};">${n}</div>
       <div style="font-size:12.5px;color:var(--muted);margin-top:4px;">${escapeHtml(card.label)}</div></button>`;
-  }).join("");
+  }).join("") + finHtml;
 
   const alerts = data.recent_alerts || [];
   document.getElementById("ovAlerts").innerHTML = alerts.length
@@ -3373,6 +3399,59 @@ document.addEventListener("click", async function (e){
 });
 // <<OVERVIEW-END>>
 
+// <<MODERATION-START>>
+async function loadModerationTab(){
+  const { data, error } = await supabaseClient.rpc("moderation_queue");
+  const reports = document.getElementById("modReports"), notices = document.getElementById("modTakedowns");
+  if (error || !data){
+    reports.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load the moderation queue. Run relvia-moderation.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
+    notices.innerHTML = ""; return;
+  }
+  const rows = data.reports || [];
+  reports.innerHTML = rows.length ? rows.map(r => {
+    const id = r.content_id;
+    const kind = { post: "Post", stream: "Stream", project: "Project", track: "Track", comment: "Comment", user: "User", fashion_item: "Fashion item", fashion_brand: "Fashion brand", other: "Other" }[r.content_type] || r.content_type;
+    const actions = [
+      r.content_type === "fashion_item" ? `<button class="btn sm danger" type="button" data-mod="remove-item" data-id="${escapeHtml(id)}">Remove item</button>` : "",
+      r.content_type === "fashion_brand" ? `<button class="btn sm danger" type="button" data-mod="suspend-brand" data-id="${escapeHtml(id)}">Suspend brand</button>` : "",
+      `<button class="btn sm" type="button" data-mod="dismiss" data-type="${escapeHtml(r.content_type)}" data-id="${escapeHtml(id)}">Dismiss</button>`
+    ].join(" ");
+    return `<tr><td><b>${escapeHtml(kind)}</b><div style="font-size:11.5px;color:var(--muted);word-break:break-all;">${escapeHtml(id)}</div></td>
+      <td><b>${escapeHtml(r.reports)}</b></td>
+      <td style="font-size:12.5px;">${escapeHtml(r.reasons || "")}${r.details ? `<div style="color:var(--muted);margin-top:4px;">${escapeHtml(r.details)}</div>` : ""}</td>
+      <td style="font-size:12px;">${escapeHtml(new Date(r.first_reported).toLocaleString())}</td>
+      <td>${actions}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">Nothing reported right now.</td></tr>`;
+
+  const td = data.takedowns || [];
+  notices.innerHTML = td.length ? td.map(t => `<tr><td><b>${escapeHtml(t.complainant_name)}</b><div style="font-size:12px;color:var(--muted);">${escapeHtml(t.work_description)}</div></td>
+      <td><a href="${escapeHtml(t.infringing_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--gold);">Open copy</a></td>
+      <td style="font-size:12px;">${escapeHtml(new Date(t.received_at).toLocaleString())}</td></tr>`).join("")
+    : `<tr class="empty-row"><td colspan="3">No copyright notices waiting.</td></tr>`;
+}
+
+document.addEventListener("click", async function (e){
+  const b = e.target.closest("[data-mod]"); if (!b) return;
+  const kind = b.dataset.mod, id = b.dataset.id;
+  let res = null;
+  if (kind === "dismiss"){
+    if (!confirm("Dismiss every open report on this item? It stays on the site.")) return;
+    res = await supabaseClient.rpc("moderation_dismiss", { p_type: b.dataset.type, p_id: id });
+  } else if (kind === "remove-item"){
+    if (!confirm("Remove this Fashion item from the site? This can't be undone from here.")) return;
+    res = await supabaseClient.rpc("fashion_remove_item", { p_item_id: id });
+  } else if (kind === "suspend-brand"){
+    const note = prompt("Reason for suspending this brand (kept on file):");
+    if (!note) return;
+    res = await supabaseClient.rpc("fashion_review", { p_brand_id: id, p_action: "suspend", p_note: note });
+  }
+  if (res && res.error){ showToast(res.error.message || "That didn't work."); return; }
+  if (res){ showToast("Done."); await loadModerationTab(); if (kind !== "dismiss") await loadOverviewTab(); }
+});
+
+document.addEventListener("click", function (e){ if (e.target.id === "modRefresh") loadModerationTab(); });
+// <<MODERATION-END>>
+
 function setupEcosystemTabs(){
   document.querySelectorAll(".eco-tab").forEach(tab => {
     tab.addEventListener("click", async () => {
@@ -3401,6 +3480,7 @@ function setupEcosystemTabs(){
       if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
       if (target === "takedowns" && !takedownsLoaded){ takedownsLoaded = true; await loadTakedownTab(); }
       if (target === "overview"){ await loadOverviewTab(); }
+      if (target === "moderation"){ await loadModerationTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
