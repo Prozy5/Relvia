@@ -271,7 +271,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     <section class="sp-box">
       <h2>Not sure what fits?</h2>
       <p>Tell us what you want to reach and we'll put together a plan. Custom sponsorships and product partnerships are handled by invoice.</p>
-      <a class="btn btn-gold" href="mailto:sponsors@relvia.online?subject=Sponsorship%20inquiry">Contact the sponsor team</a>
+      <a class="btn btn-gold" href="mailto:relviasponsors@gmail.com?subject=Sponsorship%20inquiry">Contact the sponsor team</a>
       <p class="note">Audience numbers are shared on request, from our own platform data.</p>
     </section>
   </div>
@@ -292,7 +292,7 @@ footer.site{ margin-top:70px; padding:26px 0 40px; border-top:1px solid var(--bo
     var price = t.price ? '<div class="price">' + esc(t.price) + (t.per ? ' <small>' + esc(t.per) + '</small>' : '') + '</div>' : '<div class="price"><small>Pricing on request</small></div>';
     var btn = (t.link && /^https:\/\/(buy\.stripe\.com|checkout\.stripe\.com)\//.test(t.link))
       ? '<a class="btn btn-gold" href="' + esc(t.link) + '" target="_blank" rel="noopener noreferrer">Sponsor at this level</a>'
-      : '<a class="btn btn-ghost" href="mailto:sponsors@relvia.online?subject=' + encodeURIComponent(t.name + " sponsorship") + '">Contact us</a>';
+      : '<a class="btn btn-ghost" href="mailto:relviasponsors@gmail.com?subject=' + encodeURIComponent(t.name + " sponsorship") + '">Contact us</a>';
     return '<div class="tier"><h2>' + esc(t.name) + '</h2>' + price + '<ul>' + t.points.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join("") + '</ul>' + btn + '</div>';
   }).join("");
 })();
