@@ -239,6 +239,87 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head"><h2 style="font-size:18px;">Copyright notices waiting</h2><div><button class="btn sm" type="button" data-ov-goto="takedowns">Open takedowns</button></div></div>
       <div class="panel"><table><thead><tr><th>Notice</th><th>Copy on Relvia</th><th>Received</th></tr></thead>
         <tbody id="modTakedowns"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody></table></div>
+    <!-- USERS -->
+    <div class="section">
+      <div class="section-head">
+        <h2>Users</h2>
+        <input type="text" class="search-input" id="userSearch" placeholder="Search users...">
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Name</th><th>Username</th><th>Creator+</th><th>Streaming</th><th>Watching</th><th>Actions</th></tr></thead>
+          <tbody id="usersTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- CONTENT MODERATION QUEUE -->
+    <div class="section">
+      <div class="section-head"><h2>Moderation Queue</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        User-submitted reports across the ecosystem. NOTE: this is the review side — a "Report" button needs adding to each content type's page to actually let users submit these; none exist yet as a UI element.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Type</th><th>Reason</th><th>Reported</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="reportsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- IP BANS (ecosystem-wide) -->
+    <div class="section">
+      <div class="section-head"><h2>IP Bans</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        Applies platform-wide. Heads up: IPs change and VPNs bypass this easily — treat it as a deterrent for casual abuse, not a hard wall. NOTE: enforcement currently only runs on Relvia Live's sign-in page — wiring the same check into Studios/Music/Campus sign-in is a follow-up.
+      </p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>IP Address</th><th>Reason</th><th>Banned</th><th>Actions</th></tr></thead>
+          <tbody id="ipBansTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form">
+          <input type="text" id="newIpAddress" placeholder="IP address (e.g. 203.0.113.4)" style="width:200px;">
+          <input type="text" id="newIpReason" placeholder="Reason" style="flex:1;min-width:200px;">
+          <button class="btn danger" id="addIpBanBtn">Ban IP</button>
+        </div>
+      </div>
+    </div>
+
+
+      <div class="section">
+        <div class="section-head"><h2>Flagged words</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">When a new post contains one of these words or phrases, RelvBOT adds it to your Reports list so you can review it. Nothing is deleted automatically. Posts from staff are never flagged.</p>
+        <div class="panel" style="padding:18px;">
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="text" id="relvbotTermInput" maxlength="60" placeholder="Add a word or phrase" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
+            <button class="btn" id="relvbotTermAdd" type="button">Add</button>
+          </div>
+          <div id="relvbotTerms" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+      </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="section">
+      <div class="section-head">
+        <h2>Activity Log</h2>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="logSearch" placeholder="Search by person or action..." class="search-input" style="width:220px;">
+          <button class="btn" id="exportLogBtn">Export CSV</button>
+          <button class="btn" id="refreshLogBtn">Refresh</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">Covers everything across Live, Studios, and Music — everyone's actions land in this one log.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+          <tbody id="logTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     </div>
 
     <div class="eco-panel" id="eco-live">
@@ -280,20 +361,6 @@ tr:last-child td{ border-bottom:none; }
           <input type="text" id="newCategoryName" placeholder="New category name">
           <button class="btn gold" id="addCategoryBtn">Add category</button>
         </div>
-      </div>
-    </div>
-
-    <!-- USERS -->
-    <div class="section">
-      <div class="section-head">
-        <h2>Users</h2>
-        <input type="text" class="search-input" id="userSearch" placeholder="Search users...">
-      </div>
-      <div class="panel">
-        <table>
-          <thead><tr><th>Name</th><th>Username</th><th>Creator+</th><th>Streaming</th><th>Watching</th><th>Actions</th></tr></thead>
-          <tbody id="usersTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
-        </table>
       </div>
     </div>
 
@@ -969,17 +1036,6 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-head"><h2>Flagged words</h2></div>
-        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">When a new post contains one of these words or phrases, RelvBOT adds it to your Reports list so you can review it. Nothing is deleted automatically. Posts from staff are never flagged.</p>
-        <div class="panel" style="padding:18px;">
-          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-            <input type="text" id="relvbotTermInput" maxlength="60" placeholder="Add a word or phrase" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:white;font-size:13px;">
-            <button class="btn" id="relvbotTermAdd" type="button">Add</button>
-          </div>
-          <div id="relvbotTerms" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-        </div>
-      </div>
     </div><!-- /eco-relvbot -->
 
     <!-- ================= BETA TAB ================= -->
@@ -1126,20 +1182,6 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
-    <!-- CONTENT MODERATION QUEUE -->
-    <div class="section">
-      <div class="section-head"><h2>Moderation Queue</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        User-submitted reports across the ecosystem. NOTE: this is the review side — a "Report" button needs adding to each content type's page to actually let users submit these; none exist yet as a UI element.
-      </p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>Type</th><th>Reason</th><th>Reported</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="reportsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- RATE LIMITS -->
     <div class="section">
       <div class="section-head"><h2>Rate Limits</h2></div>
@@ -1151,25 +1193,6 @@ tr:last-child td{ border-bottom:none; }
           <thead><tr><th>Action</th><th>Description</th><th>Max Requests</th><th>Window (sec)</th><th></th></tr></thead>
           <tbody id="rateLimitsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- IP BANS (ecosystem-wide) -->
-    <div class="section">
-      <div class="section-head"><h2>IP Bans</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        Applies platform-wide. Heads up: IPs change and VPNs bypass this easily — treat it as a deterrent for casual abuse, not a hard wall. NOTE: enforcement currently only runs on Relvia Live's sign-in page — wiring the same check into Studios/Music/Campus sign-in is a follow-up.
-      </p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>IP Address</th><th>Reason</th><th>Banned</th><th>Actions</th></tr></thead>
-          <tbody id="ipBansTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
-        <div class="add-form">
-          <input type="text" id="newIpAddress" placeholder="IP address (e.g. 203.0.113.4)" style="width:200px;">
-          <input type="text" id="newIpReason" placeholder="Reason" style="flex:1;min-width:200px;">
-          <button class="btn danger" id="addIpBanBtn">Ban IP</button>
-        </div>
       </div>
     </div>
 
@@ -1289,24 +1312,6 @@ tr:last-child td{ border-bottom:none; }
     </div>
 
     <!-- ADS (owner role only) -->
-    <!-- ACTIVITY LOG -->
-    <div class="section">
-      <div class="section-head">
-        <h2>Activity Log</h2>
-        <div style="display:flex;gap:10px;">
-          <input type="text" id="logSearch" placeholder="Search by person or action..." class="search-input" style="width:220px;">
-          <button class="btn" id="exportLogBtn">Export CSV</button>
-          <button class="btn" id="refreshLogBtn">Refresh</button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:12px;margin:-8px 0 12px;">Covers everything across Live, Studios, and Music — everyone's actions land in this one log.</p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>When</th><th>Owner</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-          <tbody id="logTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
     </div><!-- /eco-founder -->
 
     <!-- ================= FINANCE TAB (founder only) ================= -->
