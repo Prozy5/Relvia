@@ -204,6 +204,8 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="campus">Relvia Campus</button>
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
       <button class="eco-tab" data-eco-tab="fashion">RelviaFashion</button>
+      <button class="eco-tab" data-eco-tab="research">Research Desk</button>
+      <button class="eco-tab" data-eco-tab="sponsors">Sponsor Bot</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
       <button class="eco-tab" data-eco-tab="finance" id="financeTabBtn" style="display:none;">Finance</button>
@@ -733,6 +735,51 @@ tr:last-child td{ border-bottom:none; }
         </select></div>
       <div class="panel"><table><thead><tr><th>Brand</th><th>Status</th><th>Category</th><th>Owner</th><th>Followers</th><th>Looks</th><th>Actions</th></tr></thead>
         <tbody id="fashionAll"><tr class="empty-row"><td colspan="7">Loading...</td></tr></tbody></table></div>
+    </div>
+
+    <div class="eco-panel" id="eco-research">
+      <div class="section-head"><h2>Research Desk</h2><div><button class="btn sm" id="researchRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">Drafts come from the research bot or from staff. Nothing goes public until you approve it, and only at or after its publish time. Every action is logged.</p>
+
+      <div class="section-head"><h2 style="font-size:18px;">New draft</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <input id="rdTitle" maxlength="140" placeholder="Story title" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;">
+          <select id="rdType" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;">
+            <option value="court_record">Court record</option><option value="police_release">Police release</option><option value="news">News report</option><option value="historical">Historical</option>
+          </select>
+          <textarea id="rdSummary" maxlength="600" placeholder="Summary (what the video says, in plain language)" style="grid-column:1/-1;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"></textarea>
+          <textarea id="rdSources" placeholder="Sources, one per line:  type | title | https://link | date   (type: court_record, police_release, news, historical)" style="grid-column:1/-1;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"></textarea>
+          <textarea id="rdScript" placeholder="Script, one scene per line" style="grid-column:1/-1;min-height:90px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"></textarea>
+          <label style="font-size:12.5px;color:var(--muted);"><input type="checkbox" id="rdMinor"> Involves a minor (blocks publishing)</label>
+          <label style="font-size:12.5px;color:var(--muted);"><input type="checkbox" id="rdVictim"> Could identify a victim (blocks publishing)</label>
+          <label style="font-size:12.5px;color:var(--muted);"><input type="checkbox" id="rdGraphic"> Graphic detail (blocks publishing)</label>
+          <div style="text-align:right;"><button class="btn gold sm" id="rdCreate" type="button">Save draft</button></div>
+        </div>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Review queue</h2></div>
+      <div class="panel"><table><thead><tr><th>Story</th><th>Status</th><th>Sources</th><th>What's blocking it</th><th>Actions</th></tr></thead>
+        <tbody id="researchQueue"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+    </div>
+
+    <div class="eco-panel" id="eco-sponsors">
+      <div class="section-head"><h2>Sponsor Bot</h2><div><button class="btn sm gold" id="sponsorRun" type="button">Run now</button><button class="btn sm" id="sponsorRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">The bot searches every week and adds new sponsor leads with a pitch draft. Nothing is sent by the bot. You review each lead, edit the pitch, and send it yourself.</p>
+      <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Lead</th><th>Fit</th><th>Status</th><th>Follow-up</th><th>Pitch</th></tr></thead>
+        <tbody id="sponsorLeads"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Pitch</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;" id="sponsorPitchBox"><div class="hint">Choose Pitch on a lead to review and edit its draft here.</div></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Search list</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;">
+        <div id="sponsorQueries"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;"><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Recent runs</h2></div>
+      <div class="panel"><table><thead><tr><th>When</th><th>Source</th><th>Searches</th><th>New leads</th></tr></thead><tbody id="sponsorRuns"><tr class="empty-row"><td colspan="4">No runs yet.</td></tr></tbody></table></div>
     </div>
 
     <div class="eco-panel" id="eco-news">
@@ -3273,6 +3320,8 @@ function setupEcosystemTabs(){
       if (target === "beta" && !betaTabLoaded){ betaTabLoaded = true; await loadBetaTab(); }
       if (target === "relvbot" && !relvbotLoaded){ relvbotLoaded = true; await loadRelvbotTab(); }
       if (target === "fashion" && !fashionLoaded){ fashionLoaded = true; await loadFashionTab(); }
+      if (target === "research" && !researchLoaded){ researchLoaded = true; await loadResearchTab(); }
+      if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
@@ -3405,6 +3454,9 @@ async function renderRelvbotAll(){
 // <<FASHION-ADMIN-START>>
 let fashionData = { brands: [], reports: [] };
 let fashionContracts = [];
+let researchLoaded = false;
+let sponsorsLoaded = false;
+let researchRows = [];
 let fashionVerify = [];
 let fashionFilter = "all";
 const FASHION_PILL = { pending: "temp", approved: "ok", rejected: "banned", suspended: "banned" };
@@ -3559,6 +3611,223 @@ async function onFashionClick(e){
   if (done) await renderFashion();
 }
 // <<FASHION-ADMIN-END>>
+
+// <<RESEARCH-START>>
+const RD_STATUS = { draft: "temp", scheduled: "ok", published: "ok", rejected: "banned", pulled: "banned" };
+
+async function loadResearchTab(){
+  document.getElementById("researchRefresh").addEventListener("click", renderResearch);
+  document.getElementById("rdCreate").addEventListener("click", createResearchDraft);
+  document.getElementById("eco-research").addEventListener("click", onResearchClick);
+  await renderResearch();
+}
+
+async function renderResearch(){
+  const { data, error } = await supabaseClient.rpc("research_queue");
+  if (error || !Array.isArray(data)){
+    document.getElementById("researchQueue").innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load the review queue. Run relvia-research-desk.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
+    return;
+  }
+  researchRows = data;
+  const rows = document.getElementById("researchQueue");
+  rows.innerHTML = data.length ? data.map(s => {
+    const blockers = (s.blockers || []).length
+      ? `<ul style="margin:0 0 0 16px;color:#e8a33d;font-size:12px;">${s.blockers.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
+      : `<span style="color:#6dbb83;font-size:12px;">Ready to approve</span>`;
+    const people = (s.people || []).map(p => `<div style="font-size:12px;margin-top:4px;">${escapeHtml(p.name)} ${p.verified ? '<span class="pill ok">record checked</span>' : (p.record_url ? `<button class="btn sm" type="button" data-research="verify" data-id="${escapeHtml(p.id)}">Check record</button>` : '<span style="color:#e8a33d;">needs a record link</span>')}</div>`).join("");
+    let actions = `<button class="btn sm" type="button" data-research="person" data-id="${escapeHtml(s.id)}">Add named person</button>`;
+    if (s.status === "draft") actions += `<button class="btn sm gold" type="button" data-research="approve" data-id="${escapeHtml(s.id)}">Approve…</button><button class="btn sm danger" type="button" data-research="reject" data-id="${escapeHtml(s.id)}">Reject</button>`;
+    if (s.status === "scheduled") actions += `<button class="btn sm danger" type="button" data-research="pull" data-id="${escapeHtml(s.id)}">Pull video</button>`;
+    return `<tr><td><b>${escapeHtml(s.title)}</b><div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(s.summary)}</div>${people}</td>
+      <td><span class="pill ${RD_STATUS[s.status] || ""}">${escapeHtml(s.status)}</span>${s.publish_at ? `<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Publishes ${escapeHtml(new Date(s.publish_at).toLocaleString())}</div>` : ""}</td>
+      <td>${(s.sources || []).length}</td><td>${blockers}</td><td>${actions}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">Nothing waiting. Save a draft to start.</td></tr>`;
+}
+
+function parseSources(text){
+  const out = [];
+  for (const line of String(text || "").split("\n")){
+    if (!line.trim()) continue;
+    const parts = line.split("|").map(s => s.trim());
+    if (parts.length < 3) throw new Error("Each source needs: type | title | https://link | date");
+    const [type, title, url, date] = parts;
+    if (!["court_record", "police_release", "news", "historical"].includes(type)) throw new Error("Source type must be court_record, police_release, news, or historical");
+    if (!/^https:\/\/[^\s]+$/.test(url)) throw new Error("Every source needs an https:// link");
+    out.push({ type, title, url, date: date || null });
+  }
+  return out;
+}
+
+async function createResearchDraft(){
+  const title = document.getElementById("rdTitle").value.trim();
+  const summary = document.getElementById("rdSummary").value.trim();
+  try {
+    if (title.length < 5) throw new Error("Give the story a title of at least 5 characters.");
+    if (summary.length < 20) throw new Error("Write a summary of at least 20 characters.");
+    const sources = parseSources(document.getElementById("rdSources").value);
+    const script = document.getElementById("rdScript").value.split("\n").map(s => s.trim()).filter(Boolean).map((text, i) => ({ scene: i + 1, text }));
+    const { error } = await supabaseClient.rpc("research_create_draft", {
+      p_title: title, p_summary: summary, p_case_type: document.getElementById("rdType").value,
+      p_script: script, p_sources: sources,
+      p_minor: document.getElementById("rdMinor").checked, p_victim: document.getElementById("rdVictim").checked, p_graphic: document.getElementById("rdGraphic").checked,
+    });
+    if (error) throw error;
+    showToast("Draft saved for review.");
+    ["rdTitle", "rdSummary", "rdSources", "rdScript"].forEach(id => document.getElementById(id).value = "");
+    ["rdMinor", "rdVictim", "rdGraphic"].forEach(id => document.getElementById(id).checked = false);
+    await renderResearch();
+  } catch (e){ showToast(e.message || "That didn't work."); }
+}
+
+async function onResearchClick(e){
+  const btn = e.target.closest("[data-research]");
+  if (!btn || btn.disabled) return;
+  const act = btn.dataset.research, id = btn.dataset.id;
+  const story = researchRows.find(s => s.id === id);
+  const name = story ? story.title : "this story";
+  let res = null;
+  if (act === "person"){
+    const pname = prompt("Named person (their full name, as it appears in the record):");
+    if (!pname) return;
+    const url = prompt("Link to their court or public record (https://...):");
+    if (!url) return;
+    const type = prompt("Record type: court_record or police_release", "court_record");
+    res = await supabaseClient.rpc("research_add_person", { p_story: id, p_name: pname, p_record_url: url, p_record_type: type });
+  } else if (act === "verify"){
+    if (!confirm("Confirm you have checked this person's record against the link?")) return;
+    res = await supabaseClient.rpc("research_verify_person", { p_person: id });
+  } else if (act === "approve"){
+    const when = prompt("Publish date and time (YYYY-MM-DD HH:MM, your local time):");
+    if (!when) return;
+    const at = new Date(when.replace(" ", "T"));
+    if (isNaN(at.getTime())) { showToast("That date isn't valid. Use YYYY-MM-DD HH:MM."); return; }
+    if (!confirm(`Approve "${name}" and schedule it for ${at.toLocaleString()}? You can pull it down any time.`)) return;
+    res = await supabaseClient.rpc("research_approve", { p_id: id, p_publish_at: at.toISOString() });
+  } else if (act === "reject"){
+    const reason = prompt(`Reject "${name}"? Give the reason (kept in the log).`);
+    if (!reason) return;
+    res = await supabaseClient.rpc("research_reject", { p_id: id, p_reason: reason });
+  } else if (act === "pull"){
+    const reason = prompt(`Pull "${name}" now? Give the reason (kept in the log).`);
+    if (!reason) return;
+    res = await supabaseClient.rpc("research_pull", { p_id: id, p_reason: reason });
+  }
+  if (!res) return;
+  if (res.error) showToast(res.error.message || "That didn't work.");
+  else showToast("Done.");
+  await renderResearch();
+}
+// <<RESEARCH-END>>
+
+// <<SPONSOR-START>>
+const SPONSOR_STATUSES = ["new", "reviewing", "pitched", "replied", "won", "declined", "dismissed"];
+const SPONSOR_FUNCTION_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co/functions/v1/sponsor-search";
+let sponsorData = { leads: [], queries: [], runs: [] };
+
+async function loadSponsorTab(){
+  document.getElementById("sponsorRefresh").addEventListener("click", renderSponsors);
+  document.getElementById("sponsorRun").addEventListener("click", runSponsorNow);
+  document.getElementById("sponsorAddQuery").addEventListener("click", addSponsorQuery);
+  document.getElementById("eco-sponsors").addEventListener("click", onSponsorClick);
+  document.getElementById("eco-sponsors").addEventListener("change", onSponsorChange);
+  await renderSponsors();
+}
+
+async function renderSponsors(){
+  const { data, error } = await supabaseClient.rpc("sponsor_dashboard");
+  if (error || !data){
+    document.getElementById("sponsorLeads").innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load the Sponsor Bot. Run relvia-sponsor-bot.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
+    return;
+  }
+  sponsorData = { leads: data.leads || [], queries: data.queries || [], runs: data.runs || [] };
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById("sponsorLeads").innerHTML = sponsorData.leads.length ? sponsorData.leads.map(l => {
+    const due = l.next_followup && l.next_followup <= today ? ' <span class="pill temp">follow up</span>' : "";
+    return `<tr><td><b>${escapeHtml(l.name)}</b>${due}<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(l.division)}</div>
+      <div style="font-size:12px;margin-top:4px;">${escapeHtml(l.why || "")}</div>
+      <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
+      <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
+      <td><select data-sponsor="status" data-id="${escapeHtml(l.id)}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${SPONSOR_STATUSES.map(s => `<option${s === l.status ? " selected" : ""}>${s}</option>`).join("")}</select></td>
+      <td><input type="date" data-sponsor="followup" data-id="${escapeHtml(l.id)}" value="${escapeHtml(l.next_followup || "")}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;"></td>
+      <td><button class="btn sm" type="button" data-sponsor="pitch" data-id="${escapeHtml(l.id)}">${l.pitch ? "Review pitch" : "Write pitch"}</button></td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">No leads yet. Click Run now to search, or wait for the weekly run.</td></tr>`;
+
+  document.getElementById("sponsorQueries").innerHTML = sponsorData.queries.map(q =>
+    `<label style="display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13px;"><input type="checkbox" data-sponsor="toggle" data-id="${escapeHtml(q.id)}" ${q.enabled ? "checked" : ""}> ${escapeHtml(q.query)}</label>`).join("") || '<div class="hint">No searches yet.</div>';
+
+  document.getElementById("sponsorRuns").innerHTML = sponsorData.runs.length ? sponsorData.runs.map(r => `<tr><td>${escapeHtml(new Date(r.started_at).toLocaleString())}</td><td>${escapeHtml(r.source)}</td><td>${r.queries_run}</td><td>${r.added}</td></tr>`).join("")
+    : `<tr class="empty-row"><td colspan="4">No runs yet.</td></tr>`;
+}
+
+async function runSponsorNow(){
+  const btn = document.getElementById("sponsorRun"); btn.disabled = true; btn.textContent = "Running...";
+  try {
+    const { data: sess } = await supabaseClient.auth.getSession();
+    const token = sess && sess.session && sess.session.access_token;
+    if (!token) throw new Error("Sign in again first.");
+    const res = await fetch(SPONSOR_FUNCTION_URL, { method: "POST", headers: { Authorization: "Bearer " + token, apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" }, body: "{}" });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || "The search didn't finish.");
+    showToast(`Done. ${body.added} new lead(s) from ${body.queries} search(es).`);
+    await renderSponsors();
+  } catch (e){ showToast(e.message || "The search didn't finish."); }
+  finally { btn.disabled = false; btn.textContent = "Run now"; }
+}
+
+async function addSponsorQuery(){
+  const input = document.getElementById("sponsorNewQuery"); const q = input.value.trim();
+  if (q.length < 6){ showToast("Write a search of at least 6 characters."); return; }
+  const { error } = await supabaseClient.rpc("sponsor_add_query", { p_query: q });
+  if (error){ showToast(error.message || "That didn't work."); return; }
+  input.value = ""; showToast("Search added."); await renderSponsors();
+}
+
+async function onSponsorChange(e){
+  const t = e.target, kind = t.dataset.sponsor, id = t.dataset.id;
+  if (!kind || !id) return;
+  let res = null;
+  if (kind === "status") res = await supabaseClient.rpc("sponsor_set_status", { p_id: id, p_status: t.value });
+  else if (kind === "followup"){
+    const lead = sponsorData.leads.find(l => l.id === id) || {};
+    res = await supabaseClient.rpc("sponsor_set_followup", { p_id: id, p_date: t.value || null, p_notes: lead.notes || null });
+  }
+  else if (kind === "toggle") res = await supabaseClient.rpc("sponsor_toggle_query", { p_id: id, p_enabled: t.checked });
+  if (res && res.error){ showToast(res.error.message || "That didn't work."); return; }
+  if (kind !== "toggle") await renderSponsors();
+}
+
+function onSponsorClick(e){
+  const b = e.target.closest("[data-sponsor='pitch']"); if (!b) return;
+  const lead = sponsorData.leads.find(l => l.id === b.dataset.id); if (!lead) return;
+  const pitch = lead.pitch || "";
+  document.getElementById("sponsorPitchBox").innerHTML = `
+    <div style="font-weight:700;margin-bottom:8px;">${escapeHtml(lead.name)} <span class="hint">(${escapeHtml(lead.division)})</span></div>
+    <div class="hint" style="margin-bottom:8px;">Edit the draft, fill in your name and postal address, then copy it or open it in Gmail. You send it yourself.</div>
+    <textarea id="sponsorPitchText" maxlength="4000" style="width:100%;min-height:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px;color:white;font-size:13px;line-height:1.6;">${escapeHtml(pitch)}</textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+      <button class="btn sm gold" type="button" data-sponsor="savepitch" data-id="${escapeHtml(lead.id)}">Save pitch</button>
+      <button class="btn sm" type="button" data-sponsor="copypitch" data-id="${escapeHtml(lead.id)}">Copy text</button>
+      <button class="btn sm" type="button" data-sponsor="gmail" data-id="${escapeHtml(lead.id)}">Open in Gmail</button>
+    </div>`;
+}
+
+document.addEventListener("click", async function (e){
+  const b = e.target.closest("[data-sponsor='savepitch'],[data-sponsor='copypitch'],[data-sponsor='gmail']"); if (!b) return;
+  const text = document.getElementById("sponsorPitchText").value;
+  if (b.dataset.sponsor === "savepitch"){
+    const { error } = await supabaseClient.rpc("sponsor_save_pitch", { p_id: b.dataset.id, p_pitch: text });
+    if (error){ showToast(error.message || "That didn't work."); return; }
+    showToast("Pitch saved."); await renderSponsors(); return;
+  }
+  if (b.dataset.sponsor === "copypitch"){
+    navigator.clipboard.writeText(text).then(() => showToast("Copied."), () => showToast("Couldn't copy. Select the text and copy it."));
+    return;
+  }
+  const subjectMatch = text.match(/Subject: (.*)/);
+  const body = text.replace(/^Subject: .*\n\n?/, "");
+  window.open("https://mail.google.com/mail/?view=cm&fs=1&su=" + encodeURIComponent(subjectMatch ? subjectMatch[1] : "Partnering with Relvia") + "&body=" + encodeURIComponent(body), "_blank", "noopener");
+});
+// <<SPONSOR-END>>
 
 async function loadRelvbotTab(){
   document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbotAll);
