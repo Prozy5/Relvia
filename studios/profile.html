@@ -79,5 +79,35 @@
   <p class="empty">No collaborations yet.</p>
 </main>
 <footer>Relvia Entertainment</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(async function () {
+  var SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+  var client;
+  try { client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { return; }
+  var unlockKey = "relvia-live-unlock-studios";
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]; }); }
+  try {
+    var r = await client.rpc("get_page_locks_public");
+    var lock = (r.data || []).find(function (l) { return l.page_key === "studios"; });
+    if (lock && lock.is_closed && sessionStorage.getItem(unlockKey) !== "true") {
+      document.querySelector("main").innerHTML =
+        '<div style="text-align:center;padding:100px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;">' +
+        '<h2 style="font-family:Playfair Display,serif;font-size:24px;">Relvia Studios is temporarily closed</h2>' +
+        '<p style="color:var(--muted);font-size:14px;">' + esc(lock.message || "Check back soon.") + '</p>' +
+        '<div style="display:flex;gap:8px;margin-top:6px;">' +
+        '<input id="unlockPasscode" type="password" placeholder="Passcode" style="background:#1c150d;border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:white;font-size:14px;">' +
+        '<button id="unlockSubmit" style="background:linear-gradient(135deg,var(--gold-start),var(--gold-end));color:#000;font-weight:800;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;">Unlock</button>' +
+        '</div><p id="unlockError" style="color:#f2a8a3;font-size:12.5px;display:none;">Incorrect passcode.</p></div>';
+      document.getElementById("unlockSubmit").addEventListener("click", async function () {
+        var v = await client.rpc("verify_page_passcode", { target_page_key: "studios", passcode: document.getElementById("unlockPasscode").value });
+        if (v.data) { sessionStorage.setItem(unlockKey, "true"); location.reload(); }
+        else { document.getElementById("unlockError").style.display = "block"; }
+      });
+    }
+  } catch (e) { /* fail closed-safe: lock check failed, leave page as is */ }
+})();
+</script>
 </body>
 </html>
