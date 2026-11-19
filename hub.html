@@ -279,14 +279,6 @@ footer a{ color:var(--gold); }
         <div><h2>Dev blog</h2><div class="hint">Platform updates from the Relvia team.</div></div>
       </div>
       <div id="blogList"><p class="empty">Loading…</p></div>
-      <form class="blog-form" id="blogForm" hidden>
-        <input class="field" id="blogTitle" placeholder="Update title" maxlength="160">
-        <textarea class="field" id="blogBody" placeholder="What changed?" maxlength="4000"></textarea>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn" type="submit">Publish update</button>
-          <span class="blog-msg" id="blogMsg"></span>
-        </div>
-      </form>
     </section>
 
     <!-- ASSISTANT -->
@@ -449,19 +441,6 @@ async function loadBlog(){
       <div class="t"><strong>${esc(p.title)}</strong>${esc(p.body)}</div>
     </div>`).join("");
 }
-document.getElementById("blogForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const title = document.getElementById("blogTitle").value.trim();
-  const body = document.getElementById("blogBody").value.trim();
-  const msg = document.getElementById("blogMsg");
-  if (!title){ msg.textContent = "Add a title first."; return; }
-  const { error } = await sb.from("hub_blog").insert({ title, body, created_by: user.id });
-  if (error){ msg.textContent = "Couldn't publish. Only owners can post updates."; return; }
-  document.getElementById("blogTitle").value = "";
-  document.getElementById("blogBody").value = "";
-  msg.textContent = "Published.";
-  loadBlog();
-});
 
 /* ---------- signed-in: earnings, owner view, owner blog form ---------- */
 async function loadSignedIn(){
@@ -486,12 +465,6 @@ async function loadSignedIn(){
       </tr>`).join("");
   }
 
-  // Owners can publish dev blog updates.
-  const { data: owner } = await sb.from("live_owners").select("role").eq("user_id", user.id).maybeSingle();
-  if (owner && ["owner", "founder"].includes(owner.role)){
-    isOwner = true;
-    document.getElementById("blogForm").hidden = false;
-  }
 }
 
 /* ---------- assistant (history saved to the account) ---------- */
@@ -582,6 +555,8 @@ async function start(){
   ]);
 }
 start().catch(() => {});
+// Pull in new dev blog posts every two minutes, no reload needed.
+setInterval(() => loadBlog().catch(() => {}), 120000);
 </script>
 </body>
 </html>
