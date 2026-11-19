@@ -199,6 +199,7 @@ tr:last-child td{ border-bottom:none; }
 
     <div class="ecosystem-tabs">
       <button class="eco-tab" data-eco-tab="overview">Overview</button>
+      <button class="eco-tab" data-eco-tab="hub">Shutdown &amp; Hub</button>
       <button class="eco-tab" data-eco-tab="live">Relvia Live</button>
       <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
@@ -208,6 +209,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="research">Research Desk</button>
       <button class="eco-tab" data-eco-tab="sponsors">Sponsor Bot</button>
       <button class="eco-tab" data-eco-tab="takedowns">Takedowns</button>
+      <button class="eco-tab" data-eco-tab="sign">Sign</button>
       <button class="eco-tab" data-eco-tab="moderation">Moderation</button>
       <button class="eco-tab" data-eco-tab="growth">Growth</button>
       <button class="eco-tab" data-eco-tab="relvbot">RelvBOT</button>
@@ -219,6 +221,34 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
+    <div class="eco-panel" id="eco-hub">
+      <div class="section-head"><h2>Shutdown &amp; Hub</h2><div><button class="btn sm" id="hubRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">The platform switch, plus what needs you: health, security, alerts and recent actions.</p>
+
+      <div class="panel" id="shutdownCard" style="padding:20px;margin-bottom:20px;border-color:rgba(224,87,79,.35);">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3 style="font-size:16px;margin:0 0 4px;">Platform shutdown</h3>
+            <p class="hint" id="shutdownState" style="margin:0;">Checking...</p>
+          </div>
+          <button class="btn sm danger" id="shutdownToggle" type="button" disabled>Loading</button>
+        </div>
+        <textarea id="shutdownMessage" rows="2" maxlength="300" placeholder="Message people will see (required to turn on)" style="width:100%;margin-top:12px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;"></textarea>
+        <p class="hint" style="margin-top:8px;">Founder only. When on: every page shows the closed notice, writes are refused across the platform, and the status page shows a full outage. Owners keep working, and payments, logs and alerts keep recording. Turning it off restores everything.</p>
+      </div>
+
+      <div id="hubCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Recent health checks</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><div id="hubHealth" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Unread alerts</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><div id="hubAlerts" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Recent platform actions</h2></div>
+      <div class="panel" style="margin-bottom:24px;"><div id="hubActions" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+    </div>
+
     <div class="eco-panel" id="eco-overview">
       <div class="section-head"><h2>Overview</h2><div><button class="btn sm" id="ovRefresh" type="button">Refresh</button></div></div>
       <p class="hint" style="margin-bottom:16px;">Everything waiting on you, in one place. Click a card to open that area.</p>
@@ -226,6 +256,42 @@ tr:last-child td{ border-bottom:none; }
 
       <div class="section-head"><h2 style="font-size:18px;">Unread alerts</h2><div><button class="btn sm" id="ovReadAll" type="button">Mark all read</button></div></div>
       <div class="panel" style="margin-bottom:24px;"><div id="ovAlerts" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+    </div>
+
+    <div class="eco-panel" id="eco-sign">
+      <div class="section-head"><h2>Sign</h2><div><button class="btn sm" id="signRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">E-contracts for RelviaRecords, Relvia Live, Relvia Studios and RelviaFashion. A draft can't be issued until it's approved. Get the text reviewed by a lawyer before you approve it. Each contract is frozen when issued, so later template changes never alter a contract someone already has.</p>
+
+      <div class="section-head"><h2 style="font-size:18px;">Templates</h2></div>
+      <div class="panel" style="margin-bottom:16px;"><table><thead><tr><th>Division</th><th>Version</th><th>Text</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="signTemplates"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
+
+      <div class="panel" style="padding:20px;margin-bottom:24px;">
+        <h3 style="font-size:15px;margin-bottom:10px;">New draft version</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <select id="signDraftDivision" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;"></select>
+          <input type="text" id="signDraftTitle" maxlength="120" placeholder="Title (e.g. RelviaRecords artist agreement)" style="flex:1;min-width:240px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+        </div>
+        <textarea id="signDraftBody" rows="10" placeholder="Paste the full agreement text here" style="width:100%;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:white;font-size:13px;margin-bottom:10px;"></textarea>
+        <button class="btn sm gold" id="signDraftBtn" type="button">Save draft</button>
+        <span class="hint" style="margin-left:10px;">Saved as a draft. It stays unissuable until you approve it.</span>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Issue a contract</h2></div>
+      <div class="panel" style="padding:20px;margin-bottom:24px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <select id="signDivision" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;"></select>
+          <input type="text" id="signName" maxlength="120" placeholder="Signee's full name" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+          <input type="email" id="signEmail" maxlength="160" placeholder="Signee's email" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+        </div>
+        <button class="btn sm gold" id="signIssueBtn" type="button">Issue contract</button>
+        <p class="hint" id="signIssuable" style="margin-top:10px;"></p>
+        <div id="signLinkBox" style="display:none;margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:10px;"></div>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Contracts</h2></div>
+      <div class="panel"><table><thead><tr><th>Signee</th><th>Division</th><th>Status</th><th>Created</th><th>Signed</th><th>Fingerprint</th><th>Action</th></tr></thead>
+        <tbody id="signContracts"><tr class="empty-row"><td colspan="7">Loading...</td></tr></tbody></table></div>
     </div>
 
     <div class="eco-panel" id="eco-moderation">
@@ -3485,7 +3551,9 @@ function setupEcosystemTabs(){
       if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
       if (target === "takedowns" && !takedownsLoaded){ takedownsLoaded = true; await loadTakedownTab(); }
       if (target === "overview"){ await loadOverviewTab(); }
+      if (target === "hub"){ await loadHub(); }
       if (target === "moderation"){ await loadModerationTab(); }
+      if (target === "sign"){ await loadSignTab(); }
       if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
@@ -4042,6 +4110,240 @@ async function onTakedownClick(e){
   await renderTakedowns();
 }
 // <<TAKEDOWN-END>>
+
+// <<SHUTDOWN-START>>
+let shutdownWired = false;
+async function loadShutdownCard(){
+  if (!shutdownWired){
+    shutdownWired = true;
+    document.getElementById("shutdownToggle").addEventListener("click", toggleShutdown);
+    document.getElementById("hubRefresh").addEventListener("click", loadHub);
+  }
+  const btn = document.getElementById("shutdownToggle");
+  const state = document.getElementById("shutdownState");
+  const { data, error } = await supabaseClient.rpc("platform_shutdown_status");
+  if (error || !data){
+    state.textContent = "Couldn't read the shutdown switch. Run relvia-platform-shutdown.sql in Supabase first.";
+    btn.disabled = true; btn.textContent = "Unavailable"; return;
+  }
+  btn.disabled = false;
+  btn.dataset.on = data.is_on ? "1" : "0";
+  if (data.is_on){
+    state.innerHTML = `<strong style="color:#f2a8a3;">Relvia is SHUT DOWN.</strong> Message shown: "${escapeHtml(data.message)}"`;
+    btn.textContent = "Turn shutdown off";
+    btn.className = "btn sm gold";
+  } else {
+    state.textContent = "Relvia is running normally.";
+    btn.textContent = "Shut down Relvia";
+    btn.className = "btn sm danger";
+  }
+}
+
+async function toggleShutdown(){
+  const btn = document.getElementById("shutdownToggle");
+  const turningOn = btn.dataset.on !== "1";
+  const message = document.getElementById("shutdownMessage").value.trim();
+  if (turningOn){
+    if (message.length < 5) return showToast("Write the message people will see first.");
+    const typed = prompt("This takes the whole of Relvia offline for everyone except owners. Type SHUT DOWN to confirm.");
+    if (typed !== "SHUT DOWN") return showToast("Shutdown cancelled.");
+  } else {
+    if (!confirm("Turn Relvia back on?")) return;
+  }
+  const { error } = await supabaseClient.rpc("platform_shutdown_set", { p_on: turningOn, p_message: message });
+  if (error) return showToast(error.message);
+  showToast(turningOn ? "Relvia is shut down." : "Relvia is back on.");
+  document.getElementById("shutdownMessage").value = "";
+  await logAction(turningOn ? "platform_shutdown_on" : "platform_shutdown_off", "ecosystem", "whole platform", message || "");
+  await loadHub();
+}
+
+// ---------- hub: switch status, health, alerts, recent actions ----------
+const hubUsd = cents => "$" + (Number(cents || 0) / 100).toFixed(2);
+
+function hubEmpty(text){ return `<div class="hint">${escapeHtml(text)}</div>`; }
+
+async function loadHub(){
+  await loadShutdownCard();
+
+  const [{ data: ov }, { data: runs }, { data: alerts }, { data: actions }] = await Promise.all([
+    supabaseClient.rpc("relvbot_overview"),
+    supabaseClient.from("relvbot_runs").select("job_key, status, message, started_at")
+      .eq("job_key", "health_check").order("started_at", { ascending:false }).limit(6),
+    supabaseClient.from("founder_alerts").select("alert_type, message, created_at")
+      .eq("is_read", false).order("created_at", { ascending:false }).limit(8),
+    supabaseClient.from("live_moderation_log").select("action, details, target_label, created_at")
+      .or("action.like.platform_%,action.eq.lockdown_everything").order("created_at", { ascending:false }).limit(10),
+  ]);
+
+  const latestHealth = (runs || [])[0];
+  const healthOk = latestHealth ? latestHealth.status === "ok" : null;
+  const dbPct = ov ? relvbotPct(ov.db_bytes, ov.db_limit_bytes) : 0;
+  const stPct = ov ? relvbotPct(ov.storage_bytes, ov.storage_limit_bytes) : 0;
+
+  document.getElementById("hubCards").innerHTML = [
+    relvbotCard(healthOk === null ? "—" : (healthOk ? "Healthy" : "Problems"), "Latest health check",
+      latestHealth ? `Ran ${new Date(latestHealth.started_at).toLocaleString()}` : "Not run yet",
+      healthOk === null ? "" : healthOk ? "good" : "bad"),
+    relvbotCard(ov ? ov.open_findings : "—", "Open security findings", "From the weekly scan", ov && ov.open_findings > 0 ? "warn" : "good"),
+    relvbotCard((alerts || []).length, "Unread alerts", "", (alerts || []).length > 0 ? "warn" : "good"),
+    relvbotCard(ov ? ov.failed_crons_24h : "—", "Failed scheduled jobs (24h)", "", ov && ov.failed_crons_24h > 0 ? "bad" : "good"),
+    relvbotCard(ov ? `${dbPct}%` : "—", "Database", ov ? `${relvbotMb(ov.db_bytes)} of ${relvbotMb(ov.db_limit_bytes)}` : "", dbPct >= 80 ? "bad" : dbPct >= 60 ? "warn" : ""),
+    relvbotCard(ov ? `${stPct}%` : "—", "File storage", ov ? `${relvbotMb(ov.storage_bytes)} of ${relvbotMb(ov.storage_limit_bytes)}` : "", stPct >= 80 ? "bad" : stPct >= 60 ? "warn" : ""),
+    relvbotCard(ov ? hubUsd(ov.revenue_cents) : "—", "Revenue this month", ""),
+  ].join("");
+
+  document.getElementById("hubHealth").innerHTML = (runs && runs.length)
+    ? runs.map(r => `<div style="padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:13px;">
+        <span class="pill ${r.status === "ok" ? "ended" : "live"}" style="margin-right:8px;">${escapeHtml(r.status)}</span>
+        <span style="color:var(--muted);">${new Date(r.started_at).toLocaleString()}</span>
+        <div style="margin-top:4px;">${escapeHtml(r.message || "")}</div></div>`).join("")
+    : hubEmpty("No health checks yet. They run hourly once RelvBOT is set up.");
+
+  document.getElementById("hubAlerts").innerHTML = (alerts && alerts.length)
+    ? alerts.map(a => `<div style="padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:13px;">
+        <strong>${escapeHtml(a.alert_type || "alert")}</strong>
+        <span style="color:var(--muted);">${new Date(a.created_at).toLocaleString()}</span>
+        <div style="margin-top:4px;">${escapeHtml(a.message || "")}</div></div>`).join("")
+    : hubEmpty("Nothing unread. You're clear.");
+
+  document.getElementById("hubActions").innerHTML = (actions && actions.length)
+    ? actions.map(a => `<div style="padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:13px;">
+        <strong>${escapeHtml(a.action)}</strong>
+        <span style="color:var(--muted);">${new Date(a.created_at).toLocaleString()}</span>
+        <div style="margin-top:4px;color:var(--muted);">${escapeHtml(a.details || a.target_label || "")}</div></div>`).join("")
+    : hubEmpty("No platform actions recorded yet.");
+}
+// <<SHUTDOWN-END>>
+
+// <<SIGN-START>>
+const SIGN_DIVISIONS = ["RelviaRecords", "Relvia Live", "Relvia Studios", "RelviaFashion"];
+let signWired = false;
+
+function signLinkFor(token){ return `${window.location.origin}/sign/?t=${encodeURIComponent(token)}`; }
+
+async function loadSignTab(){
+  if (!signWired){
+    signWired = true;
+    const opts = SIGN_DIVISIONS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join("");
+    document.getElementById("signDivision").innerHTML = opts;
+    document.getElementById("signDraftDivision").innerHTML = opts;
+    document.getElementById("eco-sign").addEventListener("click", onSignClick);
+    document.getElementById("signRefresh").addEventListener("click", refreshSignTab);
+    document.getElementById("signIssueBtn").addEventListener("click", issueSignContract);
+    document.getElementById("signDraftBtn").addEventListener("click", saveSignDraft);
+  }
+  await refreshSignTab();
+}
+
+async function refreshSignTab(){
+  await Promise.all([renderSignTemplates(), renderSignContracts()]);
+}
+
+async function renderSignTemplates(){
+  const { data, error } = await supabaseClient.rpc("contract_templates_list");
+  const body = document.getElementById("signTemplates");
+  const note = document.getElementById("signIssuable");
+  if (error || !Array.isArray(data)){
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load templates. Run relvia-contracts.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
+    note.textContent = ""; return;
+  }
+  const issuable = data.filter(t => t.is_current && t.approved).map(t => t.division);
+  note.textContent = issuable.length ? `Ready to issue: ${issuable.join(", ")}.` : "Nothing is ready to issue yet. Approve a template first.";
+  body.innerHTML = data.length ? data.map(t => {
+    const status = t.is_current ? '<span class="pill featured">Approved, current</span>'
+      : t.approved ? '<span class="pill">Approved, replaced</span>' : '<span class="pill live">Draft, not issuable</span>';
+    const action = t.approved ? "" : `<button class="btn sm gold" type="button" data-sign-action="approve" data-id="${escapeHtml(t.id)}">Approve</button>`;
+    return `<tr><td>${escapeHtml(t.division)}</td><td>v${escapeHtml(String(t.version))}</td>
+      <td><details><summary>${escapeHtml(t.title)}</summary><pre style="white-space:pre-wrap;font-size:12px;margin-top:8px;">${escapeHtml(t.body)}</pre></details></td>
+      <td>${status}</td><td>${action}</td></tr>`;
+  }).join("") : '<tr class="empty-row"><td colspan="5">No templates yet.</td></tr>';
+}
+
+async function renderSignContracts(){
+  const { data, error } = await supabaseClient.rpc("contract_list");
+  const body = document.getElementById("signContracts");
+  if (error || !Array.isArray(data)){
+    body.innerHTML = `<tr class="empty-row"><td colspan="7">Couldn't load contracts. (${escapeHtml(error ? error.message : "no data")})</td></tr>`; return;
+  }
+  const labels = { pending: '<span class="pill">Waiting</span>', signed: '<span class="pill featured">Signed</span>', cancelled: '<span class="pill live">Cancelled</span>' };
+  body.innerHTML = data.length ? data.map(c => {
+    const when = c.created_at ? new Date(c.created_at).toLocaleDateString() : "";
+    const signed = c.signed_at ? `${escapeHtml(c.signed_name || "")}<br><span class="hint">${new Date(c.signed_at).toLocaleString()}</span>` : "—";
+    const fp = c.body_sha256 ? `<code title="${escapeHtml(c.body_sha256)}">${escapeHtml(c.body_sha256.slice(0, 12))}…</code>` : "";
+    let action = "";
+    if (c.status === "pending"){
+      action = `<button class="btn sm" type="button" data-sign-action="copy" data-token="${escapeHtml(c.token)}">Copy link</button>
+        <button class="btn sm danger" type="button" data-sign-action="cancel" data-id="${escapeHtml(c.id)}">Cancel</button>`;
+    }
+    return `<tr><td>${escapeHtml(c.signee_name)}<br><span class="hint">${escapeHtml(c.signee_email)}</span></td>
+      <td>${escapeHtml(c.division)} v${escapeHtml(String(c.template_version))}</td><td>${labels[c.status] || escapeHtml(c.status)}</td>
+      <td>${when}</td><td>${signed}</td><td>${fp}</td><td>${action}</td></tr>`;
+  }).join("") : '<tr class="empty-row"><td colspan="7">No contracts issued yet.</td></tr>';
+}
+
+async function onSignClick(e){
+  const btn = e.target.closest("[data-sign-action]");
+  if (!btn) return;
+  const action = btn.dataset.signAction;
+
+  if (action === "copy"){
+    const link = signLinkFor(btn.dataset.token);
+    try { await navigator.clipboard.writeText(link); showToast("Signing link copied."); }
+    catch (_) { showToast(link); }
+    return;
+  }
+  if (action === "approve"){
+    if (!confirm("Approve this version? Once approved it becomes the one used for new contracts in this division. Confirm a lawyer has reviewed it first.")) return;
+    const { error } = await supabaseClient.rpc("contract_approve_template", { p_template_id: btn.dataset.id });
+    if (error) return showToast(error.message);
+    showToast("Approved. New contracts in this division will use this version.");
+    await refreshSignTab(); return;
+  }
+  if (action === "cancel"){
+    if (!confirm("Cancel this contract? Its signing link stops working. This can't be undone.")) return;
+    const { error } = await supabaseClient.rpc("contract_cancel", { p_invite_id: btn.dataset.id });
+    if (error) return showToast(error.message);
+    showToast("Contract cancelled.");
+    await renderSignContracts(); return;
+  }
+}
+
+async function issueSignContract(){
+  const division = document.getElementById("signDivision").value;
+  const name = document.getElementById("signName").value.trim();
+  const email = document.getElementById("signEmail").value.trim();
+  if (!name || !email) return showToast("Add the signee's name and email.");
+
+  const { data, error } = await supabaseClient.rpc("contract_issue", { p_division: division, p_signee_name: name, p_signee_email: email });
+  if (error) return showToast(error.message);
+
+  const box = document.getElementById("signLinkBox");
+  box.style.display = "block";
+  box.innerHTML = `<strong>Contract issued to ${escapeHtml(name)}.</strong>
+    <p class="hint" style="margin:6px 0 10px;">Send this private link to them. Anyone with the link can sign, so only share it with the signee.</p>
+    <code style="word-break:break-all;">${escapeHtml(signLinkFor(data.token))}</code>
+    <div style="margin-top:10px;"><button class="btn sm gold" type="button" data-sign-action="copy" data-token="${escapeHtml(data.token)}">Copy link</button></div>`;
+  document.getElementById("signName").value = "";
+  document.getElementById("signEmail").value = "";
+  await renderSignContracts();
+}
+
+async function saveSignDraft(){
+  const division = document.getElementById("signDraftDivision").value;
+  const title = document.getElementById("signDraftTitle").value.trim();
+  const bodyText = document.getElementById("signDraftBody").value.trim();
+  if (title.length < 3 || bodyText.length < 20) return showToast("Add a title and the agreement text.");
+
+  const { error } = await supabaseClient.rpc("contract_save_draft", { p_division: division, p_title: title, p_body: bodyText });
+  if (error) return showToast(error.message);
+  showToast("Draft saved. Get it reviewed, then approve it.");
+  document.getElementById("signDraftTitle").value = "";
+  document.getElementById("signDraftBody").value = "";
+  await renderSignTemplates();
+}
+// <<SIGN-END>>
+
 
 async function loadRelvbotTab(){
   document.getElementById("relvbotRefresh").addEventListener("click", renderRelvbotAll);
