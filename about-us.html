@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="About Relvia Entertainment: one platform for film, music, live streaming and creators.">
+<title>About Us — Relvia Entertainment</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0a0806; --panel:rgba(22,17,12,.72); --border:#2a2018; --line:rgba(224,177,88,.22);
+  --gold:#e0b158; --gold-hi:#f6d487; --gold-lo:#b9832f;
+  --text:#f5f1ea; --muted:#a89e8f;
+  --font-display:"Playfair Display",Georgia,serif; --font-body:"Inter",system-ui,sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  min-height:100vh; background:var(--bg); color:var(--text); font-family:var(--font-body); line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden; position:relative;
+}
+/* film grain over the whole page */
+body::before{
+  content:""; position:fixed; inset:-50%; z-index:100; pointer-events:none; opacity:.07;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain 8s steps(8) infinite;
+}
+@keyframes grain{
+  0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)}
+  75%{transform:translate(-2%,-1%)} 100%{transform:translate(0,0)}
+}
+a{ color:inherit; text-decoration:none; }
+
+/* ---------- top bar ---------- */
+.bar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:16px 32px; background:rgba(10,8,6,.78); backdrop-filter:blur(14px); border-bottom:1px solid var(--border);
+}
+.brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:18px; }
+.crest{
+  width:32px; height:32px; border-radius:50%; border:1.5px solid var(--gold-lo);
+  display:flex; align-items:center; justify-content:center; font-style:italic; color:var(--gold-hi);
+  background:radial-gradient(circle at 32% 22%, rgba(242,199,102,.28), transparent 65%), #000;
+}
+.bar nav{ display:flex; gap:20px; flex-wrap:wrap; font-size:11.5px; font-weight:800; letter-spacing:1.2px; }
+.bar nav a{ color:var(--muted); transition:color .2s; }
+.bar nav a:hover{ color:var(--gold); }
+
+/* ---------- hero ---------- */
+.hero{ position:relative; padding:130px 32px 120px; text-align:center; overflow:hidden; isolation:isolate; }
+.glow{
+  position:absolute; z-index:-1; border-radius:50%; filter:blur(80px); pointer-events:none; opacity:.6;
+  animation:drift 14s ease-in-out infinite alternate;
+}
+.glow.a{ width:560px; height:560px; left:-160px; top:-180px; background:radial-gradient(circle, rgba(224,177,88,.5), transparent 70%); }
+.glow.b{ width:640px; height:640px; right:-200px; bottom:-260px; background:radial-gradient(circle, rgba(185,131,47,.42), transparent 70%); animation-duration:18s; animation-delay:-6s; }
+@keyframes drift{ from{ transform:translate(0,0) scale(1); } to{ transform:translate(40px,30px) scale(1.12); } }
+
+.kicker{
+  display:inline-flex; align-items:center; gap:10px; font-size:11px; font-weight:800; letter-spacing:2.4px;
+  color:var(--gold); text-transform:uppercase; padding:8px 16px; border:1px solid var(--line); border-radius:999px;
+  background:rgba(224,177,88,.06);
+}
+.kicker .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 4px rgba(224,177,88,.18); }
+h1{
+  font-family:var(--font-display); font-weight:700; font-size:clamp(46px,8.4vw,104px); line-height:1;
+  letter-spacing:-2px; margin:30px auto 24px; max-width:960px;
+}
+h1 .gold{
+  font-style:italic; font-weight:600;
+  background:linear-gradient(120deg,var(--gold-hi) 0%,var(--gold) 45%,var(--gold-lo) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.lede{ font-size:clamp(16px,1.9vw,20px); color:var(--muted); max-width:640px; margin:0 auto; }
+.scroll-hint{ margin-top:56px; font-size:10.5px; font-weight:800; letter-spacing:2.4px; color:var(--muted); text-transform:uppercase; }
+.scroll-hint::after{ content:"↓"; display:block; margin-top:8px; color:var(--gold); font-size:18px; animation:nudge 2.4s ease-in-out infinite; }
+@keyframes nudge{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
+
+/* ---------- sections ---------- */
+section{ padding:110px 32px; position:relative; }
+.wrap{ max-width:1080px; margin:0 auto; }
+.label{ font-size:11px; font-weight:800; letter-spacing:2.2px; color:var(--gold); text-transform:uppercase; margin-bottom:14px; }
+h2{ font-family:var(--font-display); font-weight:600; font-size:clamp(34px,4.6vw,52px); line-height:1.08; letter-spacing:-.8px; margin-bottom:18px; }
+h2 em{ color:var(--gold); font-weight:500; }
+.sub{ color:var(--muted); font-size:16px; max-width:640px; }
+
+/* mission */
+.mission{ display:grid; grid-template-columns:1.1fr .9fr; gap:64px; align-items:start; }
+.mission p{ color:var(--muted); font-size:16.5px; margin-bottom:16px; }
+.mission p strong{ color:var(--text); font-weight:600; }
+.pillars{ display:grid; gap:14px; }
+.pillar{
+  position:relative; padding:24px 26px 24px 30px; border:1px solid var(--border); border-radius:18px; background:var(--panel);
+  transition:border-color .3s, transform .3s; overflow:hidden;
+}
+.pillar::before{ content:""; position:absolute; left:0; top:18px; bottom:18px; width:3px; border-radius:3px; background:linear-gradient(var(--gold-hi),var(--gold-lo)); }
+.pillar:hover{ border-color:var(--line); transform:translateX(4px); }
+.pillar h3{ font-family:var(--font-display); font-size:21px; margin-bottom:6px; }
+.pillar p{ font-size:14.5px; color:var(--muted); margin:0; }
+
+/* divisions */
+.divisions{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px; margin-top:56px; }
+.division{
+  position:relative; padding:30px; border-radius:24px; border:1px solid var(--border); overflow:hidden;
+  background:linear-gradient(180deg,rgba(28,21,14,.92),rgba(14,10,7,.92));
+  transition:transform .35s, border-color .35s, box-shadow .35s;
+}
+.division::after{
+  content:""; position:absolute; right:-30%; top:-30%; width:70%; height:70%; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(224,177,88,.22), transparent 70%); transition:transform .6s, opacity .6s; opacity:.6;
+}
+.division:hover{ transform:translateY(-6px); border-color:var(--line); box-shadow:0 24px 50px rgba(0,0,0,.45); }
+.division:hover::after{ transform:scale(1.35); opacity:1; }
+.num{ font-family:var(--font-display); font-style:italic; font-size:15px; color:var(--gold-lo); margin-bottom:34px; display:block; }
+.division h3{ font-family:var(--font-display); font-size:24px; margin-bottom:8px; }
+.division p{ font-size:14.5px; color:var(--muted); position:relative; z-index:1; }
+
+/* values */
+.values{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:56px; border-top:1px solid var(--line); }
+.value{ padding:30px 28px 0 0; }
+.value + .value{ padding-left:28px; border-left:1px solid var(--border); }
+.value h3{ font-family:var(--font-display); font-size:23px; margin-bottom:10px; color:var(--gold-hi); }
+.value p{ font-size:14.5px; color:var(--muted); }
+
+/* founder */
+.founder{
+  position:relative; display:grid; grid-template-columns:auto 1fr; gap:48px; align-items:center;
+  padding:56px; border-radius:32px; border:1px solid var(--line); overflow:hidden;
+  background:radial-gradient(120% 140% at 0% 0%, rgba(224,177,88,.16), transparent 55%), var(--panel);
+}
+.monogram{
+  width:180px; height:180px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-style:italic; font-weight:700; font-size:74px; color:var(--gold-hi);
+  border:1.5px solid var(--gold-lo);
+  background:radial-gradient(circle at 32% 22%, rgba(242,199,102,.32), transparent 65%), #000;
+  box-shadow:0 0 0 12px rgba(224,177,88,.06), 0 30px 60px rgba(0,0,0,.5);
+}
+.founder .role{ font-size:11px; font-weight:800; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
+.founder h3{ font-family:var(--font-display); font-size:clamp(32px,4.2vw,44px); line-height:1.08; margin-bottom:18px; }
+.founder p{ color:var(--muted); font-size:15.5px; margin-bottom:14px; }
+.founder p:last-of-type{ margin-bottom:24px; }
+
+/* cta */
+.cta{
+  position:relative; text-align:center; padding:110px 32px; overflow:hidden; border-top:1px solid var(--border);
+  background:radial-gradient(60% 80% at 50% 0%, rgba(224,177,88,.18), transparent 70%);
+}
+.cta h2{ max-width:780px; margin:0 auto 18px; }
+.cta p{ color:var(--muted); font-size:16.5px; margin-bottom:34px; }
+.btns{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.btn{
+  display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:800; letter-spacing:.3px;
+  padding:15px 28px; border-radius:14px; transition:transform .2s, box-shadow .2s, opacity .2s;
+}
+.btn:hover{ transform:translateY(-2px); }
+.btn-gold{ background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); color:#000; box-shadow:0 14px 30px rgba(185,131,47,.25); }
+.btn-gold:hover{ box-shadow:0 18px 38px rgba(185,131,47,.35); }
+.btn-line{ border:1px solid var(--line); color:var(--text); }
+
+footer{ text-align:center; font-size:12px; color:var(--muted); padding:32px; border-top:1px solid var(--border); letter-spacing:.3px; }
+footer a{ color:var(--gold); }
+
+/* scroll reveal */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in{ opacity:1; transform:none; }
+.reveal.d1{ transition-delay:.08s; } .reveal.d2{ transition-delay:.16s; } .reveal.d3{ transition-delay:.24s; }
+.division.reveal:nth-child(2){ transition-delay:.08s; }
+.division.reveal:nth-child(3){ transition-delay:.16s; }
+.division.reveal:nth-child(4){ transition-delay:.08s; }
+.division.reveal:nth-child(5){ transition-delay:.16s; }
+.division.reveal:nth-child(6){ transition-delay:.24s; }
+
+/* ---------- responsive ---------- */
+@media (max-width:860px){
+  .mission{ grid-template-columns:1fr; gap:44px; }
+  .values{ grid-template-columns:1fr; }
+  .value, .value + .value{ padding:26px 0; border-left:none; border-bottom:1px solid var(--border); }
+  .founder{ grid-template-columns:1fr; text-align:center; padding:40px 26px; }
+  .monogram{ margin:0 auto; width:146px; height:146px; font-size:60px; }
+  .founder .role{ text-align:center; }
+}
+@media (max-width:600px){
+  .bar{ padding:14px 18px; }
+  .bar nav{ gap:14px; font-size:10.5px; }
+  .hero{ padding:90px 20px 90px; }
+  section{ padding:80px 20px; }
+  .cta{ padding:84px 20px; }
+}
+@media (prefers-reduced-motion:reduce){
+  body::before, .glow, .scroll-hint::after{ animation:none !important; }
+  .reveal{ opacity:1; transform:none; transition:none; }
+  *{ transition:none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="index.html"><span class="crest" aria-hidden="true">R</span>Relvia</a>
+  <nav>
+    <a href="studios/index.html">STUDIOS</a>
+    <a href="music/index.html">MUSIC</a>
+    <a href="live.html">LIVE</a>
+    <a href="creators/index.html">CREATORS</a>
+    <a href="contact.html">CONTACT</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="glow a" aria-hidden="true"></div>
+    <div class="glow b" aria-hidden="true"></div>
+    <span class="kicker"><span class="dot"></span>About Relvia</span>
+    <h1>Built for people who <span class="gold">make things.</span></h1>
+    <p class="lede">Relvia Entertainment is one platform for film, music, live streaming and the creators behind them. Make it, share it, get paid for it, without stitching together five apps.</p>
+    <div class="scroll-hint">Scroll</div>
+  </div>
+
+  <!-- MISSION -->
+  <section>
+    <div class="wrap mission">
+      <div class="reveal">
+        <div class="label">Our mission</div>
+        <h2>One place to <em>make, show</em> and earn.</h2>
+        <p>Creators shouldn't need a dozen tools to finish one project. Relvia brings the making, the audience and the money into one platform, so the work stays yours.</p>
+        <p><strong>Relvia is built independently, and it's still growing.</strong> Some divisions are in beta, and we say so on each page when that's the case.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar reveal d1"><h3>Make it</h3><p>Studios and Music give you the tools to build, cut, release and collaborate.</p></div>
+        <div class="pillar reveal d2"><h3>Show it</h3><p>Live and Creators put your work in front of people who want to see it.</p></div>
+        <div class="pillar reveal d3"><h3>Earn from it</h3><p>Tips, memberships and payouts are built in, not bolted on.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVISIONS -->
+  <section style="padding-top:30px;">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="label">The divisions</div>
+        <h2>Six rooms, <em>one</em> house.</h2>
+        <p class="sub">Each division has its own home on the platform, and they share one account, one wallet and one audience.</p>
+      </div>
+
+      <div class="divisions">
+        <div class="division reveal"><span class="num">01</span><h3>Relvia Studios</h3><p>Film and series projects, from building a crew to cutting footage and releasing it.</p></div>
+        <div class="division reveal"><span class="num">02</span><h3>Relvia Music</h3><p>Upload tracks and releases, and reach listeners directly.</p></div>
+        <div class="division reveal"><span class="num">03</span><h3>Relvia Live</h3><p>Live streaming with chat, categories and recordings, plus RelvBits tips for creators.</p></div>
+        <div class="division reveal"><span class="num">04</span><h3>RelviaCreators</h3><p>A home for creators to share posts, connect with their audience and grow.</p></div>
+        <div class="division reveal"><span class="num">05</span><h3>Relvia Campus</h3><p>Campus communities and student creators.</p></div>
+        <div class="division reveal"><span class="num">06</span><h3>RelviaFashion</h3><p>Brands, collections and creators in one place.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section style="padding-top:30px;">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="label">What we believe</div>
+        <h2>How we <em>run</em> things.</h2>
+      </div>
+      <div class="values">
+        <div class="value reveal d1"><h3>Creators keep control</h3><p>Your work, your audience and your earnings stay with you.</p></div>
+        <div class="value reveal d2"><h3>Trust over speed</h3><p>We'd rather earn trust slowly than grow fast by cutting corners.</p></div>
+        <div class="value reveal d3"><h3>Say it when it breaks</h3><p>When something goes wrong, we say so, and we fix it in the open.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER -->
+  <section style="padding-top:30px;">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="label">The founder</div>
+        <div class="founder">
+          <div class="monogram" aria-hidden="true">D</div>
+          <div>
+            <div class="role">Founder &amp; owner, Relvia Entertainment</div>
+            <h3>Deondre Chambers</h3>
+            <p>Dee started Relvia to build the platform he wished existed for creators: one place to make, show and earn from your work. He's a musician with years of marching band experience, which is where the discipline behind the work comes from.</p>
+            <p>He still runs the platform day to day, so if you have an idea, a bug or a partnership to propose, the contact page is the place to start.</p>
+            <a class="btn btn-line" href="contact.html">Get in touch</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta reveal">
+    <h2>Got something to <em>make?</em></h2>
+    <p>Questions, partnerships, press or a bug to report. We'd like to hear from you.</p>
+    <div class="btns">
+      <a class="btn btn-gold" href="contact.html">Contact us</a>
+      <a class="btn btn-line" href="/login.html">Join Relvia</a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Relvia Entertainment &middot;
+  <a href="contact.html">Contact</a> &middot; <a href="copyright.html">Copyright</a>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// Fade sections in as they scroll into view. Shows everything if the browser can't do it.
+(function () {
+  var items = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)) { items.forEach(function (el) { el.classList.add("in"); }); return; }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+  items.forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
