@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RelviaHub: your day, goals, today's recap, latest posts, dev blog and the Relvia Assistant.">
+<title>RelviaHub — Relvia Entertainment</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#070504; --panel:#110d08; --panel-2:#17110b; --border:#2a2018; --border-soft:#1d1610;
+  --line:rgba(224,177,88,.26); --glow:rgba(224,177,88,.12);
+  --gold:#e0b158; --gold-hi:#f6d487; --gold-lo:#b9832f;
+  --text:#f5f1ea; --muted:#a89e8f; --soft:#7d7568; --danger:#e0574f; --ok:#8fbf7a;
+  --display:"Playfair Display",Georgia,serif; --body:"Inter",system-ui,sans-serif;
+  --radius:20px;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  background:
+    radial-gradient(ellipse 900px 520px at 10% -10%, rgba(224,177,88,.10), transparent 60%),
+    radial-gradient(ellipse 700px 460px at 100% 10%, rgba(185,131,47,.07), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--text); font-family:var(--body); line-height:1.55; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+a{ color:inherit; text-decoration:none; }
+button, input, textarea{ font:inherit; color:inherit; }
+button{ cursor:pointer; }
+button:disabled{ opacity:.5; cursor:not-allowed; }
+:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:6px; }
+
+/* top bar */
+.bar{
+  position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:18px;
+  padding:14px clamp(16px,3vw,36px); background:rgba(7,5,4,.82); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-soft);
+}
+.brand{ display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:700; font-size:18px; }
+.crest{
+  width:34px; height:34px; border-radius:50%; border:1.5px solid var(--gold-lo); display:flex; align-items:center; justify-content:center;
+  font-style:italic; color:var(--gold-hi); background:radial-gradient(circle at 32% 22%, rgba(246,210,122,.28), transparent 65%), #000;
+}
+.bar nav{ display:flex; gap:20px; flex-wrap:wrap; font-size:11.5px; font-weight:800; letter-spacing:1.2px; }
+.bar nav a{ color:var(--muted); transition:color .2s; }
+.bar nav a:hover{ color:var(--gold); }
+
+main{ max-width:1180px; margin:0 auto; padding:44px clamp(16px,3vw,36px) 90px; }
+
+/* hero */
+.hero{ position:relative; padding:14px 0 34px; }
+.eyebrow{ font-size:11px; font-weight:800; letter-spacing:2.4px; color:var(--gold); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+.eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 4px rgba(224,177,88,.18); }
+h1{ font-family:var(--display); font-weight:700; font-size:clamp(38px,5.8vw,68px); line-height:1.04; letter-spacing:-1.2px; margin-bottom:12px; }
+h1 .gold{ font-style:italic; font-weight:600; background:linear-gradient(120deg,var(--gold-hi),var(--gold) 50%,var(--gold-lo)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.sub{ color:var(--muted); font-size:16px; max-width:640px; }
+.quick{ display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.quick a{
+  font-size:12.5px; font-weight:700; color:var(--text); padding:9px 16px; border-radius:999px;
+  border:1px solid var(--line); background:rgba(224,177,88,.05); transition:background .2s, color .2s, border-color .2s;
+}
+.quick a:hover{ background:var(--gold); color:#000; border-color:var(--gold); }
+
+/* stat strip */
+.strip{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.tile{
+  position:relative; border:1px solid var(--border); border-radius:18px; padding:20px 20px 18px; overflow:hidden;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+}
+.tile::after{ content:""; position:absolute; right:-40px; top:-40px; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle,var(--glow),transparent 70%); pointer-events:none; }
+.tile .k{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--muted); }
+.tile .v{ font-family:var(--display); font-size:30px; color:var(--gold-hi); margin-top:6px; line-height:1.1; }
+.tile .s{ font-size:12px; color:var(--soft); margin-top:4px; }
+
+/* grid + cards */
+.grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:18px; }
+.card{
+  grid-column:span 6; border:1px solid var(--border); border-radius:var(--radius); padding:24px;
+  background:linear-gradient(180deg,var(--panel-2),#0d0905); transition:border-color .25s;
+}
+.card:hover{ border-color:rgba(224,177,88,.3); }
+.card.wide{ grid-column:span 12; }
+.card.third{ grid-column:span 4; }
+.card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+.card h2{ font-family:var(--display); font-size:22px; font-weight:600; }
+.card .hint{ font-size:12.5px; color:var(--muted); margin-top:3px; }
+.tag{ font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#000; background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); padding:4px 10px; border-radius:999px; white-space:nowrap; }
+.tag.muted{ color:var(--muted); background:none; border:1px solid var(--border); }
+
+/* progress */
+.progress{ height:6px; border-radius:999px; background:#1c150d; overflow:hidden; margin-bottom:14px; }
+.progress span{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi)); transition:width .4s ease; border-radius:999px; }
+
+/* goals */
+.goal-form{ display:flex; gap:8px; margin-bottom:10px; }
+.field{
+  flex:1; background:#0a0705; border:1px solid var(--border); border-radius:12px; padding:11px 14px; font-size:14px; transition:border-color .2s;
+}
+.field:focus{ outline:none; border-color:var(--gold); }
+.btn{
+  background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); color:#000; font-weight:800; font-size:13px;
+  border:none; padding:11px 18px; border-radius:12px; transition:transform .15s, box-shadow .2s; box-shadow:0 10px 24px rgba(185,131,47,.18);
+}
+.btn:hover{ transform:translateY(-1px); }
+.btn.ghost{ background:none; color:var(--muted); border:1px solid var(--border); box-shadow:none; font-weight:700; }
+.btn.ghost:hover{ color:var(--gold); border-color:var(--line); }
+.goal-list{ list-style:none; }
+.goal{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-top:1px solid var(--border-soft); font-size:14.5px; }
+.goal:first-child{ border-top:none; }
+.goal input[type="checkbox"]{ appearance:none; width:20px; height:20px; border-radius:7px; border:1.5px solid var(--gold-lo); background:#0a0705; display:grid; place-items:center; cursor:pointer; flex-shrink:0; }
+.goal input[type="checkbox"]:checked{ background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); border-color:transparent; }
+.goal input[type="checkbox"]:checked::after{ content:""; width:6px; height:10px; border:solid #000; border-width:0 2px 2px 0; transform:rotate(45deg) translate(-1px,-1px); }
+.goal .txt{ flex:1; min-width:0; overflow-wrap:anywhere; }
+.goal .txt.done{ color:var(--soft); text-decoration:line-through; }
+.goal .del{ background:none; border:none; color:var(--soft); font-size:18px; padding:2px 6px; border-radius:8px; }
+.goal .del:hover{ color:var(--danger); background:rgba(224,87,79,.08); }
+.empty{ color:var(--soft); font-size:13.5px; padding:10px 0; }
+
+/* recap */
+.recap-list{ display:grid; gap:10px; }
+.recap-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:12px; background:#0a0705; border:1px solid var(--border-soft); font-size:14px; }
+.recap-row b{ font-family:var(--display); font-size:20px; color:var(--gold-hi); font-weight:700; }
+
+/* feed + blog items */
+.item{ padding:14px 0; border-top:1px solid var(--border-soft); }
+.item:first-child{ border-top:none; padding-top:0; }
+.item .by{ font-size:12px; color:var(--gold); font-weight:700; margin-bottom:4px; }
+.item .t{ font-size:14.5px; overflow-wrap:anywhere; }
+.item .t strong{ font-family:var(--display); font-size:17px; font-weight:600; display:block; margin-bottom:4px; }
+.item .d{ font-size:12.5px; color:var(--soft); margin-top:4px; }
+
+/* blog form */
+.blog-form{ display:grid; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border-soft); }
+.blog-form[hidden]{ display:none; }
+.blog-form textarea{ resize:vertical; min-height:80px; }
+.blog-msg{ font-size:12.5px; color:var(--muted); }
+
+/* assistant */
+.chips{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.chip{ font-size:12px; font-weight:700; color:var(--gold); border:1px solid var(--line); padding:7px 13px; border-radius:999px; background:none; }
+.chip:hover{ background:rgba(224,177,88,.1); }
+.chat-log{ min-height:160px; max-height:380px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:4px 4px 4px 0; scroll-behavior:smooth; }
+.msg{ padding:11px 15px; border-radius:16px; font-size:14px; max-width:85%; white-space:pre-wrap; overflow-wrap:anywhere; }
+.msg.bot{ background:#0a0705; border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:6px; }
+.msg.me{ background:linear-gradient(135deg,rgba(246,212,135,.2),rgba(185,131,47,.2)); border:1px solid var(--line); align-self:flex-end; border-bottom-right-radius:6px; }
+.msg.typing{ color:var(--soft); font-style:italic; }
+.chat-form{ display:flex; gap:8px; margin-top:12px; }
+
+footer{ text-align:center; font-size:12px; color:var(--soft); padding:34px; border-top:1px solid var(--border-soft); }
+footer a{ color:var(--gold); }
+
+/* responsive */
+@media (max-width:980px){
+  .strip{ grid-template-columns:repeat(2,1fr); }
+  .card, .card.third{ grid-column:span 12; }
+}
+@media (max-width:600px){
+  .bar nav{ display:none; }
+  .strip{ grid-template-columns:1fr 1fr; gap:10px; }
+  .tile{ padding:16px; }
+  .tile .v{ font-size:24px; }
+  .card{ padding:20px; }
+  .goal-form{ flex-direction:column; }
+  .btn{ width:100%; }
+}
+@media (prefers-reduced-motion:reduce){
+  *{ transition:none !important; scroll-behavior:auto !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="index.html"><span class="crest" aria-hidden="true">R</span>Relvia</a>
+  <nav>
+    <a href="creators/index.html">CREATORS</a>
+    <a href="studios/index.html">STUDIOS</a>
+    <a href="music/index.html">MUSIC</a>
+    <a href="live.html">LIVE</a>
+    <a href="about-us.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span><span id="today">RelviaHub</span></div>
+    <h1 id="greeting">Hello.</h1>
+    <p class="sub" id="subline">Here's everything on Relvia in one place.</p>
+    <div class="quick">
+      <a href="creators/index.html">RelviaCreators</a>
+      <a href="studios/index.html">Studios</a>
+      <a href="music/index.html">Music</a>
+      <a href="live.html">Live</a>
+      <a href="about-us.html">About</a>
+    </div>
+  </section>
+
+  <!-- stat strip: totals + today's recap -->
+  <div class="strip">
+    <div class="tile"><div class="k">Revenue</div><div class="v" id="statRevenue">—</div><div class="s">All time</div></div>
+    <div class="tile"><div class="k">Tips sent</div><div class="v" id="statTips">—</div><div class="s">All time</div></div>
+    <div class="tile"><div class="k">Creators</div><div class="v" id="statCreators">—</div><div class="s">On Relvia</div></div>
+    <div class="tile"><div class="k">Posts today</div><div class="v" id="statPosts">—</div><div class="s">Since midnight UTC</div></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- GOALS -->
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Today's goals</h2><div class="hint" id="goalHint">Saved to your account when you're signed in.</div></div>
+        <span class="tag muted" id="goalCount">0 / 0</span>
+      </div>
+      <div class="progress"><span id="goalBar"></span></div>
+      <form class="goal-form" id="goalForm">
+        <input class="field" id="goalInput" placeholder="What do you want to get done today?" maxlength="120" autocomplete="off">
+        <button class="btn" type="submit">Add goal</button>
+      </form>
+      <ul class="goal-list" id="goalList"></ul>
+    </section>
+
+    <!-- DAILY RECAP -->
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Today on Relvia</h2><div class="hint">Totals for today. No names.</div></div>
+        <span class="tag">Live</span>
+      </div>
+      <div class="recap-list" id="recapList"><p class="empty">Loading…</p></div>
+    </section>
+
+    <!-- YOUR EARNINGS (signed-in creators) -->
+    <section class="card third" id="myRevenueBox" hidden>
+      <div class="card-head"><div><h2>Your earnings</h2><div class="hint">Only you can see this.</div></div></div>
+      <div class="recap-list">
+        <div class="recap-row"><span>Tips received</span><b id="myTips">—</b></div>
+        <div class="recap-row"><span>Number of tips</span><b id="myCount">—</b></div>
+      </div>
+    </section>
+
+    <!-- OWNER TABLE -->
+    <section class="card wide" id="ownerBox" hidden>
+      <div class="card-head">
+        <div><h2>Owner view: revenue by creator</h2><div class="hint">Visible only to platform owners.</div></div>
+        <span class="tag">Owner</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 6px;color:var(--muted);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;">Creator</th>
+            <th style="text-align:left;padding:9px 6px;color:var(--muted);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;">Tips received</th>
+            <th style="text-align:left;padding:9px 6px;color:var(--muted);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;">Tips</th>
+          </tr></thead>
+          <tbody id="ownerRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FEED -->
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Latest from the feed</h2><div class="hint">The newest RelviaCreators posts.</div></div>
+        <a class="tag muted" href="creators/index.html">Open feed</a>
+      </div>
+      <div id="latestPosts"><p class="empty">Loading…</p></div>
+    </section>
+
+    <!-- DEV BLOG -->
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Dev blog</h2><div class="hint">Platform updates from the Relvia team.</div></div>
+      </div>
+      <div id="blogList"><p class="empty">Loading…</p></div>
+      <form class="blog-form" id="blogForm" hidden>
+        <input class="field" id="blogTitle" placeholder="Update title" maxlength="160">
+        <textarea class="field" id="blogBody" placeholder="What changed?" maxlength="4000"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" type="submit">Publish update</button>
+          <span class="blog-msg" id="blogMsg"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- ASSISTANT -->
+    <section class="card wide">
+      <div class="card-head">
+        <div><h2>Relvia Assistant</h2><div class="hint" id="assistHint">Sign in to chat. Your conversation is saved to your account.</div></div>
+        <button class="btn ghost" id="clearChat" type="button" hidden>Clear chat</button>
+      </div>
+      <div class="chips">
+        <button class="chip" type="button" data-prompt="Help me plan my day based on my goals.">Plan my day</button>
+        <button class="chip" type="button" data-prompt="How do RelvBits tips work for creators?">How do tips work?</button>
+        <button class="chip" type="button" data-prompt="What should I focus on to grow my audience on Relvia?">Grow my audience</button>
+        <button class="chip" type="button" data-prompt="Where do I find my earnings and payouts?">Find my earnings</button>
+      </div>
+      <div class="chat-log" id="chatLog">
+        <div class="msg bot">Hi! Ask me about Relvia, or tell me what you're working on today.</div>
+      </div>
+      <form class="chat-form" id="chatForm">
+        <input class="field" id="chatInput" placeholder="Ask the assistant…" maxlength="1000" autocomplete="off">
+        <button class="btn" type="submit" id="chatSend">Send</button>
+      </form>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Relvia Entertainment &middot; <a href="contact.html">Contact</a>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let user = null;      // signed-in user, or null
+let isOwner = false;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const money = cents => "$" + (Number(cents || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = n => Number(n || 0).toLocaleString("en-US");
+const localDay = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/* ---------- greeting + date ---------- */
+function timeOfDay(){
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
+function setHeader(name){
+  document.getElementById("today").textContent = new Date().toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
+  document.getElementById("greeting").innerHTML = name
+    ? `${timeOfDay()}, <span class="gold">${esc(name)}.</span>`
+    : `Hello, <span class="gold">welcome.</span>`;
+  document.getElementById("subline").textContent = name
+    ? "Here's your day, the latest from Relvia, and your assistant."
+    : "Here's everything on Relvia in one place. Sign in to see your goals and your own numbers.";
+}
+
+/* ---------- goals: account when signed in, browser when not ---------- */
+const localKey = () => "relvia-hub-goals-" + localDay();
+function localGoals(){ try { return JSON.parse(localStorage.getItem(localKey()) || "[]"); } catch (e) { return []; } }
+function saveLocalGoals(g){ try { localStorage.setItem(localKey(), JSON.stringify(g)); } catch (e) {} }
+
+async function fetchGoals(){
+  if (!user) return localGoals().map(g => ({ id: g.id, text: g.text, done: !!g.done }));
+  const { data, error } = await sb.from("hub_goals").select("id, text, done").eq("day", localDay()).order("created_at", { ascending: true });
+  if (error) return [];
+  return data || [];
+}
+function renderGoals(goals){
+  const list = document.getElementById("goalList");
+  const done = goals.filter(g => g.done).length;
+  document.getElementById("goalCount").textContent = `${done} / ${goals.length}`;
+  document.getElementById("goalBar").style.width = goals.length ? (done / goals.length * 100) + "%" : "0%";
+  if (!goals.length){ list.innerHTML = '<li class="empty">No goals yet. Add your first one above.</li>'; return; }
+  list.innerHTML = goals.map(g => `
+    <li class="goal">
+      <input type="checkbox" data-id="${esc(g.id)}" ${g.done ? "checked" : ""} aria-label="Mark done">
+      <span class="txt ${g.done ? "done" : ""}">${esc(g.text)}</span>
+      <button class="del" data-del="${esc(g.id)}" aria-label="Delete goal">×</button>
+    </li>`).join("");
+}
+async function refreshGoals(){ renderGoals(await fetchGoals()); }
+
+document.getElementById("goalForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const input = document.getElementById("goalInput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  if (!user){
+    const g = localGoals(); g.push({ id: uid(), text, done: false }); saveLocalGoals(g);
+  } else {
+    await sb.from("hub_goals").insert({ user_id: user.id, day: localDay(), text });
+  }
+  refreshGoals();
+});
+document.getElementById("goalList").addEventListener("change", async e => {
+  if (e.target.type !== "checkbox") return;
+  const id = e.target.dataset.id, done = e.target.checked;
+  if (!user){
+    const g = localGoals(); const item = g.find(x => x.id === id); if (item) item.done = done; saveLocalGoals(g);
+  } else {
+    await sb.from("hub_goals").update({ done }).eq("id", id);
+  }
+  refreshGoals();
+});
+document.getElementById("goalList").addEventListener("click", async e => {
+  const id = e.target.dataset.del;
+  if (id === undefined) return;
+  if (!user){
+    saveLocalGoals(localGoals().filter(x => x.id !== id));
+  } else {
+    await sb.from("hub_goals").delete().eq("id", id);
+  }
+  refreshGoals();
+});
+
+/* ---------- totals + today's recap ---------- */
+async function loadTotals(){
+  const { data } = await sb.rpc("hub_public_totals");
+  if (!data) return;
+  document.getElementById("statRevenue").textContent = money(data.revenue_cents);
+  document.getElementById("statTips").textContent = num(data.tips_count);
+  document.getElementById("statCreators").textContent = num(data.creators);
+}
+async function loadRecap(){
+  const box = document.getElementById("recapList");
+  const { data } = await sb.rpc("hub_daily_recap");
+  if (!data){ box.innerHTML = '<p class="empty">Recap unavailable right now.</p>'; return; }
+  document.getElementById("statPosts").textContent = num(data.posts_today);
+  box.innerHTML = `
+    <div class="recap-row"><span>New posts</span><b>${num(data.posts_today)}</b></div>
+    <div class="recap-row"><span>Tips sent</span><b>${num(data.tips_today)}</b></div>
+    <div class="recap-row"><span>Revenue</span><b>${money(data.revenue_today_cents)}</b></div>
+    <div class="recap-row"><span>New creators</span><b>${num(data.new_creators_today)}</b></div>`;
+}
+
+/* ---------- latest posts ---------- */
+async function loadLatest(){
+  const box = document.getElementById("latestPosts");
+  const { data, error } = await sb.rpc("hub_latest_posts");
+  if (error || !data || !data.length){ box.innerHTML = '<p class="empty">No posts yet.</p>'; return; }
+  box.innerHTML = data.map(p => `
+    <div class="item">
+      <div class="by">${esc(p.author)} · ${new Date(p.created_at).toLocaleDateString("en-US", { month:"short", day:"numeric" })}</div>
+      <div class="t">${p.caption ? esc(p.caption) : "<em>Photo post</em>"}</div>
+    </div>`).join("");
+}
+
+/* ---------- dev blog (from the database) ---------- */
+async function loadBlog(){
+  const box = document.getElementById("blogList");
+  const { data, error } = await sb.from("hub_blog").select("id, title, body, created_at").eq("published", true).order("created_at", { ascending: false }).limit(10);
+  if (error || !data || !data.length){ box.innerHTML = '<p class="empty">No updates yet. Check back soon.</p>'; return; }
+  box.innerHTML = data.map(p => `
+    <div class="item">
+      <div class="by">${new Date(p.created_at).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}</div>
+      <div class="t"><strong>${esc(p.title)}</strong>${esc(p.body)}</div>
+    </div>`).join("");
+}
+document.getElementById("blogForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const title = document.getElementById("blogTitle").value.trim();
+  const body = document.getElementById("blogBody").value.trim();
+  const msg = document.getElementById("blogMsg");
+  if (!title){ msg.textContent = "Add a title first."; return; }
+  const { error } = await sb.from("hub_blog").insert({ title, body, created_by: user.id });
+  if (error){ msg.textContent = "Couldn't publish. Only owners can post updates."; return; }
+  document.getElementById("blogTitle").value = "";
+  document.getElementById("blogBody").value = "";
+  msg.textContent = "Published.";
+  loadBlog();
+});
+
+/* ---------- signed-in: earnings, owner view, owner blog form ---------- */
+async function loadSignedIn(){
+  const { data: profile } = await sb.from("profiles").select("display_name, username").eq("id", user.id).maybeSingle();
+  setHeader(profile?.display_name || profile?.username || "there");
+
+  const { data: mine } = await sb.rpc("hub_my_revenue");
+  if (mine && (mine.tips_count > 0 || mine.tips_cents > 0)){
+    document.getElementById("myRevenueBox").hidden = false;
+    document.getElementById("myTips").textContent = money(mine.tips_cents);
+    document.getElementById("myCount").textContent = num(mine.tips_count);
+  }
+
+  const { data: rows } = await sb.rpc("hub_owner_creator_revenue");
+  if (rows && rows.length){
+    document.getElementById("ownerBox").hidden = false;
+    document.getElementById("ownerRows").innerHTML = rows.map(r => `
+      <tr>
+        <td style="padding:9px 6px;border-top:1px solid #1d1610;">${esc(r.display_name)}</td>
+        <td style="padding:9px 6px;border-top:1px solid #1d1610;">${money(r.tips_cents)}</td>
+        <td style="padding:9px 6px;border-top:1px solid #1d1610;">${num(r.tips_count)}</td>
+      </tr>`).join("");
+  }
+
+  // Owners can publish dev blog updates.
+  const { data: owner } = await sb.from("live_owners").select("role").eq("user_id", user.id).maybeSingle();
+  if (owner && ["owner", "founder"].includes(owner.role)){
+    isOwner = true;
+    document.getElementById("blogForm").hidden = false;
+  }
+}
+
+/* ---------- assistant (history saved to the account) ---------- */
+function addMsg(text, who){
+  const log = document.getElementById("chatLog");
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+  return div;
+}
+async function loadChatHistory(){
+  if (!user) return;
+  const { data } = await sb.from("hub_assistant_messages").select("role, content, created_at")
+    .eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
+  if (!data || !data.length) return;
+  document.getElementById("chatLog").innerHTML = "";
+  data.reverse().forEach(m => addMsg(m.content, m.role === "user" ? "me" : "bot"));
+  document.getElementById("clearChat").hidden = false;
+}
+async function ask(text){
+  const btn = document.getElementById("chatSend");
+  addMsg(text, "me");
+  const thinking = addMsg("Thinking…", "bot typing");
+  btn.disabled = true;
+  let reply = "";
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess || !sess.session){ thinking.remove(); addMsg("Sign in to use the assistant.", "bot"); return; }
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/relvia-assistant`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + sess.session.access_token },
+      body: JSON.stringify({ message: text }),
+    });
+    const out = await res.json().catch(() => ({}));
+    reply = out.reply || out.error || "Something went wrong. Try again.";
+  } catch (err){
+    reply = "I couldn't reach the assistant. Check your connection and try again.";
+  }
+  thinking.remove();
+  addMsg(reply, "bot");
+  btn.disabled = false;
+  if (user && reply && !reply.startsWith("I couldn't") && !reply.startsWith("Something went")){
+    await sb.from("hub_assistant_messages").insert([
+      { user_id: user.id, role: "user", content: text },
+      { user_id: user.id, role: "assistant", content: reply },
+    ]);
+  }
+}
+document.getElementById("chatForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  ask(text);
+});
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => ask(c.dataset.prompt)));
+document.getElementById("clearChat").addEventListener("click", async () => {
+  if (!user) return;
+  await sb.from("hub_assistant_messages").delete().eq("user_id", user.id);
+  document.getElementById("chatLog").innerHTML = '<div class="msg bot">Chat cleared. What's next?</div>';
+});
+
+/* ---------- start ---------- */
+document.getElementById("year").textContent = new Date().getFullYear();
+
+async function start(){
+  const { data: sess } = await sb.auth.getSession();
+  user = sess && sess.session ? sess.session.user : null;
+  setHeader(null);
+  if (user){
+    document.getElementById("goalHint").textContent = "Saved to your account.";
+    document.getElementById("assistHint").textContent = "Your conversation is saved to your account.";
+    document.getElementById("clearChat").hidden = false;
+  } else {
+    document.getElementById("goalHint").textContent = "Saved in this browser, for today. Sign in to keep them everywhere.";
+  }
+  await Promise.all([
+    refreshGoals(),
+    loadTotals(),
+    loadRecap(),
+    loadLatest(),
+    loadBlog(),
+    user ? loadSignedIn() : Promise.resolve(),
+    loadChatHistory(),
+  ]);
+}
+start().catch(() => {});
+</script>
+</body>
+</html>
