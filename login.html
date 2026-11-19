@@ -211,7 +211,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const FEED_URL = "/creators/index.html";
+const FEED_URL = "/hub.html";
 
 // ==========================================
 // IF ALREADY LOGGED IN, SKIP STRAIGHT TO SOCIAL
@@ -358,5 +358,6 @@ signupSubmit.addEventListener("click", async () => {
 
 </script>
 <script src="beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
 </body>
 </html>
