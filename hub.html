@@ -554,7 +554,7 @@ document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () =
 document.getElementById("clearChat").addEventListener("click", async () => {
   if (!user) return;
   await sb.from("hub_assistant_messages").delete().eq("user_id", user.id);
-  document.getElementById("chatLog").innerHTML = '<div class="msg bot">Chat cleared. What's next?</div>';
+  document.getElementById("chatLog").innerHTML = '<div class="msg bot">Chat cleared. What next?</div>';
 });
 
 /* ---------- start ---------- */
