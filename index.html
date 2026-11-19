@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Relvia Entertainment™</title>
-<meta name="description" content="Relvia is one account for film and series, music, and live streams.">
+<meta name="description" content="The Next Generation of Entertainment.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,8 +141,10 @@ button{ font:inherit; cursor:pointer; }
   <nav class="bar-nav" aria-label="Divisions">
     <a href="studios/index.html">STUDIOS</a>
     <a href="music/index.html">MUSIC</a>
-    <a href="live/live.html">LIVE</a>
+    <a href="live.html">LIVE</a>
     <a href="creators/index.html">CREATORS</a>
+    <a href="about-us.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
     <a class="signin" href="/login.html">SIGN IN</a>
   </nav>
 </div>
@@ -185,7 +187,7 @@ button{ font:inherit; cursor:pointer; }
           <div class="p-go">Listen</div>
         </div>
       </a>
-      <a class="panel" href="live/.html">
+      <a class="panel" href="live.html">
         <div class="art"></div>
         <div class="p-body">
           <div class="live-tag">LIVE</div>
@@ -224,6 +226,7 @@ button{ font:inherit; cursor:pointer; }
 <div class="bar bottom">
   <span>&copy; <span id="year"></span> RELVIA ENTERTAINMENT</span>
   <span class="long">FILM &middot; TELEVISION &middot; MUSIC &middot; LIVE &middot; CREATORS</span>
+  <span class="bottom-links"><a href="about-us.html">About</a> &middot; <a href="contact.html">Contact</a></span>
 </div>
 
 <script>
@@ -252,7 +255,7 @@ const cover = (url, title) => url
   pill.classList.add("on");
 
   document.getElementById("liveList").innerHTML = streams.map(s => `
-    <li class="item"><a href="live/watch.html?stream=${s.id}">
+    <li class="item"><a href="watch.html?stream=${s.id}">
       ${cover(null, s.title)}
       <div style="min-width:0;"><div class="t">${esc(s.title)}</div><div class="m">${esc(names[s.host_id] || "Relvia Live")}</div></div>
       <span class="k live">${s.viewer_count || 0} watching</span>
@@ -278,5 +281,6 @@ const cover = (url, title) => url
 </script>
 
 <script src="beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
 </body>
 </html>
