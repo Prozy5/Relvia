@@ -187,6 +187,55 @@ function showToast(message){
   setTimeout(() => toast.classList.remove("show"), 2400);
 }
 
+
+// ---- RelviaLive logo watermark (only for the RelviaLive account) ----
+const RELVIALIVE_USER_ID = "c1dc06a3-7360-443a-9156-2f5ff52bb2ed";
+const RELVIALIVE_LOGO_URL = "relvia-logo.png";
+function isRelviaLive(){ return !!currentUser && currentUser.id === RELVIALIVE_USER_ID; }
+function makeWatermarkProcessor(){
+  const logo = new Image(); logo.src = RELVIALIVE_LOGO_URL;
+  let srcEl = null, canvas = null, ctx = null, raf = 0, outTrack = null;
+  return {
+    name: "relvia-logo-watermark",
+    async init({ track }){
+      srcEl = document.createElement("video");
+      srcEl.srcObject = new MediaStream([track]);
+      srcEl.muted = true; srcEl.playsInline = true;
+      await srcEl.play();
+      canvas = document.createElement("canvas");
+      canvas.width = 1280; canvas.height = 720;
+      ctx = canvas.getContext("2d");
+      const draw = () => {
+        ctx.drawImage(srcEl, 0, 0, canvas.width, canvas.height);
+        if (logo.complete && logo.naturalWidth){
+          const h = 70, w = logo.naturalWidth * (h / logo.naturalHeight);
+          ctx.globalAlpha = 0.85;
+          ctx.drawImage(logo, canvas.width - w - 28, 24, w, h);
+          ctx.globalAlpha = 1;
+        }
+        raf = requestAnimationFrame(draw);
+      };
+      draw();
+      outTrack = canvas.captureStream(30).getVideoTracks()[0];
+      this.processedTrack = outTrack;
+    },
+    async restart({ track }){ await this.destroy(); return this.init({ track }); },
+    async destroy(){
+      cancelAnimationFrame(raf);
+      if (srcEl) srcEl.srcObject = null;
+      if (outTrack) outTrack.stop();
+    }
+  };
+}
+async function applyWatermark(){
+  if (!isRelviaLive() || !currentRoom) return;
+  const pub = currentRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
+  if (pub?.track && pub.track.setProcessor){
+    try { await pub.track.setProcessor(makeWatermarkProcessor()); }
+    catch (e){ console.error("watermark failed, streaming without it:", e); }
+  }
+}
+
 async function initialize(){
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData || !sessionData.session){ window.location.href = "live-login.html"; return; }
@@ -302,6 +351,7 @@ async function goLive(){
     await room.connect(LIVEKIT_URL, result.token);
     await room.localParticipant.setCameraEnabled(true);
     await room.localParticipant.setMicrophoneEnabled(true);
+    await applyWatermark();
 
     // Attach local camera preview.
     const videoPub = room.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
@@ -352,7 +402,7 @@ function toggleMic(){
 function toggleCam(){
   if (!currentRoom) return;
   camOn = !camOn;
-  currentRoom.localParticipant.setCameraEnabled(camOn);
+  currentRoom.localParticipant.setCameraEnabled(camOn).then(() => { if (camOn) applyWatermark(); });
   const btn = document.getElementById("toggleCamBtn");
   btn.textContent = camOn ? "Turn off camera" : "Turn on camera";
   btn.classList.toggle("off", !camOn);
@@ -454,5 +504,6 @@ async function endStream(){
 initialize();
 </script>
 <script src="../beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
 </body>
 </html>
