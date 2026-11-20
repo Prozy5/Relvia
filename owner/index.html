@@ -2579,7 +2579,11 @@ async function loadRanks(){
     supabaseClient.rpc("perm_list"),
     supabaseClient.rpc("override_list"),
   ]);
-  if (ranksRes.error){ console.error(ranksRes.error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load ranks.</td></tr>`; return; }
+  if (ranksRes.error){
+    console.error(ranksRes.error);
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load ranks: ${escapeHtml(ranksRes.error.message || "unknown error")}</td></tr>`;
+    return;
+  }
   rankCache = ranksRes.data || [];
   const cats = catsRes.data || [];
   const customs = permsRes.data || [];
