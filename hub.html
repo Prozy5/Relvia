@@ -264,6 +264,15 @@ footer a{ color:var(--gold); }
       </div>
     </section>
 
+    <!-- PINNED ANNOUNCEMENT (latest from the dev blog Announcements category) -->
+    <section class="card wide" id="announceBox">
+      <div class="card-head">
+        <div><h2>Latest announcement</h2><div class="hint">Straight from the Relvia team.</div></div>
+        <a class="tag muted" href="devblog.html#c/announcements">All announcements</a>
+      </div>
+      <div id="announceBody"><p class="empty">Loading…</p></div>
+    </section>
+
     <!-- FEED -->
     <section class="card">
       <div class="card-head">
@@ -442,6 +451,24 @@ async function loadBlog(){
     </div>`).join("");
 }
 
+/* ---------- latest announcement (newest visible post in the Announcements category) ---------- */
+async function loadAnnouncement(){
+  const box = document.getElementById("announceBody");
+  const { data, error } = await sb.from("hub_threads")
+    .select("id, title, body, created_at, pinned")
+    .eq("category_id", "announcements").eq("hidden", false)
+    .order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(1);
+  if (error || !data || !data.length){ box.innerHTML = '<p class="empty">No announcements yet.</p>'; return; }
+  const a = data[0];
+  const excerpt = (a.body || "").length > 280 ? a.body.slice(0, 280) + "…" : (a.body || "");
+  box.innerHTML = `
+    <div class="item">
+      <div class="by">${new Date(a.created_at).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}${a.pinned ? " · Pinned" : ""}</div>
+      <div class="t"><strong>${esc(a.title)}</strong>${esc(excerpt)}</div>
+      <div class="d"><a href="devblog.html#t/${esc(a.id)}" style="color:var(--gold);font-weight:700;">Read the full announcement →</a></div>
+    </div>`;
+}
+
 /* ---------- signed-in: earnings, owner view, owner blog form ---------- */
 async function loadSignedIn(){
   const { data: profile } = await sb.from("profiles").select("display_name, username").eq("id", user.id).maybeSingle();
@@ -550,6 +577,7 @@ async function start(){
     loadRecap(),
     loadLatest(),
     loadBlog(),
+    loadAnnouncement(),
     user ? loadSignedIn() : Promise.resolve(),
     loadChatHistory(),
   ]);
