@@ -93,6 +93,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-family
 .timeline-msg{ font-size:13.5px; color:#ddd; line-height:1.5; }
 
 .empty{ text-align:center; color:var(--muted); padding:30px 0; font-size:13.5px; }
+.updated-at{ font-size:11.5px; color:var(--muted-soft); margin-top:12px; }
 </style>
 </head>
 <body>
@@ -110,6 +111,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-family
     <div class="status-dot" id="statusDot"></div>
     <h1 id="statusHeroText">Checking status...</h1>
     <p id="statusHeroSub"></p>
+    <p id="statusUpdated" class="updated-at"></p>
   </div>
 
   <div class="eyebrow">Components</div>
@@ -149,6 +151,18 @@ const STATUS_LABELS = {
 async function loadAutoStatus(){
   const hero = document.getElementById("statusHero");
 
+  // Whole-platform shutdown wins over everything else.
+  try {
+    const sd = await supabaseClient.rpc("platform_shutdown_status");
+    if (!sd.error && sd.data && sd.data.is_on){
+      hero.className = "status-hero major_outage";
+      document.getElementById("statusHeroText").textContent = "Relvia is shut down";
+      document.getElementById("statusHeroSub").textContent = sd.data.message || "Relvia is temporarily closed.";
+      return;
+    }
+  } catch (e) {}
+
+
   const { data, error } = await supabaseClient.rpc("get_ecosystem_status");
 
   if (error || !data || data.length === 0){
@@ -162,15 +176,17 @@ async function loadAutoStatus(){
   hero.className = `status-hero ${overall_status}`;
   document.getElementById("statusHeroText").textContent = STATUS_LABELS[overall_status] || overall_status;
 
+  const sub = document.getElementById("statusHeroSub");
   if (is_override){
-    document.getElementById("statusHeroSub").textContent = override_message || "Manually reported by Relvia staff.";
-    document.getElementById("statusHeroSub").innerHTML += `<br><span class="override-tag">Manually reported</span>`;
+    // escaped: staff-written text must never be read as HTML
+    sub.innerHTML = `${escapeHtml(override_message || "Manually reported by Relvia staff.")}<br><span class="override-tag">Manually reported</span>`;
   } else {
-    document.getElementById("statusHeroSub").textContent =
+    sub.textContent =
       overall_status === "operational"
         ? `All ${total_count} monitored pages are up.`
         : `${closed_count} of ${total_count} monitored pages are currently closed.`;
   }
+  document.getElementById("statusUpdated").textContent = `Last checked ${new Date().toLocaleTimeString()}`;
 }
 
 // ==========================================================
@@ -181,7 +197,11 @@ async function loadComponents(){
 
   const { data, error } = await supabaseClient.rpc("get_page_locks_public");
 
-  if (error || !data || data.length === 0){
+  if (error){
+    container.innerHTML = `<div class="empty">Couldn't load components. Retrying shortly.</div>`;
+    return;
+  }
+  if (!data || data.length === 0){
     container.innerHTML = `<div class="empty">No component data available.</div>`;
     return;
   }
@@ -228,18 +248,26 @@ async function loadTimeline(){
     .order("created_at", { ascending:false })
     .limit(15);
 
-  if (error || !data || data.length === 0){
+  if (error){
+    timeline.innerHTML = `<div class="empty">Couldn't load updates. Retrying shortly.</div>`;
+    return;
+  }
+  if (!data || data.length === 0){
     timeline.innerHTML = `<div class="empty">No manual updates posted yet.</div>`;
     return;
   }
 
+  // Every status the owner panel can post gets a colour; anything unknown falls back to "degraded".
+  const PILL = { operational: "operational", degraded: "degraded", degraded_performance: "degraded", maintenance: "maintenance", outage: "outage", partial_outage: "outage", major_outage: "outage" };
   timeline.innerHTML = "";
   data.forEach(update => {
     const item = document.createElement("div");
     item.className = "timeline-item";
+    const pill = PILL[update.status] || "degraded";
+    const label = String(update.status || "update").replace(/_/g, " ");
     item.innerHTML = `
       <div class="timeline-head">
-        <span class="timeline-pill ${update.status}">${escapeHtml(update.status)}</span>
+        <span class="timeline-pill ${pill}">${escapeHtml(label)}</span>
         <span class="timeline-time">${new Date(update.created_at).toLocaleString()}</span>
       </div>
       <div class="timeline-msg">${escapeHtml(update.message || "")}</div>`;
@@ -256,5 +284,6 @@ function loadAll(){
 loadAll();
 setInterval(loadAll, 30000);
 </script>
+<script src="beta-toolkit.js"></script>
 </body>
 </html>
