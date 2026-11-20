@@ -84,17 +84,24 @@ h1 em{ font-style:italic; font-weight:600; color:var(--gold); }
 .field{ width:100%; background:#0a0705; border:1px solid var(--border); border-radius:12px; padding:11px 14px; font-size:14px; }
 .field:focus{ outline:none; border-color:var(--gold); }
 textarea.field{ resize:vertical; min-height:110px; }
+.file-label{ font-size:12.5px; color:var(--muted); display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+.file-label input{ font-size:12px; }
 
-.card{ border:1px solid var(--border); border-radius:20px; padding:22px 24px; margin-bottom:16px; background:linear-gradient(180deg,var(--panel-2),#0d0905); }
+.card{ border:1px solid var(--border); border-radius:20px; padding:22px 24px; margin-bottom:16px; background:linear-gradient(180deg,var(--panel-2),#0d0905); position:relative; }
 .card.pinned{ border-color:var(--line); }
 .card.hidden{ opacity:.6; border-style:dashed; }
+.card.picked{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(224,177,88,.25) inset; }
 a.thread{ display:block; transition:border-color .2s, transform .2s; }
 a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--soft); margin-bottom:8px; }
-.row b{ color:var(--gold); font-weight:700; }
+.row b, .by-link{ color:var(--gold); font-weight:700; }
+.by-link:hover{ color:var(--gold-hi); text-decoration:underline; }
 .title{ font-family:var(--display); font-size:22px; font-weight:600; line-height:1.25; margin-bottom:6px; overflow-wrap:anywhere; }
 .excerpt{ font-size:14px; color:#cfc6b7; overflow-wrap:anywhere; }
-.body{ font-size:15px; color:#e4dccd; white-space:pre-wrap; overflow-wrap:anywhere; }
+.body{ font-size:15px; color:#e4dccd; overflow-wrap:anywhere; }
+.body code{ background:#0a0705; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+.body a{ color:var(--gold); text-decoration:underline; }
+.post-img{ display:block; max-width:100%; max-height:420px; border-radius:14px; border:1px solid var(--border); margin-top:14px; }
 .count{ font-size:12px; color:var(--muted); }
 
 .tag{ font-size:9.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
@@ -110,6 +117,10 @@ a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 .react.on{ border-color:var(--gold); background:rgba(224,177,88,.12); }
 .react.on span{ color:var(--gold-hi); }
 
+.bulkbar{ position:sticky; top:86px; z-index:20; display:none; gap:8px; flex-wrap:wrap; align-items:center; padding:12px 14px; margin-bottom:14px;
+  border:1px solid var(--line); border-radius:16px; background:rgba(17,13,8,.95); backdrop-filter:blur(8px); }
+.bulkbar.show{ display:flex; }
+
 .mod{ border:1px solid var(--line); border-radius:18px; padding:16px; margin:18px 0; background:rgba(224,177,88,.04); }
 .mod h4{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
 .mod .acts{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -117,7 +128,6 @@ a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 
 .reply{ padding:16px 0; border-top:1px solid var(--border-soft); }
 .reply:first-child{ border-top:none; }
-.reply .foot{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:10px; }
 .reply .foot button{ background:none; border:none; font-size:12px; color:var(--soft); font-weight:700; padding:4px 0; }
 .reply .foot button:hover{ color:var(--gold); }
 
@@ -125,13 +135,13 @@ a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 .editor{ display:grid; gap:10px; margin-top:12px; }
 .note{ font-size:12.5px; color:var(--soft); }
 .note.err{ color:var(--danger); }
-.note.ok{ color:var(--ok); }
 
 .state{ text-align:center; color:var(--soft); padding:50px 20px; border:1px dashed var(--border); border-radius:20px; }
 .state h3{ font-family:var(--display); font-size:22px; color:var(--text); font-weight:600; margin-bottom:6px; }
 .back{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; letter-spacing:.6px; color:var(--gold); margin-bottom:18px; }
 .logline{ font-size:12.5px; color:var(--soft); padding:7px 0; border-top:1px solid var(--border-soft); }
 .logline:first-child{ border-top:none; }
+.section-h{ font-family:var(--display); font-size:22px; font-weight:600; margin:30px 0 10px; }
 
 .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--panel-2); border:1px solid var(--gold); padding:11px 18px; border-radius:14px; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:50; }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
@@ -189,15 +199,20 @@ footer a{ color:var(--gold); }
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const IMG_PREFIX = SUPABASE_URL + "/storage/v1/object/public/devblog-images/";
+const MAX_IMG = 3 * 1024 * 1024;
 
 const EMOJIS = ["👍", "🔥", "🐛"];
 let me = null, role = null, staff = false, owner = false, cats = [];
+let bulkMode = false;
+const picked = new Set();
 const view = document.getElementById("view");
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const when = iso => new Date(iso).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
 const excerpt = (s, n = 180) => (s || "").length > n ? s.slice(0, n) + "…" : (s || "");
 const catById = id => cats.find(c => c.id === id);
+const safeImg = url => url && url.startsWith(IMG_PREFIX);
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("show");
@@ -220,6 +235,16 @@ async function names(ids){
 }
 async function log(action, type, id, note = ""){
   await sb.from("hub_mod_log").insert({ actor_id: me.id, action, target_type: type, target_id: String(id), note });
+}
+
+/* ---------- rich text: **bold**, *italic*, `code`, [link](https://...) ---------- */
+function rich(text){
+  let s = esc(text);
+  s = s.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  s = s.replace(/\[([^\]\n]{1,80})\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener nofollow">$1</a>');
+  return s.replace(/\n/g, "<br>");
 }
 
 /* ---------- reactions ---------- */
@@ -295,12 +320,12 @@ function renderNav(active){
       ${c.visibility === "owner" ? '<span class="lock">Owner</span>' : ""}</a>`).join("");
 }
 
-/* ---------- thread list (shared by categories and search) ---------- */
+/* ---------- thread list (shared by categories, search and author pages) ---------- */
 function threadList(threads, who, showCat){
   return threads.map(t => `
-    <a class="card thread ${t.pinned ? "pinned" : ""} ${t.hidden ? "hidden" : ""}" href="#t/${t.id}">
+    <a class="card thread ${t.pinned ? "pinned" : ""} ${t.hidden ? "hidden" : ""} ${picked.has(t.id) ? "picked" : ""}" href="#t/${t.id}" data-tid="${t.id}">
       <div class="row">
-        <b>${esc(who[t.author_id] || "Relvia member")}</b> · <span>${when(t.created_at)}</span>
+        <span class="by-link" data-user="${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</span> · <span>${when(t.created_at)}</span>
         ${showCat && catById(t.category_id) ? `<span class="tag">${esc(catById(t.category_id).name)}</span>` : ""}
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
@@ -308,14 +333,16 @@ function threadList(threads, who, showCat){
       </div>
       <div class="title">${esc(t.title)}</div>
       <div class="excerpt">${esc(excerpt(t.body))}</div>
+      ${t.image_url && safeImg(t.image_url) ? `<img class="post-img" src="${esc(t.image_url)}" alt="" loading="lazy" style="max-height:200px;">` : ""}
       <div class="row" style="margin:12px 0 0;"><span class="count">${t.reply_count} repl${t.reply_count === 1 ? "y" : "ies"}</span>
         ${t.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
     </a>`).join("");
 }
-async function queryThreads({ cat, sort, unanswered, q }){
+async function queryThreads({ cat, sort, unanswered, q, author }){
   let qy = sb.from("hub_threads")
-    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id");
+    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url");
   if (cat) qy = qy.eq("category_id", cat).order("pinned", { ascending: false });
+  if (author) qy = qy.eq("author_id", author);
   if (q){
     const s = q.replace(/[,()%*]/g, " ").trim();
     qy = qy.or(`title.ilike.%${s}%,body.ilike.%${s}%`);
@@ -367,7 +394,24 @@ async function renderCategory(id, params){
         <label><input type="checkbox" id="unansw" ${unanswered ? "checked" : ""}> Unanswered only</label>
         <span class="count" id="countLine"></span>
       </div>
-      ${canPost(cat) ? '<button class="btn sm" id="newBtn">New thread</button>' : ""}
+      <div style="display:flex;gap:8px;">
+        ${staff ? '<button class="btn ghost sm" id="bulkToggle">Select threads</button>' : ""}
+        ${canPost(cat) ? '<button class="btn sm" id="newBtn">New thread</button>' : ""}
+      </div>
+    </div>
+    <div class="bulkbar" id="bulkbar">
+      <span class="count" id="bulkCount">0 selected</span>
+      <button class="btn ghost sm" data-bulk="lock">Lock</button>
+      <button class="btn ghost sm" data-bulk="unlock">Unlock</button>
+      <button class="btn ghost sm" data-bulk="pin">Pin</button>
+      <button class="btn ghost sm" data-bulk="unpin">Unpin</button>
+      <button class="btn ghost sm" data-bulk="hide">Hide</button>
+      <button class="btn ghost sm" data-bulk="unhide">Unhide</button>
+      <select class="field" id="bulkMove" style="width:auto;padding:7px 10px;font-size:12.5px;">
+        <option value="">Move to…</option>
+        ${cats.filter(c => c.id !== id).map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}
+      </select>
+      <button class="btn danger sm" data-bulk="clear">Clear</button>
     </div>
     <div id="newForm" hidden></div>
     <div id="threads"><div class="state"><p>Loading…</p></div></div>`;
@@ -397,11 +441,67 @@ async function renderCategory(id, params){
       f.innerHTML = f.hidden ? "" : `
         <form class="card form" id="threadForm">
           <input class="field" id="tTitle" placeholder="Thread title" maxlength="160" required>
-          <textarea class="field" id="tBody" placeholder="What's on your mind?" maxlength="8000"></textarea>
+          <textarea class="field" id="tBody" placeholder="What's on your mind? Use **bold**, *italic*, \`code\` or [link](https://…)" maxlength="8000"></textarea>
+          <label class="file-label">Add an image (optional, up to 3 MB) <input type="file" id="tImg" accept="image/*"></label>
           <div class="toolbar" style="margin:0;"><button class="btn sm" type="submit">Post thread</button><span class="note" id="tMsg"></span></div>
         </form>`;
     });
   }
+
+  // Bulk selection (staff)
+  const bulkbar = document.getElementById("bulkbar");
+  const refreshBulk = () => {
+    document.getElementById("bulkCount").textContent = `${picked.size} selected`;
+    document.querySelectorAll("a.thread[data-tid]").forEach(a => a.classList.toggle("picked", picked.has(a.dataset.tid)));
+  };
+  const bulkBtn = document.getElementById("bulkToggle");
+  if (bulkBtn){
+    bulkBtn.addEventListener("click", () => {
+      bulkMode = !bulkMode;
+      bulkBtn.textContent = bulkMode ? "Done selecting" : "Select threads";
+      bulkbar.classList.toggle("show", bulkMode);
+      if (!bulkMode){ picked.clear(); refreshBulk(); }
+    });
+  }
+  box.addEventListener("click", e => {
+    const a = e.target.closest("a.thread[data-tid]");
+    if (!a || !bulkMode) return;
+    e.preventDefault();
+    const tid = a.dataset.tid;
+    picked.has(tid) ? picked.delete(tid) : picked.add(tid);
+    refreshBulk();
+  });
+  bulkbar.addEventListener("click", async e => {
+    const b = e.target.closest("[data-bulk]");
+    if (!b) return;
+    const act = b.dataset.bulk;
+    if (act === "clear"){ picked.clear(); refreshBulk(); return; }
+    const ids = [...picked];
+    if (!ids.length){ toast("Select at least one thread."); return; }
+    let patch = null;
+    if (act === "lock" || act === "unlock") patch = { locked: act === "lock" };
+    if (act === "pin" || act === "unpin") patch = { pinned: act === "pin" };
+    if (act === "hide" || act === "unhide") patch = { hidden: act === "hide" };
+    if (act === "move"){ return; }
+    if (!patch) return;
+    const { error: upErr } = await sb.from("hub_threads").update(patch).in("id", ids);
+    if (upErr){ toast("Couldn't apply that. Check your permissions."); return; }
+    await sb.from("hub_mod_log").insert(ids.map(id => ({ actor_id: me.id, action: `bulk-${act}`, target_type: "thread", target_id: id, note: `${ids.length} selected` })));
+    picked.clear();
+    toast(`${ids.length} thread${ids.length === 1 ? "" : "s"} updated.`);
+    route();
+  });
+  document.getElementById("bulkMove").addEventListener("change", async e => {
+    const target = e.target.value;
+    const ids = [...picked];
+    if (!target || !ids.length){ e.target.value = ""; if (!ids.length) toast("Select at least one thread."); return; }
+    const { error: mvErr } = await sb.from("hub_threads").update({ category_id: target }).in("id", ids);
+    if (mvErr){ toast("Couldn't move those threads."); return; }
+    await sb.from("hub_mod_log").insert(ids.map(id => ({ actor_id: me.id, action: "bulk-move", target_type: "thread", target_id: id, note: "to " + target })));
+    picked.clear();
+    toast(`${ids.length} thread${ids.length === 1 ? "" : "s"} moved.`);
+    route();
+  });
 }
 
 /* ---------- search results ---------- */
@@ -420,6 +520,43 @@ async function renderSearch(q){
   document.getElementById("countLine").textContent = `${threads.length} match${threads.length === 1 ? "" : "es"}`;
   box.innerHTML = threads.length ? threadList(threads, who, true)
     : '<div class="state"><h3>No matches</h3><p>Try different words.</p></div>';
+}
+
+/* ---------- author page ---------- */
+async function renderUser(uid){
+  renderNav(null);
+  const who = await names([uid]);
+  const name = who[uid];
+  if (!name){ return notFound(); }
+  view.innerHTML = `
+    <a class="back" href="#">← All categories</a>
+    <div class="eyebrow">Member</div>
+    <h1>${esc(name)}</h1>
+    <p class="lede">Recent threads and replies.</p>
+    <h3 class="section-h">Threads</h3>
+    <div id="uThreads"><div class="state"><p>Loading…</p></div></div>
+    <h3 class="section-h">Replies</h3>
+    <div id="uReplies"><div class="state"><p>Loading…</p></div></div>`;
+
+  const { data: threads } = await queryThreads({ author: uid, sort: "new" });
+  document.getElementById("uThreads").innerHTML = threads.length ? threadList(threads, who, true)
+    : '<div class="state"><p>No threads yet.</p></div>';
+
+  const { data: replies } = await sb.from("hub_replies")
+    .select("id, body, created_at, thread_id, hidden").eq("author_id", uid).order("created_at", { ascending: false }).limit(30);
+  const tIds = [...new Set((replies || []).map(r => r.thread_id))];
+  const { data: rThreads } = tIds.length
+    ? await sb.from("hub_threads").select("id, title").in("id", tIds)
+    : { data: [] };
+  const titles = Object.fromEntries((rThreads || []).map(t => [t.id, t.title]));
+  document.getElementById("uReplies").innerHTML = (replies || []).length
+    ? (replies || []).map(r => `
+      <a class="card thread ${r.hidden ? "hidden" : ""}" href="#t/${r.thread_id}">
+        <div class="row"><span>${when(r.created_at)}</span> · <span>on “${esc(titles[r.thread_id] || "a thread")}”</span>
+          ${r.hidden ? '<span class="tag hide">Hidden</span>' : ""}</div>
+        <div class="excerpt">${esc(excerpt(r.body))}</div>
+      </a>`).join("")
+    : '<div class="state"><p>No replies yet.</p></div>';
 }
 
 /* ---------- thread ---------- */
@@ -442,16 +579,17 @@ async function renderThread(id){
     <a class="back" href="#c/${esc(t.category_id)}">← ${esc(cat ? cat.name : "Back")}</a>
     <div class="card ${t.hidden ? "hidden" : ""}">
       <div class="row">
-        <b>${esc(who[t.author_id] || "Relvia member")}</b> · <span>${when(t.created_at)}</span>
+        <a class="by-link" href="#u/${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</a> · <span>${when(t.created_at)}</span>
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
         ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
         ${t.edited_at ? `<span class="tag edit">Edited ${when(t.edited_at)}</span>` : ""}
       </div>
-      <div class="editable" data-type="thread" data-id="${t.id}">
+      <div class="editable" data-type="thread" data-id="${t.id}" data-raw="${esc(t.body)}" data-title="${esc(t.title)}">
         <h1 class="t-title" style="font-size:clamp(28px,3.6vw,40px);">${esc(t.title)}</h1>
-        ${t.body ? `<div class="body t-body" style="margin-top:14px;">${esc(t.body)}</div>` : ""}
-        <div class="foot" style="display:flex;gap:12px;margin-top:12px;">
+        ${t.body ? `<div class="body t-body" style="margin-top:14px;">${rich(t.body)}</div>` : ""}
+        ${t.image_url && safeImg(t.image_url) ? `<img class="post-img" src="${esc(t.image_url)}" alt="Attached image" loading="lazy">` : ""}
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
           ${mine && !t.locked && !t.hidden ? '<button class="btn ghost sm" data-act="edit">Edit</button>' : ""}
           ${me ? `<button class="btn ghost sm" data-act="report" data-type="thread" data-id="${t.id}">Report</button>` : ""}
         </div>
@@ -474,17 +612,18 @@ async function renderThread(id){
       </div>
     </div>` : ""}
 
-    <h3 style="font-family:var(--display);font-size:22px;font-weight:600;margin:28px 0 6px;">${list.length} repl${list.length === 1 ? "y" : "ies"}</h3>
+    <h3 class="section-h" style="margin:28px 0 6px;">${list.length} repl${list.length === 1 ? "y" : "ies"}</h3>
     <div id="replies">
       ${list.map(r => {
         const rMine = me && r.author_id === me.id;
         return `
         <div class="reply ${r.hidden ? "hidden" : ""}" style="${r.hidden ? "opacity:.6;" : ""}">
-          <div class="row"><b>${esc(who[r.author_id] || "Relvia member")}</b> · <span>${when(r.created_at)}</span>
+          <div class="row"><a class="by-link" href="#u/${r.author_id || ""}">${esc(who[r.author_id] || "Relvia member")}</a> · <span>${when(r.created_at)}</span>
             ${r.hidden ? '<span class="tag hide">Hidden</span>' : ""}
             ${r.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
-          <div class="editable" data-type="reply" data-id="${r.id}">
-            <div class="body t-body">${esc(r.body)}</div>
+          <div class="editable" data-type="reply" data-id="${r.id}" data-raw="${esc(r.body)}">
+            <div class="body t-body">${rich(r.body)}</div>
+            ${r.image_url && safeImg(r.image_url) ? `<img class="post-img" src="${esc(r.image_url)}" alt="Attached image" loading="lazy">` : ""}
             <div class="foot" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
               ${rMine && !r.hidden ? '<button data-act="edit">Edit</button>' : ""}
               ${me ? `<button data-act="report" data-type="reply" data-id="${r.id}">Report</button>` : ""}
@@ -502,13 +641,26 @@ async function renderThread(id){
       ${!me ? '<p class="note">Sign in to reply.</p>'
         : !canReply ? '<p class="note">This thread is locked. Replies are closed.</p>'
         : `<form class="form" id="replyForm">
-             <textarea class="field" id="replyBody" placeholder="Write a reply…" maxlength="4000" required></textarea>
+             <textarea class="field" id="replyBody" placeholder="Write a reply… (**bold**, *italic*, \`code\`, [link](https://…))" maxlength="4000" required></textarea>
+             <label class="file-label">Add an image (optional, up to 3 MB) <input type="file" id="rImg" accept="image/*"></label>
              <div class="toolbar" style="margin:0;"><button class="btn sm" type="submit">Reply</button><span class="note" id="rMsg"></span></div>
            </form>`}
     </div>`;
 
   view.dataset.thread = t.id;
   view.dataset.cat = t.category_id;
+}
+
+/* ---------- uploads ---------- */
+async function uploadImage(file){
+  if (!file) return null;
+  if (!file.type.startsWith("image/")) throw new Error("That file isn't an image.");
+  if (file.size > MAX_IMG) throw new Error("Images have to be 3 MB or smaller.");
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60);
+  const path = `${me.id}/${Date.now()}-${safe}`;
+  const { error } = await sb.storage.from("devblog-images").upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw new Error("Couldn't upload the image.");
+  return sb.storage.from("devblog-images").getPublicUrl(path).data.publicUrl;
 }
 
 /* ---------- moderation queue (staff) ---------- */
@@ -557,7 +709,7 @@ async function loadModPanel(){
 }
 
 function notFound(){
-  view.innerHTML = `<a class="back" href="#">← All categories</a><div class="state"><h3>Not found</h3><p>That thread or category doesn't exist, or you don't have access to it.</p></div>`;
+  view.innerHTML = `<a class="back" href="#">← All categories</a><div class="state"><h3>Not found</h3><p>That page doesn't exist, or you don't have access to it.</p></div>`;
 }
 
 /* ---------- actions (event delegation) ---------- */
@@ -581,13 +733,11 @@ view.addEventListener("click", async e => {
 
   if (act === "edit"){
     const box = el.closest(".editable");
-    const title = box.querySelector(".t-title");
-    const body = box.querySelector(".t-body");
     const isThread = box.dataset.type === "thread";
     box.innerHTML = `
       <div class="editor">
-        ${isThread ? `<input class="field ed-title" maxlength="160" value="${esc(title ? title.textContent : "")}">` : ""}
-        <textarea class="field ed-body" maxlength="${isThread ? 8000 : 4000}">${esc(body ? body.textContent : "")}</textarea>
+        ${isThread ? `<input class="field ed-title" maxlength="160" value="${esc(box.dataset.title)}">` : ""}
+        <textarea class="field ed-body" maxlength="${isThread ? 8000 : 4000}">${esc(box.dataset.raw)}</textarea>
         <div class="toolbar" style="margin:0;">
           <button class="btn sm" data-act="save" data-type="${box.dataset.type}" data-id="${box.dataset.id}">Save changes</button>
           <button class="btn ghost sm" data-act="cancel">Cancel</button>
@@ -674,18 +824,31 @@ view.addEventListener("submit", async e => {
     const msg = document.getElementById("tMsg");
     const cat = (location.hash.match(/^#c\/([^/?]+)/) || [])[1];
     if (title.length < 3){ msg.className = "note err"; msg.textContent = "Titles need at least 3 characters."; return; }
-    const { data, error } = await sb.from("hub_threads").insert({ category_id: cat, author_id: me.id, title, body }).select("id").single();
-    if (error){ msg.className = "note err"; msg.textContent = "Couldn't post. You may not have permission here."; return; }
-    location.hash = "#t/" + data.id;
+    try {
+      msg.className = "note"; msg.textContent = "Posting…";
+      const image_url = await uploadImage(document.getElementById("tImg").files[0]);
+      const { data, error } = await sb.from("hub_threads").insert({ category_id: cat, author_id: me.id, title, body, image_url }).select("id").single();
+      if (error) throw new Error("Couldn't post. You may not have permission here.");
+      location.hash = "#t/" + data.id;
+    } catch (err){ msg.className = "note err"; msg.textContent = err.message; }
   }
   if (e.target.id === "replyForm"){
     const body = document.getElementById("replyBody").value.trim();
     const msg = document.getElementById("rMsg");
     if (!body) return;
-    const { error } = await sb.from("hub_replies").insert({ thread_id: view.dataset.thread, author_id: me.id, body });
-    if (error){ msg.className = "note err"; msg.textContent = "Couldn't reply. The thread may be locked or you may be banned."; return; }
-    route();
+    try {
+      msg.className = "note"; msg.textContent = "Posting…";
+      const image_url = await uploadImage(document.getElementById("rImg").files[0]);
+      const { error } = await sb.from("hub_replies").insert({ thread_id: view.dataset.thread, author_id: me.id, body, image_url });
+      if (error) throw new Error("Couldn't reply. The thread may be locked or you may be banned.");
+      route();
+    } catch (err){ msg.className = "note err"; msg.textContent = err.message; }
   }
+});
+
+view.addEventListener("click", e => {
+  const link = e.target.closest("[data-user]");
+  if (link && !bulkMode && link.dataset.user) { /* normal anchor navigation via href */ }
 });
 
 /* ---------- routing ---------- */
@@ -695,6 +858,7 @@ async function route(){
   if (path.startsWith("#t/")) return renderThread(path.slice(3));
   if (path.startsWith("#c/")) return renderCategory(path.slice(3), params);
   if (path.startsWith("#s/")) return renderSearch(decodeURIComponent(path.slice(3)));
+  if (path.startsWith("#u/")) return renderUser(path.slice(3));
   return renderHome();
 }
 
@@ -717,12 +881,11 @@ async function start(){
   cats = data || [];
   renderNav(null);
 
-  window.addEventListener("hashchange", route);
+  window.addEventListener("hashchange", () => { picked.clear(); bulkMode = false; route(); });
   await route();
-  // Refresh every minute, but not while someone is typing or editing.
   setInterval(() => {
     const typing = document.activeElement && ["TEXTAREA", "INPUT", "SELECT"].includes(document.activeElement.tagName);
-    if (!typing){ route(); if (me) loadBadge(); }
+    if (!typing && !bulkMode){ route(); if (me) loadBadge(); }
   }, 60000);
 }
 start().catch(() => { view.innerHTML = '<div class="state"><h3>Something went wrong</h3><p>Refresh the page and try again.</p></div>'; });
