@@ -103,14 +103,14 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-family
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
-<body>
+<body data-page-key="campus_go_live">
 
 <header class="topbar">
   <div class="brand">
     <div class="brand-badge">R</div>
     <span class="brand-name">Go Live — Campus</span>
   </div>
-  <a class="back-link" href="campus.html">← Back to Relvia Campus</a>
+  <a class="back-link" href="index.html">← Back to Relvia Campus</a>
 </header>
 
 <div class="container">
@@ -155,7 +155,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BROADCAST_ENDPOINT = `${SUPABASE_URL}/functions/v1/mint-campus-broadcast-token`;
 
 // Same LiveKit project as Relvia Live — replace with your real URL.
-const LIVEKIT_URL = "wss://YOUR-PROJECT.livekit.cloud"; // <-- replace this
+const LIVEKIT_URL = "wss://relvia-entertainment-44y38cgp.livekit.cloud";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: "relvia-campus-auth" }
@@ -177,9 +177,9 @@ function showToast(message){
 
 async function initialize(){
   const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (!sessionData || !sessionData.session){ window.location.href = "campus-login.html"; return; }
+  if (!sessionData || !sessionData.session){ window.location.href = "login.html"; return; }
   const { data: userData } = await supabaseClient.auth.getUser();
-  if (!userData.user){ window.location.href = "campus-login.html"; return; }
+  if (!userData.user){ window.location.href = "login.html"; return; }
   currentUser = userData.user;
 
   const { data: categories } = await supabaseClient.from("campus_categories").select("*").order("sort_order", { ascending:true });
@@ -291,10 +291,13 @@ async function endStream(){
   }
 
   showToast("Stream ended");
-  setTimeout(() => { window.location.href = "campus.html"; }, 1000);
+  setTimeout(() => { window.location.href = "index.html"; }, 1000);
 }
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
+<script src="/page-lock.js"></script>
 </body>
 </html>
