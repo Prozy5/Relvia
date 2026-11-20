@@ -574,6 +574,67 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div>
 
+    <!-- RANKS (owners and founders) -->
+    <div class="section" id="ranksSection" style="display:none;">
+      <div class="section-head"><h2>Ranks</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Create ranks, choose what each one can do, and promote people. The person needs a Relvia account first. Ranks with Moderate act as staff on the Dev Blog.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Rank</th><th>Permissions</th><th>People</th><th>Actions</th></tr></thead>
+          <tbody id="ranksTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="panel" style="margin-top:14px;padding:16px;">
+        <h3 style="font-size:14px;margin-bottom:10px;">Create or edit a rank</h3>
+        <input type="hidden" id="rankId">
+        <div class="add-form">
+          <input type="text" id="rankName" placeholder="Rank name (e.g. Dev Blog Staff)" maxlength="40" style="flex:1;min-width:200px;">
+          <input type="color" id="rankColor" value="#e0b158" style="width:52px;height:40px;" title="Rank colour">
+          <input type="number" id="rankPosition" value="0" style="width:100px;" title="Higher numbers show first">
+        </div>
+        <div id="rankPermBoxes" style="display:grid;gap:8px;margin:12px 0;"></div>
+        <div class="add-form">
+          <button class="btn gold" id="saveRankBtn">Save rank</button>
+          <button class="btn" id="clearRankBtn">Clear</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:14px;padding:16px;">
+        <h3 style="font-size:14px;margin-bottom:10px;">Promote someone</h3>
+        <div class="add-form">
+          <input type="email" id="promoteEmail" placeholder="Email (must have a Relvia account)" style="flex:1;min-width:240px;">
+          <select id="promoteRank" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;"></select>
+          <button class="btn gold" id="promoteBtn">Promote</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:14px;padding:16px;">
+        <h3 style="font-size:14px;margin-bottom:10px;">Create a permission</h3>
+        <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 10px;">Custom permissions appear in the rank form. Use a short name with letters, numbers, or dashes, like "giveaways".</p>
+        <div class="add-form">
+          <input type="text" id="permSlug" placeholder="Name (e.g. giveaways)" maxlength="30" style="width:200px;">
+          <input type="text" id="permLabel" placeholder="Label for staff (e.g. Run giveaways)" maxlength="60" style="flex:1;min-width:220px;">
+          <button class="btn gold" id="createPermBtn">Create permission</button>
+        </div>
+        <div id="customPermList" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+      <div class="panel" style="margin-top:14px;padding:16px;">
+        <h3 style="font-size:14px;margin-bottom:10px;">Overrides</h3>
+        <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 10px;">Allow or deny one permission for one person, on top of their ranks. Founder overrides beat owner overrides. Owners can't change a founder's override or set overrides on owners.</p>
+        <table>
+          <thead><tr><th>Person</th><th>Permission</th><th>Effect</th><th>Set by</th><th>Actions</th></tr></thead>
+          <tbody id="overridesTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+        <div class="add-form" style="margin-top:12px;">
+          <input type="email" id="overrideEmail" placeholder="Email (must have a Relvia account)" style="flex:1;min-width:220px;">
+          <select id="overridePerm" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;"></select>
+          <select id="overrideEffect" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="allow">Allow</option>
+            <option value="deny">Deny</option>
+          </select>
+          <button class="btn gold" id="overrideBtn">Save override</button>
+        </div>
+      </div>
+    </div>
+
     <!-- REVENUE (owner role only) -->
     <div class="section" id="revenueSection" style="display:none;">
       <div class="section-head"><h2>Revenue</h2></div>
@@ -1809,10 +1870,11 @@ async function gate(){
 
   if (myRole === "owner" || myRole === "founder"){
     document.getElementById("staffSection").style.display = "block";
+    document.getElementById("ranksSection").style.display = "block";
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
-    tasks.push(loadStaff(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig());
+    tasks.push(loadStaff(), loadRanks(), loadRevenue(), loadRelvbitsConfig(), loadStorageConfig());
   }
 
   if (myRole === "founder"){
@@ -1838,6 +1900,11 @@ async function gate(){
 
   if (myRole === "owner" || myRole === "founder"){
     document.getElementById("addStaffBtn").addEventListener("click", addStaff);
+    document.getElementById("saveRankBtn").addEventListener("click", saveRank);
+    document.getElementById("clearRankBtn").addEventListener("click", clearRankForm);
+    document.getElementById("promoteBtn").addEventListener("click", promoteUser);
+    document.getElementById("createPermBtn").addEventListener("click", createPerm);
+    document.getElementById("overrideBtn").addEventListener("click", saveOverride);
   }
 
   document.getElementById("streamSearch").addEventListener("input", (e) => renderStreams(e.target.value));
@@ -2494,6 +2561,241 @@ async function loadLeaderboard(){
       <td>${entry.viewers}</td>`;
     tbody.appendChild(row);
   });
+}
+
+// ==========================================================
+// RANKS (owners and founders — backed by rank_* SECURITY DEFINER functions)
+// ==========================================================
+let rankCache = [];
+let rankBoxesBuilt = false;
+
+async function loadRanks(){
+  const tbody = document.getElementById("ranksTableBody");
+  const [ranksRes, catsRes, permsRes, overridesRes] = await Promise.all([
+    supabaseClient.rpc("rank_list"),
+    supabaseClient.from("hub_categories").select("id, name").order("position", { ascending: true }),
+    supabaseClient.rpc("perm_list"),
+    supabaseClient.rpc("override_list"),
+  ]);
+  if (ranksRes.error){ console.error(ranksRes.error); tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load ranks.</td></tr>`; return; }
+  rankCache = ranksRes.data || [];
+  const cats = catsRes.data || [];
+  const customs = permsRes.data || [];
+  buildPermBoxes(cats, customs);
+  renderCustomPerms(customs);
+  renderOverrides(overridesRes.data || [], cats, customs);
+  rankBoxesBuilt = true;
+
+  if (!rankCache.length){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No ranks yet. Create one below.</td></tr>`;
+  } else {
+    tbody.innerHTML = "";
+    rankCache.forEach(r => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${escapeHtml(r.color)};margin-right:6px;"></span>${escapeHtml(r.name)}</td>
+        <td>${r.permissions.length ? r.permissions.map(p => `<span class="pill">${escapeHtml(p)}</span>`).join(" ") : `<span style="color:var(--muted);">None</span>`}</td>
+        <td>${r.members.length ? r.members.map(m => `<div style="font-size:12.5px;margin-bottom:4px;">${escapeHtml(m.email)} <button class="btn danger" data-revoke="${m.user_id}" style="padding:2px 8px;font-size:11px;">Remove</button></div>`).join("") : `<span style="color:var(--muted);">No one yet</span>`}</td>
+        <td><button class="btn" data-edit>Edit</button> <button class="btn danger" data-delete>Delete</button></td>`;
+      row.querySelector("[data-edit]").addEventListener("click", () => editRank(r));
+      row.querySelector("[data-delete]").addEventListener("click", () => deleteRank(r));
+      row.querySelectorAll("[data-revoke]").forEach(b => b.addEventListener("click", () => revokeRank(b.dataset.revoke, r)));
+      tbody.appendChild(row);
+    });
+  }
+
+  const sel = document.getElementById("promoteRank");
+  const current = sel.value;
+  sel.innerHTML = rankCache.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join("") || `<option value="">Create a rank first</option>`;
+  if (current && rankCache.some(r => r.id === current)) sel.value = current;
+}
+
+const RANK_DIVISIONS = [
+  { key: "studios", label: "Studios" },
+  { key: "music", label: "Music" },
+  { key: "live", label: "Live" },
+  { key: "creators", label: "Creators" },
+  { key: "campus", label: "Campus" },
+  { key: "fashion", label: "Fashion" },
+  { key: "devblog", label: "Dev Blog" },
+];
+const RANK_LEVELS = ["view", "moderate", "manage"];
+
+function buildPermBoxes(cats, customs = []){
+  const grid = "display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px 12px;align-items:center;";
+  const head = `<div style="${grid}font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;"><div>Division</div>${RANK_LEVELS.map(l => `<div>${l}</div>`).join("")}</div>`;
+  const rows = RANK_DIVISIONS.map(d => `
+    <div style="${grid}font-size:13.5px;">
+      <div>${escapeHtml(d.label)}</div>
+      ${RANK_LEVELS.map(l => `<label><input type="checkbox" value="${d.key}:${l}"></label>`).join("")}
+    </div>`).join("");
+  const posts = cats.length
+    ? `<div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-top:6px;">Dev Blog posting</div>` +
+      cats.map(c => `<label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);"><input type="checkbox" value="${escapeHtml("post:" + c.id)}"> Post in ${escapeHtml(c.name)}</label>`).join("")
+    : "";
+  const customRows = customs.length
+    ? `<div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-top:6px;">Custom</div>` +
+      customs.map(p => `<label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);"><input type="checkbox" value="${escapeHtml(p.key)}"> ${escapeHtml(p.label)}</label>`).join("")
+    : "";
+  const keep = [...document.querySelectorAll("#rankPermBoxes input:checked")].map(i => i.value);
+  document.getElementById("rankPermBoxes").innerHTML = head + rows + posts + customRows;
+  document.querySelectorAll("#rankPermBoxes input").forEach(i => { i.checked = keep.includes(i.value); });
+}
+
+function clearRankForm(){
+  document.getElementById("rankId").value = "";
+  document.getElementById("rankName").value = "";
+  document.getElementById("rankColor").value = "#e0b158";
+  document.getElementById("rankPosition").value = "0";
+  document.querySelectorAll("#rankPermBoxes input").forEach(i => i.checked = false);
+}
+
+function editRank(r){
+  document.getElementById("rankId").value = r.id;
+  document.getElementById("rankName").value = r.name;
+  document.getElementById("rankColor").value = r.color;
+  document.getElementById("rankPosition").value = r.position;
+  document.querySelectorAll("#rankPermBoxes input").forEach(i => i.checked = r.permissions.includes(i.value));
+  document.getElementById("rankName").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function saveRank(){
+  const id = document.getElementById("rankId").value || null;
+  const name = document.getElementById("rankName").value.trim();
+  const color = document.getElementById("rankColor").value;
+  const position = parseInt(document.getElementById("rankPosition").value, 10) || 0;
+  const perms = [...document.querySelectorAll("#rankPermBoxes input:checked")].map(i => i.value);
+  if (name.length < 2){ showToast("Give the rank a name"); return; }
+
+  const { error } = await supabaseClient.rpc("rank_save", { p_id: id, p_name: name, p_color: color, p_perms: perms, p_position: position });
+  if (error){ console.error(error); showToast(error.message || "Couldn't save rank"); return; }
+
+  showToast("Rank saved");
+  await logAction(id ? "edit_rank" : "create_rank", "rank", name, perms.join(", ") || "no permissions");
+  clearRankForm();
+  await loadRanks();
+}
+
+async function deleteRank(r){
+  if (!confirm(`Delete the rank "${r.name}"? Everyone with it loses its permissions.`)) return;
+  const { error } = await supabaseClient.rpc("rank_delete", { p_id: r.id });
+  if (error){ console.error(error); showToast(error.message || "Couldn't delete rank"); return; }
+  showToast("Rank deleted");
+  await logAction("delete_rank", "rank", r.name);
+  await loadRanks();
+}
+
+async function promoteUser(){
+  const email = document.getElementById("promoteEmail").value.trim();
+  const rankId = document.getElementById("promoteRank").value;
+  if (!email){ showToast("Enter an email"); return; }
+  if (!rankId){ showToast("Create a rank first"); return; }
+
+  const { error } = await supabaseClient.rpc("rank_grant", { p_email: email, p_rank_id: rankId });
+  if (error){ console.error(error); showToast(error.message || "Couldn't promote"); return; }
+
+  const rankName = rankCache.find(r => r.id === rankId)?.name || "rank";
+  document.getElementById("promoteEmail").value = "";
+  showToast(`Promoted to ${rankName}`);
+  await logAction("promote", "rank", email, rankName);
+  await loadRanks();
+}
+
+async function revokeRank(userId, r){
+  const member = r.members.find(m => m.user_id === userId);
+  if (!confirm(`Remove ${member ? member.email : "this person"} from ${r.name}?`)) return;
+  const { error } = await supabaseClient.rpc("rank_revoke", { p_user_id: userId, p_rank_id: r.id });
+  if (error){ console.error(error); showToast(error.message || "Couldn't remove"); return; }
+  showToast("Removed from rank");
+  await logAction("demote", "rank", member ? member.email : userId, r.name);
+  await loadRanks();
+}
+
+// ==========================================================
+function renderCustomPerms(customs){
+  const box = document.getElementById("customPermList");
+  box.innerHTML = customs.length
+    ? customs.map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--border);">
+        <span>${escapeHtml(p.label)} <span style="color:var(--muted);font-size:12px;">${escapeHtml(p.key)}</span></span>
+        <button class="btn danger" data-del-perm="${escapeHtml(p.key)}" style="padding:2px 8px;font-size:11px;">Delete</button>
+      </div>`).join("")
+    : `<span style="color:var(--muted);">No custom permissions yet.</span>`;
+  box.querySelectorAll("[data-del-perm]").forEach(b => b.addEventListener("click", () => deletePerm(b.dataset.delPerm)));
+}
+
+function renderOverrides(list, cats, customs){
+  const tbody = document.getElementById("overridesTableBody");
+  const allKeys = [
+    ...RANK_DIVISIONS.flatMap(d => RANK_LEVELS.map(l => ({ key: `${d.key}:${l}`, label: `${d.label} · ${l}` }))),
+    ...cats.map(c => ({ key: "post:" + c.id, label: "Post in " + c.name })),
+    ...customs.map(p => ({ key: p.key, label: p.label })),
+  ];
+  document.getElementById("overridePerm").innerHTML = allKeys.map(k => `<option value="${escapeHtml(k.key)}">${escapeHtml(k.label)}</option>`).join("");
+
+  if (!list.length){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No overrides yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = "";
+  list.forEach(o => {
+    const locked = o.set_by_role === "founder" && myRole !== "founder";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(o.email)}</td>
+      <td>${escapeHtml(o.perm)}</td>
+      <td><span class="pill ${o.effect === "allow" ? "featured" : ""}">${escapeHtml(o.effect)}</span></td>
+      <td>${escapeHtml(o.set_by_role)}</td>
+      <td>${locked
+        ? `<span style="color:var(--muted);font-size:12px;">Founder only</span>`
+        : `<button class="btn danger" data-action="remove">Remove</button>`}</td>`;
+    if (!locked) row.querySelector('[data-action="remove"]').addEventListener("click", () => removeOverride(o.user_id, o.perm, o.email));
+    tbody.appendChild(row);
+  });
+}
+
+async function createPerm(){
+  const slug = document.getElementById("permSlug").value.trim().toLowerCase();
+  const label = document.getElementById("permLabel").value.trim();
+  if (!slug || !label){ showToast("Enter a name and a label"); return; }
+  const { error } = await supabaseClient.rpc("perm_create", { p_slug: slug, p_label: label });
+  if (error){ console.error(error); showToast(error.message || "Couldn't create permission"); return; }
+  document.getElementById("permSlug").value = "";
+  document.getElementById("permLabel").value = "";
+  showToast("Permission created");
+  await logAction("create_permission", "permission", slug, label);
+  await loadRanks();
+}
+
+async function deletePerm(key){
+  if (!confirm(`Delete the permission ${key}? It's removed from every rank and its overrides are cleared.`)) return;
+  const { error } = await supabaseClient.rpc("perm_delete", { p_key: key });
+  if (error){ console.error(error); showToast(error.message || "Couldn't delete permission"); return; }
+  showToast("Permission deleted");
+  await logAction("delete_permission", "permission", key);
+  await loadRanks();
+}
+
+async function saveOverride(){
+  const email = document.getElementById("overrideEmail").value.trim();
+  const perm = document.getElementById("overridePerm").value;
+  const effect = document.getElementById("overrideEffect").value;
+  if (!email || !perm){ showToast("Enter an email and pick a permission"); return; }
+  const { error } = await supabaseClient.rpc("override_set", { p_email: email, p_perm: perm, p_effect: effect });
+  if (error){ console.error(error); showToast(error.message || "Couldn't save override"); return; }
+  document.getElementById("overrideEmail").value = "";
+  showToast("Override saved");
+  await logAction("set_override", "override", email, `${perm} ${effect}`);
+  await loadRanks();
+}
+
+async function removeOverride(userId, perm, email){
+  if (!confirm(`Remove this override for ${email}?`)) return;
+  const { error } = await supabaseClient.rpc("override_remove", { p_user_id: userId, p_perm: perm });
+  if (error){ console.error(error); showToast(error.message || "Couldn't remove override"); return; }
+  showToast("Override removed");
+  await logAction("remove_override", "override", email, perm);
+  await loadRanks();
 }
 
 // ==========================================================
