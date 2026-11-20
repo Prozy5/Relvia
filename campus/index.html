@@ -165,7 +165,7 @@ img, video{ max-width:100%; display:block; }
 .relvbits-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; }
 </style>
 </head>
-<body>
+<body data-page-key="campus">
 
 <header class="topbar">
   <div class="brand">
@@ -515,18 +515,6 @@ function setupRelvbitsModal(){
   const customAmount = document.getElementById("customAmount");
   let selectedAmountCents = 500;
 
-  (async () => {
-    const { data: flag } = await supabaseClient.from("feature_flags").select("enabled").eq("key", "relvbits_checkout").maybeSingle();
-    const relvbitsBtn = document.getElementById("sendRelvbitsBtn");
-    if (relvbitsBtn && flag && flag.enabled === false) {
-      relvbitsBtn.textContent = "RelvBits — Coming Soon";
-      relvbitsBtn.disabled = true;
-      relvbitsBtn.style.opacity = "0.5";
-      relvbitsBtn.style.cursor = "default";
-      relvbitsBtn.onclick = null;
-    }
-  })();
-
   document.getElementById("sendRelvbitsBtn").addEventListener("click", () => {
     if (!currentPlayerStream) return;
     document.getElementById("relvbitsError").classList.remove("show");
@@ -597,5 +585,8 @@ function setupRelvbitsModal(){
 
 initialize();
 </script>
+<script src="../beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
+<script src="/page-lock.js"></script>
 </body>
 </html>
