@@ -1873,6 +1873,8 @@ async function gate(){
   if (myRole === "owner" || myRole === "founder"){
     document.getElementById("staffSection").style.display = "block";
     document.getElementById("ranksTabBtn").style.display = "block";
+    // The Ranks panel was nested inside the Live panel, which hid it. Move it to the top level so its tab can open it.
+    document.querySelector(".container").appendChild(document.getElementById("eco-ranks"));
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
