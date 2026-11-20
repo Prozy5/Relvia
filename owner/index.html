@@ -604,7 +604,7 @@ tr:last-child td{ border-bottom:none; }
       <div id="ranksList"><div class="rank-empty">Loading...</div></div>
       <div id="rankActivity"></div>
       <div class="panel" style="margin-top:14px;padding:16px;">
-        <h3 style="font-size:14px;margin-bottom:10px;">Create or edit a rank</h3>
+        <h3 id="rankFormTitle" style="font-size:14px;margin-bottom:10px;">Create a rank</h3>
         <input type="hidden" id="rankId">
         <div class="add-form">
           <input type="text" id="rankName" placeholder="Rank name (e.g. Dev Blog Staff)" maxlength="40" style="flex:1;min-width:200px;">
@@ -620,8 +620,10 @@ tr:last-child td{ border-bottom:none; }
           <button class="btn ghost sm" type="button" data-preset="clear">Clear all</button>
         </div>
         <div id="rankPermBoxes" style="display:grid;gap:8px;margin:12px 0;"></div>
+        <div id="rankFormInfo" style="margin:10px 0;"></div>
         <div class="add-form">
-          <button class="btn gold" id="saveRankBtn">Save rank</button>
+          <button class="btn gold" id="saveRankBtn">Create rank</button>
+          <button class="btn ghost" id="cancelRankBtn" type="button" style="display:none;">Cancel edit</button>
           <button class="btn" id="clearRankBtn">Clear</button>
         </div>
       </div>
@@ -2626,6 +2628,7 @@ async function loadRanks(){
   renderRankCards();
   renderRankMonitor(overridesRes.data || []);
   loadRankActivity();
+  bindRankForm();
 
   const sel = document.getElementById("promoteRank");
   const current = sel.value;
@@ -2634,6 +2637,54 @@ async function loadRanks(){
 }
 
 let catNames = {}, customLabels = {}, rankSearch = "";
+let rankOriginal = null; // permissions of the rank being edited, to show what changed
+
+// Title, button labels and Cancel for create vs edit.
+function setRankFormMode(name){
+  const editing = !!name;
+  document.getElementById("rankFormTitle").textContent = editing ? `Editing ${name}` : "Create a rank";
+  document.getElementById("saveRankBtn").textContent = editing ? "Save changes" : "Create rank";
+  document.getElementById("cancelRankBtn").style.display = editing ? "" : "none";
+  setTimeout(updateRankFormInfo, 0);
+}
+
+// Summary under the permission boxes: count, changes since editing started, live chips, duplicate-name warning.
+function updateRankFormInfo(){
+  const info = document.getElementById("rankFormInfo");
+  if (!info) return;
+  const chosen = [...document.querySelectorAll("#rankPermBoxes input:checked")].map(i => i.value);
+  const orig = rankOriginal || [];
+  const added = chosen.filter(k => !orig.includes(k)).length;
+  const removed = orig.filter(k => !chosen.includes(k)).length;
+  const id = document.getElementById("rankId").value;
+  const name = document.getElementById("rankName").value.trim();
+  const dup = name && rankCache.find(r => r.name.toLowerCase() === name.toLowerCase() && r.id !== id);
+  const chips = chosen.length
+    ? chosen.map(k => `<span class="perm-chip">${escapeHtml(permLabel(k))}</span>`).join("")
+    : `<span class="rank-meta">No permissions yet</span>`;
+  info.innerHTML = `
+    <div class="rank-meta" style="margin-bottom:6px;">${chosen.length} permission${chosen.length === 1 ? "" : "s"} selected${id ? ` · ${added} added, ${removed} removed since you opened it` : ""}</div>
+    <div class="rank-perms">${chips}</div>
+    ${dup ? `<div style="color:#ff8a8a;font-size:12.5px;margin-top:8px;">⚠ Another rank is already called "${escapeHtml(dup.name)}".</div>` : ""}`;
+}
+
+// Wires the form once: change summary, division toggles, and Cancel.
+function bindRankForm(){
+  const box = document.getElementById("rankPermBoxes");
+  if (!box || box.dataset.bound) return;
+  box.dataset.bound = "1";
+  box.addEventListener("change", updateRankFormInfo);
+  box.addEventListener("click", e => {
+    const b = e.target.closest("[data-div-all]");
+    if (!b) return;
+    const boxes = [...box.querySelectorAll(`input[value^="${b.dataset.divAll}:"]`)];
+    const allOn = boxes.every(i => i.checked);
+    boxes.forEach(i => i.checked = !allOn);
+    updateRankFormInfo();
+  });
+  document.getElementById("rankName").addEventListener("input", updateRankFormInfo);
+  document.getElementById("cancelRankBtn").addEventListener("click", clearRankForm);
+}
 
 // Monitor: totals, problems to fix, and recent rank activity from the moderation log.
 function renderRankMonitor(overrides){
@@ -2802,7 +2853,7 @@ function buildPermBoxes(cats, customs = []){
   const head = `<div style="${grid}font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;"><div>Division</div>${RANK_LEVELS.map(l => `<div>${l}</div>`).join("")}</div>`;
   const rows = RANK_DIVISIONS.map(d => `
     <div style="${grid}font-size:13.5px;">
-      <div>${escapeHtml(d.label)}</div>
+      <button type="button" class="btn ghost sm" data-div-all="${d.key}" title="Click to select or clear all three levels" style="justify-self:start;">${escapeHtml(d.label)}</button>
       ${RANK_LEVELS.map(l => `<label><input type="checkbox" value="${d.key}:${l}"></label>`).join("")}
     </div>`).join("");
   const posts = cats.length
@@ -2819,6 +2870,8 @@ function buildPermBoxes(cats, customs = []){
 }
 
 function clearRankForm(){
+  rankOriginal = null;
+  setRankFormMode(null);
   document.getElementById("rankId").value = "";
   document.getElementById("rankName").value = "";
   document.getElementById("rankColor").value = "#e0b158";
@@ -2827,6 +2880,8 @@ function clearRankForm(){
 }
 
 function editRank(r){
+  rankOriginal = [...r.permissions];
+  setRankFormMode(r.name);
   document.getElementById("rankId").value = r.id;
   document.getElementById("rankName").value = r.name;
   document.getElementById("rankColor").value = r.color;
@@ -2842,6 +2897,9 @@ async function saveRank(){
   const position = parseInt(document.getElementById("rankPosition").value, 10) || 0;
   const perms = [...document.querySelectorAll("#rankPermBoxes input:checked")].map(i => i.value);
   if (name.length < 2){ showToast("Give the rank a name"); return; }
+  const dup = rankCache.find(r => r.name.toLowerCase() === name.toLowerCase() && r.id !== id);
+  if (dup){ showToast(`"${dup.name}" already exists. Pick another name.`); return; }
+  if (!perms.length && !confirm("This rank has no permissions, so it won't grant anything. Save anyway?")) return;
 
   const { error } = await supabaseClient.rpc("rank_save", { p_id: id, p_name: name, p_color: color, p_perms: perms, p_position: position });
   if (error){ console.error(error); showToast(error.message || "Couldn't save rank"); return; }
