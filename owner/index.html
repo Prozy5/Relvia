@@ -166,6 +166,19 @@ tr:last-child td{ border-bottom:none; }
 
 .log-time{ color:var(--muted-soft); font-size:12px; white-space:nowrap; }
 
+/* ranks */
+#ranksList{ display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+.rank-card{ border:1px solid var(--border); border-left:4px solid var(--rank-color,#e0b158); border-radius:14px; padding:16px; background:rgba(255,255,255,.02); display:flex; flex-direction:column; gap:12px; }
+.rank-head{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap; }
+.rank-name{ font-weight:800; font-size:16px; }
+.rank-meta{ color:var(--muted); font-size:12px; }
+.rank-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+.rank-perms{ display:flex; gap:6px; flex-wrap:wrap; }
+.perm-chip{ font-size:11.5px; padding:4px 9px; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.03); }
+.rank-members{ display:grid; gap:6px; border-top:1px solid var(--border); padding-top:10px; }
+.rank-member{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12.5px; }
+.rank-empty{ grid-column:1/-1; color:var(--muted); padding:24px; text-align:center; border:1px dashed var(--border); border-radius:14px; }
+
 @media(max-width:900px){
   .stats-row{ grid-template-columns:repeat(2,1fr); }
   .panel{ overflow-x:auto; }
@@ -579,12 +592,10 @@ tr:last-child td{ border-bottom:none; }
     <div class="eco-panel" id="eco-ranks">
       <div class="section-head"><h2>Ranks</h2></div>
       <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Create ranks, choose what each one can do, and promote people. The person needs a Relvia account first. Ranks with Moderate act as staff on the Dev Blog.</p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>Rank</th><th>Permissions</th><th>People</th><th>Actions</th></tr></thead>
-          <tbody id="ranksTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
+      <div class="add-form" style="margin-bottom:14px;">
+        <input type="search" id="rankSearch" placeholder="Search ranks, permissions or people" style="flex:1;min-width:240px;">
       </div>
+      <div id="ranksList"><div class="rank-empty">Loading...</div></div>
       <div class="panel" style="margin-top:14px;padding:16px;">
         <h3 style="font-size:14px;margin-bottom:10px;">Create or edit a rank</h3>
         <input type="hidden" id="rankId">
@@ -1908,6 +1919,7 @@ async function gate(){
     document.getElementById("clearRankBtn").addEventListener("click", clearRankForm);
     document.getElementById("promoteBtn").addEventListener("click", promoteUser);
     document.getElementById("createPermBtn").addEventListener("click", createPerm);
+    document.getElementById("rankSearch").addEventListener("input", (e) => { rankSearch = e.target.value; renderRankCards(); });
     document.getElementById("overrideBtn").addEventListener("click", saveOverride);
   }
 
@@ -2574,7 +2586,7 @@ let rankCache = [];
 let rankBoxesBuilt = false;
 
 async function loadRanks(){
-  const tbody = document.getElementById("ranksTableBody");
+  const tbody = document.getElementById("ranksList");
   const [ranksRes, catsRes, permsRes, overridesRes] = await Promise.all([
     supabaseClient.rpc("rank_list"),
     supabaseClient.from("hub_categories").select("id, name").order("position", { ascending: true }),
@@ -2583,7 +2595,7 @@ async function loadRanks(){
   ]);
   if (ranksRes.error){
     console.error(ranksRes.error);
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Couldn't load ranks: ${escapeHtml(ranksRes.error.message || "unknown error")}</td></tr>`;
+    tbody.innerHTML = `<div class="rank-empty">Couldn't load ranks: ${escapeHtml(ranksRes.error.message || "unknown error")}</div>`;
     return;
   }
   rankCache = ranksRes.data || [];
@@ -2593,29 +2605,81 @@ async function loadRanks(){
   renderCustomPerms(customs);
   renderOverrides(overridesRes.data || [], cats, customs);
   rankBoxesBuilt = true;
-
-  if (!rankCache.length){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No ranks yet. Create one below.</td></tr>`;
-  } else {
-    tbody.innerHTML = "";
-    rankCache.forEach(r => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${escapeHtml(r.color)};margin-right:6px;"></span>${escapeHtml(r.name)}</td>
-        <td>${r.permissions.length ? r.permissions.map(p => `<span class="pill">${escapeHtml(p)}</span>`).join(" ") : `<span style="color:var(--muted);">None</span>`}</td>
-        <td>${r.members.length ? r.members.map(m => `<div style="font-size:12.5px;margin-bottom:4px;">${escapeHtml(m.email)} <button class="btn danger" data-revoke="${m.user_id}" style="padding:2px 8px;font-size:11px;">Remove</button></div>`).join("") : `<span style="color:var(--muted);">No one yet</span>`}</td>
-        <td><button class="btn" data-edit>Edit</button> <button class="btn danger" data-delete>Delete</button></td>`;
-      row.querySelector("[data-edit]").addEventListener("click", () => editRank(r));
-      row.querySelector("[data-delete]").addEventListener("click", () => deleteRank(r));
-      row.querySelectorAll("[data-revoke]").forEach(b => b.addEventListener("click", () => revokeRank(b.dataset.revoke, r)));
-      tbody.appendChild(row);
-    });
-  }
+  catNames = Object.fromEntries(cats.map(c => [c.id, c.name]));
+  customLabels = Object.fromEntries(customs.map(p => [p.key, p.label]));
+  renderRankCards();
 
   const sel = document.getElementById("promoteRank");
   const current = sel.value;
   sel.innerHTML = rankCache.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join("") || `<option value="">Create a rank first</option>`;
   if (current && rankCache.some(r => r.id === current)) sel.value = current;
+}
+
+let catNames = {}, customLabels = {}, rankSearch = "";
+const DIV_LABELS = { studios: "Studios", music: "Music", live: "Live", creators: "Creators", campus: "Campus", fashion: "Fashion", devblog: "Dev Blog" };
+
+// Turns a permission key into the words staff see.
+function permLabel(k){
+  if (k.startsWith("post:")) return "Post in " + (catNames[k.slice(5)] || k.slice(5));
+  if (customLabels[k]) return customLabels[k];
+  const [d, l] = k.split(":");
+  if (DIV_LABELS[d]) return `${DIV_LABELS[d]} · ${l.charAt(0).toUpperCase() + l.slice(1)}`;
+  return k;
+}
+
+function renderRankCards(){
+  const box = document.getElementById("ranksList");
+  if (!rankCache.length){
+    box.innerHTML = `<div class="rank-empty">No ranks yet. Create one below.</div>`;
+    return;
+  }
+  const q = rankSearch.trim().toLowerCase();
+  const list = rankCache.filter(r => !q
+    || r.name.toLowerCase().includes(q)
+    || r.permissions.some(p => permLabel(p).toLowerCase().includes(q))
+    || r.members.some(m => m.email.toLowerCase().includes(q)));
+  if (!list.length){
+    box.innerHTML = `<div class="rank-empty">Nothing matches "${escapeHtml(rankSearch)}".</div>`;
+    return;
+  }
+  box.innerHTML = list.map(r => `
+    <div class="rank-card" style="--rank-color:${escapeHtml(r.color)};">
+      <div class="rank-head">
+        <div>
+          <div class="rank-name">${escapeHtml(r.name)}</div>
+          <div class="rank-meta">${r.members.length} member${r.members.length === 1 ? "" : "s"} · ${r.permissions.length} permission${r.permissions.length === 1 ? "" : "s"}</div>
+        </div>
+        <div class="rank-actions">
+          <button class="btn sm" data-act="edit">Edit</button>
+          <button class="btn ghost sm" data-act="copy">Duplicate</button>
+          <button class="btn danger sm" data-act="delete">Delete</button>
+        </div>
+      </div>
+      <div class="rank-perms">${r.permissions.length
+        ? r.permissions.map(p => `<span class="perm-chip">${escapeHtml(permLabel(p))}</span>`).join("")
+        : `<span class="rank-meta">No permissions</span>`}</div>
+      <div class="rank-members">${r.members.length
+        ? r.members.map(m => `<div class="rank-member"><span>${escapeHtml(m.email)}</span><button class="btn ghost sm" data-revoke="${m.user_id}">Remove</button></div>`).join("")
+        : `<div class="rank-meta">No one has this rank yet.</div>`}</div>
+    </div>`).join("");
+
+  box.querySelectorAll(".rank-card").forEach((card, i) => {
+    const r = list[i];
+    card.querySelector('[data-act="edit"]').addEventListener("click", () => editRank(r));
+    card.querySelector('[data-act="copy"]').addEventListener("click", () => copyRank(r));
+    card.querySelector('[data-act="delete"]').addEventListener("click", () => deleteRank(r));
+    card.querySelectorAll("[data-revoke]").forEach(b => b.addEventListener("click", () => revokeRank(b.dataset.revoke, r)));
+  });
+}
+
+function copyRank(r){
+  clearRankForm();
+  document.getElementById("rankName").value = "Copy of " + r.name;
+  document.getElementById("rankColor").value = r.color;
+  document.getElementById("rankPosition").value = r.position;
+  document.querySelectorAll("#rankPermBoxes input").forEach(i => i.checked = r.permissions.includes(i.value));
+  document.getElementById("rankName").scrollIntoView({ behavior: "smooth", block: "center" });
+  showToast("Copied. Give it a name and save.");
 }
 
 const RANK_DIVISIONS = [
