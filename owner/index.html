@@ -178,8 +178,8 @@ tr:last-child td{ border-bottom:none; }
 <div class="gate-screen" id="deniedScreen">
   <div class="gate-card">
     <div class="icon">✦</div>
-    <h1>Owners only</h1>
-    <p>This panel is restricted to Relvia Live owners.</p>
+    <h1>Owners and founders only</h1>
+    <p>This panel is restricted to Relvia owners and founders.</p>
     <a href="index.html">Back to Relvia Live</a>
   </div>
 </div>
@@ -1857,7 +1857,8 @@ async function gate(){
     .eq("user_id", currentUser.id)
     .maybeSingle();
 
-  if (!owner){
+  // Only owners and founders can open this panel. Moderators and anyone with ranks are turned away.
+  if (!owner || !["owner", "founder"].includes(owner.role)){
     document.getElementById("deniedScreen").style.display = "flex";
     return;
   }
