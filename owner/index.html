@@ -56,7 +56,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 
 .container{ max-width:1400px; margin:auto; padding:30px; }
 
-.ecosystem-tabs{ display:flex; gap:6px; margin-bottom:26px; background:var(--surface-light); border:1px solid var(--border); border-radius:16px; padding:6px; width:fit-content; }
+.ecosystem-tabs{ display:grid; grid-template-rows:repeat(2,auto); grid-auto-flow:column; grid-auto-columns:max-content; gap:6px; margin-bottom:26px; background:var(--surface-light); border:1px solid var(--border); border-radius:16px; padding:6px; width:fit-content; max-width:100%; overflow-x:auto; }
 .eco-tab{
   font-size:13.5px; font-weight:800; padding:11px 22px; border-radius:11px; border:none; background:none; color:var(--muted); cursor:pointer;
 }
@@ -230,7 +230,7 @@ tr:last-child td{ border-bottom:none; }
     <div class="ecosystem-tabs">
       <button class="eco-tab" data-eco-tab="overview">Overview</button>
       <button class="eco-tab" data-eco-tab="ranks" id="ranksTabBtn" style="display:none;">Ranks</button>
-      <button class="eco-tab" data-eco-tab="hub">Shutdown &amp; Hub</button>
+      <button class="eco-tab" data-eco-tab="health">Platform Health &amp; Status</button>
       <button class="eco-tab" data-eco-tab="live">Relvia Live</button>
       <button class="eco-tab" data-eco-tab="studios">Relvia Studios</button>
       <button class="eco-tab" data-eco-tab="music">Relvia Music</button>
@@ -248,11 +248,10 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="news">News</button>
       <button class="eco-tab" data-eco-tab="offices">Offices</button>
       <button class="eco-tab" data-eco-tab="beta">Beta</button>
-      <button class="eco-tab" data-eco-tab="test">Test</button>
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
-    <div class="eco-panel" id="eco-hub">
+    <div class="eco-panel" id="eco-health">
       <div class="section-head"><h2>Shutdown &amp; Hub</h2><div><button class="btn sm" id="hubRefresh" type="button">Refresh</button></div></div>
       <p class="hint" style="margin-bottom:16px;">The platform switch, plus what needs you: health, security, alerts and recent actions.</p>
 
@@ -278,7 +277,120 @@ tr:last-child td{ border-bottom:none; }
 
       <div class="section-head"><h2 style="font-size:18px;">Recent platform actions</h2></div>
       <div class="panel" style="margin-bottom:24px;"><div id="hubActions" style="padding:14px;"><div class="hint">Loading...</div></div></div>
+
+      <!-- SYSTEM STATUS, OVERRIDE, BOT, PAGE ACCESS -->
+    <!-- STATUS PAGE -->
+    <div class="section">
+      <div class="section-head"><h2>System Status</h2></div>
+      <div class="panel" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <span id="currentStatusPill" class="pill">—</span>
+          <span style="color:var(--muted);font-size:12.5px;">is the current public status</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+          <button class="btn" data-status="operational" data-msg="All systems operational.">All Operational</button>
+          <button class="btn" data-status="degraded" data-msg="We're investigating reports of degraded performance.">Investigating Issue</button>
+          <button class="btn" data-status="degraded" data-msg="The issue has been identified. A fix is in progress.">Identified — Fixing</button>
+          <button class="btn" data-status="operational" data-msg="The issue has been resolved.">Resolved</button>
+          <button class="btn" data-status="outage" data-msg="Relvia Live is currently experiencing an outage. We're on it.">Major Outage</button>
+          <button class="btn" data-status="maintenance" data-msg="Scheduled maintenance is underway. Some features may be unavailable.">Maintenance</button>
+        </div>
+        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
+          <select id="customStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="operational">Operational</option>
+            <option value="degraded">Degraded</option>
+            <option value="outage">Outage</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+          <input type="text" id="customStatusMessage" placeholder="Custom status message" style="flex:1;min-width:220px;">
+          <button class="btn gold" id="postCustomStatusBtn">Post</button>
+        </div>
+      </div>
     </div>
+
+    <!-- STATUS OVERRIDE (drives the auto-computed status hero) -->
+    <div class="section">
+      <div class="section-head"><h2>Status Override</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
+        The status page auto-detects issues from closed pages. Use this ONLY for things it can't see on its own — Supabase, LiveKit, or Stripe having problems. Overrides the auto-detected status until cleared.
+      </p>
+      <div class="panel" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <span id="overrideStatusPill" class="pill">—</span>
+          <span style="color:var(--muted);font-size:12.5px;" id="overrideStatusSub">Loading...</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" data-override="degraded_performance" data-msg="We're seeing degraded performance on some services.">Degraded Performance</button>
+          <button class="btn" data-override="partial_outage" data-msg="Some services are currently unavailable.">Partial Outage</button>
+          <button class="btn danger" data-override="major_outage" data-msg="We're experiencing a major outage. We're on it.">Major Outage</button>
+          <button class="btn" data-override="maintenance" data-msg="Scheduled maintenance is underway.">Under Maintenance</button>
+        </div>
+        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
+          <select id="overrideStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
+            <option value="degraded_performance">Degraded Performance</option>
+            <option value="partial_outage">Partial Outage</option>
+            <option value="major_outage">Major Outage</option>
+            <option value="maintenance">Under Maintenance</option>
+            <option value="operational">Operational</option>
+          </select>
+          <input type="text" id="overrideMessageInput" placeholder="Message shown on the status page" style="flex:1;min-width:220px;">
+          <button class="btn gold" id="applyOverrideBtn">Apply Override</button>
+          <button class="btn" id="clearOverrideBtn">Clear (back to auto-detect)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM BOT -->
+    <div class="section">
+      <div class="section-head"><h2>System Bot</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">A real, clearly-labeled account that posts on real events (new categories, first streams, signups, milestones). Sign up a normal account for it first via live-login.html, then set it here.</p>
+      <div class="panel" style="padding:18px;">
+        <div id="botStatusLine" style="margin-bottom:14px;font-size:13.5px;color:var(--muted);">Loading...</div>
+        <div class="add-form" style="border-top:none;padding:0;">
+          <input type="text" id="botUsernameInput" placeholder="Bot account username">
+          <button class="btn gold" id="setBotBtn">Set as bot account</button>
+          <button class="btn" id="toggleBotEnabledBtn">Pause bot</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>When</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody id="botActivityTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE ACCESS -->
+    <div class="section">
+      <div class="section-head"><h2>Page Access</h2></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Close a page to put it into maintenance mode for everyone except owners/staff. Also feeds the public status page.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Page</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead>
+          <tbody id="pageLocksTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+
+      <!-- PLATFORM CHECKS -->
+      <div class="section">
+        <div class="section-head"><h2>Platform Checks</h2></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Checks every public page loads, every key database table and function responds, and the switches read correctly. Read-only: nothing is written.</p>
+        <div class="panel" style="padding:20px;">
+          <button class="btn gold" id="runChecksBtn">Run all checks</button>
+          <span id="checkSummary" style="margin-left:14px;font-size:13px;color:var(--muted);"></span>
+        </div>
+        <div class="panel" style="margin-top:14px;">
+          <table>
+            <thead><tr><th>Check</th><th>Area</th><th>Result</th><th>Detail</th></tr></thead>
+            <tbody id="checkResults"><tr class="empty-row"><td colspan="4">Press "Run all checks".</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /eco-health -->
 
     <div class="eco-panel" id="eco-overview">
       <div class="section-head"><h2>Overview</h2><div><button class="btn sm" id="ovRefresh" type="button">Refresh</button></div></div>
@@ -460,101 +572,6 @@ tr:last-child td{ border-bottom:none; }
         </div>
       </div>
     </div>
-
-    <!-- STATUS PAGE -->
-    <div class="section">
-      <div class="section-head"><h2>System Status</h2></div>
-      <div class="panel" style="padding:20px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-          <span id="currentStatusPill" class="pill">—</span>
-          <span style="color:var(--muted);font-size:12.5px;">is the current public status</span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
-          <button class="btn" data-status="operational" data-msg="All systems operational.">All Operational</button>
-          <button class="btn" data-status="degraded" data-msg="We're investigating reports of degraded performance.">Investigating Issue</button>
-          <button class="btn" data-status="degraded" data-msg="The issue has been identified. A fix is in progress.">Identified — Fixing</button>
-          <button class="btn" data-status="operational" data-msg="The issue has been resolved.">Resolved</button>
-          <button class="btn" data-status="outage" data-msg="Relvia Live is currently experiencing an outage. We're on it.">Major Outage</button>
-          <button class="btn" data-status="maintenance" data-msg="Scheduled maintenance is underway. Some features may be unavailable.">Maintenance</button>
-        </div>
-        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
-          <select id="customStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
-            <option value="operational">Operational</option>
-            <option value="degraded">Degraded</option>
-            <option value="outage">Outage</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-          <input type="text" id="customStatusMessage" placeholder="Custom status message" style="flex:1;min-width:220px;">
-          <button class="btn gold" id="postCustomStatusBtn">Post</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATUS OVERRIDE (drives the auto-computed status hero) -->
-    <div class="section">
-      <div class="section-head"><h2>Status Override</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">
-        The status page auto-detects issues from closed pages. Use this ONLY for things it can't see on its own — Supabase, LiveKit, or Stripe having problems. Overrides the auto-detected status until cleared.
-      </p>
-      <div class="panel" style="padding:20px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-          <span id="overrideStatusPill" class="pill">—</span>
-          <span style="color:var(--muted);font-size:12.5px;" id="overrideStatusSub">Loading...</span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <button class="btn" data-override="degraded_performance" data-msg="We're seeing degraded performance on some services.">Degraded Performance</button>
-          <button class="btn" data-override="partial_outage" data-msg="Some services are currently unavailable.">Partial Outage</button>
-          <button class="btn danger" data-override="major_outage" data-msg="We're experiencing a major outage. We're on it.">Major Outage</button>
-          <button class="btn" data-override="maintenance" data-msg="Scheduled maintenance is underway.">Under Maintenance</button>
-        </div>
-        <div class="add-form" style="border-top:1px solid var(--border);padding-top:16px;">
-          <select id="overrideStatusLevel" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:white;font-size:13px;">
-            <option value="degraded_performance">Degraded Performance</option>
-            <option value="partial_outage">Partial Outage</option>
-            <option value="major_outage">Major Outage</option>
-            <option value="maintenance">Under Maintenance</option>
-            <option value="operational">Operational</option>
-          </select>
-          <input type="text" id="overrideMessageInput" placeholder="Message shown on the status page" style="flex:1;min-width:220px;">
-          <button class="btn gold" id="applyOverrideBtn">Apply Override</button>
-          <button class="btn" id="clearOverrideBtn">Clear (back to auto-detect)</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SYSTEM BOT -->
-    <div class="section">
-      <div class="section-head"><h2>System Bot</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">A real, clearly-labeled account that posts on real events (new categories, first streams, signups, milestones). Sign up a normal account for it first via live-login.html, then set it here.</p>
-      <div class="panel" style="padding:18px;">
-        <div id="botStatusLine" style="margin-bottom:14px;font-size:13.5px;color:var(--muted);">Loading...</div>
-        <div class="add-form" style="border-top:none;padding:0;">
-          <input type="text" id="botUsernameInput" placeholder="Bot account username">
-          <button class="btn gold" id="setBotBtn">Set as bot account</button>
-          <button class="btn" id="toggleBotEnabledBtn">Pause bot</button>
-        </div>
-      </div>
-      <div class="panel" style="margin-top:14px;">
-        <table>
-          <thead><tr><th>When</th><th>Action</th><th>Details</th></tr></thead>
-          <tbody id="botActivityTableBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PAGE ACCESS -->
-    <div class="section">
-      <div class="section-head"><h2>Page Access</h2></div>
-      <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Close a page to put it into maintenance mode for everyone except owners/staff. Also feeds the public status page.</p>
-      <div class="panel">
-        <table>
-          <thead><tr><th>Page</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead>
-          <tbody id="pageLocksTableBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-
 
     <!-- ANNOUNCEMENTS -->
     <div class="section">
@@ -1239,23 +1256,6 @@ tr:last-child td{ border-bottom:none; }
       </div>
     </div><!-- /eco-beta -->
 
-    <!-- ================= TEST TAB ================= -->
-    <div class="eco-panel" id="eco-test">
-      <div class="section">
-        <div class="section-head"><h2>Platform Checks</h2></div>
-        <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Checks every public page loads, every key database table and function responds, and the switches read correctly. Read-only: nothing is written.</p>
-        <div class="panel" style="padding:20px;">
-          <button class="btn gold" id="runChecksBtn">Run all checks</button>
-          <span id="checkSummary" style="margin-left:14px;font-size:13px;color:var(--muted);"></span>
-        </div>
-        <div class="panel" style="margin-top:14px;">
-          <table>
-            <thead><tr><th>Check</th><th>Area</th><th>Result</th><th>Detail</th></tr></thead>
-            <tbody id="checkResults"><tr class="empty-row"><td colspan="4">Press "Run all checks".</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div><!-- /eco-test -->
 
     <!-- ================= FOUNDER TAB (founder only) ================= -->
     <div class="eco-panel" id="eco-founder">
@@ -4157,10 +4157,13 @@ function setupEcosystemTabs(){
       if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
       if (target === "takedowns" && !takedownsLoaded){ takedownsLoaded = true; await loadTakedownTab(); }
       if (target === "overview"){ await loadOverviewTab(); }
-      if (target === "hub"){ await loadHub(); }
+      if (target === "health"){
+        await loadHub();
+        const b = document.getElementById("runChecksBtn");
+        if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); }
+      }
       if (target === "moderation"){ await loadModerationTab(); }
       if (target === "sign"){ await loadSignTab(); }
-      if (target === "test"){ const b = document.getElementById("runChecksBtn"); if (b && !b.dataset.wired){ b.dataset.wired = "1"; b.addEventListener("click", runAllChecks); } }
       if (target === "founder" && !founderTabLoaded){
         founderTabLoaded = true;
         await Promise.all([
