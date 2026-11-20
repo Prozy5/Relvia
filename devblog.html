@@ -356,19 +356,42 @@ async function queryThreads({ cat, sort, unanswered, q, author }){
 }
 
 /* ---------- home ---------- */
-function renderHome(){
+async function renderHome(){
   renderNav(null);
   view.innerHTML = `
     <div class="eyebrow">Dev blog</div>
     <h1>Everything <em>Relvia.</em></h1>
-    <p class="lede">Pick a category. Announcements and updates come from the team. Talk, report bugs, and follow the news here.</p>
+    <p class="lede">The latest from every category. Open a category to see all of its threads.</p>
     <div class="toolbar"><span></span>${me ? "" : '<a class="btn sm" href="login.html">Sign in to post</a>'}</div>
-    ${cats.map(c => `
-      <a class="card thread" href="#c/${esc(c.id)}">
-        <div class="title">${esc(c.name)}</div>
-        <div class="excerpt">${esc(c.description)}</div>
-      </a>`).join("")}
+    <div id="sections"><div class="state"><p>Loading…</p></div></div>
     <div id="modPanel"></div>`;
+
+  const sections = await Promise.all(cats.map(async c => {
+    const { data } = await sb.from("hub_threads")
+      .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url")
+      .eq("category_id", c.id)
+      .order("pinned", { ascending: false })
+      .order("last_activity", { ascending: false })
+      .limit(3);
+    return { c, threads: data || [] };
+  }));
+  const who = await names(sections.flatMap(s => s.threads.map(t => t.author_id)));
+  const box = document.getElementById("sections");
+  if (!box) return;
+  box.innerHTML = sections.map(({ c, threads }) => `
+    <section style="margin-bottom:34px;">
+      <div class="toolbar" style="margin-bottom:10px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom:4px;">${esc(c.visibility === "owner" ? "Owner only" : c.visibility === "staff" ? "Team" : "Category")}</div>
+          <h2 style="font-family:var(--display);font-size:24px;font-weight:600;">${esc(c.name)}</h2>
+          <div class="count">${esc(c.description)}</div>
+        </div>
+        <a class="btn ghost sm" href="#c/${esc(c.id)}">View all →</a>
+      </div>
+      ${threads.length
+        ? threadList(threads, who, false)
+        : '<div class="state" style="padding:26px 20px;"><p>No threads yet.</p></div>'}
+    </section>`).join("");
   if (staff) loadModPanel();
 }
 
