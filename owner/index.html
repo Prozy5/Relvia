@@ -604,6 +604,14 @@ tr:last-child td{ border-bottom:none; }
           <input type="color" id="rankColor" value="#e0b158" style="width:52px;height:40px;" title="Rank colour">
           <input type="number" id="rankPosition" value="0" style="width:100px;" title="Higher numbers show first">
         </div>
+        <div id="rankPresets" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:12px 0 4px;">
+          <span class="rank-meta">Presets:</span>
+          <button class="btn ghost sm" type="button" data-preset="devblog-mod">Dev Blog Moderator</button>
+          <button class="btn ghost sm" type="button" data-preset="devblog-manage">Dev Blog Manager</button>
+          <button class="btn ghost sm" type="button" data-preset="viewer">Division Viewer</button>
+          <button class="btn ghost sm" type="button" data-preset="manager">Division Manager</button>
+          <button class="btn ghost sm" type="button" data-preset="clear">Clear all</button>
+        </div>
         <div id="rankPermBoxes" style="display:grid;gap:8px;margin:12px 0;"></div>
         <div class="add-form">
           <button class="btn gold" id="saveRankBtn">Save rank</button>
@@ -1920,6 +1928,7 @@ async function gate(){
     document.getElementById("promoteBtn").addEventListener("click", promoteUser);
     document.getElementById("createPermBtn").addEventListener("click", createPerm);
     document.getElementById("rankSearch").addEventListener("input", (e) => { rankSearch = e.target.value; renderRankCards(); });
+    document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(b.dataset.preset)));
     document.getElementById("overrideBtn").addEventListener("click", saveOverride);
   }
 
@@ -2651,6 +2660,8 @@ function renderRankCards(){
         </div>
         <div class="rank-actions">
           <button class="btn sm" data-act="edit">Edit</button>
+          <button class="btn ghost sm" data-act="up" title="Move up">▲</button>
+          <button class="btn ghost sm" data-act="down" title="Move down">▼</button>
           <button class="btn ghost sm" data-act="copy">Duplicate</button>
           <button class="btn danger sm" data-act="delete">Delete</button>
         </div>
@@ -2659,7 +2670,10 @@ function renderRankCards(){
         ? r.permissions.map(p => `<span class="perm-chip">${escapeHtml(permLabel(p))}</span>`).join("")
         : `<span class="rank-meta">No permissions</span>`}</div>
       <div class="rank-members">${r.members.length
-        ? r.members.map(m => `<div class="rank-member"><span>${escapeHtml(m.email)}</span><button class="btn ghost sm" data-revoke="${m.user_id}">Remove</button></div>`).join("")
+        ? r.members.map(m => `<div class="rank-member">
+            <span>${escapeHtml(m.email)}<br><span class="rank-meta">${m.granted_at ? "Promoted " + new Date(m.granted_at).toLocaleDateString() : ""}${m.granted_by_email ? " by " + escapeHtml(m.granted_by_email) : ""}</span></span>
+            <button class="btn ghost sm" data-revoke="${m.user_id}">Remove</button>
+          </div>`).join("")
         : `<div class="rank-meta">No one has this rank yet.</div>`}</div>
     </div>`).join("");
 
@@ -2667,9 +2681,35 @@ function renderRankCards(){
     const r = list[i];
     card.querySelector('[data-act="edit"]').addEventListener("click", () => editRank(r));
     card.querySelector('[data-act="copy"]').addEventListener("click", () => copyRank(r));
+    card.querySelector('[data-act="up"]').addEventListener("click", () => rankMove(r, 1));
+    card.querySelector('[data-act="down"]').addEventListener("click", () => rankMove(r, -1));
     card.querySelector('[data-act="delete"]').addEventListener("click", () => deleteRank(r));
     card.querySelectorAll("[data-revoke]").forEach(b => b.addEventListener("click", () => revokeRank(b.dataset.revoke, r)));
   });
+}
+
+// Permission presets fill the checkboxes with a ready set. They replace whatever is ticked.
+function presetKeys(name){
+  switch (name){
+    case "devblog-mod": return ["devblog:view", "devblog:moderate"];
+    case "devblog-manage": return ["devblog:view", "devblog:moderate", "devblog:manage"];
+    case "viewer": return RANK_DIVISIONS.map(d => `${d.key}:view`);
+    case "manager": return RANK_DIVISIONS.flatMap(d => [`${d.key}:view`, `${d.key}:moderate`, `${d.key}:manage`]);
+    default: return [];
+  }
+}
+
+function applyPreset(name){
+  const keys = presetKeys(name);
+  document.querySelectorAll("#rankPermBoxes input").forEach(i => { i.checked = keys.includes(i.value); });
+  showToast(keys.length ? `Preset applied: ${keys.length} permission${keys.length === 1 ? "" : "s"}` : "Cleared");
+}
+
+async function rankMove(r, dir){
+  const { error } = await supabaseClient.rpc("rank_move", { p_id: r.id, p_dir: dir });
+  if (error){ console.error(error); showToast(error.message || "Couldn't move rank"); return; }
+  await logAction("reorder_rank", "rank", r.name, dir > 0 ? "up" : "down");
+  await loadRanks();
 }
 
 function copyRank(r){
