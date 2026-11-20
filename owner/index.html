@@ -178,6 +178,11 @@ tr:last-child td{ border-bottom:none; }
 .rank-members{ display:grid; gap:6px; border-top:1px solid var(--border); padding-top:10px; }
 .rank-member{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12.5px; }
 .rank-empty{ grid-column:1/-1; color:var(--muted); padding:24px; text-align:center; border:1px dashed var(--border); border-radius:14px; }
+.rank-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:12px; }
+.rank-stat{ border:1px solid var(--border); border-radius:12px; padding:12px; background:rgba(255,255,255,.02); }
+.rank-stat-n{ font-size:22px; font-weight:800; }
+.rank-warnings{ border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:14px; display:flex; flex-direction:column; gap:6px; font-size:13px; }
+.rank-activity-row{ display:grid; grid-template-columns:auto 1fr auto; gap:12px; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
 
 @media(max-width:900px){
   .stats-row{ grid-template-columns:repeat(2,1fr); }
@@ -592,10 +597,12 @@ tr:last-child td{ border-bottom:none; }
     <div class="eco-panel" id="eco-ranks">
       <div class="section-head"><h2>Ranks</h2></div>
       <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Create ranks, choose what each one can do, and promote people. The person needs a Relvia account first. Ranks with Moderate act as staff on the Dev Blog.</p>
+      <div id="rankMonitor"></div>
       <div class="add-form" style="margin-bottom:14px;">
         <input type="search" id="rankSearch" placeholder="Search ranks, permissions or people" style="flex:1;min-width:240px;">
       </div>
       <div id="ranksList"><div class="rank-empty">Loading...</div></div>
+      <div id="rankActivity"></div>
       <div class="panel" style="margin-top:14px;padding:16px;">
         <h3 style="font-size:14px;margin-bottom:10px;">Create or edit a rank</h3>
         <input type="hidden" id="rankId">
@@ -2617,6 +2624,8 @@ async function loadRanks(){
   catNames = Object.fromEntries(cats.map(c => [c.id, c.name]));
   customLabels = Object.fromEntries(customs.map(p => [p.key, p.label]));
   renderRankCards();
+  renderRankMonitor(overridesRes.data || []);
+  loadRankActivity();
 
   const sel = document.getElementById("promoteRank");
   const current = sel.value;
@@ -2625,6 +2634,61 @@ async function loadRanks(){
 }
 
 let catNames = {}, customLabels = {}, rankSearch = "";
+
+// Monitor: totals, problems to fix, and recent rank activity from the moderation log.
+function renderRankMonitor(overrides){
+  const box = document.getElementById("rankMonitor");
+  if (!box) return;
+  const ranks = rankCache || [];
+  const people = new Set();
+  const staff = new Set();
+  ranks.forEach(r => r.members.forEach(m => {
+    people.add(m.user_id);
+    if (r.permissions.some(p => /:(moderate|manage)$/.test(p) || p.startsWith("post:"))) staff.add(m.user_id);
+  }));
+  const allows = overrides.filter(o => o.effect === "allow").length;
+  const denies = overrides.filter(o => o.effect === "deny").length;
+
+  const warns = [];
+  ranks.forEach(r => {
+    if (!r.members.length) warns.push(`“${escapeHtml(r.name)}” has nobody in it.`);
+    if (!r.permissions.length) warns.push(`“${escapeHtml(r.name)}” has no permissions, so promoting someone to it changes nothing.`);
+  });
+  overrides.filter(o => o.effect === "deny").forEach(o =>
+    warns.push(`${escapeHtml(o.email)} is blocked from ${escapeHtml(permLabel(o.perm))}.`));
+
+  const stat = (n, label) => `<div class="rank-stat"><div class="rank-stat-n">${n}</div><div class="rank-meta">${label}</div></div>`;
+  box.innerHTML = `
+    <div class="rank-stats">
+      ${stat(ranks.length, "Ranks")}
+      ${stat(people.size, "People ranked")}
+      ${stat(staff.size, "Staff")}
+      ${stat(Object.keys(customLabels).length, "Custom permissions")}
+      ${stat(allows, "Allow overrides")}
+      ${stat(denies, "Deny overrides")}
+    </div>
+    <div class="rank-warnings">${warns.length
+      ? warns.map(w => `<div>⚠ ${w}</div>`).join("")
+      : `<div class="rank-meta">No problems found.</div>`}</div>`;
+}
+
+async function loadRankActivity(){
+  const box = document.getElementById("rankActivity");
+  if (!box) return;
+  const { data, error } = await supabaseClient.from("live_moderation_log")
+    .select("action, target_type, target_label, details, actor_id, created_at")
+    .in("target_type", ["rank", "permission", "override"])
+    .order("created_at", { ascending: false }).limit(25);
+  if (error){ box.innerHTML = `<div class="rank-meta">Couldn't load activity: ${escapeHtml(error.message || "unknown error")}</div>`; return; }
+  if (!data || !data.length){ box.innerHTML = `<h3 style="font-size:14px;margin:16px 0 8px;">Recent rank activity</h3><div class="rank-meta">No rank changes logged yet.</div>`; return; }
+  const who = id => id === currentUser.id ? "you" : "another owner";
+  box.innerHTML = `<h3 style="font-size:14px;margin:16px 0 8px;">Recent rank activity</h3>` + data.map(a => `
+    <div class="rank-activity-row">
+      <span class="rank-meta">${new Date(a.created_at).toLocaleString()}</span>
+      <span>${escapeHtml(a.action.replace(/_/g, " "))} · ${escapeHtml(a.target_label || "")}${a.details ? ` <span class="rank-meta">(${escapeHtml(String(a.details))})</span>` : ""}</span>
+      <span class="rank-meta">by ${who(a.actor_id)}</span>
+    </div>`).join("");
+}
 const DIV_LABELS = { studios: "Studios", music: "Music", live: "Live", creators: "Creators", campus: "Campus", fashion: "Fashion", devblog: "Dev Blog" };
 
 // Turns a permission key into the words staff see.
