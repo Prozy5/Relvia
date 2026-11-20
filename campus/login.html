@@ -90,7 +90,7 @@ button{ cursor:pointer; border:none; background:none; color:inherit; font-size:i
 .note{ margin-top:20px; text-align:center; font-size:12px; color:var(--muted-soft); line-height:1.6; }
 </style>
 </head>
-<body>
+<body data-page-key="campus_signup">
 
 <div class="wrap">
   <div class="brand">
@@ -293,5 +293,8 @@ document.getElementById("signupSubmit").addEventListener("click", async () => {
 // case email confirmation delayed it past signup time.
 document.getElementById("loginSubmit").addEventListener("click", async function fallbackProfileCreate(){});
 </script>
+<script src="../beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
+<script src="/page-lock.js"></script>
 </body>
 </html>
