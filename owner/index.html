@@ -756,9 +756,14 @@ tr:last-child td{ border-bottom:none; }
       <div class="section">
         <div class="section-head"><h2>Projects</h2></div>
         <div class="panel">
+          <div id="studiosBreakdown" class="rank-stats" style="margin-bottom:12px;"></div>
+          <div class="add-form" style="margin-bottom:12px;">
+            <input type="search" id="studiosSearch" placeholder="Search projects or creators" style="flex:1;min-width:220px;">
+            <select id="studiosStatusFilter" class="rank-select"><option value="">All statuses</option></select>
+          </div>
           <table>
-            <thead><tr><th>Title</th><th>Creator</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
-            <tbody id="studiosProjectsTableBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+            <thead><tr><th>Title</th><th>Creator</th><th>Status</th><th>Views</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="studiosProjectsTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -6088,57 +6093,85 @@ async function deleteArticle(articleId){
 async function loadStudiosTab(){
   await Promise.all([loadStudiosStats(), loadStudiosProjects(), loadStudiosStaff()]);
   document.getElementById("addStudiosAdminBtn").addEventListener("click", addStudiosAdmin);
+  document.getElementById("studiosSearch").addEventListener("input", renderStudiosProjects);
+  document.getElementById("studiosStatusFilter").addEventListener("change", renderStudiosProjects);
 }
+
+// "released" and "published" both count as a published film, so either label is handled.
+const STUDIOS_PUBLISHED = ["released", "published"];
 
 async function loadStudiosStats(){
-  const { count: totalProjects } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true });
-  const { count: published } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).eq("status", "released");
-  const { count: openCollabs } = await supabaseClient.from("studios_projects").select("*", { count: "exact", head: true }).neq("status", "released");
-  const { data: viewsData } = await supabaseClient.from("studios_films").select("view_count");
-  const totalViews = (viewsData || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
+  const [projectsRes, viewsRes] = await Promise.all([
+    supabaseClient.from("studios_projects").select("id, status"),
+    supabaseClient.from("studios_films").select("view_count"),
+  ]);
+  const list = projectsRes.data || [];
+  const totalViews = (viewsRes.data || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
+  const published = list.filter(p => STUDIOS_PUBLISHED.includes(p.status)).length;
 
-  document.getElementById("statStudiosProjects").textContent = totalProjects ?? 0;
-  document.getElementById("statStudiosPublished").textContent = published ?? 0;
-  document.getElementById("statStudiosOpen").textContent = openCollabs ?? 0;
+  document.getElementById("statStudiosProjects").textContent = list.length;
+  document.getElementById("statStudiosPublished").textContent = published;
+  document.getElementById("statStudiosOpen").textContent = list.length - published;
   document.getElementById("statStudiosViews").textContent = totalViews;
+
+  // Count per status, so any status a project can have shows up here.
+  const statuses = [...new Set(list.map(p => p.status))].sort();
+  document.getElementById("studiosBreakdown").innerHTML = statuses.length
+    ? statuses.map(st => `<div class="rank-stat"><div class="rank-stat-n">${list.filter(p => p.status === st).length}</div><div class="rank-meta">${escapeHtml(st)}</div></div>`).join("")
+    : `<div class="rank-meta">No projects yet.</div>`;
+
+  const filter = document.getElementById("studiosStatusFilter");
+  const current = filter.value;
+  filter.innerHTML = `<option value="">All statuses</option>` + statuses.map(st => `<option value="${escapeHtml(st)}">${escapeHtml(st)}</option>`).join("");
+  filter.value = current;
 }
+let studiosCache = [], studiosNames = {};
 
 async function loadStudiosProjects(){
-  const tbody = document.getElementById("studiosProjectsTableBody");
-
   const { data: projects, error } = await supabaseClient
     .from("studios_projects").select("*").order("created_at", { ascending:false }).limit(100);
-
-  if (error){ console.error(error); tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load projects. (Are you a Studios admin?)</td></tr>`; return; }
-
-  if (!projects || projects.length === 0){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No projects yet.</td></tr>`;
+  if (error){
+    console.error(error);
+    document.getElementById("studiosProjectsTableBody").innerHTML = `<tr class="empty-row"><td colspan="6">Couldn't load projects. (Are you a Studios admin?)</td></tr>`;
     return;
   }
+  studiosCache = projects || [];
+  const creatorIds = [...new Set(studiosCache.map(p => p.creator_id))];
+  const { data: profiles } = creatorIds.length
+    ? await supabaseClient.from("profiles").select("id, display_name, username").in("id", creatorIds)
+    : { data: [] };
+  studiosNames = {};
+  (profiles || []).forEach(p => { studiosNames[p.id] = p.display_name || p.username; });
+  renderStudiosProjects();
+}
 
-  const creatorIds = [...new Set(projects.map(p => p.creator_id))];
-  const { data: profiles } = await supabaseClient.from("profiles").select("id, display_name, username").in("id", creatorIds);
-  const nameById = {};
-  (profiles || []).forEach(p => { nameById[p.id] = p.display_name || p.username; });
+// Applies the search and status filter, then draws the rows.
+function renderStudiosProjects(){
+  const tbody = document.getElementById("studiosProjectsTableBody");
+  const q = document.getElementById("studiosSearch").value.trim().toLowerCase();
+  const status = document.getElementById("studiosStatusFilter").value;
+  const list = studiosCache.filter(p =>
+    (!status || p.status === status) &&
+    (!q || (p.title || "").toLowerCase().includes(q) || (studiosNames[p.creator_id] || "").toLowerCase().includes(q)));
+
+  if (!studiosCache.length){ tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No projects yet.</td></tr>`; return; }
+  if (!list.length){ tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Nothing matches these filters.</td></tr>`; return; }
 
   tbody.innerHTML = "";
-  projects.forEach(project => {
+  list.forEach(project => {
+    const pill = STUDIOS_PUBLISHED.includes(project.status) ? "ok" : project.status === "rejected" ? "banned" : "temp";
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${escapeHtml(project.title)}</td>
-      <td>${escapeHtml(nameById[project.creator_id] || "Unknown")}</td>
-      <td><span class="pill ${project.status === "published" ? "ok" : project.status === "rejected" ? "banned" : "temp"}">${escapeHtml(project.status)}</span></td>
+      <td>${escapeHtml(studiosNames[project.creator_id] || "Unknown")}</td>
+      <td><span class="pill ${pill}">${escapeHtml(project.status)}</span></td>
       <td>${project.view_count || 0}</td>
-      <td>
-        <button class="btn danger sm" data-action="delete">Delete</button>
-      </td>`;
-
+      <td class="rank-meta">${project.created_at ? new Date(project.created_at).toLocaleDateString() : "—"}</td>
+      <td><button class="btn danger sm" data-action="delete">Delete</button></td>`;
     row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteStudiosProject(project.id, project.title));
-
     tbody.appendChild(row);
   });
 }
-
 async function deleteStudiosProject(projectId, title){
   if (!confirm(`Permanently delete "${title}"? This removes the project, its roster, and its film if published.`)) return;
   const { error } = await supabaseClient.from("studios_projects").delete().eq("id", projectId);
