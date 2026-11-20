@@ -267,8 +267,8 @@ footer a{ color:var(--gold); }
     <!-- PINNED ANNOUNCEMENT (latest from the dev blog Announcements category) -->
     <section class="card wide" id="announceBox">
       <div class="card-head">
-        <div><h2>Latest announcement</h2><div class="hint">Straight from the Relvia team.</div></div>
-        <a class="tag muted" href="devblog.html#c/announcements">All announcements</a>
+        <div><h2>Latest from the dev blog</h2><div class="hint">Pinned posts first, then the newest across every category.</div></div>
+        <a class="tag muted" href="devblog.html">Open dev blog</a>
       </div>
       <div id="announceBody"><p class="empty">Loading…</p></div>
     </section>
@@ -455,10 +455,10 @@ async function loadBlog(){
 async function loadAnnouncement(){
   const box = document.getElementById("announceBody");
   const { data, error } = await sb.from("hub_threads")
-    .select("id, title, body, created_at, pinned")
-    .eq("category_id", "announcements").eq("hidden", false)
+    .select("id, title, body, created_at, pinned, category_id")
+    .eq("hidden", false)
     .order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(1);
-  if (error || !data || !data.length){ box.innerHTML = '<p class="empty">No announcements yet.</p>'; return; }
+  if (error || !data || !data.length){ box.innerHTML = '<p class="empty">Nothing posted yet. Check back soon.</p>'; return; }
   const a = data[0];
   const excerpt = (a.body || "").length > 280 ? a.body.slice(0, 280) + "…" : (a.body || "");
   box.innerHTML = `
