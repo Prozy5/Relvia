@@ -35,13 +35,31 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
 .brand{ display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:700; font-size:18px; }
 .crest{ width:34px; height:34px; border-radius:50%; border:1.5px solid var(--gold-lo); display:flex; align-items:center; justify-content:center;
   font-style:italic; color:var(--gold-hi); background:radial-gradient(circle at 32% 22%, rgba(246,210,122,.28), transparent 65%), #000; }
+.bar-right{ display:flex; align-items:center; gap:18px; }
 .bar nav{ display:flex; gap:20px; flex-wrap:wrap; font-size:11.5px; font-weight:800; letter-spacing:1.2px; }
 .bar nav a{ color:var(--muted); }
 .bar nav a:hover{ color:var(--gold); }
 
-.layout{ max-width:1180px; margin:0 auto; padding:36px clamp(16px,3vw,36px) 90px; display:grid; grid-template-columns:240px minmax(0,1fr); gap:28px; align-items:start; }
+.bell{ position:relative; background:none; border:1px solid var(--border); border-radius:12px; width:40px; height:40px; font-size:16px; }
+.bell:hover{ border-color:var(--line); }
+.badge{ position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo));
+  color:#000; font-size:10.5px; font-weight:800; display:none; align-items:center; justify-content:center; }
+.badge.show{ display:flex; }
+.notif-panel{ position:absolute; right:clamp(16px,3vw,36px); top:64px; width:min(360px,calc(100vw - 32px)); max-height:420px; overflow-y:auto;
+  border:1px solid var(--line); border-radius:18px; background:var(--panel-2); box-shadow:0 24px 50px rgba(0,0,0,.5); z-index:40; display:none; }
+.notif-panel.open{ display:block; }
+.notif-head{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border-soft); font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--gold); }
+.notif-item{ display:block; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid var(--border-soft); padding:12px 16px; font-size:13.5px; color:var(--text); }
+.notif-item:hover{ background:rgba(224,177,88,.05); }
+.notif-item.unread{ background:rgba(224,177,88,.06); }
+.notif-item .when{ display:block; font-size:11px; color:var(--soft); margin-top:3px; }
+.notif-empty{ padding:18px 16px; font-size:13px; color:var(--soft); }
+
+.layout{ max-width:1180px; margin:0 auto; padding:36px clamp(16px,3vw,36px) 90px; display:grid; grid-template-columns:250px minmax(0,1fr); gap:28px; align-items:start; }
 aside.side{ position:sticky; top:96px; border:1px solid var(--border); border-radius:20px; padding:16px; background:linear-gradient(180deg,var(--panel-2),#0d0905); }
 .side h3{ font-size:10.5px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase; color:var(--soft); padding:6px 10px 10px; }
+.side form{ margin-bottom:12px; }
+.side .field{ font-size:13px; padding:9px 12px; }
 .side a{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; font-size:14px; color:var(--muted); transition:background .2s,color .2s; }
 .side a:hover{ background:rgba(224,177,88,.06); color:var(--text); }
 .side a.on{ background:linear-gradient(135deg,rgba(246,212,135,.16),rgba(185,131,47,.16)); color:var(--gold-hi); }
@@ -53,6 +71,9 @@ h1 em{ font-style:italic; font-weight:600; color:var(--gold); }
 .lede{ color:var(--muted); font-size:15px; margin-bottom:26px; }
 
 .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+.filters{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.filters label{ font-size:12.5px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+.filters select.field{ width:auto; padding:8px 12px; font-size:13px; }
 .btn{ background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); color:#000; font-weight:800; font-size:13px; border:none; padding:10px 18px; border-radius:12px; box-shadow:0 10px 24px rgba(185,131,47,.18); }
 .btn.ghost{ background:none; color:var(--muted); border:1px solid var(--border); box-shadow:none; font-weight:700; padding:8px 14px; font-size:12.5px; }
 .btn.ghost:hover{ color:var(--gold); border-color:var(--line); }
@@ -80,6 +101,14 @@ a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 .tag.pin{ color:#000; background:linear-gradient(135deg,var(--gold-hi),var(--gold-lo)); border-color:transparent; }
 .tag.lock{ color:var(--danger); border-color:rgba(224,87,79,.4); }
 .tag.hide{ color:var(--soft); border-style:dashed; }
+.tag.edit{ color:var(--gold); border-color:var(--line); }
+
+.reacts{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.react{ background:#0a0705; border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:13px; transition:border-color .2s, background .2s; }
+.react span{ font-size:12px; color:var(--muted); margin-left:4px; }
+.react:hover{ border-color:var(--line); }
+.react.on{ border-color:var(--gold); background:rgba(224,177,88,.12); }
+.react.on span{ color:var(--gold-hi); }
 
 .mod{ border:1px solid var(--line); border-radius:18px; padding:16px; margin:18px 0; background:rgba(224,177,88,.04); }
 .mod h4{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
@@ -93,6 +122,7 @@ a.thread:hover{ border-color:var(--line); transform:translateY(-2px); }
 .reply .foot button:hover{ color:var(--gold); }
 
 .form{ display:grid; gap:10px; margin:16px 0; }
+.editor{ display:grid; gap:10px; margin-top:12px; }
 .note{ font-size:12.5px; color:var(--soft); }
 .note.err{ color:var(--danger); }
 .note.ok{ color:var(--ok); }
@@ -123,17 +153,29 @@ footer a{ color:var(--gold); }
 
 <header class="bar">
   <a class="brand" href="index.html"><span class="crest" aria-hidden="true">R</span>Relvia</a>
-  <nav>
-    <a href="hub.html">HUB</a>
-    <a href="creators/index.html">CREATORS</a>
-    <a href="studios/index.html">STUDIOS</a>
-    <a href="live.html">LIVE</a>
-    <a href="contact.html">CONTACT</a>
-  </nav>
+  <div class="bar-right">
+    <nav>
+      <a href="hub.html">HUB</a>
+      <a href="creators/index.html">CREATORS</a>
+      <a href="studios/index.html">STUDIOS</a>
+      <a href="live.html">LIVE</a>
+      <a href="contact.html">CONTACT</a>
+    </nav>
+    <button class="bell" id="bell" aria-label="Notifications" hidden>🔔<span class="badge" id="badge"></span></button>
+  </div>
 </header>
+
+<div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
+  <div class="notif-head"><span>Notifications</span><button class="btn ghost sm" id="markAll">Mark all read</button></div>
+  <div id="notifList"></div>
+</div>
 
 <div class="layout">
   <aside class="side">
+    <h3>Search</h3>
+    <form id="searchForm">
+      <input class="field" id="searchInput" placeholder="Search threads…" maxlength="100" autocomplete="off">
+    </form>
     <h3>Dev blog</h3>
     <nav id="catNav"></nav>
   </aside>
@@ -148,6 +190,7 @@ const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const EMOJIS = ["👍", "🔥", "🐛"];
 let me = null, role = null, staff = false, owner = false, cats = [];
 const view = document.getElementById("view");
 
@@ -179,11 +222,110 @@ async function log(action, type, id, note = ""){
   await sb.from("hub_mod_log").insert({ actor_id: me.id, action, target_type: type, target_id: String(id), note });
 }
 
+/* ---------- reactions ---------- */
+async function fetchReactions(type, ids){
+  const out = {};
+  if (!ids.length) return out;
+  const { data } = await sb.from("hub_reactions").select("target_id, emoji, user_id").eq("target_type", type).in("target_id", ids);
+  (data || []).forEach(r => {
+    const bucket = (out[r.target_id] = out[r.target_id] || {});
+    const e = bucket[r.emoji] || { count: 0, mine: false };
+    e.count++;
+    if (me && r.user_id === me.id) e.mine = true;
+    bucket[r.emoji] = e;
+  });
+  return out;
+}
+function reactionBar(type, id, counts){
+  return `<div class="reacts">${EMOJIS.map(em => {
+    const c = (counts && counts[em]) || { count: 0, mine: false };
+    return `<button class="react ${c.mine ? "on" : ""}" data-act="react" data-type="${type}" data-id="${id}" data-emoji="${em}" ${me ? "" : "disabled"} title="${me ? "React" : "Sign in to react"}">${em}<span>${c.count}</span></button>`;
+  }).join("")}</div>`;
+}
+
+/* ---------- notifications ---------- */
+async function loadBadge(){
+  if (!me) return;
+  const { count } = await sb.from("hub_notifications").select("id", { count: "exact", head: true }).eq("read", false);
+  const b = document.getElementById("badge");
+  b.textContent = count > 99 ? "99+" : (count || "");
+  b.classList.toggle("show", !!count);
+}
+async function loadNotifs(){
+  const list = document.getElementById("notifList");
+  const { data } = await sb.from("hub_notifications").select("id, kind, thread_id, message, read, created_at").order("created_at", { ascending: false }).limit(25);
+  if (!data || !data.length){ list.innerHTML = '<div class="notif-empty">No notifications yet.</div>'; return; }
+  list.innerHTML = data.map(n => `
+    <button class="notif-item ${n.read ? "" : "unread"}" data-notif="${n.id}" data-thread="${n.thread_id || ""}">
+      ${esc(n.message)}<span class="when">${when(n.created_at)}</span>
+    </button>`).join("");
+}
+document.getElementById("bell").addEventListener("click", async () => {
+  const panel = document.getElementById("notifPanel");
+  panel.classList.toggle("open");
+  if (panel.classList.contains("open")) await loadNotifs();
+});
+document.getElementById("notifList").addEventListener("click", async e => {
+  const item = e.target.closest("[data-notif]");
+  if (!item) return;
+  await sb.from("hub_notifications").update({ read: true }).eq("id", item.dataset.notif);
+  document.getElementById("notifPanel").classList.remove("open");
+  loadBadge();
+  if (item.dataset.thread) location.hash = "#t/" + item.dataset.thread;
+});
+document.getElementById("markAll").addEventListener("click", async () => {
+  await sb.from("hub_notifications").update({ read: true }).eq("user_id", me.id).eq("read", false);
+  loadNotifs(); loadBadge();
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest("#notifPanel") && !e.target.closest("#bell")) document.getElementById("notifPanel").classList.remove("open");
+});
+
+/* ---------- search ---------- */
+document.getElementById("searchForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const q = document.getElementById("searchInput").value.trim();
+  if (q) location.hash = "#s/" + encodeURIComponent(q);
+});
+
 /* ---------- sidebar ---------- */
 function renderNav(active){
   document.getElementById("catNav").innerHTML = cats.map(c => `
     <a href="#c/${esc(c.id)}" class="${active === c.id ? "on" : ""}">${esc(c.name)}
       ${c.visibility === "owner" ? '<span class="lock">Owner</span>' : ""}</a>`).join("");
+}
+
+/* ---------- thread list (shared by categories and search) ---------- */
+function threadList(threads, who, showCat){
+  return threads.map(t => `
+    <a class="card thread ${t.pinned ? "pinned" : ""} ${t.hidden ? "hidden" : ""}" href="#t/${t.id}">
+      <div class="row">
+        <b>${esc(who[t.author_id] || "Relvia member")}</b> · <span>${when(t.created_at)}</span>
+        ${showCat && catById(t.category_id) ? `<span class="tag">${esc(catById(t.category_id).name)}</span>` : ""}
+        ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
+        ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
+        ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
+      </div>
+      <div class="title">${esc(t.title)}</div>
+      <div class="excerpt">${esc(excerpt(t.body))}</div>
+      <div class="row" style="margin:12px 0 0;"><span class="count">${t.reply_count} repl${t.reply_count === 1 ? "y" : "ies"}</span>
+        ${t.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
+    </a>`).join("");
+}
+async function queryThreads({ cat, sort, unanswered, q }){
+  let qy = sb.from("hub_threads")
+    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id");
+  if (cat) qy = qy.eq("category_id", cat).order("pinned", { ascending: false });
+  if (q){
+    const s = q.replace(/[,()%*]/g, " ").trim();
+    qy = qy.or(`title.ilike.%${s}%,body.ilike.%${s}%`);
+  }
+  if (unanswered) qy = qy.eq("reply_count", 0);
+  if (sort === "new") qy = qy.order("created_at", { ascending: false });
+  else if (sort === "replies") qy = qy.order("reply_count", { ascending: false }).order("last_activity", { ascending: false });
+  else qy = qy.order("last_activity", { ascending: false });
+  const { data, error } = await qy.limit(60);
+  return { data: data || [], error };
 }
 
 /* ---------- home ---------- */
@@ -204,9 +346,11 @@ function renderHome(){
 }
 
 /* ---------- category ---------- */
-async function renderCategory(id){
+async function renderCategory(id, params){
   const cat = catById(id);
   if (!cat) return notFound();
+  const sort = params.get("sort") || "active";
+  const unanswered = params.get("unanswered") === "1";
   renderNav(id);
   view.innerHTML = `
     <a class="back" href="#">← All categories</a>
@@ -214,36 +358,36 @@ async function renderCategory(id){
     <h1>${esc(cat.name)}</h1>
     <p class="lede">${esc(cat.description)}</p>
     <div class="toolbar">
-      <span class="count" id="countLine"></span>
+      <div class="filters">
+        <select class="field" id="sortSel">
+          <option value="active" ${sort === "active" ? "selected" : ""}>Most recent activity</option>
+          <option value="new" ${sort === "new" ? "selected" : ""}>Newest first</option>
+          <option value="replies" ${sort === "replies" ? "selected" : ""}>Most replies</option>
+        </select>
+        <label><input type="checkbox" id="unansw" ${unanswered ? "checked" : ""}> Unanswered only</label>
+        <span class="count" id="countLine"></span>
+      </div>
       ${canPost(cat) ? '<button class="btn sm" id="newBtn">New thread</button>' : ""}
     </div>
     <div id="newForm" hidden></div>
     <div id="threads"><div class="state"><p>Loading…</p></div></div>`;
 
-  const { data: threads, error } = await sb.from("hub_threads")
-    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at")
-    .eq("category_id", id).order("pinned", { ascending: false }).order("last_activity", { ascending: false }).limit(60);
+  const applyFilters = () => {
+    const s = document.getElementById("sortSel").value;
+    const u = document.getElementById("unansw").checked ? 1 : 0;
+    location.hash = `#c/${id}?sort=${s}&unanswered=${u}`;
+  };
+  document.getElementById("sortSel").addEventListener("change", applyFilters);
+  document.getElementById("unansw").addEventListener("change", applyFilters);
 
+  const { data: threads, error } = await queryThreads({ cat: id, sort, unanswered });
   const box = document.getElementById("threads");
   if (error){ box.innerHTML = `<div class="state"><h3>Couldn't load threads</h3><p>${esc(error.message)}</p></div>`; return; }
-  const who = await names((threads || []).map(t => t.author_id));
-  document.getElementById("countLine").textContent = `${(threads || []).length} thread${(threads || []).length === 1 ? "" : "s"}`;
-  if (!threads || !threads.length){
-    box.innerHTML = `<div class="state"><h3>No threads yet</h3><p>Be the first to start one.</p></div>`;
-  } else {
-    box.innerHTML = threads.map(t => `
-      <a class="card thread ${t.pinned ? "pinned" : ""} ${t.hidden ? "hidden" : ""}" href="#t/${t.id}">
-        <div class="row">
-          <b>${esc(who[t.author_id] || "Relvia member")}</b> · <span>${when(t.created_at)}</span>
-          ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
-          ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
-          ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
-        </div>
-        <div class="title">${esc(t.title)}</div>
-        <div class="excerpt">${esc(excerpt(t.body))}</div>
-        <div class="row" style="margin:12px 0 0;"><span class="count">${t.reply_count} repl${t.reply_count === 1 ? "y" : "ies"}</span></div>
-      </a>`).join("");
-  }
+  const who = await names(threads.map(t => t.author_id));
+  document.getElementById("countLine").textContent = `${threads.length} thread${threads.length === 1 ? "" : "s"}`;
+  box.innerHTML = threads.length
+    ? threadList(threads, who, false)
+    : `<div class="state"><h3>${unanswered ? "Nothing unanswered" : "No threads yet"}</h3><p>${unanswered ? "Every thread here has a reply." : "Be the first to start one."}</p></div>`;
 
   const btn = document.getElementById("newBtn");
   if (btn){
@@ -260,6 +404,24 @@ async function renderCategory(id){
   }
 }
 
+/* ---------- search results ---------- */
+async function renderSearch(q){
+  renderNav(null);
+  view.innerHTML = `
+    <a class="back" href="#">← All categories</a>
+    <div class="eyebrow">Search</div>
+    <h1>Results for <em>“${esc(q)}”</em></h1>
+    <div class="toolbar"><span class="count" id="countLine"></span></div>
+    <div id="threads"><div class="state"><p>Searching…</p></div></div>`;
+  const { data: threads, error } = await queryThreads({ q, sort: "active" });
+  const box = document.getElementById("threads");
+  if (error){ box.innerHTML = `<div class="state"><h3>Search didn't work</h3><p>${esc(error.message)}</p></div>`; return; }
+  const who = await names(threads.map(t => t.author_id));
+  document.getElementById("countLine").textContent = `${threads.length} match${threads.length === 1 ? "" : "es"}`;
+  box.innerHTML = threads.length ? threadList(threads, who, true)
+    : '<div class="state"><h3>No matches</h3><p>Try different words.</p></div>';
+}
+
 /* ---------- thread ---------- */
 async function renderThread(id){
   const { data: t } = await sb.from("hub_threads").select("*").eq("id", id).maybeSingle();
@@ -267,8 +429,14 @@ async function renderThread(id){
   const cat = catById(t.category_id);
   renderNav(t.category_id);
   const { data: replies } = await sb.from("hub_replies").select("*").eq("thread_id", id).order("created_at", { ascending: true });
-  const who = await names([t.author_id, ...(replies || []).map(r => r.author_id)]);
+  const list = replies || [];
+  const [who, tReacts, rReacts] = await Promise.all([
+    names([t.author_id, ...list.map(r => r.author_id)]),
+    fetchReactions("thread", [t.id]),
+    fetchReactions("reply", list.map(r => r.id)),
+  ]);
   const canReply = me && (staff || !t.locked);
+  const mine = me && t.author_id === me.id;
 
   view.innerHTML = `
     <a class="back" href="#c/${esc(t.category_id)}">← ${esc(cat ? cat.name : "Back")}</a>
@@ -278,12 +446,17 @@ async function renderThread(id){
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
         ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
+        ${t.edited_at ? `<span class="tag edit">Edited ${when(t.edited_at)}</span>` : ""}
       </div>
-      <h1 style="font-size:clamp(28px,3.6vw,40px);">${esc(t.title)}</h1>
-      ${t.body ? `<div class="body" style="margin-top:14px;">${esc(t.body)}</div>` : ""}
-      <div class="foot" style="margin-top:14px;">
-        ${me ? `<button data-act="report" data-type="thread" data-id="${t.id}">Report</button>` : ""}
+      <div class="editable" data-type="thread" data-id="${t.id}">
+        <h1 class="t-title" style="font-size:clamp(28px,3.6vw,40px);">${esc(t.title)}</h1>
+        ${t.body ? `<div class="body t-body" style="margin-top:14px;">${esc(t.body)}</div>` : ""}
+        <div class="foot" style="display:flex;gap:12px;margin-top:12px;">
+          ${mine && !t.locked && !t.hidden ? '<button class="btn ghost sm" data-act="edit">Edit</button>' : ""}
+          ${me ? `<button class="btn ghost sm" data-act="report" data-type="thread" data-id="${t.id}">Report</button>` : ""}
+        </div>
       </div>
+      ${reactionBar("thread", t.id, tReacts[t.id])}
     </div>
 
     ${staff ? `
@@ -301,25 +474,33 @@ async function renderThread(id){
       </div>
     </div>` : ""}
 
-    <h3 style="font-family:var(--display);font-size:22px;font-weight:600;margin:28px 0 6px;">${(replies || []).length} repl${(replies || []).length === 1 ? "y" : "ies"}</h3>
+    <h3 style="font-family:var(--display);font-size:22px;font-weight:600;margin:28px 0 6px;">${list.length} repl${list.length === 1 ? "y" : "ies"}</h3>
     <div id="replies">
-      ${(replies || []).map(r => `
+      ${list.map(r => {
+        const rMine = me && r.author_id === me.id;
+        return `
         <div class="reply ${r.hidden ? "hidden" : ""}" style="${r.hidden ? "opacity:.6;" : ""}">
           <div class="row"><b>${esc(who[r.author_id] || "Relvia member")}</b> · <span>${when(r.created_at)}</span>
-            ${r.hidden ? '<span class="tag hide">Hidden</span>' : ""}</div>
-          <div class="body">${esc(r.body)}</div>
-          <div class="foot">
-            ${me ? `<button data-act="report" data-type="reply" data-id="${r.id}">Report</button>` : ""}
-            ${staff ? `<button data-act="${r.hidden ? "unhide" : "hide"}" data-type="reply" data-id="${r.id}">${r.hidden ? "Unhide" : "Hide"}</button>` : ""}
-            ${staff && r.author_id ? `<button data-act="ban" data-user="${r.author_id}">Ban author</button>` : ""}
-            ${owner ? `<button data-act="delete" data-type="reply" data-id="${r.id}">Delete</button>` : ""}
+            ${r.hidden ? '<span class="tag hide">Hidden</span>' : ""}
+            ${r.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
+          <div class="editable" data-type="reply" data-id="${r.id}">
+            <div class="body t-body">${esc(r.body)}</div>
+            <div class="foot" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+              ${rMine && !r.hidden ? '<button data-act="edit">Edit</button>' : ""}
+              ${me ? `<button data-act="report" data-type="reply" data-id="${r.id}">Report</button>` : ""}
+              ${staff ? `<button data-act="${r.hidden ? "unhide" : "hide"}" data-type="reply" data-id="${r.id}">${r.hidden ? "Unhide" : "Hide"}</button>` : ""}
+              ${staff && r.author_id ? `<button data-act="ban" data-user="${r.author_id}">Ban author</button>` : ""}
+              ${owner ? `<button data-act="delete" data-type="reply" data-id="${r.id}">Delete</button>` : ""}
+            </div>
           </div>
-        </div>`).join("")}
+          ${reactionBar("reply", r.id, rReacts[r.id])}
+        </div>`;
+      }).join("")}
     </div>
 
     <div class="card" style="margin-top:20px;">
       ${!me ? '<p class="note">Sign in to reply.</p>'
-        : t.locked && !staff ? '<p class="note">This thread is locked. Replies are closed.</p>'
+        : !canReply ? '<p class="note">This thread is locked. Replies are closed.</p>'
         : `<form class="form" id="replyForm">
              <textarea class="field" id="replyBody" placeholder="Write a reply…" maxlength="4000" required></textarea>
              <div class="toolbar" style="margin:0;"><button class="btn sm" type="submit">Reply</button><span class="note" id="rMsg"></span></div>
@@ -358,7 +539,7 @@ async function loadModPanel(){
           <div class="row"><span class="tag">${esc(r.target_type)}</span><span>${when(r.created_at)}</span></div>
           <div class="excerpt">${esc(excerpt(text, 240))}</div>
           ${r.reason ? `<div class="note" style="margin-top:6px;">Reason: ${esc(r.reason)}</div>` : ""}
-          <div class="acts toolbar" style="margin:12px 0 0;">
+          <div class="toolbar" style="margin:12px 0 0;">
             <a class="btn ghost sm" href="${link}">Open</a>
             ${item ? `<button class="btn danger sm" data-act="hide-target" data-type="${r.target_type}" data-id="${r.target_id}" data-report="${r.id}">Hide content</button>` : ""}
             <button class="btn ghost sm" data-act="resolve" data-report="${r.id}">Resolve</button>
@@ -385,7 +566,51 @@ view.addEventListener("click", async e => {
   if (!el) return;
   const act = el.dataset.act, type = el.dataset.type, id = el.dataset.id;
   const table = type === "reply" ? "hub_replies" : "hub_threads";
-  const threadId = view.dataset.thread;
+
+  if (act === "react"){
+    if (!me) return;
+    const emoji = el.dataset.emoji;
+    if (el.classList.contains("on")){
+      await sb.from("hub_reactions").delete().match({ target_type: type, target_id: id, user_id: me.id, emoji });
+    } else {
+      const { error } = await sb.from("hub_reactions").insert({ target_type: type, target_id: id, user_id: me.id, emoji });
+      if (error){ toast("Couldn't add that reaction."); return; }
+    }
+    return route();
+  }
+
+  if (act === "edit"){
+    const box = el.closest(".editable");
+    const title = box.querySelector(".t-title");
+    const body = box.querySelector(".t-body");
+    const isThread = box.dataset.type === "thread";
+    box.innerHTML = `
+      <div class="editor">
+        ${isThread ? `<input class="field ed-title" maxlength="160" value="${esc(title ? title.textContent : "")}">` : ""}
+        <textarea class="field ed-body" maxlength="${isThread ? 8000 : 4000}">${esc(body ? body.textContent : "")}</textarea>
+        <div class="toolbar" style="margin:0;">
+          <button class="btn sm" data-act="save" data-type="${box.dataset.type}" data-id="${box.dataset.id}">Save changes</button>
+          <button class="btn ghost sm" data-act="cancel">Cancel</button>
+        </div>
+      </div>`;
+    return;
+  }
+  if (act === "cancel") return route();
+  if (act === "save"){
+    const box = el.closest(".editable");
+    const body = box.querySelector(".ed-body").value.trim();
+    const patch = { body };
+    if (type === "thread"){
+      const title = box.querySelector(".ed-title").value.trim();
+      if (title.length < 3){ toast("Titles need at least 3 characters."); return; }
+      patch.title = title;
+    }
+    if (!body && type === "reply"){ toast("A reply can't be empty."); return; }
+    const { error } = await sb.from(type === "reply" ? "hub_replies" : "hub_threads").update(patch).eq("id", id);
+    if (error){ toast("Couldn't save. Try again."); return; }
+    toast("Saved.");
+    return route();
+  }
 
   if (act === "report"){
     const reason = prompt("Why are you reporting this? (optional)") ?? "";
@@ -415,7 +640,7 @@ view.addEventListener("click", async e => {
     return loadModPanel();
   }
   else if (act === "ban"){
-    const reason = prompt("Reason for the ban (shown to staff only):") ?? "";
+    const reason = prompt("Reason for the ban (shown to staff only):");
     if (reason === null) return;
     const { error } = await sb.from("hub_bans").insert({ user_id: el.dataset.user, reason, created_by: me.id });
     if (error){ toast("Couldn't ban that user."); return; }
@@ -424,9 +649,10 @@ view.addEventListener("click", async e => {
   }
   else if (act === "delete"){
     if (!confirm("Delete this permanently? This can't be undone.")) return;
+    const catId = view.dataset.cat;
     await sb.from(table).delete().eq("id", id);
     await log("delete", type || "thread", id);
-    if (type !== "reply"){ location.hash = "#c/" + view.dataset.cat; return; }
+    if (type !== "reply"){ location.hash = "#c/" + catId; return; }
   }
   route();
 });
@@ -446,7 +672,7 @@ view.addEventListener("submit", async e => {
     const title = document.getElementById("tTitle").value.trim();
     const body = document.getElementById("tBody").value.trim();
     const msg = document.getElementById("tMsg");
-    const cat = (location.hash.match(/^#c\/([^/]+)/) || [])[1];
+    const cat = (location.hash.match(/^#c\/([^/?]+)/) || [])[1];
     if (title.length < 3){ msg.className = "note err"; msg.textContent = "Titles need at least 3 characters."; return; }
     const { data, error } = await sb.from("hub_threads").insert({ category_id: cat, author_id: me.id, title, body }).select("id").single();
     if (error){ msg.className = "note err"; msg.textContent = "Couldn't post. You may not have permission here."; return; }
@@ -464,9 +690,11 @@ view.addEventListener("submit", async e => {
 
 /* ---------- routing ---------- */
 async function route(){
-  const h = location.hash;
-  if (h.startsWith("#t/")) return renderThread(h.slice(3));
-  if (h.startsWith("#c/")) return renderCategory(h.slice(3));
+  const [path, qs] = location.hash.split("?");
+  const params = new URLSearchParams(qs || "");
+  if (path.startsWith("#t/")) return renderThread(path.slice(3));
+  if (path.startsWith("#c/")) return renderCategory(path.slice(3), params);
+  if (path.startsWith("#s/")) return renderSearch(decodeURIComponent(path.slice(3)));
   return renderHome();
 }
 
@@ -479,6 +707,8 @@ async function start(){
   if (me){
     const { data: r } = await sb.rpc("hub_my_role");
     role = r || null;
+    document.getElementById("bell").hidden = false;
+    loadBadge();
   }
   staff = ["owner", "founder", "moderator"].includes(role);
   owner = ["owner", "founder"].includes(role);
@@ -489,10 +719,10 @@ async function start(){
 
   window.addEventListener("hashchange", route);
   await route();
-  // Pull in new threads and replies every minute, unless someone is typing.
+  // Refresh every minute, but not while someone is typing or editing.
   setInterval(() => {
-    const typing = document.activeElement && ["TEXTAREA","INPUT","SELECT"].includes(document.activeElement.tagName);
-    if (!typing) route();
+    const typing = document.activeElement && ["TEXTAREA", "INPUT", "SELECT"].includes(document.activeElement.tagName);
+    if (!typing){ route(); if (me) loadBadge(); }
   }, 60000);
 }
 start().catch(() => { view.innerHTML = '<div class="state"><h3>Something went wrong</h3><p>Refresh the page and try again.</p></div>'; });
