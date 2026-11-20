@@ -218,6 +218,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="offices">Offices</button>
       <button class="eco-tab" data-eco-tab="beta">Beta</button>
       <button class="eco-tab" data-eco-tab="test">Test</button>
+      <button class="eco-tab" data-eco-tab="ranks" id="ranksTabBtn" style="display:none;">Ranks</button>
       <button class="eco-tab" data-eco-tab="founder" id="founderTabBtn" style="display:none;">Founder</button>
     </div>
 
@@ -575,7 +576,7 @@ tr:last-child td{ border-bottom:none; }
     </div>
 
     <!-- RANKS (owners and founders) -->
-    <div class="section" id="ranksSection" style="display:none;">
+    <div class="eco-panel" id="eco-ranks">
       <div class="section-head"><h2>Ranks</h2></div>
       <p style="color:var(--muted);font-size:12.5px;margin:-8px 0 12px;">Create ranks, choose what each one can do, and promote people. The person needs a Relvia account first. Ranks with Moderate act as staff on the Dev Blog.</p>
       <div class="panel">
@@ -1871,7 +1872,7 @@ async function gate(){
 
   if (myRole === "owner" || myRole === "founder"){
     document.getElementById("staffSection").style.display = "block";
-    document.getElementById("ranksSection").style.display = "block";
+    document.getElementById("ranksTabBtn").style.display = "block";
     document.getElementById("revenueSection").style.display = "block";
     document.getElementById("relvbitsSection").style.display = "block";
     document.getElementById("storageSection").style.display = "block";
