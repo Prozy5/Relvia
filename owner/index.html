@@ -4805,19 +4805,18 @@ function onSponsorClick(e){
   const pitch = lead.pitch || "";
   document.getElementById("sponsorPitchBox").innerHTML = `
     <div style="font-weight:700;margin-bottom:8px;">${escapeHtml(lead.name)} <span class="hint">(${escapeHtml(lead.division)})</span></div>
-    <div class="hint" style="margin-bottom:8px;">Edit the draft and fill in your name and postal address. Add their email, then Approve &amp; send it from business@relvia.online, or copy it or open it in Gmail.</div>
+    <div class="hint" style="margin-bottom:8px;">Edit the draft and fill in your name and postal address. Add their email, then Approve &amp; send it from business@relvia.online, or copy it.</div>
     <textarea id="sponsorPitchText" maxlength="4000" style="width:100%;min-height:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px;color:white;font-size:13px;line-height:1.6;">${escapeHtml(pitch)}</textarea>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button class="btn sm gold" type="button" data-sponsor="savepitch" data-id="${escapeHtml(lead.id)}">Save pitch</button>
       <button class="btn sm" type="button" data-sponsor="copypitch" data-id="${escapeHtml(lead.id)}">Copy text</button>
       <input id="sponsorSendTo" type="email" maxlength="160" value="${escapeHtml(lead.contact_email || "")}" placeholder="Their email address" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;min-width:220px;">
       <button class="btn sm gold" type="button" data-sponsor="send" data-id="${escapeHtml(lead.id)}">Approve &amp; send</button>
-      <button class="btn sm" type="button" data-sponsor="gmail" data-id="${escapeHtml(lead.id)}">Open in Gmail</button>
     </div>`;
 }
 
 document.addEventListener("click", async function (e){
-  const b = e.target.closest("[data-sponsor='savepitch'],[data-sponsor='copypitch'],[data-sponsor='gmail'],[data-sponsor='send']"); if (!b) return;
+  const b = e.target.closest("[data-sponsor='savepitch'],[data-sponsor='copypitch'],[data-sponsor='send']"); if (!b) return;
   const text = document.getElementById("sponsorPitchText").value;
   if (b.dataset.sponsor === "savepitch"){
     const { error } = await supabaseClient.rpc("sponsor_save_pitch", { p_id: b.dataset.id, p_pitch: text });
@@ -4849,9 +4848,6 @@ document.addEventListener("click", async function (e){
     navigator.clipboard.writeText(text).then(() => showToast("Copied."), () => showToast("Couldn't copy. Select the text and copy it."));
     return;
   }
-  const subjectMatch = text.match(/Subject: (.*)/);
-  const body = text.replace(/^Subject: .*\n\n?/, "");
-  window.open("https://mail.google.com/mail/?view=cm&fs=1&su=" + encodeURIComponent(subjectMatch ? subjectMatch[1] : "Partnering with Relvia") + "&body=" + encodeURIComponent(body), "_blank", "noopener");
 });
 // <<SPONSOR-END>>
 
