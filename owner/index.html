@@ -4607,6 +4607,23 @@ const SPONSOR_FUNCTION_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co/functions
 const SPONSOR_SEND_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co/functions/v1/sponsor-send";
 let sponsorData = { leads: [], queries: [], runs: [] };
 
+// Which Relvia divisions a lead could be sponsored for. Matched on the lead's own text, so it works on existing leads too.
+const DIVISION_RULES = [
+  ["RelviaFashion Show 2027", /\b(fashion|runway|streetwear|apparel|designer|models?)\b/i],
+  ["Relvia Music", /\b(music|festival|record label|band|concert|audio|artists?|album)\b/i],
+  ["Relvia Studios", /\b(film|movie|producers?|production|television|tv|documentary|studio|screen)\b/i],
+  ["Relvia Live", /\b(live|events?|tour|stage|shows?|festivals?|concerts?)\b/i],
+  ["Relvia Campus", /\b(campus|college|students?|university|youth|fellow|fellowship)\b/i],
+  ["RelviaCreators", /\b(creators?|influencers?|social media|content|ambassadors?)\b/i],
+  ["RelviaOnCrime", /\b(criminal justice|justice|re-?entry|incarcerat\w*|prison|reform|crime)\b/i],
+  ["Streaming service", /\b(streaming|stream|digital media|video platform)\b/i],
+];
+function divisionsFor(l) {
+  const text = `${l.name || ""} ${l.why || ""} ${l.query || ""} ${l.division || ""}`;
+  const hits = DIVISION_RULES.filter(([, re]) => re.test(text)).map(([name]) => name);
+  return hits.length ? hits : ["Relvia Entertainment overall"];
+}
+
 // ==========================================================
 // FUNDING (grants, scholarships, fellowships, sponsors you find yourself)
 // ==========================================================
@@ -4729,6 +4746,7 @@ async function renderSponsors(){
       <div style="font-size:12px;margin-top:4px;">${escapeHtml(l.why || "")}</div>
       <div style="font-size:12px;margin-top:4px;color:${l.contact_email ? "var(--gold)" : "var(--muted)"};">${l.contact_email ? "✉ " + escapeHtml(l.contact_email) : "No public contact email found"}</div>
       <div style="font-size:12px;margin-top:4px;color:${l.deadline && l.deadline < today ? "#f87171" : "var(--muted)"};">${l.deadline ? "Due " + escapeHtml(l.deadline) + " (" + Math.ceil((new Date(l.deadline + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000) + " days)" : "No deadline found"}${l.amount ? " · " + escapeHtml(l.amount) : ""}${l.source === "grants.gov" ? " · Grants.gov" : ""}</div>
+      <div style="font-size:12px;margin-top:4px;color:var(--gold);">Can sponsor: ${divisionsFor(l).map(escapeHtml).join(", ")}</div>
       <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
       <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
       <td><select data-sponsor="status" data-id="${escapeHtml(l.id)}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${SPONSOR_STATUSES.map(s => `<option${s === l.status ? " selected" : ""}>${s}</option>`).join("")}</select></td>
