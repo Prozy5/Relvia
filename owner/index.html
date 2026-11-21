@@ -1057,7 +1057,7 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head"><h2 style="font-size:18px;">Search list</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
         <div id="sponsorQueries"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;"><select id="sponsorNewKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;font-size:13px;"><option value="sponsor">Sponsor</option><option value="grant">Grant</option><option value="fellowship">Fellowship</option></select><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
+        <div style="display:flex;gap:8px;margin-top:12px;"><select id="sponsorNewKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;font-size:13px;"><option value="sponsor">Sponsor</option><option value="grant">Grant</option><option value="fellowship">Fellowship</option><option value="accelerator">Accelerator</option></select><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
       </div>
 
       <div class="section-head"><h2 style="font-size:18px;">Recent runs</h2></div>
@@ -4612,7 +4612,7 @@ let sponsorData = { leads: [], queries: [], runs: [] };
 // ==========================================================
 let fundingLoaded = false;
 let fundingCache = [];
-const FUNDING_KINDS = { grant:"Grant", fellowship:"Fellowship", sponsor:"Sponsor", other:"Other" };
+const FUNDING_KINDS = { grant:"Grant", fellowship:"Fellowship", accelerator:"Accelerator", sponsor:"Sponsor", other:"Other" };
 const FUNDING_STATUSES = [["to_research","To research"],["drafting","Drafting"],["applied","Applied"],["waiting","Waiting"],["won","Won"],["passed","Passed"]];
 const FUNDING_DONE = ["applied","waiting","won","passed"];
 
@@ -4727,6 +4727,7 @@ async function renderSponsors(){
     const due = l.next_followup && l.next_followup <= today ? ' <span class="pill temp">follow up</span>' : "";
     return `<tr><td><b>${escapeHtml(l.name)}</b>${due}<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(FUNDING_KINDS[l.kind] || "Sponsor")} · ${escapeHtml(l.division)}</div>
       <div style="font-size:12px;margin-top:4px;">${escapeHtml(l.why || "")}</div>
+      <div style="font-size:12px;margin-top:4px;color:${l.contact_email ? "var(--gold)" : "var(--muted)"};">${l.contact_email ? "✉ " + escapeHtml(l.contact_email) : "No public contact email found"}</div>
       <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
       <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
       <td><select data-sponsor="status" data-id="${escapeHtml(l.id)}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${SPONSOR_STATUSES.map(s => `<option${s === l.status ? " selected" : ""}>${s}</option>`).join("")}</select></td>
@@ -4790,7 +4791,7 @@ function onSponsorClick(e){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button class="btn sm gold" type="button" data-sponsor="savepitch" data-id="${escapeHtml(lead.id)}">Save pitch</button>
       <button class="btn sm" type="button" data-sponsor="copypitch" data-id="${escapeHtml(lead.id)}">Copy text</button>
-      <input id="sponsorSendTo" type="email" maxlength="160" placeholder="Their email address" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;min-width:220px;">
+      <input id="sponsorSendTo" type="email" maxlength="160" value="${escapeHtml(lead.contact_email || "")}" placeholder="Their email address" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;min-width:220px;">
       <button class="btn sm gold" type="button" data-sponsor="send" data-id="${escapeHtml(lead.id)}">Approve &amp; send</button>
       <button class="btn sm" type="button" data-sponsor="gmail" data-id="${escapeHtml(lead.id)}">Open in Gmail</button>
     </div>`;
