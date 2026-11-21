@@ -238,7 +238,7 @@ tr:last-child td{ border-bottom:none; }
       <button class="eco-tab" data-eco-tab="creators">RelviaCreators</button>
       <button class="eco-tab" data-eco-tab="fashion">RelviaFashion</button>
       <button class="eco-tab" data-eco-tab="research">Research Desk</button>
-      <button class="eco-tab" data-eco-tab="sponsors">Sponsor Bot</button>
+      <button class="eco-tab" data-eco-tab="funding">Funding</button>
       <button class="eco-tab" data-eco-tab="takedowns">Takedowns</button>
       <button class="eco-tab" data-eco-tab="sign">Sign</button>
       <button class="eco-tab" data-eco-tab="moderation">Moderation</button>
@@ -1046,8 +1046,8 @@ tr:last-child td{ border-bottom:none; }
     </div>
 
     <div class="eco-panel" id="eco-sponsors">
-      <div class="section-head"><h2>Sponsor Bot</h2><div><button class="btn sm gold" id="sponsorRun" type="button">Run now</button><button class="btn sm" id="sponsorRefresh" type="button">Refresh</button></div></div>
-      <p class="hint" style="margin-bottom:16px;">The bot searches every week and adds new sponsor leads with a pitch draft. Nothing is sent by the bot. You review each lead, edit the pitch, and send it yourself.</p>
+      <div class="section-head"><h2>Sponsor &amp; grant bot</h2><div><button class="btn sm gold" id="sponsorRun" type="button">Run now</button><button class="btn sm" id="sponsorRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">The bot runs every Monday morning on its own and searches for sponsors, grants, scholarships and fellowships. It writes a draft for each lead. Nothing is sent by the bot. You review each lead, edit the draft, and send it yourself.</p>
       <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Lead</th><th>Fit</th><th>Status</th><th>Follow-up</th><th>Pitch</th></tr></thead>
         <tbody id="sponsorLeads"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
 
@@ -1057,11 +1057,51 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head"><h2 style="font-size:18px;">Search list</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
         <div id="sponsorQueries"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;"><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
+        <div style="display:flex;gap:8px;margin-top:12px;"><select id="sponsorNewKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;font-size:13px;"><option value="sponsor">Sponsor</option><option value="grant">Grant</option><option value="scholarship">Scholarship</option><option value="fellowship">Fellowship</option></select><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
       </div>
 
       <div class="section-head"><h2 style="font-size:18px;">Recent runs</h2></div>
       <div class="panel"><table><thead><tr><th>When</th><th>Source</th><th>Searches</th><th>New leads</th></tr></thead><tbody id="sponsorRuns"><tr class="empty-row"><td colspan="4">No runs yet.</td></tr></tbody></table></div>
+    </div>
+
+    <div class="eco-panel" id="eco-funding">
+      <div class="section-head"><h2>Funding</h2><div><button class="btn sm" id="fundingRefresh" type="button">Refresh</button></div></div>
+      <p class="hint" style="margin-bottom:16px;">Track grants, scholarships, fellowships and sponsors from search to decision. The bot searches every Monday on its own. Every morning, a digest of overdue and upcoming deadlines and sponsor follow-ups goes to business@relvia.online. Nothing is sent to anyone unless you click Approve &amp; send.</p>
+
+      <div class="section-head"><h2 style="font-size:18px;">Where to search</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;">
+          <a class="panel" href="https://www.grants.gov" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Grants.gov</b><div class="hint" style="margin-top:4px;">Federal grants. Search by keyword and eligibility.</div></a>
+          <a class="panel" href="https://www.sba.gov/funding-programs" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>SBA funding programs</b><div class="hint" style="margin-top:4px;">Small business loans, microloans and local resource partners.</div></a>
+          <a class="panel" href="https://www.arts.gov" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>National Endowment for the Arts</b><div class="hint" style="margin-top:4px;">Arts grants. Most go to organizations, so check eligibility.</div></a>
+          <a class="panel" href="https://candid.org" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Candid</b><div class="hint" style="margin-top:4px;">Foundation grant search. Check the current access terms.</div></a>
+          <a class="panel" href="https://www.fastweb.com" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Fastweb</b><div class="hint" style="margin-top:4px;">Student scholarship search.</div></a>
+          <a class="panel" href="https://www.scholarships.com" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Scholarships.com</b><div class="hint" style="margin-top:4px;">Student scholarship search.</div></a>
+        </div>
+        <div class="hint" style="margin-top:12px;">Also check your state arts council and your school's student and career offices. Search "[your state] arts council grants" for the state list.</div>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Add a lead</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <select id="fundingKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
+            <option value="grant">Grant</option><option value="scholarship">Scholarship</option><option value="fellowship">Fellowship</option><option value="sponsor">Sponsor</option><option value="other">Other</option>
+          </select>
+          <input type="text" id="fundingName" maxlength="160" placeholder="Name, like: Arts Project Support" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+          <input type="text" id="fundingFunder" maxlength="120" placeholder="Funder" style="flex:1;min-width:160px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <input type="text" id="fundingAmount" maxlength="60" placeholder="Amount, like: $2,500" style="flex:1;min-width:140px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+          <input type="date" id="fundingDeadline" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
+          <input type="text" id="fundingUrl" maxlength="300" placeholder="Link" style="flex:2;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
+        </div>
+        <textarea id="fundingNotes" maxlength="1000" placeholder="Notes: eligibility, what they want, who to ask" style="width:100%;min-height:70px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:white;font-size:14px;resize:vertical;"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;"><button class="btn gold" id="fundingAddBtn" type="button">Add lead</button></div>
+      </div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Tracker</h2><div><select id="fundingFilter" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;"><option value="all">All</option><option value="grant">Grants</option><option value="scholarship">Scholarships</option><option value="fellowship">Fellowships</option><option value="sponsor">Sponsors</option><option value="other">Other</option></select></div></div>
+      <div class="panel"><table><thead><tr><th>Lead</th><th>Amount</th><th>Deadline</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="fundingTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody></table></div>
     </div>
 
     <div class="eco-panel" id="eco-takedowns">
@@ -4137,6 +4177,7 @@ function setupEcosystemTabs(){
       tab.classList.add("active");
       const target = tab.dataset.ecoTab;
       document.getElementById(`eco-${target}`).classList.add("active");
+      if (target === "funding") document.getElementById("eco-sponsors").classList.add("active");
 
       if (target === "studios" && !studiosLoaded){ studiosLoaded = true; await loadStudiosTab(); }
       if (target === "music" && !musicLoaded){ musicLoaded = true; await loadMusicTab(); }
@@ -4154,7 +4195,7 @@ function setupEcosystemTabs(){
       if (target === "relvbot" && !relvbotLoaded){ relvbotLoaded = true; await loadRelvbotTab(); }
       if (target === "fashion" && !fashionLoaded){ fashionLoaded = true; await loadFashionTab(); }
       if (target === "research" && !researchLoaded){ researchLoaded = true; await loadResearchTab(); }
-      if (target === "sponsors" && !sponsorsLoaded){ sponsorsLoaded = true; await loadSponsorTab(); }
+      if (target === "funding" && !fundingLoaded){ fundingLoaded = true; await loadFundingTab(); }
       if (target === "takedowns" && !takedownsLoaded){ takedownsLoaded = true; await loadTakedownTab(); }
       if (target === "overview"){ await loadOverviewTab(); }
       if (target === "health"){
@@ -4565,7 +4606,107 @@ async function onResearchClick(e){
 // <<SPONSOR-START>>
 const SPONSOR_STATUSES = ["new", "reviewing", "pitched", "replied", "won", "declined", "dismissed"];
 const SPONSOR_FUNCTION_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co/functions/v1/sponsor-search";
+const SPONSOR_SEND_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co/functions/v1/sponsor-send";
 let sponsorData = { leads: [], queries: [], runs: [] };
+
+// ==========================================================
+// FUNDING (grants, scholarships, fellowships, sponsors you find yourself)
+// ==========================================================
+let fundingLoaded = false;
+let fundingCache = [];
+const FUNDING_KINDS = { grant:"Grant", scholarship:"Scholarship", fellowship:"Fellowship", sponsor:"Sponsor", other:"Other" };
+const FUNDING_STATUSES = [["to_research","To research"],["drafting","Drafting"],["applied","Applied"],["waiting","Waiting"],["won","Won"],["passed","Passed"]];
+const FUNDING_DONE = ["applied","waiting","won","passed"];
+
+async function loadFundingTab(){
+  document.getElementById("fundingAddBtn").addEventListener("click", addFundingLead);
+  document.getElementById("fundingRefresh").addEventListener("click", renderFunding);
+  document.getElementById("fundingFilter").addEventListener("change", renderFunding);
+  const body = document.getElementById("fundingTableBody");
+  body.addEventListener("change", onFundingChange);
+  body.addEventListener("click", onFundingClick);
+  await renderFunding();
+  await loadSponsorTab();
+}
+
+async function renderFunding(){
+  const body = document.getElementById("fundingTableBody");
+  const { data, error } = await supabaseClient.from("funding_leads").select("*").order("deadline", { ascending: true, nullsFirst: false });
+  if (error){
+    body.innerHTML = `<tr class="empty-row"><td colspan="6">Couldn't load the funding tracker. Run relvia-funding-v1.sql in Supabase first. (${escapeHtml(error.message)})</td></tr>`;
+    return;
+  }
+  fundingCache = data || [];
+  const filter = document.getElementById("fundingFilter").value;
+  const rows = fundingCache.filter(r => filter === "all" || r.kind === filter);
+  if (!rows.length){
+    body.innerHTML = `<tr class="empty-row"><td colspan="6">Nothing here yet. Add a grant, scholarship or sponsor above.</td></tr>`;
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  body.innerHTML = rows.map(r => {
+    const id = escapeHtml(r.id);
+    const overdue = r.deadline && r.deadline < today && !FUNDING_DONE.includes(r.status) ? ' <span class="pill temp">overdue</span>' : "";
+    return `<tr>
+      <td><b>${escapeHtml(r.name)}</b>${overdue}
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(FUNDING_KINDS[r.kind] || r.kind)}${r.funder ? " · " + escapeHtml(r.funder) : ""}</div>
+        ${r.url ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">Open link</a>` : ""}</td>
+      <td>${escapeHtml(r.amount || "—")}</td>
+      <td><input type="date" data-funding="deadline" data-id="${id}" value="${escapeHtml(r.deadline || "")}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;"></td>
+      <td><select data-funding="status" data-id="${id}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${FUNDING_STATUSES.map(([v, l]) => `<option value="${v}" ${r.status === v ? "selected" : ""}>${l}</option>`).join("")}</select></td>
+      <td style="font-size:12.5px;max-width:260px;">${escapeHtml(r.notes || "")}</td>
+      <td><button class="btn sm danger" type="button" data-funding="delete" data-id="${id}">Delete</button></td>
+    </tr>`;
+  }).join("");
+}
+
+async function addFundingLead(){
+  const name = document.getElementById("fundingName").value.trim();
+  if (name.length < 2){ showToast("Give the lead a name"); return; }
+  let url = document.getElementById("fundingUrl").value.trim();
+  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
+  const row = {
+    kind: document.getElementById("fundingKind").value,
+    name,
+    funder: document.getElementById("fundingFunder").value.trim() || null,
+    amount: document.getElementById("fundingAmount").value.trim() || null,
+    deadline: document.getElementById("fundingDeadline").value || null,
+    url: url || null,
+    notes: document.getElementById("fundingNotes").value.trim() || null,
+  };
+  const { error } = await supabaseClient.from("funding_leads").insert(row);
+  if (error){ console.error(error); showToast("Couldn't save the lead"); return; }
+  await logAction("create_funding", "funding", name, row.kind);
+  ["fundingName","fundingFunder","fundingAmount","fundingDeadline","fundingUrl","fundingNotes"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("fundingKind").value = "grant";
+  showToast("Lead added");
+  await renderFunding();
+}
+
+async function onFundingChange(e){
+  const field = e.target.dataset.funding;
+  if (field !== "status" && field !== "deadline") return;
+  const id = e.target.dataset.id;
+  const patch = field === "status" ? { status: e.target.value } : { deadline: e.target.value || null };
+  patch.updated_at = new Date().toISOString();
+  const { error } = await supabaseClient.from("funding_leads").update(patch).eq("id", id);
+  if (error){ console.error(error); showToast("Couldn't update"); await renderFunding(); return; }
+  const lead = fundingCache.find(r => r.id === id);
+  await logAction("update_funding", "funding", lead ? lead.name : id, field + ": " + e.target.value);
+  await renderFunding();
+}
+
+async function onFundingClick(e){
+  const btn = e.target.closest('[data-funding="delete"]');
+  if (!btn) return;
+  const lead = fundingCache.find(r => r.id === btn.dataset.id);
+  if (!confirm(`Delete "${lead ? lead.name : "this lead"}"?`)) return;
+  const { error } = await supabaseClient.from("funding_leads").delete().eq("id", btn.dataset.id);
+  if (error){ console.error(error); showToast("Couldn't delete"); return; }
+  await logAction("delete_funding", "funding", lead ? lead.name : btn.dataset.id, null);
+  showToast("Deleted");
+  await renderFunding();
+}
 
 async function loadSponsorTab(){
   document.getElementById("sponsorRefresh").addEventListener("click", renderSponsors);
@@ -4586,7 +4727,7 @@ async function renderSponsors(){
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("sponsorLeads").innerHTML = sponsorData.leads.length ? sponsorData.leads.map(l => {
     const due = l.next_followup && l.next_followup <= today ? ' <span class="pill temp">follow up</span>' : "";
-    return `<tr><td><b>${escapeHtml(l.name)}</b>${due}<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(l.division)}</div>
+    return `<tr><td><b>${escapeHtml(l.name)}</b>${due}<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(FUNDING_KINDS[l.kind] || "Sponsor")} · ${escapeHtml(l.division)}</div>
       <div style="font-size:12px;margin-top:4px;">${escapeHtml(l.why || "")}</div>
       <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
       <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
@@ -4596,7 +4737,7 @@ async function renderSponsors(){
   }).join("") : `<tr class="empty-row"><td colspan="5">No leads yet. Click Run now to search, or wait for the weekly run.</td></tr>`;
 
   document.getElementById("sponsorQueries").innerHTML = sponsorData.queries.map(q =>
-    `<label style="display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13px;"><input type="checkbox" data-sponsor="toggle" data-id="${escapeHtml(q.id)}" ${q.enabled ? "checked" : ""}> ${escapeHtml(q.query)}</label>`).join("") || '<div class="hint">No searches yet.</div>';
+    `<label style="display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13px;"><input type="checkbox" data-sponsor="toggle" data-id="${escapeHtml(q.id)}" ${q.enabled ? "checked" : ""}> <span class="pill">${escapeHtml(FUNDING_KINDS[q.kind] || "Sponsor")}</span> ${escapeHtml(q.query)}</label>`).join("") || '<div class="hint">No searches yet.</div>';
 
   document.getElementById("sponsorRuns").innerHTML = sponsorData.runs.length ? sponsorData.runs.map(r => `<tr><td>${escapeHtml(new Date(r.started_at).toLocaleString())}</td><td>${escapeHtml(r.source)}</td><td>${r.queries_run}</td><td>${r.added}</td></tr>`).join("")
     : `<tr class="empty-row"><td colspan="4">No runs yet.</td></tr>`;
@@ -4620,7 +4761,8 @@ async function runSponsorNow(){
 async function addSponsorQuery(){
   const input = document.getElementById("sponsorNewQuery"); const q = input.value.trim();
   if (q.length < 6){ showToast("Write a search of at least 6 characters."); return; }
-  const { error } = await supabaseClient.rpc("sponsor_add_query", { p_query: q });
+  const kind = document.getElementById("sponsorNewKind").value;
+  const { error } = await supabaseClient.rpc("sponsor_add_query", { p_query: q, p_kind: kind });
   if (error){ showToast(error.message || "That didn't work."); return; }
   input.value = ""; showToast("Search added."); await renderSponsors();
 }
@@ -4645,22 +4787,45 @@ function onSponsorClick(e){
   const pitch = lead.pitch || "";
   document.getElementById("sponsorPitchBox").innerHTML = `
     <div style="font-weight:700;margin-bottom:8px;">${escapeHtml(lead.name)} <span class="hint">(${escapeHtml(lead.division)})</span></div>
-    <div class="hint" style="margin-bottom:8px;">Edit the draft, fill in your name and postal address, then copy it or open it in Gmail. You send it yourself.</div>
+    <div class="hint" style="margin-bottom:8px;">Edit the draft and fill in your name and postal address. Add their email, then Approve &amp; send it from business@relvia.online, or copy it or open it in Gmail.</div>
     <textarea id="sponsorPitchText" maxlength="4000" style="width:100%;min-height:220px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:12px;color:white;font-size:13px;line-height:1.6;">${escapeHtml(pitch)}</textarea>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button class="btn sm gold" type="button" data-sponsor="savepitch" data-id="${escapeHtml(lead.id)}">Save pitch</button>
       <button class="btn sm" type="button" data-sponsor="copypitch" data-id="${escapeHtml(lead.id)}">Copy text</button>
+      <input id="sponsorSendTo" type="email" maxlength="160" placeholder="Their email address" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;min-width:220px;">
+      <button class="btn sm gold" type="button" data-sponsor="send" data-id="${escapeHtml(lead.id)}">Approve &amp; send</button>
       <button class="btn sm" type="button" data-sponsor="gmail" data-id="${escapeHtml(lead.id)}">Open in Gmail</button>
     </div>`;
 }
 
 document.addEventListener("click", async function (e){
-  const b = e.target.closest("[data-sponsor='savepitch'],[data-sponsor='copypitch'],[data-sponsor='gmail']"); if (!b) return;
+  const b = e.target.closest("[data-sponsor='savepitch'],[data-sponsor='copypitch'],[data-sponsor='gmail'],[data-sponsor='send']"); if (!b) return;
   const text = document.getElementById("sponsorPitchText").value;
   if (b.dataset.sponsor === "savepitch"){
     const { error } = await supabaseClient.rpc("sponsor_save_pitch", { p_id: b.dataset.id, p_pitch: text });
     if (error){ showToast(error.message || "That didn't work."); return; }
     showToast("Pitch saved."); await renderSponsors(); return;
+  }
+  if (b.dataset.sponsor === "send"){
+    const to = document.getElementById("sponsorSendTo").value.trim();
+    const subjectLine = text.match(/Subject: (.*)/);
+    const subject = subjectLine ? subjectLine[1].trim() : "Partnering with Relvia";
+    const body = text.replace(/^Subject: .*\n\n?/, "");
+    if (!to){ showToast("Add their email address first."); return; }
+    if (!confirm(`Send this message to ${to} from business@relvia.online now?`)) return;
+    b.disabled = true; b.textContent = "Sending...";
+    try {
+      const { data: messageId, error } = await supabaseClient.rpc("sponsor_queue_message", { p_lead: b.dataset.id, p_to: to, p_subject: subject, p_body: body });
+      if (error) throw new Error(error.message);
+      const { data: sess } = await supabaseClient.auth.getSession();
+      const token = sess && sess.session && sess.session.access_token;
+      const res = await fetch(SPONSOR_SEND_URL, { method: "POST", headers: { Authorization: "Bearer " + token, apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ message_id: messageId }) });
+      const out = await res.json();
+      if (!res.ok) throw new Error(out.error || "The email didn't send.");
+      showToast("Sent."); await renderSponsors();
+    } catch (err){ showToast(err.message || "The email didn't send."); }
+    finally { b.disabled = false; b.textContent = "Approve & send"; }
+    return;
   }
   if (b.dataset.sponsor === "copypitch"){
     navigator.clipboard.writeText(text).then(() => showToast("Copied."), () => showToast("Couldn't copy. Select the text and copy it."));
