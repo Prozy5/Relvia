@@ -1054,6 +1054,12 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head"><h2 style="font-size:18px;">Pitch</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;" id="sponsorPitchBox"><div class="hint">Choose Pitch on a lead to review and edit its draft here.</div></div>
 
+      <div class="section-head"><h2 style="font-size:18px;">Win / loss by search</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;"><div id="sponsorOutcomes"><div class="hint">Loading…</div></div></div>
+
+      <div class="section-head"><h2 style="font-size:18px;">Sent pitches</h2></div>
+      <div class="panel" style="margin-bottom:24px;padding:18px;"><div id="sponsorSent"><div class="hint">Loading…</div></div></div>
+
       <div class="section-head"><h2 style="font-size:18px;">Search list</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
         <div id="sponsorQueries"></div>
@@ -4732,13 +4738,34 @@ async function loadSponsorTab(){
   await renderSponsors();
 }
 
+// Win/loss by search: how many leads each search found, and how many got to pitched, replied or won.
+function renderOutcomes(){
+  const el = document.getElementById("sponsorOutcomes"); if (!el) return;
+  const rows = sponsorData.outcomes || [];
+  el.innerHTML = rows.length
+    ? `<table style="width:100%;font-size:13px;border-collapse:collapse;"><tr><th align="left">Search</th><th>Found</th><th>Pitched</th><th>Replied</th><th>Won</th></tr>${rows.map(r => `<tr><td style="padding:4px 0;">${escapeHtml(r.query)}</td><td align="center">${escapeHtml(r.found)}</td><td align="center">${escapeHtml(r.pitched)}</td><td align="center">${escapeHtml(r.replied)}</td><td align="center"><b style="color:var(--gold);">${escapeHtml(r.won)}</b></td></tr>`).join("")}</table>`
+    : `<div class="hint">No results yet.</div>`;
+}
+
+// The log of pitches sent from this panel, newest first.
+async function renderSentLog(){
+  const el = document.getElementById("sponsorSent"); if (!el) return;
+  const { data, error } = await supabaseClient.from("sponsor_messages").select("to_email,subject,status,sent_at,created_at,error").order("created_at", { ascending: false }).limit(25);
+  if (error || !data){ el.innerHTML = `<div class="hint">Couldn't load the send log.</div>`; return; }
+  el.innerHTML = data.length
+    ? data.map(m => `<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);"><b>${escapeHtml(m.status)}</b> · ${escapeHtml(m.to_email)} · ${escapeHtml(m.subject || "")} · <span class="hint">${escapeHtml(new Date(m.sent_at || m.created_at).toLocaleString())}</span>${m.error ? ` <span style="color:#f87171;">${escapeHtml(m.error)}</span>` : ""}</div>`).join("")
+    : `<div class="hint">Nothing sent yet.</div>`;
+}
+
 async function renderSponsors(){
   const { data, error } = await supabaseClient.rpc("sponsor_dashboard");
   if (error || !data){
     document.getElementById("sponsorLeads").innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load the Sponsor Bot. Run relvia-sponsor-bot.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
     return;
   }
-  sponsorData = { leads: data.leads || [], queries: data.queries || [], runs: data.runs || [], replies: data.replies || [] };
+  sponsorData = { leads: data.leads || [], queries: data.queries || [], runs: data.runs || [], replies: data.replies || [], outcomes: data.outcomes || [] };
+  renderOutcomes();
+  renderSentLog();
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("sponsorLeads").innerHTML = sponsorData.leads.length ? sponsorData.leads.map(l => {
     const due = l.next_followup && l.next_followup <= today ? ' <span class="pill temp">follow up</span>' : "";
