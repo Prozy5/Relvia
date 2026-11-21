@@ -4728,6 +4728,7 @@ async function renderSponsors(){
     return `<tr><td><b>${escapeHtml(l.name)}</b>${due}<div style="font-size:12px;color:var(--muted);margin-top:4px;">${escapeHtml(FUNDING_KINDS[l.kind] || "Sponsor")} · ${escapeHtml(l.division)}</div>
       <div style="font-size:12px;margin-top:4px;">${escapeHtml(l.why || "")}</div>
       <div style="font-size:12px;margin-top:4px;color:${l.contact_email ? "var(--gold)" : "var(--muted)"};">${l.contact_email ? "✉ " + escapeHtml(l.contact_email) : "No public contact email found"}</div>
+      <div style="font-size:12px;margin-top:4px;color:${l.deadline && l.deadline < today ? "#f87171" : "var(--muted)"};">${l.deadline ? "Due " + escapeHtml(l.deadline) + " (" + Math.ceil((new Date(l.deadline + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000) + " days)" : "No deadline found"}${l.amount ? " · " + escapeHtml(l.amount) : ""}${l.source === "grants.gov" ? " · Grants.gov" : ""}</div>
       <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
       <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
       <td><select data-sponsor="status" data-id="${escapeHtml(l.id)}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${SPONSOR_STATUSES.map(s => `<option${s === l.status ? " selected" : ""}>${s}</option>`).join("")}</select></td>
