@@ -4738,7 +4738,7 @@ async function renderSponsors(){
     document.getElementById("sponsorLeads").innerHTML = `<tr class="empty-row"><td colspan="5">Couldn't load the Sponsor Bot. Run relvia-sponsor-bot.sql in Supabase first. (${escapeHtml(error ? error.message : "no data")})</td></tr>`;
     return;
   }
-  sponsorData = { leads: data.leads || [], queries: data.queries || [], runs: data.runs || [] };
+  sponsorData = { leads: data.leads || [], queries: data.queries || [], runs: data.runs || [], replies: data.replies || [] };
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("sponsorLeads").innerHTML = sponsorData.leads.length ? sponsorData.leads.map(l => {
     const due = l.next_followup && l.next_followup <= today ? ' <span class="pill temp">follow up</span>' : "";
@@ -4747,6 +4747,7 @@ async function renderSponsors(){
       <div style="font-size:12px;margin-top:4px;color:${l.contact_email ? "var(--gold)" : "var(--muted)"};">${l.contact_email ? "✉ " + escapeHtml(l.contact_email) + (l.contact_email_ok === true ? " · domain can receive mail" : l.contact_email_ok === false ? " · ⚠ domain can't receive mail, do not send" : " · not checked yet") : "No public contact email found"}</div>
       <div style="font-size:12px;margin-top:4px;color:${l.deadline && l.deadline < today ? "#f87171" : "var(--muted)"};">${l.deadline ? "Due " + escapeHtml(l.deadline) + " (" + Math.ceil((new Date(l.deadline + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000) + " days)" : "No deadline found"}${l.amount ? " · " + escapeHtml(l.amount) : ""}${l.source === "grants.gov" ? " · Grants.gov" : ""}</div>
       <div style="font-size:12px;margin-top:4px;color:var(--gold);">Can sponsor: ${divisionsFor(l).map(escapeHtml).join(", ")}</div>
+      ${(sponsorData.replies || []).filter(r => r.lead_id === l.id).slice(0, 2).map(r => `<div style="font-size:12px;margin-top:4px;color:#4ade80;">Reply ${escapeHtml(String(r.received_at || "").slice(0, 10))} from ${escapeHtml(r.from_email)}: ${escapeHtml(r.subject || "(no subject)")}</div>`).join("")}
       <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--gold);">${escapeHtml(l.domain)}</a></td>
       <td><b style="color:var(--gold);">${escapeHtml(l.fit)}</b></td>
       <td><select data-sponsor="status" data-id="${escapeHtml(l.id)}" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px;color:white;">${SPONSOR_STATUSES.map(s => `<option${s === l.status ? " selected" : ""}>${s}</option>`).join("")}</select></td>
