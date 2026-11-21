@@ -1047,7 +1047,7 @@ tr:last-child td{ border-bottom:none; }
 
     <div class="eco-panel" id="eco-sponsors">
       <div class="section-head"><h2>Sponsor &amp; grant bot</h2><div><button class="btn sm gold" id="sponsorRun" type="button">Run now</button><button class="btn sm" id="sponsorRefresh" type="button">Refresh</button></div></div>
-      <p class="hint" style="margin-bottom:16px;">The bot runs every Monday morning on its own and searches for sponsors, grants, scholarships and fellowships. It writes a draft for each lead. Nothing is sent by the bot. You review each lead, edit the draft, and send it yourself.</p>
+      <p class="hint" style="margin-bottom:16px;">The bot runs every Monday morning on its own and searches for sponsors, grants and fellowships for Relvia Entertainment. It writes a draft for each lead. Nothing is sent by the bot. You review each lead, edit the draft, and send it yourself.</p>
       <div class="panel" style="margin-bottom:24px;"><table><thead><tr><th>Lead</th><th>Fit</th><th>Status</th><th>Follow-up</th><th>Pitch</th></tr></thead>
         <tbody id="sponsorLeads"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody></table></div>
 
@@ -1057,7 +1057,7 @@ tr:last-child td{ border-bottom:none; }
       <div class="section-head"><h2 style="font-size:18px;">Search list</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
         <div id="sponsorQueries"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;"><select id="sponsorNewKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;font-size:13px;"><option value="sponsor">Sponsor</option><option value="grant">Grant</option><option value="scholarship">Scholarship</option><option value="fellowship">Fellowship</option></select><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
+        <div style="display:flex;gap:8px;margin-top:12px;"><select id="sponsorNewKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;font-size:13px;"><option value="sponsor">Sponsor</option><option value="grant">Grant</option><option value="fellowship">Fellowship</option></select><input id="sponsorNewQuery" maxlength="160" placeholder="New search, like: streetwear pop-up sponsorship Durham NC" style="flex:1;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px;color:white;"><button class="btn sm gold" id="sponsorAddQuery" type="button">Add search</button></div>
       </div>
 
       <div class="section-head"><h2 style="font-size:18px;">Recent runs</h2></div>
@@ -1066,7 +1066,7 @@ tr:last-child td{ border-bottom:none; }
 
     <div class="eco-panel" id="eco-funding">
       <div class="section-head"><h2>Funding</h2><div><button class="btn sm" id="fundingRefresh" type="button">Refresh</button></div></div>
-      <p class="hint" style="margin-bottom:16px;">Track grants, scholarships, fellowships and sponsors from search to decision. The bot searches every Monday on its own. Every morning, a digest of overdue and upcoming deadlines and sponsor follow-ups goes to business@relvia.online. Nothing is sent to anyone unless you click Approve &amp; send.</p>
+      <p class="hint" style="margin-bottom:16px;">Track grants, fellowships and sponsors for Relvia Entertainment from search to decision. The bot searches every Monday on its own. Every morning, a digest of overdue and upcoming deadlines and sponsor follow-ups goes to business@relvia.online. Nothing is sent to anyone unless you click Approve &amp; send.</p>
 
       <div class="section-head"><h2 style="font-size:18px;">Where to search</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
@@ -1075,17 +1075,15 @@ tr:last-child td{ border-bottom:none; }
           <a class="panel" href="https://www.sba.gov/funding-programs" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>SBA funding programs</b><div class="hint" style="margin-top:4px;">Small business loans, microloans and local resource partners.</div></a>
           <a class="panel" href="https://www.arts.gov" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>National Endowment for the Arts</b><div class="hint" style="margin-top:4px;">Arts grants. Most go to organizations, so check eligibility.</div></a>
           <a class="panel" href="https://candid.org" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Candid</b><div class="hint" style="margin-top:4px;">Foundation grant search. Check the current access terms.</div></a>
-          <a class="panel" href="https://www.fastweb.com" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Fastweb</b><div class="hint" style="margin-top:4px;">Student scholarship search.</div></a>
-          <a class="panel" href="https://www.scholarships.com" target="_blank" rel="noopener noreferrer" style="padding:14px;text-decoration:none;color:inherit;"><b>Scholarships.com</b><div class="hint" style="margin-top:4px;">Student scholarship search.</div></a>
         </div>
-        <div class="hint" style="margin-top:12px;">Also check your state arts council and your school's student and career offices. Search "[your state] arts council grants" for the state list.</div>
+        <div class="hint" style="margin-top:12px;">Also check your state arts council. Search "[your state] arts council grants" for the state list.</div>
       </div>
 
       <div class="section-head"><h2 style="font-size:18px;">Add a lead</h2></div>
       <div class="panel" style="margin-bottom:24px;padding:18px;">
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
           <select id="fundingKind" style="background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:13px;">
-            <option value="grant">Grant</option><option value="scholarship">Scholarship</option><option value="fellowship">Fellowship</option><option value="sponsor">Sponsor</option><option value="other">Other</option>
+            <option value="grant">Grant</option><option value="fellowship">Fellowship</option><option value="sponsor">Sponsor</option><option value="other">Other</option>
           </select>
           <input type="text" id="fundingName" maxlength="160" placeholder="Name, like: Arts Project Support" style="flex:1;min-width:200px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
           <input type="text" id="fundingFunder" maxlength="120" placeholder="Funder" style="flex:1;min-width:160px;background:var(--surface-light);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:white;font-size:14px;">
@@ -1099,7 +1097,7 @@ tr:last-child td{ border-bottom:none; }
         <div style="display:flex;justify-content:flex-end;margin-top:10px;"><button class="btn gold" id="fundingAddBtn" type="button">Add lead</button></div>
       </div>
 
-      <div class="section-head"><h2 style="font-size:18px;">Tracker</h2><div><select id="fundingFilter" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;"><option value="all">All</option><option value="grant">Grants</option><option value="scholarship">Scholarships</option><option value="fellowship">Fellowships</option><option value="sponsor">Sponsors</option><option value="other">Other</option></select></div></div>
+      <div class="section-head"><h2 style="font-size:18px;">Tracker</h2><div><select id="fundingFilter" style="background:var(--surface-light);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:white;font-size:13px;"><option value="all">All</option><option value="grant">Grants</option><option value="fellowship">Fellowships</option><option value="sponsor">Sponsors</option><option value="other">Other</option></select></div></div>
       <div class="panel"><table><thead><tr><th>Lead</th><th>Amount</th><th>Deadline</th><th>Status</th><th>Notes</th><th></th></tr></thead>
         <tbody id="fundingTableBody"><tr class="empty-row"><td colspan="6">Loading...</td></tr></tbody></table></div>
     </div>
@@ -4614,7 +4612,7 @@ let sponsorData = { leads: [], queries: [], runs: [] };
 // ==========================================================
 let fundingLoaded = false;
 let fundingCache = [];
-const FUNDING_KINDS = { grant:"Grant", scholarship:"Scholarship", fellowship:"Fellowship", sponsor:"Sponsor", other:"Other" };
+const FUNDING_KINDS = { grant:"Grant", fellowship:"Fellowship", sponsor:"Sponsor", other:"Other" };
 const FUNDING_STATUSES = [["to_research","To research"],["drafting","Drafting"],["applied","Applied"],["waiting","Waiting"],["won","Won"],["passed","Passed"]];
 const FUNDING_DONE = ["applied","waiting","won","passed"];
 
@@ -4640,7 +4638,7 @@ async function renderFunding(){
   const filter = document.getElementById("fundingFilter").value;
   const rows = fundingCache.filter(r => filter === "all" || r.kind === filter);
   if (!rows.length){
-    body.innerHTML = `<tr class="empty-row"><td colspan="6">Nothing here yet. Add a grant, scholarship or sponsor above.</td></tr>`;
+    body.innerHTML = `<tr class="empty-row"><td colspan="6">Nothing here yet. Add a grant, fellowship or sponsor above.</td></tr>`;
     return;
   }
   const today = new Date().toISOString().slice(0, 10);
