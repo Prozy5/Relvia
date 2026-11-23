@@ -358,6 +358,7 @@ function threadList(threads, who, showCat){
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
         ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
+        ${t.answered_reply_id ? '<span class="tag pin">Answered</span>' : ""}
       </div>
       <div class="title">${esc(t.title)}</div>
       ${(t.tags || []).length ? `<div class="row" style="margin:6px 0 0;">${t.tags.map(g => `<span class="tag">#${esc(g)}</span>`).join("")}</div>` : ""}
@@ -369,7 +370,7 @@ function threadList(threads, who, showCat){
 }
 async function queryThreads({ cat, sort, unanswered, q, author, tag, days }){
   let qy = sb.from("hub_threads")
-    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url, tags");
+    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url, tags, answered_reply_id");
   if (cat) qy = qy.eq("category_id", cat).order("pinned", { ascending: false });
   if (author) qy = qy.eq("author_id", author);
   if (q){
@@ -697,6 +698,7 @@ async function renderThread(id){
             <div class="body t-body">${rich(r.body)}</div>
             ${r.image_url && safeImg(r.image_url) ? `<img class="post-img" src="${esc(r.image_url)}" alt="Attached image" loading="lazy">` : ""}
             <div class="foot" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+              ${(mine || staff) && !t.locked && !r.hidden ? `<button data-act="${t.answered_reply_id === r.id ? "unanswer" : "answer"}" data-thread="${t.id}" data-reply="${r.id}">${t.answered_reply_id === r.id ? "✓ Answer (undo)" : "Mark as answer"}</button>` : ""}
               ${rMine && !r.hidden ? '<button data-act="edit">Edit</button>' : ""}
               ${me ? `<button data-act="report" data-type="reply" data-id="${r.id}">Report</button>` : ""}
               ${staff ? `<button data-act="${r.hidden ? "unhide" : "hide"}" data-type="reply" data-id="${r.id}">${r.hidden ? "Unhide" : "Hide"}</button>` : ""}
@@ -745,11 +747,13 @@ async function loadModPanel(){
   const threadIds = (reports || []).filter(r => r.target_type === "thread").map(r => r.target_id);
   const replyIds = (reports || []).filter(r => r.target_type === "reply").map(r => r.target_id);
   const [tRes, rRes] = await Promise.all([
-    threadIds.length ? sb.from("hub_threads").select("id, title, body").in("id", threadIds) : { data: [] },
-    replyIds.length ? sb.from("hub_replies").select("id, body, thread_id").in("id", replyIds) : { data: [] },
+    threadIds.length ? sb.from("hub_threads").select("id, title, body, hidden").in("id", threadIds) : { data: [] },
+    replyIds.length ? sb.from("hub_replies").select("id, body, thread_id, hidden").in("id", replyIds) : { data: [] },
   ]);
   const tMap = Object.fromEntries((tRes.data || []).map(t => [t.id, t]));
   const rMap = Object.fromEntries((rRes.data || []).map(r => [r.id, r]));
+  const reportCount = {};
+  (reports || []).forEach(r => { reportCount[r.target_id] = (reportCount[r.target_id] || 0) + 1; });
 
   panel.innerHTML = `
     <div class="eyebrow" style="margin-top:44px;">Moderation</div>
@@ -760,7 +764,12 @@ async function loadModPanel(){
       const link = r.target_type === "thread" ? `#t/${r.target_id}` : `#t/${item ? item.thread_id : ""}`;
       return `
         <div class="card">
-          <div class="row"><span class="tag">${esc(r.target_type)}</span><span>${when(r.created_at)}</span></div>
+          <div class="row">
+            <span class="tag">${esc(r.target_type)}</span>
+            <span class="tag hide">${reportCount[r.target_id] || 1} open report${(reportCount[r.target_id] || 1) === 1 ? "" : "s"}</span>
+            ${item && item.hidden ? '<span class="tag hide">Hidden</span>' : ""}
+            <span>${when(r.created_at)}</span>
+          </div>
           <div class="excerpt">${esc(excerpt(text, 240))}</div>
           ${r.reason ? `<div class="note" style="margin-top:6px;">Reason: ${esc(r.reason)}</div>` : ""}
           <div class="toolbar" style="margin:12px 0 0;">
@@ -790,6 +799,16 @@ view.addEventListener("click", async e => {
   if (!el) return;
   const act = el.dataset.act, type = el.dataset.type, id = el.dataset.id;
   const table = type === "reply" ? "hub_replies" : "hub_threads";
+
+  if (act === "answer" || act === "unanswer"){
+    const { error: ansErr } = await sb.from("hub_threads")
+      .update({ answered_reply_id: act === "answer" ? el.dataset.reply : null })
+      .eq("id", el.dataset.thread);
+    if (ansErr){ toast("Couldn't update the answer: " + ansErr.message); return; }
+    toast(act === "answer" ? "Marked as the answer." : "Answer removed.");
+    route();
+    return;
+  }
 
   if (act === "share"){
     const url = location.href;
