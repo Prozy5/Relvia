@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>News — Relvia</title>
+<title>World Monitor — Relvia</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,7 +70,7 @@ img{ max-width:100%; display:block; }
 <header class="topbar">
   <a class="brand" href="/index.html">
     <div class="brand-badge">R</div>
-    <span class="brand-name">Relvia</span>
+    <span class="brand-name">Relvia&trade;</span>
   </a>
   <div class="page-nav">
     <a href="news.html" class="active">News</a>
@@ -79,85 +79,71 @@ img{ max-width:100%; display:block; }
   <a class="back-link" id="backLink" href="/index.html">← Relvia Entertainment</a>
 </header>
 
+
 <div class="container" id="container">
   <div class="loading-state">Loading...</div>
 </div>
 
 <script>
-
 const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const params = new URLSearchParams(window.location.search);
-const slug = params.get("article");
+const TOPICS = { world:"World", economy:"Economy", tech:"Tech", culture:"Culture", research:"Research", "north-carolina":"North Carolina" };
+let allBriefs = [];
+let activeTopic = "all";
 
-function escapeHtml(str){
-  return (str || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 }
+function safeHref(u){ return /^https:\/\//i.test(u) ? escapeHtml(u) : "#"; }
 
-async function initialize(){
-  if (slug){
-    document.getElementById("backLink").href = "news.html";
-    document.getElementById("backLink").textContent = "← All News";
-    await renderArticleReader();
-  } else {
-    await renderArticleList();
-  }
-}
-
-async function renderArticleList(){
+function renderPage(){
   const container = document.getElementById("container");
+  const shown = activeTopic === "all" ? allBriefs : allBriefs.filter(b => b.topic === activeTopic);
+  const chips = ["all", ...Object.keys(TOPICS)].map(t => `
+    <button class="btn ghost sm${activeTopic === t ? " on" : ""}" data-topic="${t}" type="button">${t === "all" ? "All" : TOPICS[t]}</button>`).join("");
 
-  const { data: articles, error } = await supabaseClient
-    .from("news_articles").select("*").eq("is_published", true).order("published_at", { ascending:false });
-
-  if (error || !articles || articles.length === 0){
-    container.innerHTML = `
-      <div class="page-eyebrow">Relvia</div>
-      <div class="page-title">News</div>
-      <div class="empty-state">Nothing published yet — check back soon.</div>`;
-    return;
-  }
-
-  const listHtml = articles.map(a => `
-    <a class="article-card" href="news.html?article=${a.slug}">
-      <div class="article-category">${escapeHtml(a.category || "Announcement")}</div>
-      <div class="article-title">${escapeHtml(a.title)}</div>
-      ${a.excerpt ? `<div class="article-excerpt">${escapeHtml(a.excerpt)}</div>` : ""}
-      <div class="article-meta">${new Date(a.published_at || a.created_at).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" })}</div>
-    </a>`).join("");
+  const list = shown.length ? shown.map(b => `
+    <article class="article-card">
+      <div class="article-category">${escapeHtml(TOPICS[b.topic] || b.topic)}</div>
+      <div class="article-title">${escapeHtml(b.title)}</div>
+      <div class="article-excerpt">${escapeHtml(b.summary)}</div>
+      <div class="article-meta">
+        ${new Date(b.published_at || b.created_at).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" })}
+        · <a href="${safeHref(b.source_url)}" target="_blank" rel="noopener nofollow">Read the original at ${escapeHtml(b.source_name)} →</a>
+      </div>
+    </article>`).join("")
+    : '<div class="empty-state">No briefs in this topic yet. Check back soon.</div>';
 
   container.innerHTML = `
     <div class="page-eyebrow">Relvia</div>
-    <div class="page-title">News</div>
-    ${listHtml}`;
+    <div class="page-title">World Monitor &amp; Research</div>
+    <p class="article-excerpt" style="margin-bottom:18px;">Short briefs on news and research we follow, each with a link to the original. We summarize; the original source has the full story.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;">${chips}</div>
+    ${list}`;
+
+  container.querySelectorAll("[data-topic]").forEach(btn => {
+    btn.addEventListener("click", () => { activeTopic = btn.dataset.topic; renderPage(); });
+  });
 }
 
-async function renderArticleReader(){
-  const container = document.getElementById("container");
-
-  const { data: article, error } = await supabaseClient
-    .from("news_articles").select("*").eq("slug", slug).eq("is_published", true).maybeSingle();
-
-  if (error || !article){
-    container.innerHTML = `<div class="empty-state">This article doesn't exist or isn't published yet.</div>`;
+async function initialize(){
+  const { data, error } = await supabaseClient
+    .from("world_briefs").select("id, title, summary, topic, source_name, source_url, published_at, created_at")
+    .eq("published", true).order("published_at", { ascending: false }).limit(100);
+  if (error){
+    document.getElementById("container").innerHTML = '<div class="empty-state">The briefs couldn\'t load. Try again soon.</div>';
     return;
   }
-
-  document.title = `${article.title} — Relvia News`;
-
-  container.innerHTML = `
-    ${article.cover_image_url ? `<img class="article-cover" src="${article.cover_image_url}">` : ""}
-    <div class="reader-category">${escapeHtml(article.category || "Announcement")}</div>
-    <div class="reader-title">${escapeHtml(article.title)}</div>
-    <div class="reader-meta">${new Date(article.published_at || article.created_at).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" })}</div>
-    <div class="reader-body">${escapeHtml(article.content)}</div>
-  `;
+  allBriefs = data || [];
+  document.title = "World Monitor — Relvia";
+  renderPage();
 }
 
 initialize();
 </script>
+<script src="beta-toolkit.js"></script>
+<script src="/shutdown-notice.js"></script>
 </body>
 </html>
