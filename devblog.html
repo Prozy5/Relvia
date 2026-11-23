@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="The Relvia dev blog: announcements, central talks, updates, bug reports, news and finances.">
+<meta property="og:title" content="Dev Blog — Relvia Entertainment">
+<meta property="og:description" content="The Relvia dev blog: announcements, central talks, updates, bug reports, news and finances.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <title>Dev Blog — Relvia Entertainment</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,6 +160,21 @@ footer a{ color:var(--gold); }
   .side a{ padding:8px 12px; }
   .bar nav{ display:none; }
 }
+@media (max-width:520px){
+  body{ font-size:15px; }
+  h1{ font-size:clamp(26px,8vw,32px); }
+  .card{ padding:14px; }
+  .toolbar{ flex-direction:column; align-items:stretch; gap:10px; }
+  .toolbar > div{ flex-wrap:wrap; }
+  .toolbar .btn, .toolbar .field{ width:100%; }
+  .filters{ flex-wrap:wrap; gap:8px; }
+  .filters .field{ width:100%; }
+  .row{ flex-wrap:wrap; gap:6px; }
+  .thread .title{ font-size:17px; }
+  .form .field, .form textarea{ width:100%; }
+  .bar{ flex-wrap:wrap; gap:10px; }
+  #searchForm input{ width:100%; }
+}
 @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
 </style>
 </head>
@@ -204,6 +223,12 @@ const MAX_IMG = 3 * 1024 * 1024;
 
 const EMOJIS = ["👍", "🔥", "🐛"];
 let me = null, role = null, staff = false, owner = false, cats = [];
+let perms = [];                 // permissions granted by ranks, e.g. "moderate", "post:updates"
+let canDelete = false, canBan = false;
+let badges = {};                // user id -> highest rank { name, color }
+const badgeFor = id => badges[id]
+  ? ` <span class="tag" style="color:${esc(badges[id].color)};border-color:${esc(badges[id].color)};background:none;">${esc(badges[id].name)}</span>`
+  : "";
 let bulkMode = false;
 const picked = new Set();
 const view = document.getElementById("view");
@@ -221,6 +246,7 @@ function toast(msg){
 function canPost(cat){
   if (!me || !cat) return false;
   if (cat.post_policy === "anyone") return true;
+  if (perms.includes("post:" + cat.id)) return true;
   if (cat.post_policy === "staff") return staff;
   if (cat.post_policy === "owner") return owner;
   return false;
@@ -231,6 +257,8 @@ async function names(ids){
   if (!u.length) return map;
   const { data } = await sb.from("profiles").select("id, display_name, username").in("id", u);
   (data || []).forEach(p => { map[p.id] = p.display_name || p.username || "Relvia member"; });
+  const { data: bd } = await sb.rpc("hub_rank_badges", { p_ids: u });
+  (bd || []).forEach(b => { badges[b.user_id] = { name: b.name, color: b.color }; });
   return map;
 }
 async function log(action, type, id, note = ""){
@@ -325,28 +353,31 @@ function threadList(threads, who, showCat){
   return threads.map(t => `
     <a class="card thread ${t.pinned ? "pinned" : ""} ${t.hidden ? "hidden" : ""} ${picked.has(t.id) ? "picked" : ""}" href="#t/${t.id}" data-tid="${t.id}">
       <div class="row">
-        <span class="by-link" data-user="${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</span> · <span>${when(t.created_at)}</span>
+        <span class="by-link" data-user="${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</span>${badgeFor(t.author_id)} · <span>${when(t.created_at)}</span>
         ${showCat && catById(t.category_id) ? `<span class="tag">${esc(catById(t.category_id).name)}</span>` : ""}
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
         ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
       </div>
       <div class="title">${esc(t.title)}</div>
+      ${(t.tags || []).length ? `<div class="row" style="margin:6px 0 0;">${t.tags.map(g => `<span class="tag">#${esc(g)}</span>`).join("")}</div>` : ""}
       <div class="excerpt">${esc(excerpt(t.body))}</div>
       ${t.image_url && safeImg(t.image_url) ? `<img class="post-img" src="${esc(t.image_url)}" alt="" loading="lazy" style="max-height:200px;">` : ""}
       <div class="row" style="margin:12px 0 0;"><span class="count">${t.reply_count} repl${t.reply_count === 1 ? "y" : "ies"}</span>
         ${t.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
     </a>`).join("");
 }
-async function queryThreads({ cat, sort, unanswered, q, author }){
+async function queryThreads({ cat, sort, unanswered, q, author, tag, days }){
   let qy = sb.from("hub_threads")
-    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url");
+    .select("id, title, body, author_id, pinned, locked, hidden, reply_count, last_activity, created_at, edited_at, category_id, image_url, tags");
   if (cat) qy = qy.eq("category_id", cat).order("pinned", { ascending: false });
   if (author) qy = qy.eq("author_id", author);
   if (q){
-    const s = q.replace(/[,()%*]/g, " ").trim();
-    qy = qy.or(`title.ilike.%${s}%,body.ilike.%${s}%`);
+    const s = q.replace(/[,(){}%*"\\]/g, " ").trim();
+    qy = qy.or(`title.ilike.%${s}%,body.ilike.%${s}%,tags.cs.{${s.toLowerCase()}}`);
   }
+  if (tag) qy = qy.contains("tags", [tag]);
+  if (days) qy = qy.gte("created_at", new Date(Date.now() - Number(days) * 86400000).toISOString());
   if (unanswered) qy = qy.eq("reply_count", 0);
   if (sort === "new") qy = qy.order("created_at", { ascending: false });
   else if (sort === "replies") qy = qy.order("reply_count", { ascending: false }).order("last_activity", { ascending: false });
@@ -401,6 +432,8 @@ async function renderCategory(id, params){
   if (!cat) return notFound();
   const sort = params.get("sort") || "active";
   const unanswered = params.get("unanswered") === "1";
+  const tag = (params.get("tag") || "").toLowerCase();
+  const days = params.get("days") || "";
   renderNav(id);
   view.innerHTML = `
     <a class="back" href="#">← All categories</a>
@@ -415,6 +448,14 @@ async function renderCategory(id, params){
           <option value="replies" ${sort === "replies" ? "selected" : ""}>Most replies</option>
         </select>
         <label><input type="checkbox" id="unansw" ${unanswered ? "checked" : ""}> Unanswered only</label>
+        <select class="field" id="daysSel">
+          <option value="" ${days === "" ? "selected" : ""}>Any time</option>
+          <option value="7" ${days === "7" ? "selected" : ""}>Last 7 days</option>
+          <option value="30" ${days === "30" ? "selected" : ""}>Last 30 days</option>
+          <option value="365" ${days === "365" ? "selected" : ""}>Last year</option>
+        </select>
+        <input class="field" id="tagFilter" placeholder="Filter by tag" maxlength="30" value="${esc(tag)}" style="width:auto;">
+        <button class="btn ghost sm" id="tagGo" type="button">Apply</button>
         <span class="count" id="countLine"></span>
       </div>
       <div style="display:flex;gap:8px;">
@@ -442,12 +483,17 @@ async function renderCategory(id, params){
   const applyFilters = () => {
     const s = document.getElementById("sortSel").value;
     const u = document.getElementById("unansw").checked ? 1 : 0;
-    location.hash = `#c/${id}?sort=${s}&unanswered=${u}`;
+    const d = document.getElementById("daysSel").value;
+    const t = document.getElementById("tagFilter").value.trim().toLowerCase().replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-");
+    location.hash = `#c/${id}?sort=${s}&unanswered=${u}&days=${d}&tag=${encodeURIComponent(t)}`;
   };
   document.getElementById("sortSel").addEventListener("change", applyFilters);
   document.getElementById("unansw").addEventListener("change", applyFilters);
+  document.getElementById("daysSel").addEventListener("change", applyFilters);
+  document.getElementById("tagGo").addEventListener("click", applyFilters);
+  document.getElementById("tagFilter").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); applyFilters(); } });
 
-  const { data: threads, error } = await queryThreads({ cat: id, sort, unanswered });
+  const { data: threads, error } = await queryThreads({ cat: id, sort, unanswered, tag, days });
   const box = document.getElementById("threads");
   if (error){ box.innerHTML = `<div class="state"><h3>Couldn't load threads</h3><p>${esc(error.message)}</p></div>`; return; }
   const who = await names(threads.map(t => t.author_id));
@@ -465,6 +511,7 @@ async function renderCategory(id, params){
         <form class="card form" id="threadForm">
           <input class="field" id="tTitle" placeholder="Thread title" maxlength="160" required>
           <textarea class="field" id="tBody" placeholder="What's on your mind? Use **bold**, *italic*, \`code\` or [link](https://…)" maxlength="8000"></textarea>
+          <input class="field" id="tTags" placeholder="Tags, separated by commas (up to 5), e.g. release, bug" maxlength="120">
           <label class="file-label">Add an image (optional, up to 3 MB) <input type="file" id="tImg" accept="image/*"></label>
           <div class="toolbar" style="margin:0;"><button class="btn sm" type="submit">Post thread</button><span class="note" id="tMsg"></span></div>
         </form>`;
@@ -585,6 +632,7 @@ async function renderUser(uid){
 /* ---------- thread ---------- */
 async function renderThread(id){
   const { data: t } = await sb.from("hub_threads").select("*").eq("id", id).maybeSingle();
+  if (t) document.title = t.title + " · Relvia Dev Blog";
   if (!t) return notFound();
   const cat = catById(t.category_id);
   renderNav(t.category_id);
@@ -602,7 +650,7 @@ async function renderThread(id){
     <a class="back" href="#c/${esc(t.category_id)}">← ${esc(cat ? cat.name : "Back")}</a>
     <div class="card ${t.hidden ? "hidden" : ""}">
       <div class="row">
-        <a class="by-link" href="#u/${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</a> · <span>${when(t.created_at)}</span>
+        <a class="by-link" href="#u/${t.author_id || ""}">${esc(who[t.author_id] || "Relvia member")}</a>${badgeFor(t.author_id)} · <span>${when(t.created_at)}</span>
         ${t.pinned ? '<span class="tag pin">Pinned</span>' : ""}
         ${t.locked ? '<span class="tag lock">Locked</span>' : ""}
         ${t.hidden ? '<span class="tag hide">Hidden</span>' : ""}
@@ -631,7 +679,7 @@ async function renderThread(id){
           ${cats.map(c => `<option value="${esc(c.id)}" ${c.id === t.category_id ? "selected" : ""}>Move to ${esc(c.name)}</option>`).join("")}
         </select>
         ${t.author_id ? `<button class="btn danger sm" data-act="ban" data-user="${t.author_id}">Ban author</button>` : ""}
-        ${owner ? `<button class="btn danger sm" data-act="delete" data-type="thread" data-id="${t.id}">Delete</button>` : ""}
+        ${canDelete ? `<button class="btn danger sm" data-act="delete" data-type="thread" data-id="${t.id}">Delete</button>` : ""}
       </div>
     </div>` : ""}
 
@@ -641,7 +689,7 @@ async function renderThread(id){
         const rMine = me && r.author_id === me.id;
         return `
         <div class="reply ${r.hidden ? "hidden" : ""}" style="${r.hidden ? "opacity:.6;" : ""}">
-          <div class="row"><a class="by-link" href="#u/${r.author_id || ""}">${esc(who[r.author_id] || "Relvia member")}</a> · <span>${when(r.created_at)}</span>
+          <div class="row"><a class="by-link" href="#u/${r.author_id || ""}">${esc(who[r.author_id] || "Relvia member")}</a>${badgeFor(r.author_id)} · <span>${when(r.created_at)}</span>
             ${r.hidden ? '<span class="tag hide">Hidden</span>' : ""}
             ${r.edited_at ? '<span class="tag edit">Edited</span>' : ""}</div>
           <div class="editable" data-type="reply" data-id="${r.id}" data-raw="${esc(r.body)}">
@@ -651,8 +699,8 @@ async function renderThread(id){
               ${rMine && !r.hidden ? '<button data-act="edit">Edit</button>' : ""}
               ${me ? `<button data-act="report" data-type="reply" data-id="${r.id}">Report</button>` : ""}
               ${staff ? `<button data-act="${r.hidden ? "unhide" : "hide"}" data-type="reply" data-id="${r.id}">${r.hidden ? "Unhide" : "Hide"}</button>` : ""}
-              ${staff && r.author_id ? `<button data-act="ban" data-user="${r.author_id}">Ban author</button>` : ""}
-              ${owner ? `<button data-act="delete" data-type="reply" data-id="${r.id}">Delete</button>` : ""}
+              ${canBan && r.author_id ?`<button data-act="ban" data-user="${r.author_id}">Ban author</button>` : ""}
+              ${canDelete ? `<button data-act="delete" data-type="reply" data-id="${r.id}">Delete</button>` : ""}
             </div>
           </div>
           ${reactionBar("reply", r.id, rReacts[r.id])}
@@ -850,7 +898,8 @@ view.addEventListener("submit", async e => {
     try {
       msg.className = "note"; msg.textContent = "Posting…";
       const image_url = await uploadImage(document.getElementById("tImg").files[0]);
-      const { data, error } = await sb.from("hub_threads").insert({ category_id: cat, author_id: me.id, title, body, image_url }).select("id").single();
+      const tags = (document.getElementById("tTags").value || "").split(",").map(x => x.trim().toLowerCase().replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-")).filter(Boolean).slice(0, 5);
+      const { data, error } = await sb.from("hub_threads").insert({ category_id: cat, author_id: me.id, title, body, image_url, tags }).select("id").single();
       if (error) throw new Error("Couldn't post. You may not have permission here.");
       location.hash = "#t/" + data.id;
     } catch (err){ msg.className = "note err"; msg.textContent = err.message; }
@@ -899,6 +948,10 @@ async function start(){
   }
   staff = ["owner", "founder", "moderator"].includes(role);
   owner = ["owner", "founder"].includes(role);
+  if (me){ const { data: p } = await sb.rpc("hub_my_perms"); perms = p || []; }
+  if (perms.includes("devblog:moderate") || perms.includes("devblog:manage")) staff = true;
+  canDelete = owner || perms.includes("devblog:manage");
+  canBan = owner || perms.includes("devblog:manage");
 
   const { data } = await sb.from("hub_categories").select("*").order("position", { ascending: true });
   cats = data || [];
