@@ -661,6 +661,7 @@ async function renderThread(id){
         ${t.body ? `<div class="body t-body" style="margin-top:14px;">${rich(t.body)}</div>` : ""}
         ${t.image_url && safeImg(t.image_url) ? `<img class="post-img" src="${esc(t.image_url)}" alt="Attached image" loading="lazy">` : ""}
         <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn ghost sm" data-act="share" data-title="${esc(t.title)}">Share</button>
           ${mine && !t.locked && !t.hidden ? '<button class="btn ghost sm" data-act="edit">Edit</button>' : ""}
           ${me ? `<button class="btn ghost sm" data-act="report" data-type="thread" data-id="${t.id}">Report</button>` : ""}
         </div>
@@ -789,6 +790,20 @@ view.addEventListener("click", async e => {
   if (!el) return;
   const act = el.dataset.act, type = el.dataset.type, id = el.dataset.id;
   const table = type === "reply" ? "hub_replies" : "hub_threads";
+
+  if (act === "share"){
+    const url = location.href;
+    const title = el.dataset.title || "Relvia Dev Blog";
+    try {
+      if (navigator.share){ await navigator.share({ title, url }); return; }
+      await navigator.clipboard.writeText(url);
+      toast("Link copied.");
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+      toast("Couldn't copy the link. Copy it from the address bar.");
+    }
+    return;
+  }
 
   if (act === "react"){
     if (!me) return;
