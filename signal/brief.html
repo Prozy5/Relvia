@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relvia Signal — Brief</title>
+<meta name="description" content="A brief from Relvia Signal, written from one source article and checked against it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --background:#0a0806; --glass:#120e09; --surface:#1c150d; --border:#2a2018;
+  --gold-start:#f2c766; --gold-end:#b9832f; --gold:#e0b158;
+  --text:#f5f1ea; --muted:#a89e8f;
+  --font-display:"Playfair Display", Georgia, serif; --font-body:"Inter", system-ui, sans-serif;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{ background:var(--background); color:var(--text); font-family:var(--font-body); font-size:17px; line-height:1.7;
+  background-image: radial-gradient(900px 420px at 80% -10%, rgba(224,177,88,.10), transparent 60%); background-repeat:no-repeat; min-height:100vh; }
+.wrap{ max-width:720px; margin:0 auto; padding:0 18px; }
+.top{ padding:22px 0; border-bottom:1px solid var(--border); }
+.brand{ font-family:var(--font-display); font-size:26px; font-weight:700; text-decoration:none;
+  background:linear-gradient(135deg, var(--gold-start), var(--gold-end)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.back{ color:var(--gold); text-decoration:none; font-size:14px; font-weight:600; float:right; margin-top:6px; }
+.back:hover{ text-decoration:underline; }
+article{ padding:36px 0 20px; }
+.meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:13px; color:var(--muted); letter-spacing:.04em; }
+.tag{ display:inline-block; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:3px 9px; border-radius:4px; border:1px solid var(--gold); color:var(--gold); }
+h1{ font-family:var(--font-display); font-size:38px; font-weight:700; line-height:1.2; margin:16px 0 22px; }
+.summary{ font-size:19px; line-height:1.7; margin:0 0 28px; }
+.source{ border-top:1px solid var(--border); padding-top:18px; color:var(--muted); font-size:15px; }
+.source a{ color:var(--gold); font-weight:600; }
+.note{ margin-top:30px; color:var(--muted); font-size:14px; border-left:3px solid var(--gold); padding:4px 0 4px 14px; }
+.empty{ color:var(--muted); padding:40px 0; text-align:center; font-family:var(--font-display); font-style:italic; font-size:20px; }
+@media (max-width:520px){ h1{ font-size:30px; } .summary{ font-size:17px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="signal.html">Relvia Signal</a>
+    <a class="back" href="signal.html">← All briefs</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="content"><div class="empty">Loading the brief…</div></div>
+</main>
+
+<script>
+const SUPABASE_URL = "https://nqcbhpqzzwjgkusfbexo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2JocHF6endqZ2t1c2ZiZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjY1NjEsImV4cCI6MjA5ODk0MjU2MX0.BphyIGT-X9ctYVvfYXw_ldo5XGguNv5j-zDiGBPrCVU";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
+function safeHref(u){ return /^https?:\/\//i.test(u) ? esc(u) : "#"; }
+
+async function show(){
+  const id = new URLSearchParams(location.search).get("id");
+  const box = document.getElementById("content");
+  if (!id){ box.innerHTML = '<div class="empty">This brief could not be found.</div>'; return; }
+  try {
+    const { data, error } = await supabaseClient
+      .from("world_briefs")
+      .select("title, summary, source_name, source_url, published_at, written_by, checker_passed")
+      .eq("id", id)
+      .eq("published", true)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data){ box.innerHTML = '<div class="empty">This brief could not be found.</div>'; return; }
+
+    const date = data.published_at ? new Date(data.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "";
+    document.title = data.title + " — Relvia Signal";
+    box.innerHTML = `
+      <article>
+        <div class="meta">
+          ${data.written_by === "bot" ? '<span class="tag">Drafted by bot</span>' : ""}
+          ${data.checker_passed ? '<span class="tag">Checked against source</span>' : ""}
+          <span>${esc(date)}</span>
+        </div>
+        <h1>${esc(data.title)}</h1>
+        <p class="summary">${esc(data.summary)}</p>
+        <div class="source">
+          Source: ${esc(data.source_name || "source")} ·
+          <a href="${safeHref(data.source_url)}" target="_blank" rel="noopener nofollow">Read the full article →</a>
+        </div>
+        <p class="note">This brief was written from one news article and checked against it by a second AI. A person reviewed it before publishing. Read the full article before you share.</p>
+      </article>`;
+  } catch (_) {
+    box.innerHTML = '<div class="empty">The brief couldn\'t load. Try again in a few minutes.</div>';
+  }
+}
+show();
+</script>
+</body>
+</html>
