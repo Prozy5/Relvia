@@ -100,7 +100,7 @@ body{ background:var(--background); color:var(--text); font-family:var(--font-bo
         <div class="brand">Relvia Signal</div>
         <div class="brand-sub">Stories from around the world, read the source</div>
       </div>
-      <div class="live"><i></i> Live · updated every 15 minutes</div>
+      <div class="live" id="live"><i></i> Live · updated every 15 minutes</div>
     </div>
     <p class="deck">What is happening, where it is happening, and the article behind every dot.</p>
   </div>
@@ -182,9 +182,12 @@ async function load(){
 
   if (error){
     document.getElementById("stats").textContent = "The events couldn't load. Try again in a few minutes.";
+    document.getElementById("live").innerHTML = '<i style="background:var(--muted-soft);animation:none"></i> Couldn\'t refresh';
     return;
   }
   events = data || [];
+  const t = new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  document.getElementById("live").innerHTML = `<i></i> Live · checked at ${t}`;
   render();
 }
 
@@ -227,7 +230,9 @@ function render(){
         ${e.actor ? `<p class="who">${esc(e.actor)}</p>` : '<p class="who">&nbsp;</p>'}
         <span class="go">Read the article →</span>
       </a>`;
-  }).join("") : '<div class="empty">Nothing matches these filters right now.</div>';
+  }).join("") : (events.length === 0
+      ? '<div class="empty">No events have been found yet. The sync checks the news feed every 15 minutes, so stories appear after the next check.</div>'
+      : '<div class="empty">Nothing matches these filters right now. Try turning on another category or a longer time window.</div>');
 }
 
 ["window","f-conflict","f-protest","f-news"].forEach(id => {
